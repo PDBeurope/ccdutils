@@ -1,6 +1,7 @@
 # ccd_utils
 
 ## Initial Idea for Project
+
 * Program that
   * Reads in a PDB chemical components definition
   * Produces a decent 2D image of the molecule in svg format
