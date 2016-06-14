@@ -26,6 +26,8 @@ BondType = {  'SING': Chem.rdchem.BondType.SINGLE, 'DOUB': Chem.rdchem.BondType.
 StereoType = { 'S': Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW, 'R':Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW}
 ElementType = {'HE':'He','LI':'Li','BE':'Be','NE':'Ne','NA':'Na','FE': 'Fe'}
 
+this_script_dir = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.path.join(this_script_dir, 'data')
 
 if __name__ == "__main__":
 
@@ -33,7 +35,7 @@ if __name__ == "__main__":
     smiles={}
     FragmentMols = {}
     
-    fragmentFile = '/Users/sameer/NetBeansProjects/Chem/data/smi.text'
+    fragmentFile = os.path.join(data_dir, 'smi.text')
     open(fragmentFile, 'r')
     
     lines = [line.strip("\n").strip("\t").strip("\r").replace("\n","").replace("\t","").replace("\r","") for line in open(fragmentFile)]
@@ -50,13 +52,15 @@ if __name__ == "__main__":
     
     cif_parser = mmcif.CifFileReader(input='data', preserve_order=True)
    
-    path2 = '/Users/sameer/NetBeansProjects/Chem/data/cif/'
-    path3 = '/Users/sameer/NetBeansProjects/Chem/data/ccd_sdf/'
-    path4 = '/Users/sameer/NetBeansProjects/Chem/data/svg/'
-   
+    cif_in_dir = os.path.join(data_dir, 'cif')
+    sdf_out_dir = os.path.join(this_script_dir, 'sdf_out')
+    svg_out_dir = os.path.join(this_script_dir, 'svg_out')
+    for out_dir in [sdf_out_dir, svg_out_dir]:  # make output directories if necessary
+        if not os.path.isdir(out_dir):
+            os.mkdir(out_dir, 0755)
     imgFileName = ''
     
-    for fileName in os.listdir(path2):
+    for fileName in os.listdir(cif_in_dir):
         mol2 = Chem.MolFromSmiles('')
         mol2.UpdatePropertyCache(strict=False)
         
@@ -65,7 +69,7 @@ if __name__ == "__main__":
         PDBconf.SetId(0)
         Idealconf = Chem.Conformer()
         Idealconf.SetId(1)
-        cifObj = cif_parser.read(os.path.join(path2, fileName), output='cif_wrapper')
+        cifObj = cif_parser.read(os.path.join(cif_in_dir, fileName), output='cif_wrapper')
         chem_comp = list(cifObj.values())[0]
         chem_comp_id = chem_comp._chem_comp['id'][0]
         print chem_comp_id
@@ -151,13 +155,13 @@ if __name__ == "__main__":
   
         mol2.AddConformer(PDBconf)
         Chem.rdmolops.WedgeMolBonds(mol2,PDBconf)
-        w_PDB = Chem.SDWriter(path3+'/'+chem_comp_id+'_PDB.sdf')
+        w_PDB = Chem.SDWriter(sdf_out_dir + '/' + chem_comp_id + '_PDB.sdf')
         w_PDB.SetKekulize(False)
         w_PDB.write(mol2, confId=0)
         
         mol2.AddConformer(Idealconf)
         Chem.rdmolops.WedgeMolBonds(mol2,Idealconf)
-        w_Ideal = Chem.SDWriter(path3+'/'+chem_comp._chem_comp['id'][0]+'_Ideal.sdf')
+        w_Ideal = Chem.SDWriter(sdf_out_dir + '/' + chem_comp._chem_comp['id'][0] + '_Ideal.sdf')
         w_Ideal.SetKekulize(False)
         w_Ideal.write(mol2, confId=1)
 #        print Chem.MolToMolBlock(mol2)
@@ -185,7 +189,7 @@ if __name__ == "__main__":
         drawer_nH.DrawMolecule(mol2,confId=confIdFor2D)
         drawer_nH.FinishDrawing()
 #        svg = drawer.GetDrawingText().replace('svg:','')
-        svgFileName = path4+'/'+chem_comp._chem_comp['id'][0]+'_NoLable_H.svg'
+        svgFileName = svg_out_dir + '/' + chem_comp._chem_comp['id'][0] + '_NoLable_H.svg'
         f = open(svgFileName,'w')
         f.write(drawer_nH.GetDrawingText().replace('svg:','').replace('xmlns:svg','xmlns'))
 
@@ -208,7 +212,7 @@ if __name__ == "__main__":
         drawer.DrawMolecule(mol2,confId=confIdFor2D)
         drawer.FinishDrawing()
 #        svg = drawer.GetDrawingText().replace('svg:','')
-        svgFileName = path4+'/'+chem_comp._chem_comp['id'][0]+'_atomLable_H.svg'
+        svgFileName = svg_out_dir + '/' + chem_comp._chem_comp['id'][0] + '_atomLable_H.svg'
         f = open(svgFileName,'w')
         f.write(drawer.GetDrawingText().replace('svg:','').replace('xmlns:svg','xmlns'))
 
