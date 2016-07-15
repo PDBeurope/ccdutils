@@ -1,6 +1,7 @@
 import os
 import sys
 import pprint
+import logging
 
 
 def load_smiles_from_smi_text_file():
@@ -17,7 +18,7 @@ def load_smiles_from_smi_text_file():
     """
     this_script_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = os.path.join(this_script_dir, 'data')
-    fragment_file_name = os.path.join(data_dir, 'smi.text2')
+    fragment_file_name = os.path.join(data_dir, 'smi.text')
     try:
         open(fragment_file_name, 'r')
     except IOError as err:
@@ -33,8 +34,11 @@ def load_smiles_from_smi_text_file():
 def main():
     print "ccd_find_fragments"
 
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
     smiles_2_fragment_name = load_smiles_from_smi_text_file()
-    pprint.pprint(smiles_2_fragment_name)
+    logging.debug('Have loaded {} smiles, fragment names: '.format(len(smiles_2_fragment_name)))
+    logging.debug(pprint.pformat(smiles_2_fragment_name))
 
 
 if __name__ == "__main__":
