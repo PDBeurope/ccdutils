@@ -2,6 +2,7 @@ import os
 import sys
 import pprint
 import logging
+from rdkit import Chem
 
 
 def load_smiles_from_smi_text_file():
@@ -30,13 +31,28 @@ def load_smiles_from_smi_text_file():
 
 
 def main():
-    print "ccd_find_fragments"
 
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    logging.info('ccd_find_fragments: start')
 
     smiles_to_fragment_name = load_smiles_from_smi_text_file()
     logging.debug('Have loaded {} smiles, fragment names: '.format(len(smiles_to_fragment_name)))
     logging.debug(pprint.pformat(smiles_to_fragment_name))
+
+    smiles_to_rdkit_mol = {}
+    for smile in smiles_to_fragment_name:
+        rdkit_mol = Chem.MolFromSmiles(smile)
+        # Sameer had commented out next sanitize operation?
+        Chem.SanitizeMol(rdkit_mol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_ALL ^
+                                                Chem.SanitizeFlags.SANITIZE_KEKULIZE ^
+                                                Chem.SanitizeFlags.SANITIZE_SETAROMATICITY)
+        smiles_to_rdkit_mol[smile] = rdkit_mol
+        logging.debug('fragment {} original smiles:{} rdkit smiles:{}'.
+                      format(smiles_to_fragment_name[smile],smile,Chem.MolToSmiles(rdkit_mol)))
+
+
+
+    #print smiles_to_rdkit_mol
 
 
 if __name__ == "__main__":
