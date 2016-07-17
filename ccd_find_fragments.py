@@ -25,8 +25,16 @@ def load_smiles_from_smi_text_file():
     except IOError as err:
         print "Error cannot open fragment file {0} error is '{1}'".format(fragment_file_name, err.strerror)
         sys.exit(1)
+    smiles_to_fragment_name = {}
     lines =  fragment_file.read().splitlines()
-    smiles_to_fragment_name = dict(((smile, name) for name, smile in (line.split(':') for line in lines)))
+    for line in lines:
+        name, smile = line.split(':')
+        smile = smile.replace('\t', '')  # take out tabs
+        smiles_to_fragment_name[smile] = name
+    logging.debug('method load_smiles_from_smi_text_file:')
+    logging.debug('\tHave loaded smiles_to_fragment_name dictionary from file {} '.format(fragment_file_name))
+    logging.debug('\tnumber of entries load is {} '.format(len(smiles_to_fragment_name)))
+    logging.debug('\tdump entries:\n' + pprint.pformat(smiles_to_fragment_name))
     return smiles_to_fragment_name
 
 
@@ -36,8 +44,6 @@ def main():
     logging.info('ccd_find_fragments: start')
 
     smiles_to_fragment_name = load_smiles_from_smi_text_file()
-    logging.debug('Have loaded {} smiles, fragment names: '.format(len(smiles_to_fragment_name)))
-    logging.debug(pprint.pformat(smiles_to_fragment_name))
 
     smiles_to_rdkit_mol = {}
     for smile in smiles_to_fragment_name:
