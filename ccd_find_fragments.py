@@ -31,9 +31,10 @@ def load_smiles_to_fragment_name_from_file():
         name, smile = line.split(':')
         smile = smile.replace('\t', '')  # take out tabs
         smiles_to_fragment_name[smile] = name
+    number_of_entries = len(smiles_to_fragment_name)
     logging.debug('method load_smiles_from_smi_text_file:')
-    logging.debug('\tHave loaded smiles_to_fragment_name dictionary from file {} '.format(fragment_file_name))
-    logging.debug('\tnumber of entries load is {} '.format(len(smiles_to_fragment_name)))
+    logging.info('Have loaded smiles_to_fragment_name dictionary from file {}\n\twith {} entries '.
+                 format(fragment_file_name, number_of_entries))
     logging.debug('\tdump entries:\n' + pprint.pformat(smiles_to_fragment_name))
     return smiles_to_fragment_name
 
@@ -62,7 +63,9 @@ def create_smiles_to_rdkit_mol( smiles_list):
 
 
 def main():
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    logging_level = logging.INFO
+    logging_level = logging.DEBUG
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging_level)
     logging.info('ccd_find_fragments: start')
 
     smiles_to_fragment_name = load_smiles_to_fragment_name_from_file()
