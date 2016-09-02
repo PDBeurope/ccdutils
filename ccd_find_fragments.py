@@ -4,10 +4,22 @@ import pprint
 import logging
 from rdkit import Chem
 
-
-def load_smiles_to_fragment_name_from_file():
+def this_script_dir():
     """
-    loads the smiles to fragment name dictionary from the file smi.text in the data directory
+    gives the name of directory were script being run resides
+
+    Returns:
+        str the name of the directory is
+
+    """
+    return os.path.dirname(os.path.abspath(__file__))
+
+def load_smiles_to_fragment_name_from_file( fragment_file_name):
+    """
+    loads the smiles to fragment name dictionary from the given file.
+
+    Args:
+        fragment_file_name: the fragment file name (normally smi.text in the data directory)
 
     Returns:
          {} smiles to fragment name dict {str,str}
@@ -17,9 +29,6 @@ def load_smiles_to_fragment_name_from_file():
         cyclopropane:C1CC1
         phenyl:c1ccccc1
     """
-    this_script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(this_script_dir, 'data')
-    fragment_file_name = os.path.join(data_dir, 'smi.text')
     try:
         fragment_file = open(fragment_file_name, 'r')
     except IOError as err:
@@ -33,8 +42,8 @@ def load_smiles_to_fragment_name_from_file():
         smiles_to_fragment_name[smile] = name
     number_of_entries = len(smiles_to_fragment_name)
     logging.debug('method load_smiles_from_smi_text_file:')
-    logging.info('Have loaded smiles_to_fragment_name dictionary from file {}\n\twith {} entries '.
-                 format(fragment_file_name, number_of_entries))
+    logging.info('Have loaded smiles_to_fragment_name dictionary with {} entries from file {}'.
+                 format(number_of_entries,fragment_file_name))
     logging.debug('\tdump entries:\n' + pprint.pformat(smiles_to_fragment_name))
     return smiles_to_fragment_name
 
@@ -68,14 +77,19 @@ def main():
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging_level)
     logging.info('ccd_find_fragments: start')
 
-    smiles_to_fragment_name = load_smiles_to_fragment_name_from_file()
+    data_dir = os.path.join(this_script_dir(), 'data')
+    fragment_file_name = os.path.join(data_dir, 'smi.text')
+    smiles_to_fragment_name = load_smiles_to_fragment_name_from_file(fragment_file_name)
     smiles_to_rdkit_mol = create_smiles_to_rdkit_mol(smiles_to_fragment_name.keys())
 
+    logging.debug('check rdkit_mol conversion worked by converting back to SMILES')
     for smile in smiles_to_fragment_name:
-        logging.debug('fragment {} original smiles:{} rdkit smiles:{}'.
+        logging.debug('\tfragment {} original smiles:{} rdkit smiles:{}'.
                       format(smiles_to_fragment_name[smile],
                              smile,
                              Chem.MolToSmiles(smiles_to_rdkit_mol[smile])))
+
+    #f_file = "d"
 
 if __name__ == "__main__":
     main()
