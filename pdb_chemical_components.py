@@ -12,7 +12,7 @@ class PdbChemicalComponents(object):
         Returns:
             None
         """
-        raise NotImplementedError('to be written')
+        pass  # TODO write method
 
     def number_atoms(self):
         """
@@ -21,4 +21,4 @@ class PdbChemicalComponents(object):
         Returns:
             int: the number of atoms
         """
-        raise NotImplementedError('to be written')
+        return 0  # TODO write method
