@@ -1,3 +1,5 @@
+import os
+
 class PdbChemicalComponents(object):
     def __init__(self):
         pass
@@ -12,6 +14,8 @@ class PdbChemicalComponents(object):
         Returns:
             None
         """
+        if not os.path.isfile(file_name):
+            raise ValueError('cannot read chemical compoents from %s as file not found' % file_name)
         pass  # TODO write method
 
     def number_atoms(self):
