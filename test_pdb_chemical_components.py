@@ -24,14 +24,14 @@ class MyTestCase(unittest.TestCase):
     def test_hard_code_CMO_has_2_atoms(self):
         self.assertEqual(2, self.ccd_hard_code_cmo.number_atoms)
 
-    # def test_load_EOH_cif_chem_comp_id_is_EOH(self):
-    #     self.assertEqual('EOH', self.ccd_eoh.chem_comp_id)
-    #
-    # def test_load_EOH_cif_atom_ids_are_correct(self):
-    #     self.assertEqual(['C1', 'C2',  'O', 'H11', 'H12', 'H21', 'H22', 'H23', 'HO'], self.ccd_eoh.atomid)
-    #
-    # def test_load_EOH_number_atoms_is_9(self):
-    #     self.assertEqual(9, self.ccd_eoh.number_of_atoms)
+    def test_load_EOH_cif_chem_comp_id_is_EOH(self):
+        self.assertEqual('EOH', self.ccd_eoh.chem_comp_id)
+
+    def test_load_EOH_cif_atom_ids_are_correct(self):
+        self.assertEqual(['C1', 'C2',  'O', 'H11', 'H12', 'H21', 'H22', 'H23', 'HO'], self.ccd_eoh.atom_ids)
+
+    def test_load_EOH_number_atoms_is_9(self):
+        self.assertEqual(9, self.ccd_eoh.number_atoms)
 
 
 if __name__ == '__main__':
