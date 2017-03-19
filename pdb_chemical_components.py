@@ -23,21 +23,6 @@ class PdbChemicalComponents(object):
     def number_atoms(self):
         return len(self.atoms)
 
-
-    def read_ccd_from_cif_file(self, file_name):
-        """
-        reads the ccd from a cif fileC
-
-        Args:
-            file_name (str): the filename
-
-        Returns:
-            None
-        """
-        if not os.path.isfile(file_name):
-            raise ValueError('cannot read chemical compoents from %s as file not found' % file_name)
-        pass  # TODO write method
-
     def test_hard_code_CMO(self):
         """
         stub to produce a hard coded carbon monoxide ccd object for development idea/testing
@@ -55,3 +40,37 @@ class PdbChemicalComponents(object):
         self.atoms.append(this_atom)
         this_atom = self.Atom(atom_id='O', pdbx_stereo_config='N', xyz_ideal=(-0.600, 0.000, 0.000))
         self.atoms.append(this_atom)
+
+    def read_ccd_from_cif_file(self, file_name):
+        """
+        reads the ccd from a cif fileC
+
+        Args:
+            file_name (str): the filename
+
+        Returns:
+            None
+        """
+        if not os.path.isfile(file_name):
+            raise ValueError('cannot read chemical compoents from %s as file not found' % file_name)
+        self.read_ccd_from_file_mmcifIO(file_name)
+
+    def read_ccd_from_file_mmcifIO(self, file_name):
+        import mmCif.mmcifIO as mmcif
+        cif_parser = mmcif.CifFileReader(input='data', preserve_order=True)
+        cifObj = cif_parser.read(file_name, output='cif_wrapper')
+        chem_comp = list(cifObj.values())[0]
+        self.chem_comp_id = chem_comp._chem_comp['id'][0]
+        self.chem_comp_name = chem_comp._chem_comp['name'][0]
+        atoms=chem_comp._chem_comp_atom
+        self.atoms = []
+        for atom in atoms:
+            atom_id= atom['atom_id']
+            pdbx_stereo_config = atom['pdbx_stereo_config']
+            ideal_x = float(atom['pdbx_model_Cartn_x_ideal'])
+            ideal_y = float(atom['pdbx_model_Cartn_y_ideal'])
+            ideal_z = float(atom['pdbx_model_Cartn_z_ideal'])
+            this_atom = self.Atom(atom_id=atom_id,
+                                  pdbx_stereo_config=pdbx_stereo_config,
+                                  xyz_ideal=(ideal_x, ideal_y, ideal_z))
+            self.atoms.append(this_atom)
