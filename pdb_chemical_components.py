@@ -14,13 +14,25 @@ class PdbChemicalComponents(object):
 
     @property
     def atom_ids(self):
+        """
+        tuple of the atom_id's (aka atom names) in the chem_comp
+
+        Returns:
+            (str): the atom_id's
+        """
         atom_ids = []
         for atom in self.atoms:
             atom_ids.append(atom.atom_id)
-        return atom_ids
+        return tuple(atom_ids)
 
     @property
     def number_atoms(self):
+        """
+        The number of atoms in the chem_comp
+
+        Returns:
+            int: the number of atoms
+        """
         return len(self.atoms)
 
     def test_hard_code_CMO(self):

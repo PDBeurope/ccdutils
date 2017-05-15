@@ -22,7 +22,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('CARBON MONOXIDE', self.ccd_hard_code_cmo.chem_comp_name)
 
     def test_hard_code_CMO_atom_ids(self):
-        self.assertEqual(['C', 'O'], self.ccd_hard_code_cmo.atom_ids)
+        self.assertEqual(('C', 'O'), self.ccd_hard_code_cmo.atom_ids)
 
     def test_hard_code_CMO_has_2_atoms(self):
         self.assertEqual(2, self.ccd_hard_code_cmo.number_atoms)
@@ -34,7 +34,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('ETHANOL', self.ccd_eoh.chem_comp_name)
 
     def test_load_EOH_cif_atom_ids_are_correct(self):
-        self.assertEqual(['C1', 'C2',  'O', 'H11', 'H12', 'H21', 'H22', 'H23', 'HO'], self.ccd_eoh.atom_ids)
+        self.assertEqual(('C1', 'C2',  'O', 'H11', 'H12', 'H21', 'H22', 'H23', 'HO'), self.ccd_eoh.atom_ids)
 
     def test_load_EOH_number_atoms_is_9(self):
         self.assertEqual(9, self.ccd_eoh.number_atoms)
