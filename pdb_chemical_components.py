@@ -4,11 +4,18 @@ from collections import namedtuple
 
 class PdbChemicalComponents(object):
 
-    def __init__(self, file_name=None):
+    def __init__(self, file_name=None, cif_parser='auto'):
+        """
+
+        Args:
+            file_name:
+            cif_parser:
+        """
         self.chem_comp_id = None
         self.chem_comp_name = None
         self.Atom = namedtuple('Atom', 'atom_id pdbx_stereo_config xyz_ideal')
         self.atoms = []
+        self.cif_parser = cif_parser
         if file_name is not None:
             self.read_ccd_from_cif_file(file_name)
 
@@ -65,19 +72,29 @@ class PdbChemicalComponents(object):
         """
         if not os.path.isfile(file_name):
             raise ValueError('cannot read chemical compoents from %s as file not found' % file_name)
-        self.read_ccd_from_file_mmcifIO(file_name)
+        if self.cif_parser == 'auto':
+            try:
+                self.read_ccd_from_file_mmcifio(file_name)
+            except ImportError:
+                self.read_ccd_from_file_ciffile(file_name)
+        elif self.cif_parser == 'mmcifIO':
+            self.read_ccd_from_file_mmcifio(file_name)
+        elif self.cif_parser == 'CifFile':
+            self.read_ccd_from_file_ciffile(file_name)
+        else:
+            raise RuntimeError('unrecognized cif_parser {}'.format(self.cif_parser))
 
-    def read_ccd_from_file_mmcifIO(self, file_name):
-        import mmCif.mmcifIO as mmcif
-        cif_parser = mmcif.CifFileReader(input='data', preserve_order=True)
-        cifObj = cif_parser.read(file_name, output='cif_wrapper')
-        chem_comp = list(cifObj.values())[0]
+    def read_ccd_from_file_mmcifio(self, file_name):
+        import mmCif.mmcifIO as mmcifIO
+        cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
+        cif_obj = cif_parser.read(file_name, output='cif_wrapper')
+        chem_comp = list(cif_obj.values())[0]
         self.chem_comp_id = chem_comp._chem_comp['id'][0]
         self.chem_comp_name = chem_comp._chem_comp['name'][0]
-        atoms=chem_comp._chem_comp_atom
+        atoms = chem_comp._chem_comp_atom
         self.atoms = []
         for atom in atoms:
-            atom_id= atom['atom_id']
+            atom_id = atom['atom_id']
             pdbx_stereo_config = atom['pdbx_stereo_config']
             ideal_x = float(atom['pdbx_model_Cartn_x_ideal'])
             ideal_y = float(atom['pdbx_model_Cartn_y_ideal'])
@@ -86,3 +103,6 @@ class PdbChemicalComponents(object):
                                   pdbx_stereo_config=pdbx_stereo_config,
                                   xyz_ideal=(ideal_x, ideal_y, ideal_z))
             self.atoms.append(this_atom)
+
+    def read_ccd_from_file_ciffile(self, file_name):
+        raise NotImplementedError('read_ccd_from_file_ciffile not yet written')
