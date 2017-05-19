@@ -8,8 +8,8 @@ class PdbChemicalComponents(object):
         """
 
         Args:
-            file_name:
-            cif_parser:
+            file_name (str): filename
+            cif_parser (str): the cif parser to use. One of 'auto' or 'mmcifIO'(EBI) or'CifFile'
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
@@ -105,4 +105,5 @@ class PdbChemicalComponents(object):
             self.atoms.append(this_atom)
 
     def read_ccd_from_file_ciffile(self, file_name):
+
         raise NotImplementedError('read_ccd_from_file_ciffile not yet written')
