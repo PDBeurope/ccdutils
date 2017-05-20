@@ -42,7 +42,7 @@ class PdbChemicalComponents(object):
         """
         return len(self.atoms)
 
-    def test_hard_code_carbon_monoxide(self):
+    def load_carbon_monoxide_hard_coded(self):
         """
         stub to produce a hard coded carbon monoxide ccd object for development idea/testing
 
