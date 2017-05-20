@@ -42,7 +42,7 @@ class PdbChemicalComponents(object):
         """
         return len(self.atoms)
 
-    def test_hard_code_CMO(self):
+    def test_hard_code_carbon_monoxide(self):
         """
         stub to produce a hard coded carbon monoxide ccd object for development idea/testing
 
@@ -105,9 +105,36 @@ class PdbChemicalComponents(object):
             self.atoms.append(this_atom)
 
     def read_ccd_from_file_ciffile(self, file_name):
-        # code adapted from
-        # https://svn-dev.wwpdb.org/svn-wwpdb/py-validation/trunk/src/python/pdboi/pdbdata/mmcifapiconnector.py
+        """
+        reads the chemical component from file file_name using the pdbx_v2.core.CifFile parser
+
+        Args:
+            file_name (str): the filename
+
+        Returns:
+            None
+
+        Raises:
+            ImportError: if CifFile parser cannot be loaded.
+        """
         from pdbx_v2.core.CifFile import CifFile
+        # method based on calls made by
+        # https://svn-dev.wwpdb.org/svn-wwpdb/py-validation/trunk/src/python/pdboi/pdbdata/mmcifapiconnector.py
         cif_file = CifFile(file_name, parseLogFileName=None).getCifFile()
         first_data_block = cif_file.GetBlock(cif_file.GetFirstBlockName())
-        self.chem_comp_id =  first_data_block.getCategory('chem_comp', 'id', 'first')
+        table_chem_comp = first_data_block.GetTable('chem_comp')
+        self.chem_comp_id = table_chem_comp(0,'id')
+        self.chem_comp_name = table_chem_comp(0,'name')
+        self.atoms = []
+        table_chem_comp_atom = first_data_block.GetTable('chem_comp_atom')
+        number_atoms = table_chem_comp_atom.GetNumRows()
+        for row_num in range(number_atoms):
+            atom_id = table_chem_comp_atom(row_num, 'atom_id')
+            pdbx_stereo_config = table_chem_comp_atom(row_num, 'pdbx_stereo_config')
+            ideal_x = float(table_chem_comp_atom(row_num, 'pdbx_model_Cartn_x_ideal'))
+            ideal_y = float(table_chem_comp_atom(row_num, 'pdbx_model_Cartn_y_ideal'))
+            ideal_z = float(table_chem_comp_atom(row_num, 'pdbx_model_Cartn_z_ideal'))
+            this_atom = self.Atom(atom_id=atom_id,
+                                  pdbx_stereo_config=pdbx_stereo_config,
+                                  xyz_ideal=(ideal_x, ideal_y, ideal_z))
+            self.atoms.append(this_atom)
