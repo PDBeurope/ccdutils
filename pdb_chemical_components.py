@@ -13,8 +13,11 @@ class PdbChemicalComponents(object):
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
+        self.inchikey = None
         self.Atom = namedtuple('Atom', 'atom_id pdbx_stereo_config xyz_ideal')
         self.atoms = []
+        self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
+        self.bonds = []
         self.cif_parser = cif_parser
         if file_name is not None:
             self.read_ccd_from_cif_file(file_name)
@@ -42,9 +45,20 @@ class PdbChemicalComponents(object):
         """
         return len(self.atoms)
 
+    @property
+    def number_bonds(self):
+        """
+        The number of bonds in the chem_comp
+
+        Returns:
+            int: the number of bonds
+        """
+        return len(self.bonds)
+
     def load_carbon_monoxide_hard_coded(self):
         """
         stub to produce a hard coded carbon monoxide ccd object for development idea/testing
+        without file parsing
 
         Returns:
             None
@@ -53,12 +67,37 @@ class PdbChemicalComponents(object):
         self.chem_comp_id = 'CMO'
         # _chem_comp.name                                  "CARBON MONOXIDE"
         self.chem_comp_name = 'CARBON MONOXIDE'
+        #
+        # loop_
+        # _pdbx_chem_comp_descriptor.comp_id 
+        # _pdbx_chem_comp_descriptor.type 
+        # _pdbx_chem_comp_descriptor.program 
+        # _pdbx_chem_comp_descriptor.program_version 
+        # _pdbx_chem_comp_descriptor.descriptor 
+        # CMO SMILES           ACDLabs              10.04 "[O+]#[C-]"                 
+        # CMO SMILES_CANONICAL CACTVS               3.341 "[C-]#[O+]"                 
+        # CMO SMILES           CACTVS               3.341 "[C-]#[O+]"                 
+        # CMO SMILES_CANONICAL "OpenEye OEToolkits" 1.5.0 "[C-]#[O+]"                 
+        # CMO SMILES           "OpenEye OEToolkits" 1.5.0 "[C-]#[O+]"                 
+        # CMO InChI            InChI                1.03  InChI=1S/CO/c1-2            
+        # CMO InChIKey         InChI                1.03  UGFAIRIUMAVXCW-UHFFFAOYSA-N 
+        self.inchikey = 'UGFAIRIUMAVXCW-UHFFFAOYSA-N'
         # CMO C C C -1 1 N N N -0.296 8.526 17.112 0.607  0.000 0.000 C CMO 1
         # CMO O O O 1  1 N N N 0.023  7.997 18.053 -0.600 0.000 0.000 O CMO 2
         this_atom = self.Atom(atom_id='C', pdbx_stereo_config='N', xyz_ideal=(0.607, 0.000, 0.000))
         self.atoms.append(this_atom)
         this_atom = self.Atom(atom_id='O', pdbx_stereo_config='N', xyz_ideal=(-0.600, 0.000, 0.000))
         self.atoms.append(this_atom)
+        # _chem_comp_bond.comp_id              CMO
+        # _chem_comp_bond.atom_id_1            C
+        # _chem_comp_bond.atom_id_2            O
+        # _chem_comp_bond.value_order          TRIP
+        # _chem_comp_bond.pdbx_aromatic_flag   N
+        # _chem_comp_bond.pdbx_stereo_config   N
+        # _chem_comp_bond.pdbx_ordinal         1
+        this_bond = self.Bond(atom_id_1='C', atom_id_2='O', value_order='TRIP', 
+                              pdbx_aromatic_flag='N', pdbx_stereo_config='N')
+        self.bonds.append(this_bond)
 
     def read_ccd_from_cif_file(self, file_name):
         """

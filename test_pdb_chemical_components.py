@@ -18,6 +18,10 @@ class MyTestCase(unittest.TestCase):
         self.load_carbon_monoxide_hard_coded()
         self.assertEqual('CARBON MONOXIDE', self.cmo.chem_comp_name)
 
+    def test_hard_code_CMO_inchikey(self):
+        self.load_carbon_monoxide_hard_coded()
+        self.assertEqual('UGFAIRIUMAVXCW-UHFFFAOYSA-N', self.cmo.inchikey)
+
     def test_hard_code_CMO_atom_ids(self):
         self.load_carbon_monoxide_hard_coded()
         self.assertEqual(('C', 'O'), self.cmo.atom_ids)
@@ -25,6 +29,17 @@ class MyTestCase(unittest.TestCase):
     def test_hard_code_CMO_has_2_atoms(self):
         self.load_carbon_monoxide_hard_coded()
         self.assertEqual(2, self.cmo.number_atoms)
+
+    def test_hard_code_CMO_has_1_bond(self):
+        self.load_carbon_monoxide_hard_coded()
+        self.assertEqual(1, self.cmo.number_bonds)
+
+    def test_hard_code_CMO_bond_atom_ids(self):
+        self.load_carbon_monoxide_hard_coded()
+        the_bond = self.cmo.bonds[0]
+        self.assertEqual('C', the_bond.atom_id_1)
+        self.assertEqual('O', the_bond.atom_id_2)
+
 
     def load_EOH_cif(self):
         eoh_cif_file = os.path.join('data', 'cif', 'EOH.cif')
