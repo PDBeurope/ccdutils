@@ -127,10 +127,10 @@ class PdbChemicalComponents(object):
         import mmCif.mmcifIO as mmcifIO
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
         cif_obj = cif_parser.read(file_name, output='cif_wrapper')
-        chem_comp = list(cif_obj.values())[0]
-        self.chem_comp_id = chem_comp._chem_comp['id'][0]
-        self.chem_comp_name = chem_comp._chem_comp['name'][0]
-        atoms = chem_comp._chem_comp_atom
+        data_block = list(cif_obj.values())[0]
+        self.chem_comp_id = data_block._chem_comp['id'][0]
+        self.chem_comp_name = data_block._chem_comp['name'][0]
+        atoms = data_block._chem_comp_atom
         self.atoms = []
         for atom in atoms:
             atom_id = atom['atom_id']
@@ -142,6 +142,10 @@ class PdbChemicalComponents(object):
                                   pdbx_stereo_config=pdbx_stereo_config,
                                   xyz_ideal=(ideal_x, ideal_y, ideal_z))
             self.atoms.append(this_atom)
+        pdbx_chem_comp_descriptor = data_block._pdbx_chem_comp_descriptor
+        for descriptor in pdbx_chem_comp_descriptor:
+            if descriptor['type'] == 'InChIKey':
+                self.inchikey = descriptor['descriptor']
 
     def read_ccd_from_file_ciffile(self, file_name):
         """
