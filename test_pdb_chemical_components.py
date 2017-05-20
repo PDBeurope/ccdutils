@@ -40,7 +40,6 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('C', the_bond.atom_id_1)
         self.assertEqual('O', the_bond.atom_id_2)
 
-
     def load_EOH_cif(self):
         eoh_cif_file = os.path.join('data', 'cif', 'EOH.cif')
         try:
@@ -77,6 +76,12 @@ class MyTestCase(unittest.TestCase):
         for eoh_from_cif in self.ccd_eoh_from_ciffile, self.ccd_eoh_from_mmccifio:
             if eoh_from_cif is not None:
                 self.assertEqual('ETHANOL', eoh_from_cif.chem_comp_name)
+
+    def test_load_EOH_cif_inchikey(self):
+        self.load_EOH_cif()
+        for eoh_from_cif in self.ccd_eoh_from_ciffile, self.ccd_eoh_from_mmccifio:
+            if eoh_from_cif is not None:
+                self.assertEqual('LFQSCWFLJHTTHZ-UHFFFAOYSA-N', eoh_from_cif.inchikey)
 
     def test_load_EOH_cif_atom_ids_are_correct(self):
         self.load_EOH_cif()
