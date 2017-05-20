@@ -166,8 +166,8 @@ class PdbChemicalComponents(object):
         cif_file = CifFile(file_name, parseLogFileName=None).getCifFile()
         first_data_block = cif_file.GetBlock(cif_file.GetFirstBlockName())
         table_chem_comp = first_data_block.GetTable('chem_comp')
-        self.chem_comp_id = table_chem_comp(0,'id')
-        self.chem_comp_name = table_chem_comp(0,'name')
+        self.chem_comp_id = table_chem_comp(0, 'id')
+        self.chem_comp_name = table_chem_comp(0, 'name')
         self.atoms = []
         table_chem_comp_atom = first_data_block.GetTable('chem_comp_atom')
         number_atoms = table_chem_comp_atom.GetNumRows()
@@ -181,3 +181,7 @@ class PdbChemicalComponents(object):
                                   pdbx_stereo_config=pdbx_stereo_config,
                                   xyz_ideal=(ideal_x, ideal_y, ideal_z))
             self.atoms.append(this_atom)
+        table_pdbx_chem_comp_descriptor = first_data_block.GetTable('pdbx_chem_comp_descriptor')
+        for row_num in range(table_pdbx_chem_comp_descriptor.GetNumRows()):
+            if table_pdbx_chem_comp_descriptor(row_num, 'type') == 'InChIKey':
+                self.inchikey = table_pdbx_chem_comp_descriptor(row_num, 'descriptor')
