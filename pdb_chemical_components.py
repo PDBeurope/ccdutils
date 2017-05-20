@@ -105,5 +105,9 @@ class PdbChemicalComponents(object):
             self.atoms.append(this_atom)
 
     def read_ccd_from_file_ciffile(self, file_name):
-
-        raise NotImplementedError('read_ccd_from_file_ciffile not yet written')
+        # code adapted from
+        # https://svn-dev.wwpdb.org/svn-wwpdb/py-validation/trunk/src/python/pdboi/pdbdata/mmcifapiconnector.py
+        from pdbx_v2.core.CifFile import CifFile
+        cif_file = CifFile(file_name, parseLogFileName=None).getCifFile()
+        first_data_block = cif_file.GetBlock(cif_file.GetFirstBlockName())
+        self.chem_comp_id =  first_data_block.getCategory('chem_comp', 'id', 'first')

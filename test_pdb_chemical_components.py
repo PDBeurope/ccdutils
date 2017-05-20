@@ -8,7 +8,7 @@ class MyTestCase(unittest.TestCase):
 
     def setUp(self):
         eoh_cif_file = os.path.join('data', 'cif', 'EOH.cif')
-        self.ccd_eoh = PdbChemicalComponents(file_name=eoh_cif_file,cif_parser='CifFile')
+        self.ccd_eoh = PdbChemicalComponents(file_name=eoh_cif_file, cif_parser='CifFile')
         self.ccd_hard_code_cmo = PdbChemicalComponents()
         self.ccd_hard_code_cmo.test_hard_code_CMO()
 
