@@ -20,66 +20,39 @@ import os
 from pdb_chemical_components import PdbChemicalComponents
 
 
-def load_carbon_monoxide_hard_coded():
+def test_hard_code_cmo():
     cmo = PdbChemicalComponents()
     cmo.load_carbon_monoxide_hard_coded()
-    return cmo
-
-
-def test_hard_code_cmo_chem_comp_id_is_cmo():
-    cmo = load_carbon_monoxide_hard_coded()
-    assert_equals('CMO', cmo.chem_comp_id)
-
-
-def test_hard_code_cmo_chem_comp_name():
-    cmo = load_carbon_monoxide_hard_coded()
-    assert_equals('CARBON MONOXIDE', cmo.chem_comp_name)
-
-
-def test_hard_code_cmo_inchikey():
-    cmo = load_carbon_monoxide_hard_coded()
-    assert_equals('UGFAIRIUMAVXCW-UHFFFAOYSA-N', cmo.inchikey)
-
-
-def test_hard_code_has_2_atoms():
-    cmo = load_carbon_monoxide_hard_coded()
-    assert_equals(2, cmo.number_atoms)
-
-
-def test_hard_code_cmo_atom_ids():
-    cmo = load_carbon_monoxide_hard_coded()
-    assert_equals(('C', 'O'), cmo.atom_ids)
-
-
-def test_hard_code_has_1_bond():
-    cmo = load_carbon_monoxide_hard_coded()
-    assert_equals(1, cmo.number_bonds)
-
-
-def test_hard_code_bond_atom_ids():
-    cmo = load_carbon_monoxide_hard_coded()
+    yield assert_equals, 'CMO', cmo.chem_comp_id, 'chem_comp_id'
+    yield assert_equals, 'CARBON MONOXIDE', cmo.chem_comp_name, 'chem_comp_name'
+    yield assert_equals, 'UGFAIRIUMAVXCW-UHFFFAOYSA-N', cmo.inchikey, 'chem_inchikey'
+    yield assert_equals, 2, cmo.number_atoms, 'number_atoms'
+    yield assert_equals, ('C', 'O'), cmo.atom_ids, 'atom_ids'
+    yield assert_equals, 1, cmo.number_bonds, 'number_bonds'
     the_bond = cmo.bonds[0]
-    assert_equals('C', the_bond.atom_id_1)
-    assert_equals('O', the_bond.atom_id_2)
+    yield assert_equals, 'C', the_bond.atom_id_1, 'bond atom_id_1'
+    yield assert_equals, 'O', the_bond.atom_id_2, 'bond atom_id_2'
 
 
 def eoh_cif_file():
     return os.path.join('data', 'cif', 'EOH.cif')
 
 
-def test_ciffile_parser_loads():
-    try:
-        PdbChemicalComponents(file_name=eoh_cif_file(), cif_parser='CifFile')
-    except ImportError as msg:
-        assert False, 'Failed to load module for CifFile parser "{}". ' \
-                      'Other tests will skip using testing this parser'.format(msg)
+def test_eoh_loads_with_parser():
+    for cif_parser in 'mmcifIO', 'CifFile':
+        try:
+            PdbChemicalComponents(file_name=eoh_cif_file(), cif_parser=cif_parser)
+        except ImportError as msg:
+            yield assert_equals, 0, 1, \
+                "Import problem using cif_parser='{}' message='{}'. " \
+                "Other tests will skip using testing this parser.".format(cif_parser, msg)
 
 
 def test_load_eoh_from_cif():
     for cif_parser in 'mmcifIO', 'CifFile':
+        description = ', with cif_parser={}'.format(cif_parser)
         try:
             eoh = PdbChemicalComponents(file_name=eoh_cif_file(), cif_parser=cif_parser)
-            description = ', with cif_parser={}'.format(cif_parser)
             yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id' + description
             yield assert_equals, 'ETHANOL', eoh.chem_comp_name, 'chem_comp_name' + description
             yield assert_equals, 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N', eoh.inchikey, 'inchikey' + description
