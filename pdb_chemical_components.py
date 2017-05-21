@@ -130,7 +130,39 @@ class PdbChemicalComponents(object):
         self.setup_bond_lists()
 
     def setup_bond_lists(self):
-        pass
+        self.bond_atom_index_1 = []
+        self.bond_atom_index_2 = []
+        self.bond_order = []
+        self.bond_aromatic = []
+        for bond in self.bonds:
+            atom_id_1 = bond.atom_id_1
+            index_atom_1 = self.find_atom_index(atom_id_1)
+            self.bond_atom_index_1.append(index_atom_1)
+            atom_id_2 = bond.atom_id_2
+            index_atom_2 = self.find_atom_index(atom_id_2)
+            self.bond_atom_index_2.append(index_atom_2)
+            bond_order = self.map_value_order_to_int(bond.value_order)
+            if bond_order == -1:
+                raise RuntimeError('problem with bond order for bond {}'.format(bond))
+            self.bond_order.append(bond_order)
+
+    def find_atom_index(self, atom_id):
+        for index in range(len(self.atoms)):
+            this_atom = self.atoms[index]
+            if atom_id == this_atom.atom_id:
+                return index
+        return -1
+
+    @staticmethod
+    def map_value_order_to_int(value_order):
+        if value_order == 'SING':
+            return 1
+        elif value_order == 'DOUB':
+            return 2
+        elif value_order == 'TRIP':
+            return 3
+        else:
+            return -1
 
     def read_ccd_from_cif_file(self, file_name):
         """
