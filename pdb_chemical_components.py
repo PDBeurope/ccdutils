@@ -1,8 +1,27 @@
+# software from PDBe: Protein Data Bank in Europe; http://pdbe.org
+#
+# Copyright 2017 EMBL - European Bioinformatics Institute
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 import os
 from collections import namedtuple
 
 
 class PdbChemicalComponents(object):
+    """
+    deals with parsing the PDB chemical chemical component cif file
+    currently limited to a single cif item in the dictionary.
+    """
 
     def __init__(self, file_name=None, cif_parser='auto'):
         """
@@ -179,8 +198,6 @@ class PdbChemicalComponents(object):
         for descriptor in pdbx_chem_comp_descriptor:
             if descriptor['type'] == 'InChIKey':
                 self.inchikey = descriptor['descriptor']
-
-
 
     def read_ccd_from_file_ciffile(self, file_name):
         """
