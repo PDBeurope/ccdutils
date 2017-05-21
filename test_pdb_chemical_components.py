@@ -95,5 +95,12 @@ class MyTestCase(unittest.TestCase):
             if eoh_from_cif is not None:
                 self.assertEqual(9, eoh_from_cif.number_atoms)
 
+    def test_load_EOH_number_bonds_is_8(self):
+        self.load_EOH_cif()
+        for eoh_from_cif in self.ccd_eoh_from_ciffile, self.ccd_eoh_from_mmccifio:
+            if eoh_from_cif is not None:
+                self.assertEqual(8, eoh_from_cif.number_bonds)
+
+
 if __name__ == '__main__':
     unittest.main()
