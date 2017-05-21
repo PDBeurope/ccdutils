@@ -32,6 +32,10 @@ def test_hard_code_cmo():
     the_bond = cmo.bonds[0]
     yield assert_equals, 'C', the_bond.atom_id_1, 'bond atom_id_1'
     yield assert_equals, 'O', the_bond.atom_id_2, 'bond atom_id_2'
+    yield assert_equals, [0], cmo.bond_atom_index_1, '(generated) bond_atom_index_1'
+    yield assert_equals, [1], cmo.bond_atom_index_2, '(generated) bond_atom_index_2'
+    yield assert_equals, [3], cmo.bond_order, '(generated) bond_order'
+    yield assert_equals, [False], cmo.bond_aromatic, '(generated) bond_aromatic'
 
 
 def eoh_cif_file():

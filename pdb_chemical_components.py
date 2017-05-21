@@ -13,6 +13,7 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
+#
 import os
 from collections import namedtuple
 
@@ -48,6 +49,7 @@ class PdbChemicalComponents(object):
         self.cif_parser = cif_parser
         if file_name is not None:
             self.read_ccd_from_cif_file(file_name)
+            self.setup_bond_lists()
 
     @property
     def atom_ids(self):
@@ -125,6 +127,10 @@ class PdbChemicalComponents(object):
         this_bond = self.Bond(atom_id_1='C', atom_id_2='O', value_order='TRIP', 
                               pdbx_aromatic_flag='N', pdbx_stereo_config='N')
         self.bonds.append(this_bond)
+        self.setup_bond_lists()
+
+    def setup_bond_lists(self):
+        pass
 
     def read_ccd_from_cif_file(self, file_name):
         """
