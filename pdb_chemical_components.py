@@ -18,6 +18,14 @@ class PdbChemicalComponents(object):
         self.atoms = []
         self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
+        self.bond_atom_index_1 = []
+        """list of int: one for each of self.bonds the index of the matching atom_id_1 in self.atoms"""
+        self.bond_atom_index_2 = []
+        """list of int: one for each of self.bonds the index of the matching atom_id_2 in self.atoms"""
+        self.bond_order = []
+        """list of int: one for each of self.bonds the bond order for the bond got from self.bonds value_order"""
+        self.bond_aromatic = []
+        """list of bool: one for each of self.bonds boolean conversion of pdbx_aromatic_flag (Y or N)"""
         self.cif_parser = cif_parser
         if file_name is not None:
             self.read_ccd_from_cif_file(file_name)
