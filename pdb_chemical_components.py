@@ -101,7 +101,7 @@ class PdbChemicalComponents(object):
 
     def read_ccd_from_cif_file(self, file_name):
         """
-        reads the ccd from a cif fileC
+        reads the ccd from a cif file
 
         Args:
             file_name (str): the filename
@@ -124,15 +124,29 @@ class PdbChemicalComponents(object):
             raise RuntimeError('unrecognized cif_parser {}'.format(self.cif_parser))
 
     def read_ccd_from_file_mmcifio(self, file_name):
+        """
+        reads the chemical component from file file_name using the mmcifIO parser
+        https://github.com/glenveegee/PDBeCIF.git
+
+        Args:
+            file_name (str): the filename
+
+        Returns:
+            None
+
+        Raises:
+            ImportError: if the parser cannot be loaded.
+        """
         import mmCif.mmcifIO as mmcifIO
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
         cif_obj = cif_parser.read(file_name, output='cif_wrapper')
         data_block = list(cif_obj.values())[0]
-        self.chem_comp_id = data_block._chem_comp['id'][0]
-        self.chem_comp_name = data_block._chem_comp['name'][0]
-        atoms = data_block._chem_comp_atom
+        chem_comp = data_block._chem_comp
+        self.chem_comp_id = chem_comp['id'][0]
+        self.chem_comp_name = chem_comp['name'][0]
         self.atoms = []
-        for atom in atoms:
+        chem_comp_atom = data_block._chem_comp_atom
+        for atom in chem_comp_atom:
             atom_id = atom['atom_id']
             pdbx_stereo_config = atom['pdbx_stereo_config']
             ideal_x = float(atom['pdbx_model_Cartn_x_ideal'])
