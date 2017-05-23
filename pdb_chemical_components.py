@@ -97,6 +97,8 @@ class PdbChemicalComponents(object):
         self.chem_comp_id = 'CMO'
         # _chem_comp.name                                  "CARBON MONOXIDE"
         self.chem_comp_name = 'CARBON MONOXIDE'
+        # _chem_comp.pdbx_release_status                   REL
+        self.pdbx_release_status = 'REL'
         #
         # loop_
         # _pdbx_chem_comp_descriptor.comp_id 
@@ -210,6 +212,7 @@ class PdbChemicalComponents(object):
         chem_comp = data_block._chem_comp
         self.chem_comp_id = chem_comp['id'][0]
         self.chem_comp_name = chem_comp['name'][0]
+        self.pdbx_release_status = chem_comp['pdbx_release_status'][0]
         self.atoms = []
         chem_comp_atom = data_block._chem_comp_atom
         for atom in chem_comp_atom:
@@ -259,6 +262,7 @@ class PdbChemicalComponents(object):
         table_chem_comp = first_data_block.GetTable('chem_comp')
         self.chem_comp_id = table_chem_comp(0, 'id')
         self.chem_comp_name = table_chem_comp(0, 'name')
+        self.pdbx_release_status = table_chem_comp(0, 'pdbx_release_status')
         self.atoms = []
         table_chem_comp_atom = first_data_block.GetTable('chem_comp_atom')
         number_atoms = table_chem_comp_atom.GetNumRows()
