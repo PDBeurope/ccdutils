@@ -66,5 +66,12 @@ def test_load_eoh_from_cif():
             yield assert_equals, ('C1', 'C2',  'O', 'H11', 'H12', 'H21', 'H22', 'H23', 'HO'), \
                 eoh.atom_ids, 'atom_ids' + description
             yield assert_equals, 8, eoh.number_bonds, 'number_bonds' + description
+            third_bond = eoh.bonds[2]
+            yield assert_equals, 'C1', third_bond.atom_id_1, 'third bond atom_id_1' + description
+            yield assert_equals, 'H11', third_bond.atom_id_2, 'third bond atom_id_2' + description
+            yield assert_equals, 0, eoh.bond_atom_index_1[2], 'third bond (generated) bond_atom_index_1'+ description
+            yield assert_equals, 3, eoh.bond_atom_index_2[2], 'third bond (generated) bond_atom_index_2' + description
+            yield assert_equals, [1]*8, eoh.bond_order,  '(generated) bond_order' + description
+            yield assert_equals, [False]*8, eoh.bond_aromatic,  '(generated) bond_aromatic' + description
         except ImportError:
             pass
