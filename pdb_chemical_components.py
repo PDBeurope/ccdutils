@@ -33,6 +33,7 @@ class PdbChemicalComponents(object):
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
+        self.pdbx_release_status = None
         self.inchikey = None
         self.Atom = namedtuple('Atom', 'atom_id pdbx_stereo_config xyz_ideal')
         self.atoms = []
