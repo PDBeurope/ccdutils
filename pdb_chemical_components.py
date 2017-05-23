@@ -148,6 +148,11 @@ class PdbChemicalComponents(object):
             if bond_order == -1:
                 raise RuntimeError('problem with bond order for bond {}'.format(bond))
             self.bond_order.append(bond_order)
+            if bond.pdbx_aromatic_flag == 'Y':
+                bond_aromatic = True
+            else:
+                bond_aromatic = False
+            self.bond_aromatic.append(bond_aromatic)
 
     def find_atom_index(self, atom_id):
         for index in range(len(self.atoms)):
@@ -178,7 +183,7 @@ class PdbChemicalComponents(object):
             None
         """
         if not os.path.isfile(file_name):
-            raise ValueError('cannot read chemical compoents from %s as file not found' % file_name)
+            raise ValueError('cannot read PDB chemical components from {} as file not found'.format(file_name))
         if self.cif_parser == 'auto':
             try:
                 self.read_ccd_from_file_mmcifio(file_name)
