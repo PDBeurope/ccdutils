@@ -33,7 +33,7 @@ class PdbChemicalComponents(object):
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
-        self.pdbx_release_status = None
+        self.chem_comp_pdbx_release_status = None
         self.inchikey = None
         self.Atom = namedtuple('Atom', 'atom_id pdbx_stereo_config xyz_ideal')
         self.atoms = []
@@ -97,8 +97,8 @@ class PdbChemicalComponents(object):
         self.chem_comp_id = 'CMO'
         # _chem_comp.name                                  "CARBON MONOXIDE"
         self.chem_comp_name = 'CARBON MONOXIDE'
-        # _chem_comp.pdbx_release_status                   REL
-        self.pdbx_release_status = 'REL'
+        # _chem_comp.chem_comp_pdbx_release_status                   REL
+        self.chem_comp_pdbx_release_status = 'REL'
         #
         # loop_
         # _pdbx_chem_comp_descriptor.comp_id 
@@ -210,9 +210,9 @@ class PdbChemicalComponents(object):
         cif_obj = cif_parser.read(file_name, output='cif_wrapper')
         data_block = list(cif_obj.values())[0]
         chem_comp = data_block._chem_comp
-        self.chem_comp_id = chem_comp['id'][0]
-        self.chem_comp_name = chem_comp['name'][0]
-        self.pdbx_release_status = chem_comp['pdbx_release_status'][0]
+        for thing in 'id', 'name', 'pdbx_release_status':
+            value = chem_comp[thing][0]
+            setattr(self, "chem_comp_" + thing, value)
         self.atoms = []
         chem_comp_atom = data_block._chem_comp_atom
         for atom in chem_comp_atom:
@@ -260,9 +260,9 @@ class PdbChemicalComponents(object):
         cif_file = CifFile(file_name, parseLogFileName=None).getCifFile()
         first_data_block = cif_file.GetBlock(cif_file.GetFirstBlockName())
         table_chem_comp = first_data_block.GetTable('chem_comp')
-        self.chem_comp_id = table_chem_comp(0, 'id')
-        self.chem_comp_name = table_chem_comp(0, 'name')
-        self.pdbx_release_status = table_chem_comp(0, 'pdbx_release_status')
+        for thing in 'id', 'name', 'pdbx_release_status':
+            value = table_chem_comp(0, thing)
+            setattr(self, "chem_comp_" + thing, value)
         self.atoms = []
         table_chem_comp_atom = first_data_block.GetTable('chem_comp_atom')
         number_atoms = table_chem_comp_atom.GetNumRows()

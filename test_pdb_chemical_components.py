@@ -25,7 +25,7 @@ def test_hard_code_cmo():
     cmo.load_carbon_monoxide_hard_coded()
     yield assert_equals, 'CMO', cmo.chem_comp_id, 'chem_comp_id'
     yield assert_equals, 'CARBON MONOXIDE', cmo.chem_comp_name, 'chem_comp_name'
-    yield assert_equals, 'REL', cmo.pdbx_release_status, 'pdbx_release_status'
+    yield assert_equals, 'REL', cmo.chem_comp_pdbx_release_status, 'chem_comp_pdbx_release_status'
     yield assert_equals, 'UGFAIRIUMAVXCW-UHFFFAOYSA-N', cmo.inchikey, 'chem_inchikey'
     yield assert_equals, 2, cmo.number_atoms, 'number_atoms'
     yield assert_equals, ('C', 'O'), cmo.atom_ids, 'atom_ids'
@@ -60,7 +60,7 @@ def test_load_eoh_from_cif():
             eoh = PdbChemicalComponents(file_name=eoh_cif_file(), cif_parser=cif_parser)
             yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id' + description
             yield assert_equals, 'ETHANOL', eoh.chem_comp_name, 'chem_comp_name' + description
-            yield assert_equals, 'REL', eoh.pdbx_release_status, 'pdbx_release_status'
+            yield assert_equals, 'REL', eoh.chem_comp_pdbx_release_status, 'chem_comp_pdbx_release_status'
             yield assert_equals, 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N', eoh.inchikey, 'inchikey' + description
             yield assert_equals, 9, eoh.number_atoms, 'number_atoms' + description
             yield assert_equals, ('C1', 'C2',  'O', 'H11', 'H12', 'H21', 'H22', 'H23', 'HO'), \
