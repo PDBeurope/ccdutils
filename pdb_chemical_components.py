@@ -285,3 +285,16 @@ class PdbChemicalComponents(object):
         for row_num in range(table_pdbx_chem_comp_descriptor.GetNumRows()):
             if table_pdbx_chem_comp_descriptor(row_num, 'type') == 'InChIKey':
                 self.inchikey = table_pdbx_chem_comp_descriptor(row_num, 'descriptor')
+        self.bonds = []
+        table_chem_comp_bond = first_data_block.GetTable('chem_comp_bond')
+        number_bonds = table_chem_comp_bond.GetNumRows()
+        for row_num in range(number_bonds):
+            atom_id_1 = table_chem_comp_bond(row_num, 'atom_id_1')
+            atom_id_2 = table_chem_comp_bond(row_num, 'atom_id_2')
+            value_order = table_chem_comp_bond(row_num,'value_order')
+            pdbx_aromatic_flag = table_chem_comp_bond(row_num,'pdbx_aromatic_flag')
+            pdbx_stereo_config = table_chem_comp_bond(row_num,'pdbx_stereo_config')
+            this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
+                                  pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
+            self.bonds.append(this_bond)
+
