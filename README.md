@@ -4,8 +4,12 @@
   for small molecules, taken from the 
   [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd)
 * Written for use in:
-  * [PDBeChem](http://www.ebi.ac.uk/pdbe-srv/pdbechem/) back end 
+  * replacing [PDBeChem](http://www.ebi.ac.uk/pdbe-srv/pdbechem/) back end 
   processing.
-   * [wwPDB validation pipeline](https://www.wwpdb.org/validation/validation-reports)
-* Uses [RDKit](http://www.rdkit.org/)
+  * the [wwPDB validation pipeline](https://www.wwpdb.org/validation/validation-reports)
+* The tools use:
+  * [RDKit](http://www.rdkit.org/) for chemistry
+  * either the [PDBeCIF](https://github.com/glenveegee/PDBeCIF.git) 
+  or the CifFile CIF parser used in wwPDB OneDep.
+
 
