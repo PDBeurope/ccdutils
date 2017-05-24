@@ -1,7 +1,10 @@
 # ccd_utils
 
-## Initial Idea for Project
-
+* A set of python tools to deal with PDB chemical components definitions
+  for small molecules, taken from the 
+  [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd)
+  
+  
 * Program that
   * Reads in a PDB chemical components definition
   * Produces a decent 2D image of the molecule in svg format
