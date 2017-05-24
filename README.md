@@ -11,6 +11,6 @@
   * [RDKit](http://www.rdkit.org/) for chemistry
   * either the [PDBeCIF](https://github.com/glenveegee/PDBeCIF.git) 
   or the CifFile CIF parser used in wwPDB OneDep.
-* Please note that the project is under active development and not yet
-  ready for wider use!
+* Please note that the project is under active development includes some rough 
+  preliminary scripts and is and not yet ready for wider use!
 
