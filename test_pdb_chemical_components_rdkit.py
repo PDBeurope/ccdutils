@@ -15,6 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import glob
+import os
+
 from nose.tools import assert_equals
 from test_pdb_chemical_components import cif_filename
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
@@ -35,3 +38,8 @@ def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
     yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id'
     yield assert_equals, eoh.inchikey, eoh.rdkit_inchikey, 'inchikey from cif file should match the rdkit inchikey'
+
+def test_inchikey_match_for_all_cif():
+    for ciffile in glob.glob(os.path.join('data', 'cif', '*.cif')):
+        pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
+        yield assert_equals, pdb_cc.inchikey, pdb_cc.rdkit_inchikey, 'check inchikeys match for ' + pdb_cc.chem_comp_id

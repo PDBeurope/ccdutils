@@ -32,7 +32,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
             name = self.atoms[atom_index]['atom_id']
-            print('DEBUG element={} name={}'.format(element,name))
             rdkit_atom = Chem.Atom(element)
             rdkit_atom.SetProp('name', name)  # from sameer_prototype_chem.py
             # set the name of the atom to be included in sdf file Alias lines
@@ -43,19 +42,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             index_1 = self.bond_atom_index_1[bond_index]
             index_2 = self.bond_atom_index_2[bond_index]
             order = Chem.rdchem.BondType(self.bond_order[bond_index])
-            print('DEBUG bond index_1={} index_2={} order={}'.format(index_1, index_2, order))
             self.rdkit_mol.AddBond(index_1, index_2, order)
-
-
-
 
     @property
     def rdkit_inchikey(self):
         inchi = Chem.inchi.MolToInchi(self.rdkit_mol)
         inchikey = Chem.inchi.InchiToInchiKey(inchi)
         return inchikey
-
-
-
-
-
