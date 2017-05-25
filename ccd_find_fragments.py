@@ -95,10 +95,14 @@ def main():
     if (logging_level == logging.DEBUG):
         logging.debug('check rdkit_mol conversion worked by converting back to SMILES')
         for smile in smiles_to_fragment_name:
-            logging.debug('\tfragment {} original smiles:{} rdkit smiles:{}'.
+            # try out inchi and inchikey
+            test_inchi = Chem.inchi.MolToInchi(smiles_to_rdkit_mol[smile])
+            test_inchikey = Chem.inchi.InchiToInchiKey(test_inchi)
+            logging.debug('\tfragment {} original smiles:{} rdkit smiles:{} inchi:{} inchikey:{}'.
                           format(smiles_to_fragment_name[smile],
                                  smile,
-                                 Chem.MolToSmiles(smiles_to_rdkit_mol[smile])))
+                                 Chem.MolToSmiles(smiles_to_rdkit_mol[smile]),
+                                 test_inchi, test_inchikey))
 
     cif_file = os.path.join(data_dir, '007.cif')  # temporary for testing.
     logging.debug('temporary for testing using cif file {}'.format(cif_file))
