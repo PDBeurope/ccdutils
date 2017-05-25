@@ -96,6 +96,17 @@ class PdbChemicalComponents(object):
         return tuple(atom_ids)
 
     @property
+    def atom_elements(self):
+        """
+        the elements for the atoms in the chem_comp_atom list
+
+        Returns:
+            (str): the elements
+        """
+        return NotImplemented,
+
+
+    @property
     def number_atoms(self):
         """
         The number of atoms in the chem_comp

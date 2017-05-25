@@ -29,6 +29,7 @@ def test_hard_code_cmo():
     yield assert_equals, 'UGFAIRIUMAVXCW-UHFFFAOYSA-N', cmo.inchikey, 'chem_inchikey'
     yield assert_equals, 2, cmo.number_atoms, 'number_atoms'
     yield assert_equals, ('C', 'O'), cmo.atom_ids, 'atom_ids'
+    yield assert_equals, ('C', 'O'), cmo.atom_elements, 'atom_elements'
     yield assert_equals, 1, cmo.number_bonds, 'number_bonds'
     the_bond = cmo.bonds[0]
     yield assert_equals, 'C', the_bond.atom_id_1, 'bond atom_id_1'
@@ -39,14 +40,14 @@ def test_hard_code_cmo():
     yield assert_equals, [False], cmo.bond_aromatic, '(generated) bond_aromatic'
 
 
-def eoh_cif_file():
-    return os.path.join('data', 'cif', 'EOH.cif')
+def cif_filename(code):
+    return os.path.join('data', 'cif', code + '.cif')
 
 
 def test_eoh_loads_with_parser():
     for cif_parser in 'mmcifIO', 'CifFile':
         try:
-            PdbChemicalComponents(file_name=eoh_cif_file(), cif_parser=cif_parser)
+            PdbChemicalComponents(file_name=cif_filename('EOH'), cif_parser=cif_parser)
         except ImportError as msg:
             yield assert_equals, 0, 1, \
                 "Import problem using cif_parser='{}' message='{}'. " \
@@ -57,7 +58,7 @@ def test_load_eoh_from_cif():
     for cif_parser in 'mmcifIO', 'CifFile':
         description = ', with cif_parser={}'.format(cif_parser)
         try:
-            eoh = PdbChemicalComponents(file_name=eoh_cif_file(), cif_parser=cif_parser)
+            eoh = PdbChemicalComponents(file_name=cif_filename('EOH'), cif_parser=cif_parser)
             yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id' + description
             yield assert_equals, 'ETHANOL', eoh.chem_comp_name, 'chem_comp_name' + description
             yield assert_equals, 'REL', eoh.chem_comp_pdbx_release_status, 'chem_comp_pdbx_release_status'
@@ -65,13 +66,26 @@ def test_load_eoh_from_cif():
             yield assert_equals, 9, eoh.number_atoms, 'number_atoms' + description
             yield assert_equals, ('C1', 'C2',  'O', 'H11', 'H12', 'H21', 'H22', 'H23', 'HO'), \
                 eoh.atom_ids, 'atom_ids' + description
+            yield assert_equals, ('C', 'C',  'O', 'H', 'H', 'H', 'H', 'H', ''), \
+                eoh.atom_elements, 'atom_elements' + description
             yield assert_equals, 8, eoh.number_bonds, 'number_bonds' + description
             third_bond = eoh.bonds[2]
             yield assert_equals, 'C1', third_bond.atom_id_1, 'third bond atom_id_1' + description
             yield assert_equals, 'H11', third_bond.atom_id_2, 'third bond atom_id_2' + description
-            yield assert_equals, 0, eoh.bond_atom_index_1[2], 'third bond (generated) bond_atom_index_1'+ description
+            yield assert_equals, 0, eoh.bond_atom_index_1[2], 'third bond (generated) bond_atom_index_1' + description
             yield assert_equals, 3, eoh.bond_atom_index_2[2], 'third bond (generated) bond_atom_index_2' + description
             yield assert_equals, [1]*8, eoh.bond_order,  '(generated) bond_order' + description
             yield assert_equals, [False]*8, eoh.bond_aromatic,  '(generated) bond_aromatic' + description
+        except ImportError:
+            pass
+
+
+def test_load_hem_from_cif():
+    for cif_parser in 'mmcifIO', 'CifFile':
+        description = ', with cif_parser={}'.format(cif_parser)
+        try:
+            hem = PdbChemicalComponents(file_name=cif_filename('HEM'), cif_parser=cif_parser)
+            yield assert_equals, 'HEM', hem.chem_comp_id, 'chem_comp_id' + description
+            yield assert_equals, True, 'Fe' in hem.atom_elements, 'Fe in hem.atom_elements' + description
         except ImportError:
             pass
