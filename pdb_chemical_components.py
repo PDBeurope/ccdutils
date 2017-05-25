@@ -49,7 +49,7 @@ class PdbChemicalComponents(object):
 
         Args:
             file_name (str): filename
-            cif_parser (str): the cif parser to use. One of 'auto' or 'mmcifIO'(EBI) or'CifFile'
+            cif_parser (str): the cif parser to use. One of 'auto' or 'mmcifIO'(EBI) or'CifFile' or 'test_hard_code_cmo'
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
@@ -70,7 +70,9 @@ class PdbChemicalComponents(object):
         self.bond_aromatic = []
         """list of bool: one for each of self.bonds boolean conversion of pdbx_aromatic_flag (Y or N)"""
         self.cif_parser = cif_parser
-        if file_name is not None:
+        if cif_parser == 'test_hard_code_cmo':
+            self.load_carbon_monoxide_hard_coded()
+        elif file_name is not None:
             self.read_ccd_from_cif_file(file_name)
             self.setup_bond_lists()
 

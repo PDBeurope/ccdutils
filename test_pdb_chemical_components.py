@@ -21,8 +21,7 @@ from pdb_chemical_components import PdbChemicalComponents
 
 
 def test_hard_code_cmo():
-    cmo = PdbChemicalComponents()
-    cmo.load_carbon_monoxide_hard_coded()
+    cmo = PdbChemicalComponents(cif_parser='test_hard_code_cmo')
     yield assert_equals, 'CMO', cmo.chem_comp_id, 'chem_comp_id'
     yield assert_equals, 'CARBON MONOXIDE', cmo.chem_comp_name, 'chem_comp_name'
     yield assert_equals, 'REL', cmo.chem_comp_pdbx_release_status, 'chem_comp_pdbx_release_status'
