@@ -35,8 +35,8 @@ class PdbChemicalComponents(object):
         self.chem_comp_name = None
         self.chem_comp_pdbx_release_status = None
         self.inchikey = None
-        self.Atom = namedtuple('Atom', 'atom_id pdbx_stereo_config xyz_ideal')
         self.atoms = []
+        """list of ChemCompAtoms"""
         self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
         self.bond_atom_index_1 = []
@@ -116,10 +116,20 @@ class PdbChemicalComponents(object):
         self.inchikey = 'UGFAIRIUMAVXCW-UHFFFAOYSA-N'
         # CMO C C C -1 1 N N N -0.296 8.526 17.112 0.607  0.000 0.000 C CMO 1
         # CMO O O O 1  1 N N N 0.023  7.997 18.053 -0.600 0.000 0.000 O CMO 2
-        this_atom = self.Atom(atom_id='C', pdbx_stereo_config='N', xyz_ideal=(0.607, 0.000, 0.000))
-        self.atoms.append(this_atom)
-        this_atom = self.Atom(atom_id='O', pdbx_stereo_config='N', xyz_ideal=(-0.600, 0.000, 0.000))
-        self.atoms.append(this_atom)
+        my_chem_comp_atom = ChemCompAtom()
+        my_chem_comp_atom.atom_id = 'C'
+        my_chem_comp_atom.pdbx_stereo_config = 'N'
+        my_chem_comp_atom.pdbx_model_Cartn_x_ideal = '0.607'
+        my_chem_comp_atom.pdbx_model_Cartn_y_ideal ='0.000'
+        my_chem_comp_atom.pdbx_model_Cartn_y_ideal = '0.000'
+        self.atoms.append(my_chem_comp_atom)
+        my_chem_comp_atom = ChemCompAtom()
+        my_chem_comp_atom.atom_id = 'O'
+        my_chem_comp_atom.pdbx_stereo_config = 'N'
+        my_chem_comp_atom.pdbx_model_Cartn_x_ideal = '-0.600'
+        my_chem_comp_atom.pdbx_model_Cartn_y_ideal = '0.000'
+        my_chem_comp_atom.pdbx_model_Cartn_y_ideal = '0.000'
+        self.atoms.append(my_chem_comp_atom)
         # _chem_comp_bond.comp_id              CMO
         # _chem_comp_bond.atom_id_1            C
         # _chem_comp_bond.atom_id_2            O
@@ -209,6 +219,7 @@ class PdbChemicalComponents(object):
 
         Raises:
             ImportError: if the parser cannot be loaded.
+            RuntimeError: if a new unrecognized item has appeared
         """
         import mmCif.mmcifIO as mmcifIO
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
@@ -221,15 +232,13 @@ class PdbChemicalComponents(object):
         self.atoms = []
         chem_comp_atom = data_block._chem_comp_atom
         for atom in chem_comp_atom:
-            atom_id = atom['atom_id']
-            pdbx_stereo_config = atom['pdbx_stereo_config']
-            ideal_x = float(atom['pdbx_model_Cartn_x_ideal'])
-            ideal_y = float(atom['pdbx_model_Cartn_y_ideal'])
-            ideal_z = float(atom['pdbx_model_Cartn_z_ideal'])
-            this_atom = self.Atom(atom_id=atom_id,
-                                  pdbx_stereo_config=pdbx_stereo_config,
-                                  xyz_ideal=(ideal_x, ideal_y, ideal_z))
-            self.atoms.append(this_atom)
+            my_chem_comp_atom = ChemCompAtom()
+            for key in atom:
+                value = atom[key]
+                if not hasattr(my_chem_comp_atom, key):
+                    raise RuntimeError('unrecognized item "{}" in chemp_comp_atom'.format(key))
+                setattr(my_chem_comp_atom, key, value)
+            self.atoms.append(my_chem_comp_atom)
         self.bonds = []
         chem_comp_bond = data_block._chem_comp_bond
         for bond in chem_comp_bond:
@@ -298,3 +307,25 @@ class PdbChemicalComponents(object):
                                   pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
             self.bonds.append(this_bond)
 
+
+class ChemCompAtom:
+    """all items in _chem_comp_atom """
+    def __init__(self):
+        self.comp_id = None
+        self.atom_id = None
+        self.alt_atom_id = None
+        self.type_symbol  = None
+        self.charge  = None
+        self.pdbx_align  = None
+        self.pdbx_aromatic_flag  = None
+        self.pdbx_leaving_atom_flag  = None
+        self.pdbx_stereo_config = None
+        self.model_Cartn_x = None
+        self.model_Cartn_y = None
+        self.model_Cartn_z = None
+        self.pdbx_model_Cartn_x_ideal = None
+        self.pdbx_model_Cartn_y_ideal = None
+        self.pdbx_model_Cartn_z_ideal = None
+        self.pdbx_component_atom_id = None
+        self.pdbx_component_comp_id = None
+        self.pdbx_ordinal = None
