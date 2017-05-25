@@ -57,6 +57,8 @@ class PdbChemicalComponents(object):
         self.inchikey = None
         self.atoms = []
         """list of ordered dictionary"""
+        self.__atom_ids = None
+        self.__elements = None
         self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
         self.bond_atom_index_1 = []
@@ -90,10 +92,12 @@ class PdbChemicalComponents(object):
         Returns:
             (str): the atom_id's
         """
-        atom_ids = []
-        for atom in self.atoms:
-            atom_ids.append(atom['atom_id'])
-        return tuple(atom_ids)
+        if self.__atom_ids is None:
+            self.__atom_ids = []
+            for atom in self.atoms:
+                self.__atom_ids.append(atom['atom_id'])
+            self.__atom_ids = tuple(self.__atom_ids)
+        return self.__atom_ids
 
     @property
     def atom_elements(self):
@@ -101,9 +105,20 @@ class PdbChemicalComponents(object):
         the elements for the atoms in the chem_comp_atom list
 
         Returns:
-            (str): the elements
+            (str): the elements for each atom
         """
-        return NotImplemented,
+        if self.__elements is None:
+            self.__elements = []
+            for atom in self.atoms:
+                type_symbol = atom['type_symbol']
+                if type_symbol is None or len(type_symbol)==0:
+                    raise RuntimeError('chem_comp_atom invalid type_symbol={}'.format(type_symbol))
+                element = type_symbol[0]
+                if len(type_symbol) > 1:
+                    element += type_symbol[1].lower()
+                self.__elements.append(element)
+            self.__elements = tuple(self.__elements)
+        return self.__elements
 
 
     @property
@@ -159,6 +174,7 @@ class PdbChemicalComponents(object):
         # CMO O O O 1  1 N N N 0.023  7.997 18.053 -0.600 0.000 0.000 O CMO 2
         my_chem_comp_atom = self.empty_chem_comp_atom()
         my_chem_comp_atom['atom_id'] = 'C'
+        my_chem_comp_atom['type_symbol'] = 'C'
         my_chem_comp_atom['pdbx_stereo_config'] = 'N'
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '0.607'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
@@ -166,6 +182,7 @@ class PdbChemicalComponents(object):
         self.atoms.append(my_chem_comp_atom)
         my_chem_comp_atom = self.empty_chem_comp_atom()
         my_chem_comp_atom['atom_id'] = 'O'
+        my_chem_comp_atom['type_symbol'] = 'O'
         my_chem_comp_atom['pdbx_stereo_config'] = 'N'
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '-0.600'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
