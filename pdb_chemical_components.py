@@ -60,6 +60,7 @@ class PdbChemicalComponents(object):
         self.__atom_ids = None
         self.__elements = None
         self.__stereo_configs = None
+        self.__charges = None
         self.__ideal_xyz = None
         self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
@@ -154,7 +155,22 @@ class PdbChemicalComponents(object):
     
     @property
     def atom_charges(self):
-        return NotImplemented
+        """
+        the formal charges for the atoms in the chem_comp_atom list
+
+        Returns:
+            (int): the chem_comp.charge value for each atom
+
+        Raises:
+            TODO custom exception if there is an error in the conversion
+        """
+        if self.__charges is None:
+            self.__charges = []
+            for atom in self._atoms:
+                charge = int(atom['charge'])
+                self.__charges.append(charge)
+            self.__charges = tuple(self.__charges)
+        return self.__charges
 
     @property
     def number_bonds(self):
@@ -223,6 +239,7 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '0.607'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
         my_chem_comp_atom['pdbx_model_Cartn_z_ideal'] = '0.000'
+        my_chem_comp_atom['charge'] = '-1'
         self._atoms.append(my_chem_comp_atom)
         my_chem_comp_atom = self.empty_chem_comp_atom()
         my_chem_comp_atom['atom_id'] = 'O'
@@ -231,6 +248,7 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '-0.600'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
         my_chem_comp_atom['pdbx_model_Cartn_z_ideal'] = '0.000'
+        my_chem_comp_atom['charge'] = '1'
         self._atoms.append(my_chem_comp_atom)
         # _chem_comp_bond.comp_id              CMO
         # _chem_comp_bond.atom_id_1            C
