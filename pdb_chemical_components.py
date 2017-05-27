@@ -89,6 +89,16 @@ class PdbChemicalComponents(object):
         return OrderedDict([(k, None) for k in PdbChemicalComponents._chem_comp_atom_items])
 
     @property
+    def number_atoms(self):
+        """
+        The number of atoms in the chem_comp
+
+        Returns:
+            int: the number of atoms
+        """
+        return len(self._atoms)
+
+    @property
     def atom_ids(self):
         """
         tuple of the atom_id's (aka atom names) in the chem_comp
@@ -141,16 +151,10 @@ class PdbChemicalComponents(object):
                 self.__stereo_configs.append(atom['pdbx_stereo_config'])
             self.__stereo_configs = tuple(self.__stereo_configs)
         return self.__stereo_configs
-
+    
     @property
-    def number_atoms(self):
-        """
-        The number of atoms in the chem_comp
-
-        Returns:
-            int: the number of atoms
-        """
-        return len(self._atoms)
+    def atom_charges(self):
+        return NotImplemented
 
     @property
     def number_bonds(self):
@@ -177,7 +181,7 @@ class PdbChemicalComponents(object):
                 float_x = float(atom['pdbx_model_Cartn_x_ideal'])
                 float_y = float(atom['pdbx_model_Cartn_y_ideal'])
                 float_z = float(atom['pdbx_model_Cartn_z_ideal'])
-                self.__ideal_xyz.append( (float_x, float_y, float_z))
+                self.__ideal_xyz.append((float_x, float_y, float_z))
             self.__ideal_xyz = tuple(self.__ideal_xyz)
         return self.__ideal_xyz
 
