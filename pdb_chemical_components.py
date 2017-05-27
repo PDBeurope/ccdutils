@@ -122,6 +122,9 @@ class PdbChemicalComponents(object):
             self.__elements = tuple(self.__elements)
         return self.__elements
 
+    @property
+    def atom_stereo_configs(self):
+        return NotImplemented
 
     @property
     def number_atoms(self):

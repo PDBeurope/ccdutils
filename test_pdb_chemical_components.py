@@ -29,6 +29,7 @@ def test_hard_code_cmo():
     yield assert_equals, 2, cmo.number_atoms, 'number_atoms'
     yield assert_equals, ('C', 'O'), cmo.atom_ids, 'atom_ids'
     yield assert_equals, ('C', 'O'), cmo.atom_elements, 'atom_elements'
+    yield assert_equals, ('N', 'N'), cmo.atom_stereo_configs, 'atom_stereo_configs'
     yield assert_equals, 1, cmo.number_bonds, 'number_bonds'
     the_bond = cmo.bonds[0]
     yield assert_equals, 'C', the_bond.atom_id_1, 'bond atom_id_1'
@@ -37,6 +38,7 @@ def test_hard_code_cmo():
     yield assert_equals, [1], cmo.bond_atom_index_2, '(generated) bond_atom_index_2'
     yield assert_equals, [3], cmo.bond_order, '(generated) bond_order'
     yield assert_equals, [False], cmo.bond_aromatic, '(generated) bond_aromatic'
+
 
 
 def cif_filename(code):
@@ -67,6 +69,8 @@ def test_load_eoh_from_cif():
                 eoh.atom_ids, 'atom_ids' + description
             yield assert_equals, ('C', 'C',  'O', 'H', 'H', 'H', 'H', 'H', 'H'), \
                 eoh.atom_elements, 'atom_elements' + description
+            yield assert_equals, ('N')*eoh.number_atoms, eoh.atom_stereo_configs, 'atom_stereo_configs' + description
+
             yield assert_equals, 8, eoh.number_bonds, 'number_bonds' + description
             third_bond = eoh.bonds[2]
             yield assert_equals, 'C1', third_bond.atom_id_1, 'third bond atom_id_1' + description
