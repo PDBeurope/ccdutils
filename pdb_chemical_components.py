@@ -60,6 +60,7 @@ class PdbChemicalComponents(object):
         self.__atom_ids = None
         self.__elements = None
         self.__stereo_configs = None
+        self.__ideal_xyz = None
         self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
         self.bond_atom_index_1 = []
@@ -170,7 +171,15 @@ class PdbChemicalComponents(object):
         Returns:
             tuple of tuple( x, y, z) for each atom. x, y, z are floats
         """
-        return NotImplemented
+        if self.__ideal_xyz is None:
+            self.__ideal_xyz = []
+            for atom in self._atoms:
+                float_x = float(atom['pdbx_model_Cartn_x_ideal'])
+                float_y = float(atom['pdbx_model_Cartn_y_ideal'])
+                float_z = float(atom['pdbx_model_Cartn_z_ideal'])
+                self.__ideal_xyz.append( (float_x, float_y, float_z))
+            self.__ideal_xyz = tuple(self.__ideal_xyz)
+        return self.__ideal_xyz
 
     def load_carbon_monoxide_hard_coded(self):
         """
@@ -209,7 +218,7 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_stereo_config'] = 'N'
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '0.607'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
-        my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
+        my_chem_comp_atom['pdbx_model_Cartn_z_ideal'] = '0.000'
         self._atoms.append(my_chem_comp_atom)
         my_chem_comp_atom = self.empty_chem_comp_atom()
         my_chem_comp_atom['atom_id'] = 'O'
@@ -217,7 +226,7 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_stereo_config'] = 'N'
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '-0.600'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
-        my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
+        my_chem_comp_atom['pdbx_model_Cartn_z_ideal'] = '0.000'
         self._atoms.append(my_chem_comp_atom)
         # _chem_comp_bond.comp_id              CMO
         # _chem_comp_bond.atom_id_1            C
