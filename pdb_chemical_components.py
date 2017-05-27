@@ -161,6 +161,17 @@ class PdbChemicalComponents(object):
         """
         return len(self.bonds)
 
+    @property
+    def ideal_xyz(self):
+        """
+        The ideal coordinates from chem_comp.pdbx_model_Cartn_x_ideal, chem_comp.pdbx_model_Cartn_y _ideal,
+        chem_comp.pdbx_model_Cartn_z_ideal,
+
+        Returns:
+            tuple of tuple( x, y, z) for each atom. x, y, z are floats
+        """
+        return NotImplemented
+
     def load_carbon_monoxide_hard_coded(self):
         """
         stub to produce a hard coded carbon monoxide ccd object for development idea/testing

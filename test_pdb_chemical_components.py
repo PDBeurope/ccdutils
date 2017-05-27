@@ -17,6 +17,7 @@
 #
 from nose.tools import assert_equals
 import os
+import unittest
 from pdb_chemical_components import PdbChemicalComponents
 
 
@@ -38,7 +39,7 @@ def test_hard_code_cmo():
     yield assert_equals, [1], cmo.bond_atom_index_2, '(generated) bond_atom_index_2'
     yield assert_equals, [3], cmo.bond_order, '(generated) bond_order'
     yield assert_equals, [False], cmo.bond_aromatic, '(generated) bond_aromatic'
-
+    yield assert_equals, ((0.607, 0.0, 0.0), (-0.607, 0., 0.)), cmo.ideal_xyz, '(generated) ideal_xyz'
 
 
 def cif_filename(code):
@@ -70,7 +71,6 @@ def test_load_eoh_from_cif():
             yield assert_equals, ('C', 'C',  'O', 'H', 'H', 'H', 'H', 'H', 'H'), \
                 eoh.atom_elements, 'atom_elements' + description
             yield assert_equals, tuple(['N']*9), eoh.atom_stereo_configs, 'atom_stereo_configs' + description
-
             yield assert_equals, 8, eoh.number_bonds, 'number_bonds' + description
             third_bond = eoh.bonds[2]
             yield assert_equals, 'C1', third_bond.atom_id_1, 'third bond atom_id_1' + description
@@ -92,3 +92,6 @@ def test_load_hem_from_cif():
             yield assert_equals, True, 'Fe' in hem.atom_elements, 'Fe in hem.atom_elements' + description
         except ImportError:
             pass
+
+class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
+    pass
