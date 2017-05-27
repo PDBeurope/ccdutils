@@ -40,6 +40,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             # set the name of the atom to be included in sdf file Alias lines
             # https://gist.github.com/ptosco/6e4468350f0fff183e4507ef24f092a1#file-pdb_atom_names-ipynb
             rdkit_atom.SetProp('molFileAlias', name)
+            charge = self.atom_charges[atom_index]
+            rdkit_atom.SetFormalCharge(charge)
             self.rdkit_mol.AddAtom(rdkit_atom)
         for bond_index in range(self.number_bonds):
             index_1 = self.bond_atom_index_1[bond_index]
