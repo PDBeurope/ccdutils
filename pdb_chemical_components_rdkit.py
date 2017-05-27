@@ -24,6 +24,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         super(PdbChemicalComponentsRDKit, self).__init__(file_name, cif_parser)
         self.rdkit_mol = None
         self.setup_rdkit_mol()
+        self._inchikey_from_rdkit = None
 
     def setup_rdkit_mol(self):
         # use method from http://rdkit-discuss.narkive.com/RVC3HZjy/building-mol-manually
@@ -45,7 +46,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             self.rdkit_mol.AddBond(index_1, index_2, order)
 
     @property
-    def rdkit_inchikey(self):
-        inchi = Chem.inchi.MolToInchi(self.rdkit_mol)
-        inchikey = Chem.inchi.InchiToInchiKey(inchi)
-        return inchikey
+    def inchikey_from_rdkit(self):
+        if self._inchikey_from_rdkit is None:
+            inchi = Chem.inchi.MolToInchi(self.rdkit_mol)
+            self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
+        return self._inchikey_from_rdkit
