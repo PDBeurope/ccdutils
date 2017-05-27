@@ -42,7 +42,7 @@ def test_load_eoh_from_cif():
 
 
 def test_inchikey_match_for_all_cif():
-    for ciffile in glob.glob(os.path.join('data', 'cif', '*.cif')):
+    for ciffile in sorted(glob.glob(os.path.join('data', 'cif', '*.cif'))):
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         yield assert_equals, pdb_cc.inchikey, pdb_cc.inchikey_from_rdkit, 'check inchikeys match for ' + pdb_cc.chem_comp_id
 
