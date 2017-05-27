@@ -85,7 +85,7 @@ class PdbChemicalComponents(object):
         Returns:
             OrderedDict: of items found in _chem_comp_atom_items
         """
-        return OrderedDict([(k,None) for k in PdbChemicalComponents._chem_comp_atom_items])
+        return OrderedDict([(k, None) for k in PdbChemicalComponents._chem_comp_atom_items])
 
     @property
     def atom_ids(self):
@@ -114,7 +114,7 @@ class PdbChemicalComponents(object):
             self.__elements = []
             for atom in self._atoms:
                 type_symbol = atom['type_symbol']
-                if type_symbol is None or len(type_symbol)==0:
+                if type_symbol is None or len(type_symbol) == 0:
                     raise RuntimeError('chem_comp_atom invalid type_symbol={}'.format(type_symbol))
                 element = type_symbol[0]
                 if len(type_symbol) > 1:
@@ -140,7 +140,6 @@ class PdbChemicalComponents(object):
                 self.__stereo_configs.append(atom['pdbx_stereo_config'])
             self.__stereo_configs = tuple(self.__stereo_configs)
         return self.__stereo_configs
-
 
     @property
     def number_atoms(self):
@@ -304,20 +303,23 @@ class PdbChemicalComponents(object):
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
         cif_obj = cif_parser.read(file_name, output='cif_wrapper')
         data_block = list(cif_obj.values())[0]
+        # noinspection PyProtectedMember
         chem_comp = data_block._chem_comp
         for thing in 'id', 'name', 'pdbx_release_status':
             value = chem_comp[thing][0]
             setattr(self, "chem_comp_" + thing, value)
         self._atoms = []
+        # noinspection PyProtectedMember
         chem_comp_atom = data_block._chem_comp_atom
         empty_atom = self.empty_chem_comp_atom()
         for atom in chem_comp_atom:
             self._atoms.append(atom)
             # check the no new attributes have been set
             for key in atom:
-                if not key in empty_atom:
+                if key not in empty_atom:
                     raise RuntimeError('unrecognized item "{}" in chem_comp_atom'.format(key))
         self.bonds = []
+        # noinspection PyProtectedMember
         chem_comp_bond = data_block._chem_comp_bond
         for bond in chem_comp_bond:
             atom_id_1 = bond['atom_id_1']
@@ -328,6 +330,7 @@ class PdbChemicalComponents(object):
             this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
                                   pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
             self.bonds.append(this_bond)
+        # noinspection PyProtectedMember
         pdbx_chem_comp_descriptor = data_block._pdbx_chem_comp_descriptor
         for descriptor in pdbx_chem_comp_descriptor:
             if descriptor['type'] == 'InChIKey':
@@ -346,6 +349,7 @@ class PdbChemicalComponents(object):
         Raises:
             ImportError: if CifFile parser cannot be loaded.
         """
+        # noinspection PyUnresolvedReferences
         from pdbx_v2.core.CifFile import CifFile
         # method based on calls made by
         # https://svn-dev.wwpdb.org/svn-wwpdb/py-validation/trunk/src/python/pdboi/pdbdata/mmcifapiconnector.py
@@ -373,9 +377,9 @@ class PdbChemicalComponents(object):
         for row_num in range(number_bonds):
             atom_id_1 = table_chem_comp_bond(row_num, 'atom_id_1')
             atom_id_2 = table_chem_comp_bond(row_num, 'atom_id_2')
-            value_order = table_chem_comp_bond(row_num,'value_order')
-            pdbx_aromatic_flag = table_chem_comp_bond(row_num,'pdbx_aromatic_flag')
-            pdbx_stereo_config = table_chem_comp_bond(row_num,'pdbx_stereo_config')
+            value_order = table_chem_comp_bond(row_num, 'value_order')
+            pdbx_aromatic_flag = table_chem_comp_bond(row_num, 'pdbx_aromatic_flag')
+            pdbx_stereo_config = table_chem_comp_bond(row_num, 'pdbx_stereo_config')
             this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
                                   pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
             self.bonds.append(this_bond)
