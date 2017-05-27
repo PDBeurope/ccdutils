@@ -16,6 +16,8 @@
 #
 from pdb_chemical_components import PdbChemicalComponents
 from rdkit import Chem
+from rdkit.Geometry import rdGeometry
+from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
 
 
 class PdbChemicalComponentsRDKit(PdbChemicalComponents):
@@ -38,17 +40,23 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             # set the name of the atom to be included in sdf file Alias lines
             # https://gist.github.com/ptosco/6e4468350f0fff183e4507ef24f092a1#file-pdb_atom_names-ipynb
             rdkit_atom.SetProp('molFileAlias', name)
-            pdbx_stereo_config = self.atom_stereo_configs[atom_index]
-            if pdbx_stereo_config == 'R':
-                rdkit_atom.SetChiralTag(Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW)
-            elif pdbx_stereo_config == 'S':
-                rdkit_atom.SetChiralTag(Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW)
             self.rdkit_mol.AddAtom(rdkit_atom)
         for bond_index in range(self.number_bonds):
             index_1 = self.bond_atom_index_1[bond_index]
             index_2 = self.bond_atom_index_2[bond_index]
             order = Chem.rdchem.BondType(self.bond_order[bond_index])
             self.rdkit_mol.AddBond(index_1, index_2, order)
+        # SanitizeMol recommended by Greg Landrum but causes issues
+        # Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
+        Chem.Kekulize(self.rdkit_mol)
+        ideal_conformer = Chem.Conformer(self.number_atoms)
+        for atom_index in range(self.number_atoms):
+            (ideal_x, ideal_y, ideal_z) = self.ideal_xyz[atom_index]
+            rdkit_xyz= rdGeometry.Point3D(ideal_x, ideal_y, ideal_z)
+            ideal_conformer.SetAtomPosition(atom_index,rdkit_xyz)
+        self.rdkit_mol.AddConformer(ideal_conformer)
+        AssignAtomChiralTagsFromStructure(self.rdkit_mol)
+
 
     @property
     def inchikey_from_rdkit(self):
