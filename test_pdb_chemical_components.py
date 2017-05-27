@@ -69,7 +69,7 @@ def test_load_eoh_from_cif():
                 eoh.atom_ids, 'atom_ids' + description
             yield assert_equals, ('C', 'C',  'O', 'H', 'H', 'H', 'H', 'H', 'H'), \
                 eoh.atom_elements, 'atom_elements' + description
-            yield assert_equals, ('N')*eoh.number_atoms, eoh.atom_stereo_configs, 'atom_stereo_configs' + description
+            yield assert_equals, tuple(['N']*9), eoh.atom_stereo_configs, 'atom_stereo_configs' + description
 
             yield assert_equals, 8, eoh.number_bonds, 'number_bonds' + description
             third_bond = eoh.bonds[2]

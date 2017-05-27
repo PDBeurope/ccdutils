@@ -59,6 +59,7 @@ class PdbChemicalComponents(object):
         """list of ordered dictionary"""
         self.__atom_ids = None
         self.__elements = None
+        self.__stereo_configs = None
         self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
         self.bond_atom_index_1 = []
@@ -124,7 +125,22 @@ class PdbChemicalComponents(object):
 
     @property
     def atom_stereo_configs(self):
-        return NotImplemented
+        """
+        the pdbx_stereo_config for the atoms in the chem_comp_atom list
+
+        Returns:
+            (str): the pdbx_stereo_config for each atom
+
+        Raises:
+            TODO custom exception if one of atom's pdbx_stereo_config is not 'N', 'R' or 'S'
+        """
+        if self.__stereo_configs is None:
+            self.__stereo_configs = []
+            for atom in self.atoms:
+                self.__stereo_configs.append(atom['pdbx_stereo_config'])
+            self.__stereo_configs = tuple(self.__stereo_configs)
+        return self.__stereo_configs
+
 
     @property
     def number_atoms(self):
