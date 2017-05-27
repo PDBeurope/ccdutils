@@ -55,7 +55,7 @@ class PdbChemicalComponents(object):
         self.chem_comp_name = None
         self.chem_comp_pdbx_release_status = None
         self.inchikey = None
-        self.atoms = []
+        self._atoms = []
         """list of ordered dictionary"""
         self.__atom_ids = None
         self.__elements = None
@@ -97,7 +97,7 @@ class PdbChemicalComponents(object):
         """
         if self.__atom_ids is None:
             self.__atom_ids = []
-            for atom in self.atoms:
+            for atom in self._atoms:
                 self.__atom_ids.append(atom['atom_id'])
             self.__atom_ids = tuple(self.__atom_ids)
         return self.__atom_ids
@@ -112,7 +112,7 @@ class PdbChemicalComponents(object):
         """
         if self.__elements is None:
             self.__elements = []
-            for atom in self.atoms:
+            for atom in self._atoms:
                 type_symbol = atom['type_symbol']
                 if type_symbol is None or len(type_symbol)==0:
                     raise RuntimeError('chem_comp_atom invalid type_symbol={}'.format(type_symbol))
@@ -136,7 +136,7 @@ class PdbChemicalComponents(object):
         """
         if self.__stereo_configs is None:
             self.__stereo_configs = []
-            for atom in self.atoms:
+            for atom in self._atoms:
                 self.__stereo_configs.append(atom['pdbx_stereo_config'])
             self.__stereo_configs = tuple(self.__stereo_configs)
         return self.__stereo_configs
@@ -150,7 +150,7 @@ class PdbChemicalComponents(object):
         Returns:
             int: the number of atoms
         """
-        return len(self.atoms)
+        return len(self._atoms)
 
     @property
     def number_bonds(self):
@@ -200,7 +200,7 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '0.607'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
-        self.atoms.append(my_chem_comp_atom)
+        self._atoms.append(my_chem_comp_atom)
         my_chem_comp_atom = self.empty_chem_comp_atom()
         my_chem_comp_atom['atom_id'] = 'O'
         my_chem_comp_atom['type_symbol'] = 'O'
@@ -208,7 +208,7 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '-0.600'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
-        self.atoms.append(my_chem_comp_atom)
+        self._atoms.append(my_chem_comp_atom)
         # _chem_comp_bond.comp_id              CMO
         # _chem_comp_bond.atom_id_1            C
         # _chem_comp_bond.atom_id_2            O
@@ -244,8 +244,8 @@ class PdbChemicalComponents(object):
             self.bond_aromatic.append(bond_aromatic)
 
     def find_atom_index(self, atom_id):
-        for index in range(len(self.atoms)):
-            this_atom = self.atoms[index]
+        for index in range(len(self._atoms)):
+            this_atom = self._atoms[index]
             if atom_id == this_atom['atom_id']:
                 return index
         return -1
@@ -308,11 +308,11 @@ class PdbChemicalComponents(object):
         for thing in 'id', 'name', 'pdbx_release_status':
             value = chem_comp[thing][0]
             setattr(self, "chem_comp_" + thing, value)
-        self.atoms = []
+        self._atoms = []
         chem_comp_atom = data_block._chem_comp_atom
         empty_atom = self.empty_chem_comp_atom()
         for atom in chem_comp_atom:
-            self.atoms.append(atom)
+            self._atoms.append(atom)
             # check the no new attributes have been set
             for key in atom:
                 if not key in empty_atom:
@@ -355,14 +355,14 @@ class PdbChemicalComponents(object):
         for thing in 'id', 'name', 'pdbx_release_status':
             value = table_chem_comp(0, thing)
             setattr(self, "chem_comp_" + thing, value)
-        self.atoms = []
+        self._atoms = []
         table_chem_comp_atom = first_data_block.GetTable('chem_comp_atom')
         number_atoms = table_chem_comp_atom.GetNumRows()
         for row_num in range(number_atoms):
             my_chem_comp_atom = self.empty_chem_comp_atom()
             for key in my_chem_comp_atom:
                 my_chem_comp_atom[key] = table_chem_comp_atom(row_num, key)
-            self.atoms.append(my_chem_comp_atom)
+            self._atoms.append(my_chem_comp_atom)
         table_pdbx_chem_comp_descriptor = first_data_block.GetTable('pdbx_chem_comp_descriptor')
         for row_num in range(table_pdbx_chem_comp_descriptor.GetNumRows()):
             if table_pdbx_chem_comp_descriptor(row_num, 'type') == 'InChIKey':

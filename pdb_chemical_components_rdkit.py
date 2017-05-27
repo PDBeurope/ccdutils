@@ -32,7 +32,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         self.rdkit_mol = Chem.RWMol(empty_mol)
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
-            name = self.atoms[atom_index]['atom_id']
+            name = self.atom_ids[atom_index]
             rdkit_atom = Chem.Atom(element)
             rdkit_atom.SetProp('name', name)  # from sameer_prototype_chem.py
             # set the name of the atom to be included in sdf file Alias lines
