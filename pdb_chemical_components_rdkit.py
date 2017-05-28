@@ -34,12 +34,12 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         self.rdkit_mol = Chem.RWMol(empty_mol)
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
-            name = self.atom_ids[atom_index]
+            atom_name = self.atom_ids[atom_index]
             rdkit_atom = Chem.Atom(element)
-            rdkit_atom.SetProp('name', name)  # from sameer_prototype_chem.py
+            rdkit_atom.SetProp('name', atom_name)  # from sameer_prototype_chem.py
             # set the name of the atom to be included in sdf file Alias lines
             # https://gist.github.com/ptosco/6e4468350f0fff183e4507ef24f092a1#file-pdb_atom_names-ipynb
-            rdkit_atom.SetProp('molFileAlias', name)
+            rdkit_atom.SetProp('molFileAlias', atom_name)
             charge = self.atom_charges[atom_index]
             rdkit_atom.SetFormalCharge(charge)
             self.rdkit_mol.AddAtom(rdkit_atom)
@@ -48,17 +48,15 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             index_2 = self.bond_atom_index_2[bond_index]
             order = Chem.rdchem.BondType(self.bond_order[bond_index])
             self.rdkit_mol.AddBond(index_1, index_2, order)
-        # SanitizeMol recommended by Greg Landrum but causes issues
-        # Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
+        Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
         Chem.Kekulize(self.rdkit_mol)
         ideal_conformer = Chem.Conformer(self.number_atoms)
         for atom_index in range(self.number_atoms):
             (ideal_x, ideal_y, ideal_z) = self.ideal_xyz[atom_index]
-            rdkit_xyz= rdGeometry.Point3D(ideal_x, ideal_y, ideal_z)
-            ideal_conformer.SetAtomPosition(atom_index,rdkit_xyz)
+            rdkit_xyz = rdGeometry.Point3D(ideal_x, ideal_y, ideal_z)
+            ideal_conformer.SetAtomPosition(atom_index, rdkit_xyz)
         self.rdkit_mol.AddConformer(ideal_conformer)
         AssignAtomChiralTagsFromStructure(self.rdkit_mol)
-
 
     @property
     def inchikey_from_rdkit(self):
