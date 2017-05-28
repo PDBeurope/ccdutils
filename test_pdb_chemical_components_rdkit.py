@@ -26,7 +26,6 @@ from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 def test_hard_code_cmo():
     cmo = PdbChemicalComponentsRDKit(cif_parser='test_hard_code_cmo')
-    cmo.load_carbon_monoxide_hard_coded()
     yield assert_equals, 'CMO', cmo.chem_comp_id, 'chem_comp_id'
     yield assert_equals, 'CARBON MONOXIDE', cmo.chem_comp_name, 'chem_comp_name'
     yield assert_equals, 'UGFAIRIUMAVXCW-UHFFFAOYSA-N', cmo.inchikey, 'chem_inchikey'
