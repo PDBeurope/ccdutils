@@ -72,7 +72,7 @@ def test_load_eoh_from_cif():
             yield assert_equals, ('C', 'C',  'O', 'H', 'H', 'H', 'H', 'H', 'H'), \
                 eoh.atom_elements, 'atom_elements' + description
             yield assert_equals, tuple(['N']*9), eoh.atom_stereo_configs, 'atom_stereo_configs' + description
-            yield assert_equals, tuple([0]*9),eoh.atom_charges, '(property) atom_charges'
+            yield assert_equals, tuple([0]*9), eoh.atom_charges, '(property) atom_charges'
             yield assert_equals, 8, eoh.number_bonds, 'number_bonds' + description
             third_bond = eoh.bonds[2]
             yield assert_equals, 'C1', third_bond.atom_id_1, 'third bond atom_id_1' + description
@@ -95,6 +95,7 @@ def test_load_hem_from_cif():
             yield assert_equals, True, 'Fe' in hem.atom_elements, 'Fe in hem.atom_elements' + description
         except ImportError:
             pass
+
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
