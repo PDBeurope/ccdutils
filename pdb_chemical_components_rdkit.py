@@ -64,3 +64,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             inchi = Chem.inchi.MolToInchi(self.rdkit_mol)
             self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
         return self._inchikey_from_rdkit
+
+    def sdf_file_or_string(self, file=None):
+        return NotImplemented
+
