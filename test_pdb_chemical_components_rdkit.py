@@ -39,10 +39,10 @@ def test_hard_code_cmo():
             'zero characters in sdf string={}'.format(sdf_string)
         yield assert_in, 'V2000', sdf_string, 'the sdf string should contain V2000'
         yield assert_in, 'END', sdf_string, 'the sdf string should contain END'
-    sdf_file_name = 'temp_test.CMO.hard_coded.sdf'
-    cmo.sdf_file_or_string(file=sdf_file_name)
+    sdf_file_name = file_name_in_subdir_for_output_files('CMO.hard_coded.ideal_withH.sdf')
+    cmo.sdf_file_or_string(file_name=sdf_file_name)
     yield assert_true, os.path.isfile(sdf_file_name) and os.path.getsize(sdf_file_name) > 0, \
-          'call to cmo.sdf_file_or_string(file="{}") must create a non-empty file.'.format(sdf_file_name)
+        'call to cmo.sdf_file_or_string(file="{}") must create a non-empty file.'.format(sdf_file_name)
 
 def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
@@ -50,12 +50,40 @@ def test_load_eoh_from_cif():
     yield assert_equals, eoh.inchikey, eoh.inchikey_from_rdkit, 'inchikey from cif file should match the rdkit inchikey'
 
 
-def test_inchikey_match_for_all_cif():
+def test_inchikey_match_for_all_sample_cifs():
     for ciffile in sorted(glob.glob(os.path.join('data', 'cif', '*.cif'))):
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         yield assert_equals, pdb_cc.inchikey, pdb_cc.inchikey_from_rdkit, \
             'check inchikeys match for ' + pdb_cc.chem_comp_id
 
+
+def test_sdf_write_for_all_sample_cifs():
+    for ciffile in sorted(glob.glob(os.path.join('data', 'cif', '*.cif'))):
+        pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
+        sdf_file_name = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
+        pdb_cc.sdf_file_or_string(file_name=sdf_file_name)
+        yield assert_true, os.path.isfile(sdf_file_name) and os.path.getsize(sdf_file_name) > 0, \
+              '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.format(pdb_cc.chem_comp_id, sdf_file_name)
+1
+
+def file_name_in_subdir_for_output_files(file_name):
+    """
+    creates the subdirectory "tests_out" if necessary and returns the file_name in this directory, If the
+    file already exists it will remove it.
+
+    Args:
+        file_name (str):  the name for the file
+
+    Returns:
+        str: the filename in the subdirectory tests_out
+    """
+    subdir = 'tests_out'
+    if not os.path.isdir(subdir):
+        os.mkdir(subdir)
+    out_file_name = os.path.join(subdir, file_name)
+    if os.path.isfile(out_file_name):
+        os.remove(out_file_name)
+    return out_file_name
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass

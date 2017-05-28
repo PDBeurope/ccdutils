@@ -65,6 +65,24 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
         return self._inchikey_from_rdkit
 
-    def sdf_file_or_string(self, file=None):
-        return NotImplemented
+    def sdf_file_or_string(self, file_name=None):
+        """
+        write a sdf file or return a string containing the molecule as a sdf file
+
+        Args:
+            file_name (str): optional filename
+
+        Returns:
+            None or a string containing the molecule converted to sdf
+
+        Notes:
+            TODO currently limited to writing the ideal coordinates with hydrogen atoms
+        """
+        sdf_string = Chem.MolToMolBlock(self.rdkit_mol)
+        if file_name is None:
+            return sdf_string
+        else:
+            with open(file_name, "w") as sdf_file:
+                sdf_file.write(sdf_string)
+            return None
 
