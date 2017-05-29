@@ -20,7 +20,12 @@ import os
 import unittest
 from pdb_chemical_components import PdbChemicalComponents
 
-cif_parser_list=('PDBeCIF', 'CifFile')
+# by default just use the 'auto' cif_parse (which ever can be imported).
+cif_parser_list = ('auto',)
+# but if environment variable TEST_CIF_PARSER_ALL test all possible
+if 'TEST_CIF_PARSER_ALL' in os.environ:
+    cif_parser_list = ('PDBeCIF', 'CifFile')
+
 
 def test_hard_code_cmo():
     cmo = PdbChemicalComponents(cif_parser='test_hard_code_cmo')
