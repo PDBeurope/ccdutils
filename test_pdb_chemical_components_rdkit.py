@@ -44,6 +44,7 @@ def test_hard_code_cmo():
     yield assert_true, os.path.isfile(sdf_file_name) and os.path.getsize(sdf_file_name) > 0, \
         'call to cmo.sdf_file_or_string(file="{}") must create a non-empty file.'.format(sdf_file_name)
 
+
 def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
     yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id'
@@ -63,8 +64,9 @@ def test_sdf_write_for_all_sample_cifs():
         sdf_file_name = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
         pdb_cc.sdf_file_or_string(file_name=sdf_file_name)
         yield assert_true, os.path.isfile(sdf_file_name) and os.path.getsize(sdf_file_name) > 0, \
-              '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.format(pdb_cc.chem_comp_id, sdf_file_name)
-1
+            '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
+            format(pdb_cc.chem_comp_id, sdf_file_name)
+
 
 def file_name_in_subdir_for_output_files(file_name):
     """
@@ -84,6 +86,7 @@ def file_name_in_subdir_for_output_files(file_name):
     if os.path.isfile(out_file_name):
         os.remove(out_file_name)
     return out_file_name
+
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
