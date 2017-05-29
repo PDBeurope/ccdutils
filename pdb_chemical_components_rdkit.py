@@ -22,6 +22,7 @@ from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
 
 class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     """ PdbChemicalComponents class with extension to produce RDKit Mol"""
+
     def __init__(self, file_name=None, cif_parser='auto'):
         super(PdbChemicalComponentsRDKit, self).__init__(file_name, cif_parser)
         self.rdkit_mol = None
@@ -65,19 +66,30 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
         return self._inchikey_from_rdkit
 
-    def sdf_file_or_string(self, file_name=None):
+    def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=True):
         """
         write a sdf file or return a string containing the molecule as a sdf file
 
         Args:
             file_name (str): optional filename
+            ideal (bool): write the ideal coordinates (if True) or model coordinates (False)
+            hydrogen (bool): include hydrogen atoms in the sdf
+            alias (bool): use the alias feature to include atom names in the sdf
 
         Returns:
             None or a string containing the molecule converted to sdf
 
         Notes:
             TODO currently limited to writing the ideal coordinates with hydrogen atoms
+            This method should not alter self.rdkit_mol by removing hydrogen atoms etc.
         """
+        if not ideal:
+            raise NotImplementedError('sdf_file_or_string ideal=False to be coded')  # TODO implement ideal
+        if not hydrogen:
+            raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
+        if not alias:
+            raise NotImplementedError('sdf_file_or_string alias=False to be coded')  # TODO implement alias
+
         sdf_string = Chem.MolToMolBlock(self.rdkit_mol)
         if file_name is None:
             return sdf_string
@@ -86,3 +98,25 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 sdf_file.write(sdf_string)
             return None
 
+    def pdb_file_or_string(self):
+        # TODO implement pdb_file_or_string - most options like sdf_file_or_string
+        raise NotImplementedError('to be coded')
+
+    def cml_file_or_string(self):
+        # TODO implement cml_file_or_string - not sure about options!
+        raise NotImplementedError('to be coded')
+
+    def image_file(self, file_name=None, wedge=False, atom_labels=False, hydrogen=False):
+        """
+        writes an image of the molecule to a file using rdkit.Chem.Draw
+
+        Args:
+            file_name (str): the name of the file. Type normally got from the filename ending for instance .png or .svg
+            wedge (bool):  wedge the bonds in the image
+            atom_labels (str): include atom labels in the image
+            hydrogen (str): include hydrogen atoms in the image.
+
+        Returns:
+
+        """
+        raise NotImplementedError('to be coded')
