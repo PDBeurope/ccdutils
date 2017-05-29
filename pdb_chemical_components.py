@@ -50,7 +50,7 @@ class PdbChemicalComponents(object):
         Args:
             file_name (str): filename
             cif_parser (str): the cif parser to use.
-            One of 'auto' or 'mmcifIO'(EBI) or'CifFile' or 'test_hard_code_cmo'
+            One of 'auto' or 'PDBeCIF' or'CifFile' or 'test_hard_code_cmo'
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
@@ -153,7 +153,7 @@ class PdbChemicalComponents(object):
                 self.__stereo_configs.append(atom['pdbx_stereo_config'])
             self.__stereo_configs = tuple(self.__stereo_configs)
         return self.__stereo_configs
-    
+
     @property
     def atom_charges(self):
         """
@@ -218,18 +218,18 @@ class PdbChemicalComponents(object):
         self.chem_comp_pdbx_release_status = 'REL'
         #
         # loop_
-        # _pdbx_chem_comp_descriptor.comp_id 
-        # _pdbx_chem_comp_descriptor.type 
-        # _pdbx_chem_comp_descriptor.program 
-        # _pdbx_chem_comp_descriptor.program_version 
-        # _pdbx_chem_comp_descriptor.descriptor 
-        # CMO SMILES           ACDLabs              10.04 "[O+]#[C-]"                 
-        # CMO SMILES_CANONICAL CACTVS               3.341 "[C-]#[O+]"                 
-        # CMO SMILES           CACTVS               3.341 "[C-]#[O+]"                 
-        # CMO SMILES_CANONICAL "OpenEye OEToolkits" 1.5.0 "[C-]#[O+]"                 
-        # CMO SMILES           "OpenEye OEToolkits" 1.5.0 "[C-]#[O+]"                 
-        # CMO InChI            InChI                1.03  InChI=1S/CO/c1-2            
-        # CMO InChIKey         InChI                1.03  UGFAIRIUMAVXCW-UHFFFAOYSA-N 
+        # _pdbx_chem_comp_descriptor.comp_id
+        # _pdbx_chem_comp_descriptor.type
+        # _pdbx_chem_comp_descriptor.program
+        # _pdbx_chem_comp_descriptor.program_version
+        # _pdbx_chem_comp_descriptor.descriptor
+        # CMO SMILES           ACDLabs              10.04 "[O+]#[C-]"
+        # CMO SMILES_CANONICAL CACTVS               3.341 "[C-]#[O+]"
+        # CMO SMILES           CACTVS               3.341 "[C-]#[O+]"
+        # CMO SMILES_CANONICAL "OpenEye OEToolkits" 1.5.0 "[C-]#[O+]"
+        # CMO SMILES           "OpenEye OEToolkits" 1.5.0 "[C-]#[O+]"
+        # CMO InChI            InChI                1.03  InChI=1S/CO/c1-2
+        # CMO InChIKey         InChI                1.03  UGFAIRIUMAVXCW-UHFFFAOYSA-N
         self.inchikey = 'UGFAIRIUMAVXCW-UHFFFAOYSA-N'
         # CMO C C C -1 1 N N N -0.296 8.526 17.112 0.607  0.000 0.000 C CMO 1
         # CMO O O O 1  1 N N N 0.023  7.997 18.053 -0.600 0.000 0.000 O CMO 2
@@ -258,7 +258,7 @@ class PdbChemicalComponents(object):
         # _chem_comp_bond.pdbx_aromatic_flag   N
         # _chem_comp_bond.pdbx_stereo_config   N
         # _chem_comp_bond.pdbx_ordinal         1
-        this_bond = self.Bond(atom_id_1='C', atom_id_2='O', value_order='TRIP', 
+        this_bond = self.Bond(atom_id_1='C', atom_id_2='O', value_order='TRIP',
                               pdbx_aromatic_flag='N', pdbx_stereo_config='N')
         self.bonds.append(this_bond)
         self.setup_bond_lists()
@@ -317,19 +317,19 @@ class PdbChemicalComponents(object):
             raise ValueError('cannot read PDB chemical components from {} as file not found'.format(file_name))
         if self.cif_parser == 'auto':
             try:
-                self.read_ccd_from_file_mmcifio(file_name)
+                self.read_ccd_from_file_pdbecif(file_name)
             except ImportError:
                 self.read_ccd_from_file_ciffile(file_name)
-        elif self.cif_parser == 'mmcifIO':
-            self.read_ccd_from_file_mmcifio(file_name)
+        elif self.cif_parser == 'PDBeCIF':
+            self.read_ccd_from_file_pdbecif(file_name)
         elif self.cif_parser == 'CifFile':
             self.read_ccd_from_file_ciffile(file_name)
         else:
             raise RuntimeError('unrecognized cif_parser {}'.format(self.cif_parser))
 
-    def read_ccd_from_file_mmcifio(self, file_name):
+    def read_ccd_from_file_pdbecif(self, file_name):
         """
-        reads the chemical component from file file_name using the mmcifIO parser
+        reads the chemical component from file file_name using the pdbecif parser
         https://github.com/glenveegee/PDBeCIF.git
 
         Args:

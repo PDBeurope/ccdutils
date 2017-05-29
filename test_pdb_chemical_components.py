@@ -20,6 +20,7 @@ import os
 import unittest
 from pdb_chemical_components import PdbChemicalComponents
 
+cif_parser_list=('PDBeCIF', 'CifFile')
 
 def test_hard_code_cmo():
     cmo = PdbChemicalComponents(cif_parser='test_hard_code_cmo')
@@ -48,7 +49,7 @@ def cif_filename(code):
 
 
 def test_eoh_loads_with_parser():
-    for cif_parser in 'mmcifIO', 'CifFile':
+    for cif_parser in cif_parser_list:
         try:
             PdbChemicalComponents(file_name=cif_filename('EOH'), cif_parser=cif_parser)
         except ImportError as msg:
@@ -58,7 +59,7 @@ def test_eoh_loads_with_parser():
 
 
 def test_load_eoh_from_cif():
-    for cif_parser in 'mmcifIO', 'CifFile':
+    for cif_parser in cif_parser_list:
         description = ', with cif_parser={}'.format(cif_parser)
         try:
             eoh = PdbChemicalComponents(file_name=cif_filename('EOH'), cif_parser=cif_parser)
@@ -87,7 +88,7 @@ def test_load_eoh_from_cif():
 
 
 def test_load_hem_from_cif():
-    for cif_parser in 'mmcifIO', 'CifFile':
+    for cif_parser in cif_parser_list:
         description = ', with cif_parser={}'.format(cif_parser)
         try:
             hem = PdbChemicalComponents(file_name=cif_filename('HEM'), cif_parser=cif_parser)
