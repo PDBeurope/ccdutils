@@ -20,7 +20,7 @@ import os
 import unittest
 
 from nose.tools import assert_equals, assert_in, assert_not_equal, assert_is_instance, assert_true
-from test_pdb_chemical_components import cif_filename
+from test_pdb_chemical_components import cif_filename,test_file_path_name
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 
@@ -52,14 +52,14 @@ def test_load_eoh_from_cif():
 
 
 def test_inchikey_match_for_all_sample_cifs():
-    for ciffile in sorted(glob.glob(os.path.join('data', 'cif', '*.cif'))):
+    for ciffile in sorted(glob.glob(os.path.join(test_file_path_name, '*.cif'))):
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         yield assert_equals, pdb_cc.inchikey, pdb_cc.inchikey_from_rdkit, \
             'check inchikeys match for ' + pdb_cc.chem_comp_id
 
 
 def test_sdf_write_for_all_sample_cifs():
-    for ciffile in sorted(glob.glob(os.path.join('data', 'cif', '*.cif'))):
+    for ciffile in sorted(glob.glob(os.path.join(test_file_path_name, '*.cif'))):
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         sdf_file_name = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
         pdb_cc.sdf_file_or_string(file_name=sdf_file_name)

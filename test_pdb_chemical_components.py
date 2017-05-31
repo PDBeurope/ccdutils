@@ -25,7 +25,7 @@ cif_parser_list = ('auto',)
 # but if environment variable TEST_CIF_PARSER_ALL test all possible
 if 'TEST_CIF_PARSER_ALL' in os.environ:
     cif_parser_list = ('PDBeCIF', 'CifFile')
-
+test_file_path_name = os.path.join('data','pdb_ccd_mmcif_test_files')
 
 def test_hard_code_cmo():
     cmo = PdbChemicalComponents(cif_parser='test_hard_code_cmo')
@@ -50,7 +50,7 @@ def test_hard_code_cmo():
 
 
 def cif_filename(code):
-    return os.path.join('data', 'cif', code + '.cif')
+    return os.path.join(test_file_path_name, code + '.cif')
 
 
 def test_eoh_loads_with_parser():
