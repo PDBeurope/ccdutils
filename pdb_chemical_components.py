@@ -46,11 +46,11 @@ class PdbChemicalComponents(object):
     """list of the items used in _chem_comp_atom"""
     def __init__(self, file_name=None, cif_parser='auto'):
         """
+        initializer - creates a PdbChemicalComponents object normally from a cif file
 
         Args:
-            file_name (str): filename
-            cif_parser (str): the cif parser to use.
-            One of 'auto' or 'PDBeCIF' or'CifFile' or 'test_hard_code_cmo'
+            file_name (str): the filename of the PDB CCD file
+            cif_parser (str): the cif parser to use. One of 'auto' or 'PDBeCIF' or'CifFile' or 'test_hard_code_cmo'
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
