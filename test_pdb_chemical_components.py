@@ -20,18 +20,22 @@ import os
 from os.path import expanduser
 import unittest
 from pdb_chemical_components import PdbChemicalComponents
+from utilities import this_script_dir
 
 # by default just use the 'auto' cif_parse (which ever can be imported).
 cif_parser_list = ('auto',)
 # but if environment variable TEST_CIF_PARSER_ALL test all possible
 if 'TEST_CIF_PARSER_ALL' in os.environ:
     cif_parser_list = ('PDBeCIF', 'CifFile')
-test_file_path_name = os.path.join('data','pdb_ccd_mmcif_test_files')
+
+test_file_path_name = os.path.join(this_script_dir(), 'data', 'pdb_ccd_mmcif_test_files')
+
 
 def test_check_test_file_path_name_is_accessible_after_changing_dir():
     home = expanduser("~")
     os.chdir(home)
-    assert_true(os.path.isdir(test_file_path_name)) 
+    assert_true(os.path.isdir(test_file_path_name))
+
 
 def test_hard_code_cmo():
     cmo = PdbChemicalComponents(cif_parser='test_hard_code_cmo')
@@ -83,16 +87,16 @@ def test_load_eoh_from_cif():
                 eoh.atom_ids, 'atom_ids' + description
             yield assert_equals, ('C', 'C',  'O', 'H', 'H', 'H', 'H', 'H', 'H'), \
                 eoh.atom_elements, 'atom_elements' + description
-            yield assert_equals, tuple(['N']*9), eoh.atom_stereo_configs, 'atom_stereo_configs' + description
-            yield assert_equals, tuple([0]*9), eoh.atom_charges, '(property) atom_charges'
+            yield assert_equals, tuple(['N'] * 9), eoh.atom_stereo_configs, 'atom_stereo_configs' + description
+            yield assert_equals, tuple([0] * 9), eoh.atom_charges, '(property) atom_charges'
             yield assert_equals, 8, eoh.number_bonds, 'number_bonds' + description
             third_bond = eoh.bonds[2]
             yield assert_equals, 'C1', third_bond.atom_id_1, 'third bond atom_id_1' + description
             yield assert_equals, 'H11', third_bond.atom_id_2, 'third bond atom_id_2' + description
             yield assert_equals, 0, eoh.bond_atom_index_1[2], 'third bond (generated) bond_atom_index_1' + description
             yield assert_equals, 3, eoh.bond_atom_index_2[2], 'third bond (generated) bond_atom_index_2' + description
-            yield assert_equals, [1]*8, eoh.bond_order,  '(generated) bond_order' + description
-            yield assert_equals, [False]*8, eoh.bond_aromatic,  '(generated) bond_aromatic' + description
+            yield assert_equals, [1] * 8, eoh.bond_order,  '(generated) bond_order' + description
+            yield assert_equals, [False] * 8, eoh.bond_aromatic,  '(generated) bond_aromatic' + description
             yield assert_equals, (1.130, 0.315, 0.), eoh.ideal_xyz[2], 'property ideal_xyz - check atom #3 the oxygen'
         except ImportError:
             pass
