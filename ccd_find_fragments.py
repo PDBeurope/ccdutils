@@ -2,17 +2,9 @@ import os
 import sys
 import pprint
 import logging
+from utilities import this_script_dir
 from rdkit import Chem
 
-def this_script_dir():
-    """
-    gives the name of directory were script being run resides
-
-    Returns:
-        str the name of the directory is
-
-    """
-    return os.path.dirname(os.path.abspath(__file__))
 
 def load_smiles_to_fragment_name_from_file( fragment_file_name):
     """
