@@ -20,7 +20,7 @@ import os
 import unittest
 
 from nose.tools import assert_equals, assert_in, assert_not_equal, assert_is_instance, assert_true
-from test_pdb_chemical_components import cif_filename,test_file_path_name
+from test_pdb_chemical_components import cif_filename, test_file_path_name
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 
@@ -52,20 +52,33 @@ def test_load_eoh_from_cif():
 
 
 def test_inchikey_match_for_all_sample_cifs():
-    for ciffile in sorted(glob.glob(os.path.join(test_file_path_name, '*.cif'))):
+    for ciffile in supply_list_of_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         yield assert_equals, pdb_cc.inchikey, pdb_cc.inchikey_from_rdkit, \
             'check inchikeys match for ' + pdb_cc.chem_comp_id
 
 
 def test_sdf_write_for_all_sample_cifs():
-    for ciffile in sorted(glob.glob(os.path.join(test_file_path_name, '*.cif'))):
+    for ciffile in supply_list_of_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         sdf_file_name = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
         pdb_cc.sdf_file_or_string(file_name=sdf_file_name)
         yield assert_true, os.path.isfile(sdf_file_name) and os.path.getsize(sdf_file_name) > 0, \
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, sdf_file_name)
+
+
+def supply_list_of_sample_cifs():
+    """
+    returns the list of sample pdb ccd cifs for test.
+
+    Args:
+        None
+
+    Returns:
+        list of filenames
+    """
+    return sorted(glob.glob(os.path.join(test_file_path_name, '*.cif')))
 
 
 def file_name_in_subdir_for_output_files(file_name):
