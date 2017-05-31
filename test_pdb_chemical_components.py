@@ -15,8 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from nose.tools import assert_equals
+from nose.tools import assert_equals, assert_true
 import os
+from os.path import expanduser
 import unittest
 from pdb_chemical_components import PdbChemicalComponents
 
@@ -26,6 +27,11 @@ cif_parser_list = ('auto',)
 if 'TEST_CIF_PARSER_ALL' in os.environ:
     cif_parser_list = ('PDBeCIF', 'CifFile')
 test_file_path_name = os.path.join('data','pdb_ccd_mmcif_test_files')
+
+def test_check_test_file_path_name_is_accessible_after_changing_dir():
+    home = expanduser("~")
+    os.chdir(home)
+    assert_true(os.path.isdir(test_file_path_name)) 
 
 def test_hard_code_cmo():
     cmo = PdbChemicalComponents(cif_parser='test_hard_code_cmo')
