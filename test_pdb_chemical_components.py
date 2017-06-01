@@ -57,7 +57,7 @@ def test_hard_code_cmo():
     yield assert_equals, [3], cmo.bond_order, '(generated) bond_order'
     yield assert_equals, [False], cmo.bond_aromatic, '(generated) bond_aromatic'
     yield assert_equals, ((0.607, 0., 0.), (-0.6, 0., 0.)), cmo.ideal_xyz, '(generated) ideal_xyz'
-    yield assert_equals, ((-0.296, 8.526, 17.112), (0.023, 7.997, 18.053)), cmo.model_xyz(), '(generated) model_xyz'
+    yield assert_equals, ((-0.296, 8.526, 17.112), (0.023, 7.997, 18.053)), cmo.model_xyz, '(generated) model_xyz'
 
 
 def cif_filename(code):

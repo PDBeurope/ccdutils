@@ -203,7 +203,8 @@ class PdbChemicalComponents(object):
             self.__ideal_xyz = tuple(self.__ideal_xyz)
         return self.__ideal_xyz
 
-#    def model_xyz(self):
+    @property
+    def model_xyz(self):
         """
         The model coordinates from chem_comp.model_Cartn_x, chem_comp.model_Cartn_y,
         chem_comp.model_Cartn_z,
@@ -211,15 +212,15 @@ class PdbChemicalComponents(object):
         Returns:
             tuple of tuple( x, y, z) for each atom. x, y, z are floats
         """
-#        if self.__model_xyz is None:
-#            self.__model_xyz = []
-#            for atom in self._atoms:
-#                float_x = float(atom['model_Cartn_x'])
-#                float_y = float(atom['model_Cartn_y'])
-#                float_z = float(atom['model_Cartn_z'])
-#                self.__model_xyz.append((float_x, float_y, float_z))
-#            self.__model_xyz = tuple(self.__model_xyz)
-#        return self.__model_xyz
+        if self.__model_xyz is None:
+            self.__model_xyz = []
+            for atom in self._atoms:
+                float_x = float(atom['model_Cartn_x'])
+                float_y = float(atom['model_Cartn_y'])
+                float_z = float(atom['model_Cartn_z'])
+                self.__model_xyz.append((float_x, float_y, float_z))
+            self.__model_xyz = tuple(self.__model_xyz)
+        return self.__model_xyz
 
     def __load_carbon_monoxide_hard_coded(self):
         """
@@ -259,9 +260,9 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '0.607'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
         my_chem_comp_atom['pdbx_model_Cartn_z_ideal'] = '0.000'
- #       my_chem_comp_atom['model_Cartn_x'] = '-0.296'
- #       my_chem_comp_atom['model_Cartn_y'] = '8.526'
- #       my_chem_comp_atom['model_Cartn_z'] = '17.112'
+        my_chem_comp_atom['model_Cartn_x'] = '-0.296'
+        my_chem_comp_atom['model_Cartn_y'] = '8.526'
+        my_chem_comp_atom['model_Cartn_z'] = '17.112'
         my_chem_comp_atom['charge'] = '-1'
         self._atoms.append(my_chem_comp_atom)
         my_chem_comp_atom = self.empty_chem_comp_atom()
@@ -271,9 +272,9 @@ class PdbChemicalComponents(object):
         my_chem_comp_atom['pdbx_model_Cartn_x_ideal'] = '-0.600'
         my_chem_comp_atom['pdbx_model_Cartn_y_ideal'] = '0.000'
         my_chem_comp_atom['pdbx_model_Cartn_z_ideal'] = '0.000'
-#        my_chem_comp_atom['model_Cartn_x'] = '0.023'
-#        my_chem_comp_atom['model_Cartn_y'] = '7.997'
-#        my_chem_comp_atom['model_Cartn_z'] = '18.053'
+        my_chem_comp_atom['model_Cartn_x'] = '0.023'
+        my_chem_comp_atom['model_Cartn_y'] = '7.997'
+        my_chem_comp_atom['model_Cartn_z'] = '18.053'
         my_chem_comp_atom['charge'] = '1'
         self._atoms.append(my_chem_comp_atom)
         # _chem_comp_bond.comp_id              CMO
