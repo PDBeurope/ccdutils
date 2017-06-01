@@ -26,6 +26,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     def __init__(self, file_name=None, cif_parser='auto'):
         super(PdbChemicalComponentsRDKit, self).__init__(file_name, cif_parser)
         self.rdkit_mol = None
+        self.rdkit_model_mol = None
         self.setup_rdkit_mol()
         self._inchikey_from_rdkit = None
 
@@ -33,6 +34,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         # use method from http://rdkit-discuss.narkive.com/RVC3HZjy/building-mol-manually
         empty_mol = Chem.Mol()  # creates a blank molecule
         self.rdkit_mol = Chem.RWMol(empty_mol)
+        self.rdkit_model_mol = Chem.RWMol(empty_mol)
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
             atom_name = self.atom_ids[atom_index]
@@ -43,21 +45,31 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             rdkit_atom.SetProp('molFileAlias', atom_name)
             charge = self.atom_charges[atom_index]
             rdkit_atom.SetFormalCharge(charge)
-            self.rdkit_mol.AddAtom(rdkit_atom)
+	    self.rdkit_mol.AddAtom(rdkit_atom)
+            self.rdkit_model_mol.AddAtom(rdkit_atom)
         for bond_index in range(self.number_bonds):
             index_1 = self.bond_atom_index_1[bond_index]
             index_2 = self.bond_atom_index_2[bond_index]
             order = Chem.rdchem.BondType(self.bond_order[bond_index])
             self.rdkit_mol.AddBond(index_1, index_2, order)
+            self.rdkit_model_mol.AddBond(index_1, index_2, order)
         Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
+        Chem.SanitizeMol(self.rdkit_model_mol, catchErrors=True)
         Chem.Kekulize(self.rdkit_mol)
+        Chem.Kekulize(self.rdkit_model_mol)
         ideal_conformer = Chem.Conformer(self.number_atoms)
+        model_conformer = Chem.Conformer(self.number_atoms)
         for atom_index in range(self.number_atoms):
             (ideal_x, ideal_y, ideal_z) = self.ideal_xyz[atom_index]
+            (model_x, model_y, model_z) = self.model_xyz[atom_index]
             rdkit_xyz = rdGeometry.Point3D(ideal_x, ideal_y, ideal_z)
+            rdkit_model_xyz = rdGeometry.Point3D(model_x, model_y, model_z)
             ideal_conformer.SetAtomPosition(atom_index, rdkit_xyz)
+            model_conformer.SetAtomPosition(atom_index, rdkit_model_xyz)
         self.rdkit_mol.AddConformer(ideal_conformer)
         AssignAtomChiralTagsFromStructure(self.rdkit_mol)
+        self.rdkit_model_mol.AddConformer(model_conformer)
+        AssignAtomChiralTagsFromStructure(self.rdkit_model_mol)
 
     @property
     def inchikey_from_rdkit(self):
@@ -84,7 +96,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             This method should not alter self.rdkit_mol by removing hydrogen atoms etc.
         """
         if not ideal:
-            raise NotImplementedError('sdf_file_or_string ideal=False to be coded')  # TODO implement ideal
+            #raise NotImplementedError('sdf_file_or_string ideal=False to be coded')  # TODO implement ideal
+            sdf_string = Chem.MolToMolBlock(self.rdkit_model_mol)
+            if file_name is None:
+                return sdf_string
+            else:
+                with open(file_name,'w') as sdf_file:
+                    sdf_file.write(sdf_string)
         if not hydrogen:
             raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
         if not alias:
