@@ -52,7 +52,7 @@ if __name__ == "__main__":
     
     cif_parser = mmcif.CifFileReader(input='data', preserve_order=True)
    
-    cif_in_dir = os.path.join(data_dir, 'cif')
+    cif_in_dir = os.path.join(data_dir, 'pdb_ccd_mmcif_test_files')
     sdf_out_dir = os.path.join(this_script_dir, 'sdf_out')
     svg_out_dir = os.path.join(this_script_dir, 'svg_out')
     for out_dir in [sdf_out_dir, svg_out_dir]:  # make output directories if necessary
