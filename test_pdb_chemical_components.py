@@ -57,6 +57,7 @@ def test_hard_code_cmo():
     yield assert_equals, [3], cmo.bond_order, '(generated) bond_order'
     yield assert_equals, [False], cmo.bond_aromatic, '(generated) bond_aromatic'
     yield assert_equals, ((0.607, 0., 0.), (-0.6, 0., 0.)), cmo.ideal_xyz, '(generated) ideal_xyz'
+    yield assert_equals, ((-0.296, 8.526, 17.112), (0.023, 7.997, 18.053)), cmo.model_xyz(), '(generated) model_xyz'
 
 
 def cif_filename(code):
@@ -98,6 +99,7 @@ def test_load_eoh_from_cif():
             yield assert_equals, [1] * 8, eoh.bond_order,  '(generated) bond_order' + description
             yield assert_equals, [False] * 8, eoh.bond_aromatic,  '(generated) bond_aromatic' + description
             yield assert_equals, (1.130, 0.315, 0.), eoh.ideal_xyz[2], 'property ideal_xyz - check atom #3 the oxygen'
+            yield assert_equals, (15.861, 48.185, 8.256), eoh.model_xyz[2], 'property model_xyz - check atom #3 the oxygen'
         except ImportError:
             pass
 
