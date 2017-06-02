@@ -77,7 +77,7 @@ def test_sdf_write_for_all_sample_cifs():
         pdb_cc.sdf_file_or_string(file_name=sdf_model_with_h,ideal=False)
         yield assert_true, os.path.isfile(sdf_model_with_h) and os.path.getsize(sdf_model_with_h) > 0, \
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
-            format(pdb_cc.chem_comp_id, sdf_ideal_with_h)
+            format(pdb_cc.chem_comp_id, sdf_model_with_h)
 
 
 def supply_list_of_sample_cifs():

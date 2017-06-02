@@ -96,13 +96,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             This method should not alter self.rdkit_mol by removing hydrogen atoms etc.
         """
         if not ideal:
-            raise NotImplementedError('sdf_file_or_string ideal=False to be coded')  # TODO implement ideal
-            #sdf_string = Chem.MolToMolBlock(self.rdkit_model_mol)
-            #if file_name is None:
-            #    return sdf_string
-            #else:
-            #    with open(file_name,'w') as sdf_file:
-            #        sdf_file.write(sdf_string)
+            #raise NotImplementedError('sdf_file_or_string ideal=False to be coded')  # TODO implement ideal
+            sdf_string = Chem.MolToMolBlock(self.rdkit_model_mol)
+            if file_name is None:
+                return sdf_string
+            else:
+                with open(file_name,'w') as sdf_file:
+                    sdf_file.write(sdf_string)
         if not hydrogen:
             raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
         if not alias:
