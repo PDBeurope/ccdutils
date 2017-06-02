@@ -45,7 +45,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             rdkit_atom.SetProp('molFileAlias', atom_name)
             charge = self.atom_charges[atom_index]
             rdkit_atom.SetFormalCharge(charge)
-	    self.rdkit_mol.AddAtom(rdkit_atom)
+            self.rdkit_mol.AddAtom(rdkit_atom)
             self.rdkit_model_mol.AddAtom(rdkit_atom)
         for bond_index in range(self.number_bonds):
             index_1 = self.bond_atom_index_1[bond_index]
@@ -96,24 +96,24 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             This method should not alter self.rdkit_mol by removing hydrogen atoms etc.
         """
         if not ideal:
-            #raise NotImplementedError('sdf_file_or_string ideal=False to be coded')  # TODO implement ideal
-            sdf_string = Chem.MolToMolBlock(self.rdkit_model_mol)
-            if file_name is None:
-                return sdf_string
-            else:
-                with open(file_name,'w') as sdf_file:
-                    sdf_file.write(sdf_string)
+            raise NotImplementedError('sdf_file_or_string ideal=False to be coded')  # TODO implement ideal
+            #sdf_string = Chem.MolToMolBlock(self.rdkit_model_mol)
+            #if file_name is None:
+            #    return sdf_string
+            #else:
+            #    with open(file_name,'w') as sdf_file:
+            #        sdf_file.write(sdf_string)
         if not hydrogen:
             raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
         if not alias:
             raise NotImplementedError('sdf_file_or_string alias=False to be coded')  # TODO implement alias
-
-        sdf_string = Chem.MolToMolBlock(self.rdkit_mol)
-        if file_name is None:
-            return sdf_string
-        else:
-            with open(file_name, "w") as sdf_file:
-                sdf_file.write(sdf_string)
+        if ideal and hydrogen and alias:   
+            sdf_string = Chem.MolToMolBlock(self.rdkit_mol)
+            if file_name is None:
+                return sdf_string
+            else:
+                with open(file_name, "w") as sdf_file:
+                    sdf_file.write(sdf_string)
             return None
 
     def pdb_file_or_string(self):

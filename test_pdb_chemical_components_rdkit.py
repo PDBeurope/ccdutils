@@ -42,10 +42,14 @@ def test_hard_code_cmo():
         yield assert_in, '0.607', sdf_string_ideal, 'the sdf string ideal should contain x coordinate for C'
     sdf_string_model = cmo.sdf_file_or_string(ideal=False)
     yield assert_in, '-0.296', sdf_string_model, 'the sdf string model should contain x coordinate for C'
-    sdf_file_name = file_name_in_subdir_for_output_files('CMO.hard_coded.ideal_withH.sdf')
-    cmo.sdf_file_or_string(file_name=sdf_file_name)
-    yield assert_true, os.path.isfile(sdf_file_name) and os.path.getsize(sdf_file_name) > 0, \
-        'call to cmo.sdf_file_or_string(file="{}") must create a non-empty file.'.format(sdf_file_name)
+    sdf_ideal_with_h = file_name_in_subdir_for_output_files('CMO.hard_coded.ideal_withH.sdf')
+    sdf_model_with_h = file_name_in_subdir_for_output_files('CMO.hard_coded.model_withH.sdf')
+    cmo.sdf_file_or_string(file_name=sdf_ideal_with_h)
+    cmo.sdf_file_or_string(file_name=sdf_model_with_h,ideal=False)
+    yield assert_true, os.path.isfile(sdf_ideal_with_h) and os.path.getsize(sdf_ideal_with_h) > 0, \
+        'call to cmo.sdf_file_or_string(file="{}") must create a non-empty file.'.format(sdf_ideal_with_h)
+    yield assert_true, os.path.isfile(sdf_model_with_h) and os.path.getsize(sdf_model_with_h) > 0, \
+        'call to cmo.sdf_file_or_string(file="{}") must create a non-empty file.'.format(sdf_model_with_h)
 
 
 def test_load_eoh_from_cif():
@@ -64,11 +68,16 @@ def test_inchikey_match_for_all_sample_cifs():
 def test_sdf_write_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
-        sdf_file_name = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
-        pdb_cc.sdf_file_or_string(file_name=sdf_file_name)
-        yield assert_true, os.path.isfile(sdf_file_name) and os.path.getsize(sdf_file_name) > 0, \
+        sdf_ideal_with_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
+        pdb_cc.sdf_file_or_string(file_name=sdf_ideal_with_h)
+        yield assert_true, os.path.isfile(sdf_ideal_with_h) and os.path.getsize(sdf_ideal_with_h) > 0, \
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
-            format(pdb_cc.chem_comp_id, sdf_file_name)
+            format(pdb_cc.chem_comp_id, sdf_ideal_with_h)
+        sdf_model_with_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.model_withH.sdf')
+        pdb_cc.sdf_file_or_string(file_name=sdf_model_with_h,ideal=False)
+        yield assert_true, os.path.isfile(sdf_model_with_h) and os.path.getsize(sdf_model_with_h) > 0, \
+            '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
+            format(pdb_cc.chem_comp_id, sdf_ideal_with_h)
 
 
 def supply_list_of_sample_cifs():
