@@ -14,7 +14,7 @@
 * Please note that the project is under active development includes some rough 
   preliminary scripts and is and not yet ready for wider use!
 
-# current rather poor installiation instructions:
+# current rather poor installation instructions:
 * Set up rdkit with anaconda following http://www.rdkit.org/docs/Install.html
 * Then issue commands like:
 ```
