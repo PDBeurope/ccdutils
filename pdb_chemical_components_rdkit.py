@@ -30,10 +30,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         """The RDKit conformer ID for the ideal cooordinate (int)."""
         self.rdkit_mol_conformer_id_model = None
         """The RDKit conformer ID for the model cooordinate (int)."""
-        self.setup_rdkit_mol()
+        self.__setup_rdkit_mol()
         self._inchikey_from_rdkit = None
 
-    def setup_rdkit_mol(self):
+    def __setup_rdkit_mol(self):
         """
         setup the rdkit mol called by the initializer only
 
@@ -42,8 +42,22 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
         """
         # use method from http://rdkit-discuss.narkive.com/RVC3HZjy/building-mol-manually
-        empty_mol = Chem.Mol()  # creates a blank molecule
+        empty_mol = Chem.Mol()
         self.rdkit_mol = Chem.RWMol(empty_mol)
+        self.__setup_atoms()
+        self.__setup_bonds()
+        self.__setup_conformers()
+        Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
+        Chem.Kekulize(self.rdkit_mol)
+        AssignAtomChiralTagsFromStructure(self.rdkit_mol)
+
+    def __setup_atoms(self):
+        """
+        sets up the atoms in the rdkit mol - elements, atom names, sdf alias name, charges.
+
+        Returns:
+            None
+        """
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
             atom_name = self.atom_ids[atom_index]
@@ -55,13 +69,30 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             charge = self.atom_charges[atom_index]
             rdkit_atom.SetFormalCharge(charge)
             self.rdkit_mol.AddAtom(rdkit_atom)
+
+    def __setup_bonds(self):
+        """
+        sets up the bonds in the rdkit mol - index numbers and bond orders
+
+        Returns:
+            None
+
+        Notes:
+            we do not use the CCD aromatic records pdbx_aromatic_flag
+        """
         for bond_index in range(self.number_bonds):
             index_1 = self.bond_atom_index_1[bond_index]
             index_2 = self.bond_atom_index_2[bond_index]
             order = Chem.rdchem.BondType(self.bond_order[bond_index])
             self.rdkit_mol.AddBond(index_1, index_2, order)
-        Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
-        Chem.Kekulize(self.rdkit_mol)
+
+    def __setup_conformers(self):
+        """
+        loads the ideal and model xyz coordinates as separate rdkit conformers.
+
+        Returns:
+            None
+        """
         ideal_conformer = Chem.Conformer(self.number_atoms)
         model_conformer = Chem.Conformer(self.number_atoms)
         for atom_index in range(self.number_atoms):
@@ -73,7 +104,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             model_conformer.SetAtomPosition(atom_index, rdkit_model_xyz)
         self.rdkit_mol_conformer_id_ideal = self.rdkit_mol.AddConformer(ideal_conformer, assignId=True)
         self.rdkit_mol_conformer_id_model = self.rdkit_mol.AddConformer(model_conformer, assignId=True)
-        AssignAtomChiralTagsFromStructure(self.rdkit_mol)
 
     @property
     def inchikey_from_rdkit(self):
