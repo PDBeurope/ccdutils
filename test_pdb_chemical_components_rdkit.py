@@ -67,6 +67,8 @@ def test_inchikey_match_for_all_sample_cifs():
 
 def test_sdf_write_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
+        #if 'HEM' in ciffile:
+        #   continue
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         sdf_ideal_with_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
         pdb_cc.sdf_file_or_string(file_name=sdf_ideal_with_h)

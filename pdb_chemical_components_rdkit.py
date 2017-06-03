@@ -50,6 +50,11 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
         Chem.Kekulize(self.rdkit_mol)
         AssignAtomChiralTagsFromStructure(self.rdkit_mol)
+        self.mol_remove_h = Chem.RWMol(self.rdkit_mol)
+        try:
+            self.mol_remove_h = Chem.RemoveHs(self.mol_remove_h)
+        except ValueError:
+            pass  #TODO deal with this error properly
 
     def __setup_atoms(self):
         """
@@ -138,7 +143,11 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             conformer_id = self.rdkit_mol_conformer_id_ideal
         else:
             conformer_id = self.rdkit_mol_conformer_id_model
-        sdf_string = Chem.MolToMolBlock(self.rdkit_mol, confId=conformer_id)
+        if hydrogen:
+            mol_h_select = self.rdkit_mol
+        else:
+            mol_h_select = self.mol_remove_h
+        sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
         if file_name is None:
             return sdf_string
         else:
