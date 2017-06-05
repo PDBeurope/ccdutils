@@ -146,8 +146,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if hydrogen:
             mol_h_select = self.rdkit_mol
         else:
-            mol_h_select = self.rdkit_mol
-            #mol_h_select = self.mol_remove_h
+            mol_h_select = self.mol_remove_h
         sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
         if file_name is None:
             return sdf_string
