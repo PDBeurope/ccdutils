@@ -67,6 +67,12 @@ def test_load_eoh_from_cif():
     yield assert_true, sdf_string_model_h.startswith('EOH'), 'model_h: sdf_file_or_string must start with EOH'
     yield assert_true, sdf_string_model_no_h.startswith('EOH'), 'model_no_h: sdf_file_or_string must start with EOH'
     yield assert_true, sdf_string_ideal_no_h.startswith('EOH'), 'ideal_no_h: sdf_file_or_string must start with EOH'
+    # alias stuff
+    yield assert_in, 'H23', sdf_string_ideal_h, 'sdf_string_ideal_h should have atom alias for H23'
+    sdf_string_ideal_h_no_alias = eoh.sdf_file_or_string(ideal=True, alias=False)
+    yield assert_not_in,  'H23', sdf_string_ideal_h_no_alias, \
+        'sdf produce with alias=False should Not have atom alias for H23'
+
 
 def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
