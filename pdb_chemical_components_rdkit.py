@@ -134,8 +134,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             TODO currently limited to writing the ideal coordinates with hydrogen atoms
             This method should not alter self.rdkit_mol by removing hydrogen atoms etc.
         """
-        if not hydrogen:
-            raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
+        #if not hydrogen:
+            #raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
         if not alias:
             raise NotImplementedError('sdf_file_or_string alias=False to be coded')  # TODO implement alias
 
@@ -146,7 +146,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if hydrogen:
             mol_h_select = self.rdkit_mol
         else:
-            mol_h_select = self.mol_remove_h
+            #mol_h_select = self.mol_remove_h
+            sdf_string = ''
+            return sdf_string 
         sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
         if file_name is None:
             return sdf_string

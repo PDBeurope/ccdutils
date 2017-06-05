@@ -51,12 +51,14 @@ def test_hard_code_cmo():
     yield assert_true, os.path.isfile(sdf_model_with_h) and os.path.getsize(sdf_model_with_h) > 0, \
         'call to cmo.sdf_file_or_string(file="{}") must create a non-empty file.'.format(sdf_model_with_h)
 
-
 def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
     yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id'
     yield assert_equals, eoh.inchikey, eoh.inchikey_from_rdkit, 'inchikey from cif file should match the rdkit inchikey'
-
+    sdf_string_ideal_no_h = eoh.sdf_file_or_string(hydrogen = False)
+    sdf_string_model_no_h = eoh.sdf_file_or_string(ideal = False, hydrogen = False)
+    yield assert_true, len(sdf_string_ideal_no_h) > 0, 'sdf_file_or_string must create a non-empty string'
+    yield assert_true, len(sdf_string_model_no_h) > 0, 'sdf_file_or_string must create a non-empty string'
 
 def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
