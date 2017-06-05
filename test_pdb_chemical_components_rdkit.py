@@ -19,7 +19,7 @@ import glob
 import os
 import unittest
 
-from nose.tools import assert_equals, assert_in, assert_not_equal, assert_is_instance, assert_true
+from nose.tools import assert_equals, assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in
 from test_pdb_chemical_components import cif_filename, test_file_path_name
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
@@ -57,9 +57,10 @@ def test_load_eoh_from_cif():
     yield assert_equals, eoh.inchikey, eoh.inchikey_from_rdkit, 'inchikey from cif file should match the rdkit inchikey'
     sdf_string_ideal_no_h = eoh.sdf_file_or_string(hydrogen = False)
     sdf_string_model_no_h = eoh.sdf_file_or_string(ideal = False, hydrogen = False)
-    yield assert_true, len(sdf_string_ideal_no_h) > 0, 'sdf_file_or_string must create a non-empty string'
-    yield assert_true, len(sdf_string_model_no_h) > 0, 'sdf_file_or_string must create a non-empty string'
-
+    yield assert_true, len(sdf_string_ideal_no_h) > 0, 'sdf_file_or_string must create a non-empty str'
+    yield assert_true, len(sdf_string_model_no_h) > 0, 'sdf_file_or_string must create a non-empty str'
+    yield assert_not_in, ' H ', sdf_string_ideal_no_h, 'sdf_file_or_string must create a non-empty str without H atom'
+    yield assert_not_in, ' H ', sdf_string_model_no_h, 'sdf_file_or_string must create a non-empty str without H atom'
 def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
