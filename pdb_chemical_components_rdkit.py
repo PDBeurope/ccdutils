@@ -136,9 +136,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         """
         #if not hydrogen:
             #raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
+        fname = self.chem_comp_id + '.sdf'
         if not alias:
             raise NotImplementedError('sdf_file_or_string alias=False to be coded')  # TODO implement alias
-
         if ideal:
             conformer_id = self.rdkit_mol_conformer_id_ideal
         else:
@@ -148,6 +148,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         else:
             mol_h_select = self.mol_remove_h
         sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
+        sdf_string = fname + sdf_string
         if file_name is None:
             return sdf_string
         else:

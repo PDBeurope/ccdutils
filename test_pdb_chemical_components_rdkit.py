@@ -55,12 +55,19 @@ def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
     yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id'
     yield assert_equals, eoh.inchikey, eoh.inchikey_from_rdkit, 'inchikey from cif file should match the rdkit inchikey'
+    sdf_string_ideal_h = eoh.sdf_file_or_string(ideal = True)
+    sdf_string_model_h = eoh.sdf_file_or_string(ideal = False)
     sdf_string_ideal_no_h = eoh.sdf_file_or_string(hydrogen = False)
     sdf_string_model_no_h = eoh.sdf_file_or_string(ideal = False, hydrogen = False)
     yield assert_true, len(sdf_string_ideal_no_h) > 0, 'sdf_file_or_string must create a non-empty str'
     yield assert_true, len(sdf_string_model_no_h) > 0, 'sdf_file_or_string must create a non-empty str'
     yield assert_not_in, ' H ', sdf_string_ideal_no_h, 'sdf_file_or_string must create a non-empty str without H atom'
     yield assert_not_in, ' H ', sdf_string_model_no_h, 'sdf_file_or_string must create a non-empty str without H atom'
+    yield assert_true, sdf_string_ideal_h.startswith('EOH'), 'ideal_h: sdf_file_or_string must start with EOH'
+    yield assert_true, sdf_string_model_h.startswith('EOH'), 'model_h: sdf_file_or_string must start with EOH'
+    yield assert_true, sdf_string_model_no_h.startswith('EOH'), 'model_no_h: sdf_file_or_string must start with EOH'
+    yield assert_true, sdf_string_ideal_no_h.startswith('EOH'), 'ideal_no_h: sdf_file_or_string must start with EOH'
+
 def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
