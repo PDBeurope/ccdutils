@@ -79,11 +79,20 @@ def test_sdf_write_for_all_sample_cifs():
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, sdf_ideal_with_h)
         sdf_model_with_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.model_withH.sdf')
-        pdb_cc.sdf_file_or_string(file_name=sdf_model_with_h,ideal=False)
+        pdb_cc.sdf_file_or_string(file_name = sdf_model_with_h,ideal=False)
         yield assert_true, os.path.isfile(sdf_model_with_h) and os.path.getsize(sdf_model_with_h) > 0, \
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, sdf_model_with_h)
-
+        sdf_ideal_no_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.ideal_noH.sdf')
+        pdb_cc.sdf_file_or_string(file_name = sdf_ideal_no_h, hydrogen = False)
+        yield assert_true, os.path.isfile(sdf_model_with_h) and os.path.getsize(sdf_ideal_no_h) > 0, \
+            '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
+            format(pdb_cc.chem_comp_id, sdf_ideal_no_h)
+        sdf_model_no_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.model_noH.sdf')
+        pdb_cc.sdf_file_or_string(file_name = sdf_model_no_h, ideal = False, hydrogen = False)
+        yield assert_true, os.path.isfile(sdf_model_with_h) and os.path.getsize(sdf_model_no_h) > 0, \
+            '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
+            format(pdb_cc.chem_comp_id, sdf_model_no_h)
 
 def supply_list_of_sample_cifs():
     """
