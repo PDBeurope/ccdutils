@@ -54,7 +54,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         try:
             self.mol_remove_h = Chem.RemoveHs(self.mol_remove_h)
         except ValueError:
-            pass  #TODO deal with this error properly
+            pass  # TODO deal with this error properly
 
     def __setup_atoms(self):
         """
@@ -157,8 +157,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             TODO currently limited to writing the ideal coordinates with hydrogen atoms
             This method should not alter self.rdkit_mol by removing hydrogen atoms etc.
         """
-        #if not hydrogen:
-            #raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
         fname = self.chem_comp_id + '.sdf'
         if ideal:
             conformer_id = self.rdkit_mol_conformer_id_ideal
