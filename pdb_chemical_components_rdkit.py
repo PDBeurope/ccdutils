@@ -176,21 +176,31 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
     def pdb_file_or_string(self, file_name=None, ideal=True):
         atom_pdb_residue_info = Chem.rdchem.AtomPDBResidueInfo()
-	atom_pdb_residue_info.SetResidueName(self.chem_comp_id)
-	atom_pdb_residue_info.SetTempFactor(20.0)
-	atom_pdb_residue_info.SetOccupancy(1.0)
-	atom_pdb_residue_info.SetChainId('A')
-	atom_pdb_residue_info.SetResidueNumber(1)
-	index = 0
-	for atom in self.rdkit_mol.GetAtoms():
-	    index += 1
-	    atom_name = ' {}{} '.format(atom.GetSymbol(), index)
-            if len(atom_name) == 5:
-	        atom_name = atom_name.rstrip() 
-            elif len(atom_name) == 6:
-	        atom_name = atom_name.strip()
-	    atom_pdb_residue_info.SetName(atom_name)
-	    atom.SetMonomerInfo(atom_pdb_residue_info)
+        atom_pdb_residue_info.SetResidueName(self.chem_comp_id)
+        atom_pdb_residue_info.SetTempFactor(20.0)
+        atom_pdb_residue_info.SetOccupancy(1.0)
+        atom_pdb_residue_info.SetChainId('A')
+        atom_pdb_residue_info.SetResidueNumber(1)
+        #index = 0
+        #for atom in self.rdkit_mol.GetAtoms():
+        #    index += 1
+        #    atom_name = ' {}{} '.format(atom.GetSymbol(), index)
+        #    if len(atom_name) == 5:
+        #        atom_name = atom_name.rstrip() 
+        #    elif len(atom_name) == 6:
+        #        atom_name = atom_name.strip()
+        for atom in self.rdkit_mol.GetAtoms():
+            atom_index = atom.GetIdx()
+            pdbx_align = self.atom_pdbx_align[atom_index]
+            element = self.atom_elements[atom_index]
+            atom_name = self.atom_ids[atom_index]
+            if len(atom_name) < 4:
+                atom_name = atom_name + ' '*(3 - len(atom_name) + (pdbx_align == '0'))
+            if pdbx_align == '1':
+                atom_name = ' ' + atom_name
+            print atom_name,pdbx_align
+            atom_pdb_residue_info.SetName(atom_name)
+            atom.SetMonomerInfo(atom_pdb_residue_info)
         if ideal:
             conformer_id = self.rdkit_mol_conformer_id_ideal
         else:

@@ -64,6 +64,7 @@ class PdbChemicalComponents(object):
         self.__charges = None
         self.__ideal_xyz = None
         self.__model_xyz = None
+        self.__pdbx_align = None
         self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
         self.bond_atom_index_1 = []
@@ -173,6 +174,16 @@ class PdbChemicalComponents(object):
                 self.__charges.append(charge)
             self.__charges = tuple(self.__charges)
         return self.__charges
+    
+    @property
+    def atom_pdbx_align(self):
+        if self.__pdbx_align is None:
+            self.__pdbx_align = []
+            for atom in self._atoms:
+                pdbx_align = atom['pdbx_align']
+                self.__pdbx_align.append(pdbx_align)
+        self.__pdbx_align = tuple(self.__pdbx_align)
+        return self.__pdbx_align
 
     @property
     def number_bonds(self):
