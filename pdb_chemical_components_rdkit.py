@@ -174,9 +174,36 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 sdf_file.write(sdf_string)
         return None
 
-    def pdb_file_or_string(self):
+    def pdb_file_or_string(self, file_name=None, ideal=True):
         # TODO implement pdb_file_or_string - most options like sdf_file_or_string
         raise NotImplementedError('to be coded')
+        atom_pdb_residue_info = Chem.rdchem.AtomPDBResidueInfo()
+	atom_pdb_residue_info.SetResidueName(self.chem_comp_id)
+	atom_pdb_residue_info.SetTempFactor(20.0)
+	atom_pdb_residue_info.SetOccupancy(1.0)
+	atom_pdb_residue_info.SetChainId('A')
+	atom_pdb_residue_info.SetResidueNumber(1)
+	index = 0
+	for atom in self.rdkit_mol.GetAtoms():
+	    index += 1
+	    atom_name = ' {}{} '.format(atom.GetSymbol(), index)
+            if len(atom_name) == 5:
+	        atom_name = atom_name.rstrip() 
+            elif len(atom_name) == 6:
+	        atom_name = atom_name.strip()
+	    atom_pdb_residue_info.SetName(atom_name)
+	    atom.SetMonomerInfo(atom_pdb_residue_info)
+        if ideal:
+            conformer_id = self.rdkit_mol_conformer_id_ideal
+        else:
+            conformer_id = self.rdkit_mol_conformer_id_model
+        pdb_string = Chem.MolToPDBBlock(self.rdkit_mol, conformer_id)
+        if file_name is None:
+            return pdb_string
+        else:
+            with open(file_name, "w") as pdb_file:
+                pdb_file.write(pdb_string)
+        return None
 
     def cml_file_or_string(self):
         # TODO implement cml_file_or_string - not sure about options!
