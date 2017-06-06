@@ -68,12 +68,35 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             atom_name = self.atom_ids[atom_index]
             rdkit_atom = Chem.Atom(element)
             rdkit_atom.SetProp('name', atom_name)  # from sameer_prototype_chem.py
-            # set the name of the atom to be included in sdf file Alias lines
-            # https://gist.github.com/ptosco/6e4468350f0fff183e4507ef24f092a1#file-pdb_atom_names-ipynb
-            rdkit_atom.SetProp('molFileAlias', atom_name)
             charge = self.atom_charges[atom_index]
             rdkit_atom.SetFormalCharge(charge)
             self.rdkit_mol.AddAtom(rdkit_atom)
+
+    @staticmethod
+    def __sdf_alias_on_off(rwmol=None, alias=False):
+        """
+        turns on or off the labels used for atom alias records in sdf output
+
+        Args:
+            rwmol: The RDkit RWMol molecule to be written
+            alias (bool: turn on (True) or off (False)
+
+        Returns:
+            None
+
+        Notes:
+            procedure used based on
+            https://gist.github.com/ptosco/6e4468350f0fff183e4507ef24f092a1#file-pdb_atom_names-ipynb
+
+        """
+        if rwmol is None:
+            raise ValueError('call to __sdf_alias with rwmol is None')
+        for rdkit_atom in rwmol.GetAtoms():
+            if alias:
+                atom_name = rdkit_atom.GetProp('name')
+                rdkit_atom.SetProp('molFileAlias', atom_name)
+            else:
+                rdkit_atom.ClearProp('molFileAlias')
 
     def __setup_bonds(self):
         """
@@ -137,8 +160,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         #if not hydrogen:
             #raise NotImplementedError('sdf_file_or_string hydrogen=False to be coded')  # TODO implement hydrogen
         fname = self.chem_comp_id + '.sdf'
-        if not alias:
-            raise NotImplementedError('sdf_file_or_string alias=False to be coded')  # TODO implement alias
         if ideal:
             conformer_id = self.rdkit_mol_conformer_id_ideal
         else:
@@ -147,6 +168,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             mol_h_select = self.rdkit_mol
         else:
             mol_h_select = self.mol_remove_h
+
+        self.__sdf_alias_on_off(mol_h_select, alias=alias)
+
         sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
         sdf_string = fname + sdf_string
         if file_name is None:
