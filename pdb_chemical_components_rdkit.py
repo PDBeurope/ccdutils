@@ -175,8 +175,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         return None
 
     def pdb_file_or_string(self, file_name=None, ideal=True):
-        # TODO implement pdb_file_or_string - most options like sdf_file_or_string
-        raise NotImplementedError('to be coded')
         atom_pdb_residue_info = Chem.rdchem.AtomPDBResidueInfo()
 	atom_pdb_residue_info.SetResidueName(self.chem_comp_id)
 	atom_pdb_residue_info.SetTempFactor(20.0)
