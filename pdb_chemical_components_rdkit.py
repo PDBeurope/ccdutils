@@ -140,22 +140,18 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
         return self._inchikey_from_rdkit
 
-    def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=True):
+    def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=False):
         """
         write a sdf file or return a string containing the molecule as a sdf file
 
         Args:
             file_name (str): optional filename
-            ideal (bool): write the ideal coordinates (if True) or model coordinates (False)
-            hydrogen (bool): include hydrogen atoms in the sdf
-            alias (bool): use the alias feature to include atom names in the sdf
+            ideal (bool): write the ideal coordinates (True) or model coordinates (False)? Default True: ideal.
+            hydrogen (bool): include hydrogen atoms in the sdf? Default True: yes)
+            alias (bool): use the alias feature to include atom names in the sdf? Default False no.
 
         Returns:
             None or a string containing the molecule converted to sdf
-
-        Notes:
-            TODO currently limited to writing the ideal coordinates with hydrogen atoms
-            This method should not alter self.rdkit_mol by removing hydrogen atoms etc.
         """
         fname = self.chem_comp_id + '.sdf'
         if ideal:
