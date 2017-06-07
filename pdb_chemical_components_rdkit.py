@@ -242,5 +242,4 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             mol_h_select = self.rdkit_mol
         else:
             mol_h_select = self.mol_remove_h
-
-        Draw.MolToFile(mol_h_select,file_name)
+        Draw.MolToFile(mol_h_select, file_name, wedgeBonds=wedge)
