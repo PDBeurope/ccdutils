@@ -33,11 +33,11 @@ def test_load_eoh_from_cif():
     yield assert_in, '0.007', pdb_string_ideal_h, 'pdb_file_or_string must contain x coordinate for ideal EOH'
     yield assert_in, '15.2120', pdb_string_model_h, 'pdb_file_or_string must contain x coordinate for model EOH'
     yield assert_in, 'HEADER', pdb_string_ideal_h, 'pdb_file_or_string must contain title section'
-    pdb_ideal_with_h = file_name_in_subdir_for_output_files('EOH.ideal_withH.png')
-    eoh.image_file(file_name=pdb_ideal_with_h)
-    yield assert_true, os.path.isfile(pdb_ideal_with_h) and os.path.getsize(pdb_ideal_with_h) > 0, \
+    img_with_h = file_name_in_subdir_for_output_files('EOH.img_withH.png')
+    eoh.image_file(file_name=img_with_h, hydrogen=True)
+    yield assert_true, os.path.isfile(img_with_h) and os.path.getsize(img_with_h) > 0, \
         '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
-        format('EOH', pdb_ideal_with_h)
+        format('EOH', img_with_h)
 
 def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
