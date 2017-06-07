@@ -34,18 +34,7 @@ def test_load_eoh_from_cif():
     sdf_string_model_no_h = eoh.sdf_file_or_string(ideal = False, hydrogen = False)
     yield assert_in, '0.007', pdb_string_ideal_h, 'pdb_file_or_string must contain x coordinate for ideal EOH'
     yield assert_in, '15.2120', pdb_string_model_h, 'pdb_file_or_string must contain x coordinate for model EOH'
-    #yield assert_not_in, ' H ', sdf_string_ideal_no_h, 'sdf_file_or_string must create a non-empty str without H atom'
-    #yield assert_not_in, ' H ', sdf_string_model_no_h, 'sdf_file_or_string must create a non-empty str without H atom'
-    #yield assert_true, sdf_string_ideal_h.startswith('EOH'), 'ideal_h: sdf_file_or_string must start with EOH'
-    #yield assert_true, sdf_string_model_h.startswith('EOH'), 'model_h: sdf_file_or_string must start with EOH'
-    #yield assert_true, sdf_string_model_no_h.startswith('EOH'), 'model_no_h: sdf_file_or_string must start with EOH'
-    #yield assert_true, sdf_string_ideal_no_h.startswith('EOH'), 'ideal_no_h: sdf_file_or_string must start with EOH'
-    # alias stuff
-    #yield assert_not_in, 'H23', sdf_string_ideal_h, 'sdf_string_ideal_h should not have atom alias for H23'
-    #sdf_string_ideal_h_with_alias = eoh.sdf_file_or_string(ideal=True, alias=True)
-    #yield assert_in,  'H23', sdf_string_ideal_h_with_alias, \
-    #    'sdf produce with alias=False should have an atom alias record for H23'
-
+    yield assert_in, 'HEADER', pdb_string_ideal_h, 'pdb_file_or_string must contain title section'
 
 def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():

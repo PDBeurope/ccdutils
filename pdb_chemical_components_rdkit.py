@@ -197,7 +197,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             element = self.atom_elements[atom_index]
             atom_name = self.atom_ids[atom_index]
             if len(atom_name) < 4:
-                atom_name = atom_name + ' '*(3 - len(atom_name) + (pdbx_align == '0'))
+                atom_name = atom_name + ' ' * (3 - len(atom_name) + (pdbx_align == '0'))
             if pdbx_align == '1':
                 atom_name = ' ' + atom_name
             print atom_name, pdbx_align
@@ -207,7 +207,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             conformer_id = self.rdkit_mol_conformer_id_ideal
         else:
             conformer_id = self.rdkit_mol_conformer_id_model
-        pdb_string = Chem.MolToPDBBlock(self.rdkit_mol, conformer_id)
+        pdb_title1 = 'HEADER    NONAME 07-Jun-17\nTITLE     Produced by PDBeChem\nCOMPND    {}\n'.format(
+            self.chem_comp_id)
+        pdb_title2 = 'AUTHOR    EBI-PDBe Generated\nREVDAT   1  07-Jun-17     0\n'
+        pdb_string = pdb_title1 + pdb_title2 + Chem.MolToPDBBlock(self.rdkit_mol, conformer_id)
         if file_name is None:
             return pdb_string
         else:
