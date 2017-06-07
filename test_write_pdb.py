@@ -30,11 +30,14 @@ def test_load_eoh_from_cif():
     yield assert_equals, eoh.inchikey, eoh.inchikey_from_rdkit, 'inchikey from cif file should match the rdkit inchikey'
     pdb_string_ideal_h = eoh.pdb_file_or_string(ideal = True)
     pdb_string_model_h = eoh.sdf_file_or_string(ideal = False)
-    sdf_string_ideal_no_h = eoh.sdf_file_or_string(hydrogen = False)
-    sdf_string_model_no_h = eoh.sdf_file_or_string(ideal = False, hydrogen = False)
     yield assert_in, '0.007', pdb_string_ideal_h, 'pdb_file_or_string must contain x coordinate for ideal EOH'
     yield assert_in, '15.2120', pdb_string_model_h, 'pdb_file_or_string must contain x coordinate for model EOH'
     yield assert_in, 'HEADER', pdb_string_ideal_h, 'pdb_file_or_string must contain title section'
+    pdb_ideal_with_h = file_name_in_subdir_for_output_files('EOH.ideal_withH.png')
+    eoh.image_file(file_name=pdb_ideal_with_h)
+    yield assert_true, os.path.isfile(pdb_ideal_with_h) and os.path.getsize(pdb_ideal_with_h) > 0, \
+        '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
+        format('EOH', pdb_ideal_with_h)
 
 def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
