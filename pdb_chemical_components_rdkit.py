@@ -18,7 +18,7 @@ from pdb_chemical_components import PdbChemicalComponents
 from rdkit import Chem
 from rdkit.Geometry import rdGeometry
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
-from rdkit.Chem import Draw
+from rdkit.Chem import Draw, AllChem
 import image
 
 
@@ -237,9 +237,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         Returns:
 
         """
-        #raise NotImplementedError('to be coded')
         if hydrogen:
             mol_h_select = self.rdkit_mol
         else:
             mol_h_select = self.mol_remove_h
+        AllChem.GenerateDepictionMatching3DStructure(mol_h_select, mol_h_select)
         Draw.MolToFile(mol_h_select, file_name, wedgeBonds=wedge)
