@@ -44,6 +44,7 @@ class PdbChemicalComponents(object):
                              'pdbx_component_comp_id',
                              'pdbx_ordinal')
     """list of the items used in _chem_comp_atom"""
+
     def __init__(self, file_name=None, cif_parser='auto'):
         """
         initializer - creates a PdbChemicalComponents object normally from a cif file
@@ -174,9 +175,15 @@ class PdbChemicalComponents(object):
                 self.__charges.append(charge)
             self.__charges = tuple(self.__charges)
         return self.__charges
-    
+
     @property
     def atom_pdbx_align(self):
+        """
+        the pdbx_align for the atoms in the chem_comp_atom list
+
+        Returns:
+            (int): the chem_comp.pdbx_align for each atom
+        """
         if self.__pdbx_align is None:
             self.__pdbx_align = []
             for atom in self._atoms:

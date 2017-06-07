@@ -175,20 +175,22 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         return None
 
     def pdb_file_or_string(self, file_name=None, ideal=True):
+        """
+        write a pdb file or return a string containing the molecule as a pdb file
+
+        Args:
+            file_name (str): optional filename
+            ideal (bool): write the ideal coordinates (True) or model coordinates (False)? Default True: ideal.
+
+        Returns:
+            None or a string containing the molecule converted to pdb
+        """
         atom_pdb_residue_info = Chem.rdchem.AtomPDBResidueInfo()
         atom_pdb_residue_info.SetResidueName(self.chem_comp_id)
         atom_pdb_residue_info.SetTempFactor(20.0)
         atom_pdb_residue_info.SetOccupancy(1.0)
         atom_pdb_residue_info.SetChainId('A')
         atom_pdb_residue_info.SetResidueNumber(1)
-        #index = 0
-        #for atom in self.rdkit_mol.GetAtoms():
-        #    index += 1
-        #    atom_name = ' {}{} '.format(atom.GetSymbol(), index)
-        #    if len(atom_name) == 5:
-        #        atom_name = atom_name.rstrip() 
-        #    elif len(atom_name) == 6:
-        #        atom_name = atom_name.strip()
         for atom in self.rdkit_mol.GetAtoms():
             atom_index = atom.GetIdx()
             pdbx_align = self.atom_pdbx_align[atom_index]
@@ -198,7 +200,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 atom_name = atom_name + ' '*(3 - len(atom_name) + (pdbx_align == '0'))
             if pdbx_align == '1':
                 atom_name = ' ' + atom_name
-            print atom_name,pdbx_align
+            print atom_name, pdbx_align
             atom_pdb_residue_info.SetName(atom_name)
             atom.SetMonomerInfo(atom_pdb_residue_info)
         if ideal:
