@@ -224,7 +224,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         # TODO implement cml_file_or_string - not sure about options!
         raise NotImplementedError('to be coded')
 
-    def image_file(self, file_name=None, wedge=False, atom_labels=False, hydrogen=False):
+    def image_file(self, file_name=None, wedge=True, atom_labels=False, hydrogen=False):
         """
         writes an image of the molecule to a file using rdkit.Chem.Draw
 
