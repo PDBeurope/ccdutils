@@ -33,7 +33,7 @@ def test_load_eoh_from_cif():
     yield assert_in, '0.007', pdb_string_ideal_h, 'pdb_file_or_string must contain x coordinate for ideal EOH'
     yield assert_in, '15.2120', pdb_string_model_h, 'pdb_file_or_string must contain x coordinate for model EOH'
     yield assert_in, 'HEADER', pdb_string_ideal_h, 'pdb_file_or_string must contain title section'
-    img_with_h = file_name_in_subdir_for_output_files('EOH.img_withH.png')
+    img_with_h = file_name_in_subdir_for_output_files('EOH.img_withH.svg')
     eoh.image_file(file_name=img_with_h, hydrogen=True)
     yield assert_true, os.path.isfile(img_with_h) and os.path.getsize(img_with_h) > 0, \
         '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
@@ -60,13 +60,13 @@ def test_sdf_write_for_all_sample_cifs():
         yield assert_true, os.path.isfile(pdb_model_with_h) and os.path.getsize(pdb_model_with_h) > 0, \
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, pdb_model_with_h)
-        img_with_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_withH.png')
-        pdb_cc.image_file(file_name=img_with_h, hydrogen=True, wedge=False)
+        img_with_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_withH.svg')
+        pdb_cc.image_file(file_name=img_with_h, hydrogen=True)
         yield assert_true, os.path.isfile(img_with_h) and os.path.getsize(img_with_h) > 0, \
             '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
             format('EOH', img_with_h)
-        img_no_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_noH.png')
-        pdb_cc.image_file(file_name=img_no_h, hydrogen=False, wedge=False)
+        img_no_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_noH.svg')
+        pdb_cc.image_file(file_name=img_no_h, hydrogen=False)
         yield assert_true, os.path.isfile(img_no_h) and os.path.getsize(img_no_h) > 0, \
             '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
             format('EOH', img_no_h)
