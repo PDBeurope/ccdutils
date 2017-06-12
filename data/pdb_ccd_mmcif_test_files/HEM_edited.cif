@@ -1,3 +1,4 @@
+# N.B. edited from standard HEM cif.
 data_HEM
 # 
 _chem_comp.id                                    HEM 
@@ -207,9 +208,7 @@ HEM CGD O2D  SING N N 76
 HEM O2A H2A  SING N N 77 
 HEM O2D H2D  SING N N 78 
 HEM FE  NA   SING N N 79 
-HEM FE  NB   SING N N 80 
 HEM FE  NC   SING N N 81 
-HEM FE  ND   SING N N 82 
 # 
 loop_
 _pdbx_chem_comp_descriptor.comp_id 
