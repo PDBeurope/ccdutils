@@ -226,7 +226,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         # TODO implement cml_file_or_string - not sure about options!
         raise NotImplementedError('to be coded')
 
-    def image_file(self, file_name=None, wedge=True, atom_labels=False, hydrogen=False):
+    def image_file(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False):
         """
         writes an image of the molecule to a file using rdkit.Chem.Draw
 
@@ -244,16 +244,17 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         else:
             mol_h_select = self.mol_remove_h
         AllChem.GenerateDepictionMatching3DStructure(mol_h_select, mol_h_select)
+        drawer = rdMolDraw2D.MolDraw2DSVG(400,200)
+        opts = drawer.drawOptions()
         if not atom_labels:
-            Draw.MolToFile(mol_h_select, file_name, wedgeBonds=wedge)
+            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select, wedgeBonds=wedge)
         else:
-            drawer = rdMolDraw2D.MolDraw2DSVG(400,200)
-            opts = drawer.drawOptions()
             for i in range(mol_h_select.GetNumAtoms()):
                 opts.atomLabels[i] = mol_h_select.GetAtomWithIdx(i).GetSymbol()+str(i)
-            drawer.DrawMolecule(mol_h_select)
-            drawer.FinishDrawing()
-            svg = drawer.GetDrawingText().replace('svg:','')
-            img_file = open (file_name, 'w')
-            img_file.write(svg)
-            img_file.close()
+            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select)
+        drawer.DrawMolecule(molecule_to_draw)
+        drawer.FinishDrawing()
+        svg = drawer.GetDrawingText().replace('svg:','')
+        img_file = open (file_name, 'w')
+        img_file.write(svg)
+        img_file.close()

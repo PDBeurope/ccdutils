@@ -51,11 +51,11 @@ def test_sdf_write_for_all_sample_cifs():
         yield assert_true, os.path.isfile(img_no_h_no_label) and os.path.getsize(img_no_h_no_label) > 0, \
             '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, img_no_h_no_label)
-        img_no_h_label = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_noH.svg')
-        pdb_cc.image_file(file_name=img_no_h_label, hydrogen=False, atom_labels=True)
-        yield assert_true, os.path.isfile(img_no_h_label) and os.path.getsize(img_no_h_label) > 0, \
+        img_no_h_label_wedge = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_label_wedge.svg')
+        pdb_cc.image_file(file_name=img_no_h_label_wedge, hydrogen=False, atom_labels=True, wedge=True)
+        yield assert_true, os.path.isfile(img_no_h_label_wedge) and os.path.getsize(img_no_h_label_wedge) > 0, \
             '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
-            format(pdb_cc.chem_comp_id, img_no_h_label)
+            format(pdb_cc.chem_comp_id, img_no_h_label_wedge)
 
 def supply_list_of_sample_cifs():
     """
