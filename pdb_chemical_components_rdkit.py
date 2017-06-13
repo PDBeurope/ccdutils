@@ -18,7 +18,9 @@ from pdb_chemical_components import PdbChemicalComponents
 from rdkit import Chem
 from rdkit.Geometry import rdGeometry
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
-from rdkit.Chem import Draw, AllChem
+from rdkit.Chem import Draw, AllChem, rdDepictor
+from rdkit.Chem.Draw import rdMolDraw2D, IPythonConsole
+from IPython.display import SVG
 import image
 
 
@@ -242,4 +244,17 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         else:
             mol_h_select = self.mol_remove_h
         AllChem.GenerateDepictionMatching3DStructure(mol_h_select, mol_h_select)
-        Draw.MolToFile(mol_h_select, file_name, wedgeBonds=wedge)
+        if not atom_labels:
+            Draw.MolToFile(mol_h_select, file_name, wedgeBonds=wedge)
+        else:
+            raise NotImplementedError('to be coded')
+            #drawer = rdMolDraw2D.MolDraw2DSVG(400,200)
+            #opts = drawer.drawOptions()
+            #for i in range(mol_h_select.GetNumAtoms()):
+            #    opts.atomLabels[i] = mol_h_select.GetAtomWithIdx(i).GetSymbol()+str(i)
+            #drawer.DrawMolecule(mol_h_select)
+            #drawer.FinishDrawing()
+            #svg = drawer.GetDrawingText().replace('svg:','')
+            #img_file = open (file_name, 'w')
+            #img_file.write(svg)
+            #img_file.close()
