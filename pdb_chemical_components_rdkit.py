@@ -247,14 +247,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if not atom_labels:
             Draw.MolToFile(mol_h_select, file_name, wedgeBonds=wedge)
         else:
-            raise NotImplementedError('to be coded')
-            #drawer = rdMolDraw2D.MolDraw2DSVG(400,200)
-            #opts = drawer.drawOptions()
-            #for i in range(mol_h_select.GetNumAtoms()):
-            #    opts.atomLabels[i] = mol_h_select.GetAtomWithIdx(i).GetSymbol()+str(i)
-            #drawer.DrawMolecule(mol_h_select)
-            #drawer.FinishDrawing()
-            #svg = drawer.GetDrawingText().replace('svg:','')
-            #img_file = open (file_name, 'w')
-            #img_file.write(svg)
-            #img_file.close()
+            drawer = rdMolDraw2D.MolDraw2DSVG(400,200)
+            opts = drawer.drawOptions()
+            for i in range(mol_h_select.GetNumAtoms()):
+                opts.atomLabels[i] = mol_h_select.GetAtomWithIdx(i).GetSymbol()+str(i)
+            drawer.DrawMolecule(mol_h_select)
+            drawer.FinishDrawing()
+            svg = drawer.GetDrawingText().replace('svg:','')
+            img_file = open (file_name, 'w')
+            img_file.write(svg)
+            img_file.close()

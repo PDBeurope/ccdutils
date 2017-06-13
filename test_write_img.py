@@ -41,21 +41,21 @@ def test_load_eoh_from_cif():
 
 
 
-#def test_sdf_write_for_all_sample_cifs():
-#    for ciffile in supply_list_of_sample_cifs():
+def test_sdf_write_for_all_sample_cifs():
+    for ciffile in supply_list_of_sample_cifs():
         #if 'HEM' in ciffile:
         #   continue
-#        pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
-#        img_with_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_withH.svg')
-#        pdb_cc.image_file(file_name=img_with_h, hydrogen=True)
-#        yield assert_true, os.path.isfile(img_with_h) and os.path.getsize(img_with_h) > 0, \
-#            '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
-#            format('EOH', img_with_h)
-#        img_no_h = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_noH.svg')
-#        pdb_cc.image_file(file_name=img_no_h, hydrogen=False)
-#        yield assert_true, os.path.isfile(img_no_h) and os.path.getsize(img_no_h) > 0, \
-#            '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
-#            format('EOH', img_no_h)
+        pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
+        img_no_h_no_label = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_noH_no_label.svg')
+        pdb_cc.image_file(file_name=img_no_h_no_label, hydrogen=False, atom_labels=False)
+        yield assert_true, os.path.isfile(img_no_h_no_label) and os.path.getsize(img_no_h_no_label) > 0, \
+            '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
+            format(pdb_cc.chem_comp_id, img_no_h_no_label)
+        img_no_h_label = file_name_in_subdir_for_output_files(pdb_cc.chem_comp_id + '.img_noH.svg')
+        pdb_cc.image_file(file_name=img_no_h_label, hydrogen=False, atom_labels=True)
+        yield assert_true, os.path.isfile(img_no_h_label) and os.path.getsize(img_no_h_label) > 0, \
+            '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
+            format(pdb_cc.chem_comp_id, img_no_h_label)
 
 def supply_list_of_sample_cifs():
     """
