@@ -204,7 +204,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 atom_name = atom_name + ' ' * (3 - len(atom_name) + (pdbx_align == '0'))
             if pdbx_align == '1':
                 atom_name = ' ' + atom_name
-            print atom_name, pdbx_align
             atom_pdb_residue_info.SetName(atom_name)
             atom.SetMonomerInfo(atom_pdb_residue_info)
         if ideal:
@@ -249,8 +248,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if not atom_labels:
             molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select, wedgeBonds=wedge)
         else:
-            for i in range(mol_h_select.GetNumAtoms()):
-                opts.atomLabels[i] = mol_h_select.GetAtomWithIdx(i).GetSymbol()+str(i)
+            for atom in self.rdkit_mol.GetAtoms():
+                atom_index = atom.GetIdx()
+                atom_name = self.atom_ids[atom_index]
+                opts.atomLabels[atom_index] = atom_name
             molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select)
         drawer.DrawMolecule(molecule_to_draw)
         drawer.FinishDrawing()
