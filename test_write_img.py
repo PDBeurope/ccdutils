@@ -39,7 +39,12 @@ def test_load_eoh_from_cif():
         '{} call to eoh.image_file(file="{}") must create a non-empty file.'.\
         format('EOH', img_with_h_label)
 
-
+def test_atp_svg():
+    atp = PdbChemicalComponentsRDKit(file_name=cif_filename('ATP'))
+    img_no_h_label_wdege = file_name_in_subdir_for_output_files('ATP.img_noH_no_label.svg')
+    atp_svg = atp.image_file(hydrogen=False, atom_labels=True, wedge=True)
+    yield assert_in, 'PA', atp_svg, 'The svg file must contain the atom name PA'
+    
 
 def test_sdf_write_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():

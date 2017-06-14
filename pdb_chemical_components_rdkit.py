@@ -255,6 +255,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         drawer.DrawMolecule(molecule_to_draw)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText().replace('svg:','')
-        img_file = open (file_name, 'w')
-        img_file.write(svg)
-        img_file.close()
+        if file_name is None:
+            return svg
+        else:
+            with open(file_name, 'w') as img_file:
+                img_file.write(svg)
+                img_file.close()
+        return None
