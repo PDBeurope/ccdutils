@@ -26,8 +26,6 @@ from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
-    pdb_string_ideal_h = eoh.pdb_file_or_string(ideal = True)
-    pdb_string_model_h = eoh.sdf_file_or_string(ideal = False)
     img_with_h_no_label = file_name_in_subdir_for_output_files('EOH.img_withH_no_label.svg')
     eoh.image_file(file_name=img_with_h_no_label, hydrogen=True, atom_labels=False)
     yield assert_true, os.path.isfile(img_with_h_no_label) and os.path.getsize(img_with_h_no_label) > 0, \

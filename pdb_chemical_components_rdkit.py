@@ -221,8 +221,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 pdb_file.write(pdb_string)
         return None
 
-    def cml_file_or_string(self):
-        # TODO implement cml_file_or_string - not sure about options!
+    def xml_file_or_string(self, file_name=None):
+        # TODO implement xml_file_or_string - not sure about options!
         raise NotImplementedError('to be coded')
 
     def image_file(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False):
