@@ -22,6 +22,7 @@ from rdkit.Chem import Draw, AllChem, rdDepictor
 from rdkit.Chem.Draw import rdMolDraw2D, IPythonConsole
 from IPython.display import SVG
 import image
+from lxml import etree
 
 
 class PdbChemicalComponentsRDKit(PdbChemicalComponents):
@@ -223,7 +224,38 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
     def xml_file_or_string(self, file_name=None):
         # TODO implement xml_file_or_string - not sure about options!
-        raise NotImplementedError('to be coded')
+        #raise NotImplementedError('to be coded')
+        top = etree.Element('xml')
+        top.set('dictRef','ebiMolecule:ebiMoleculeDict.xml')
+        top.set('ebiMolecule','http://www.ebi.ac.uk/felics/molecule')
+        mol = etree.SubElement(top, 'molecule', id=self.chem_comp_id, formalcharge='0')#Need charge
+        id_inchi = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:inchi')
+        id_inchi.text=self.inchikey
+        id_formula1 = etree.SubElement(mol, 'identifier',dictRef="ebiMolecule:stereoSmiles")
+        #TODO add methods for getting smile file
+        atom_array = etree.SubElement(mol, 'atomArray')
+        for atom_index in range(self.number_atoms):
+            element = self.atom_elements[atom_index]
+            atom_name = self.atom_ids[atom_index]
+            atom_entry = etree.SubElement(atom_array, 'atom', id=atom_name, elementType=element)
+        bond_array = etree.SubElement(mol, 'bondArray')
+        for bond_index in range(self.number_bonds):
+            atom_1 = self.bond_atom_name_1[bond_index]
+            atom_2 = self.bond_atom_name_2[bond_index]
+            bond_order = Chem.rdchem.BondType(self.bond_order[bond_index])
+            #print bond_order
+            bond_entry = etree.SubElement(bond_array, 'bond')
+            bond_entry.set('atomsRefs2',atom_1+' '+atom_2)
+            bond_entry.set('order', str(bond_order))
+        tree = etree.ElementTree(top)
+        xml_string = etree.tostring(top, pretty_print=True)
+        if file_name is None:
+            return xml_string
+        else:
+            with open (file_name, 'w') as xml_file:
+                xml_file.write(xml_string)
+                xml_file.close()
+        return None
 
     def image_file(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False):
         """

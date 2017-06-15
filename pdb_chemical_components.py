@@ -72,6 +72,8 @@ class PdbChemicalComponents(object):
         """list of int: one for each of self.bonds the index of the matching atom_id_1 in self.atoms"""
         self.bond_atom_index_2 = []
         """list of int: one for each of self.bonds the index of the matching atom_id_2 in self.atoms"""
+        self.bond_atom_name_1 = []
+        self.bond_atom_name_2 = []
         self.bond_order = []
         """list of int: one for each of self.bonds the bond order for the bond got from self.bonds value_order"""
         self.bond_aromatic = []
@@ -310,15 +312,19 @@ class PdbChemicalComponents(object):
     def setup_bond_lists(self):
         self.bond_atom_index_1 = []
         self.bond_atom_index_2 = []
+        self.bond_atom_name_1 = []
+        self.bond_atom_name_2 = []
         self.bond_order = []
         self.bond_aromatic = []
         for bond in self.bonds:
             atom_id_1 = bond.atom_id_1
             index_atom_1 = self.find_atom_index(atom_id_1)
             self.bond_atom_index_1.append(index_atom_1)
+            self.bond_atom_name_1.append(atom_id_1)
             atom_id_2 = bond.atom_id_2
             index_atom_2 = self.find_atom_index(atom_id_2)
             self.bond_atom_index_2.append(index_atom_2)
+            self.bond_atom_name_2.append(atom_id_2)
             bond_order = self.map_value_order_to_int(bond.value_order)
             if bond_order == -1:
                 raise RuntimeError('problem with bond order for bond {}'.format(bond))
