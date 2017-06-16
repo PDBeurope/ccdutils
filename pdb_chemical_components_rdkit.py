@@ -257,7 +257,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 xml_file.close()
         return None
 
-    def image_file(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False):
+    def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False):
         """
         writes an image of the molecule to a file using rdkit.Chem.Draw
 
@@ -268,7 +268,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             hydrogen (str): include hydrogen atoms in the image.
 
         Returns:
-
+            None or a string containing the svg string of the molecule
         """
         if hydrogen:
             mol_h_select = self.rdkit_mol
