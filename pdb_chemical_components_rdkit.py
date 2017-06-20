@@ -230,7 +230,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         top.set('ebiMolecule','http://www.ebi.ac.uk/felics/molecule')
         mol = etree.SubElement(top, 'molecule', id=self.chem_comp_id, formalcharge='0')#Need charge
         id_inchi = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:inchi')
-        id_inchi.text=self.inchikey
+        id_inchi.text = self.inchikey
+        #id_systematic = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:systematicName')
+        #id_systematic.text = self.chem_comp_name
         id_formula1 = etree.SubElement(mol, 'identifier',dictRef="ebiMolecule:stereoSmiles")
         #TODO add methods for getting smile file
         atom_array = etree.SubElement(mol, 'atomArray')
