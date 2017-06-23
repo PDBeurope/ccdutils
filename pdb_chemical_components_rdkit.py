@@ -228,7 +228,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         top = etree.Element('xml')
         top.set('dictRef','ebiMolecule:ebiMoleculeDict.xml')
         top.set('ebiMolecule','http://www.ebi.ac.uk/felics/molecule')
-        mol = etree.SubElement(top, 'molecule', id=self.chem_comp_id, formalcharge='0')#Need charge
+        mol = etree.SubElement(top, 'molecule', id=self.chem_comp_id, formalCharge='')#Need charge
         id_inchi = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:inchi')
         id_inchi.text = self.inchikey
         id_systematic = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:systematicName')

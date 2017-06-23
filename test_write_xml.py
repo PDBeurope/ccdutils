@@ -31,7 +31,13 @@ def test_load_eoh_from_cif():
     xml_string = eoh.xml_file_or_string()
     tree = etree.fromstring(xml_string)
     yield assert_equals, tree[0][1].text, eoh.chem_comp_name,\
-        'xml_file_or_string must provide correct systematic name' 
+        'xml_file_or_string must provide correct systematic name'
+    cml_file = open (os.path.join(test_file_path_name, 'EOH.cml'),'r')
+    cml_tree = etree.parse(cml_file)
+    cml_root = cml_tree.getroot()
+    formal_charge_cml = cml_root[0].attrib['formalCharge']
+    yield assert_equals, tree[0].attrib['formalCharge'], formal_charge_cml,\
+        'xml_file_or_string must provide correct formal charge'
     eoh.xml_file_or_string(file_name=xml)
     yield assert_true, os.path.isfile(xml) and os.path.getsize(xml) > 0, \
         '{} call to eoh.xml_file_or_string(file="{}") must create a non-empty file.'.\
