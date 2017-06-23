@@ -239,6 +239,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         id_systematic.text = self.chem_comp_name
         id_formula1 = etree.SubElement(mol, 'formula', dictRef="ebiMolecule:stereoSmiles")
         id_formula2 = etree.SubElement(mol, 'formula', dictRef="ebiMolecule:nonStereoSmiles")
+        id_formula1.text = self.stereosmiles
+        id_formula2.text = self.nonstereosmiles
         #TODO add methods for getting smile file
         atom_array = etree.SubElement(mol, 'atomArray')
         for atom_index in range(self.number_atoms):

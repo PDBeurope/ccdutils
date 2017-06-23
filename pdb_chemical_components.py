@@ -428,10 +428,10 @@ class PdbChemicalComponents(object):
         for descriptor in pdbx_chem_comp_descriptor:
             if descriptor['type'] == 'InChIKey':
                 self.inchikey = descriptor['descriptor']
-        #    if descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
-        #        self.stereosmiles = descriptor['descriptor']
-        #    if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
-        #        self.nonstereosmiles =descriptor['descriptor']
+            if descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
+                self.stereosmiles = descriptor['descriptor']
+            if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
+                self.nonstereosmiles =descriptor['descriptor']
 
     def read_ccd_from_file_ciffile(self, file_name):
         """
