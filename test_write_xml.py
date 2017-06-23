@@ -43,6 +43,24 @@ def test_load_eoh_from_cif():
         '{} call to eoh.xml_file_or_string(file="{}") must create a non-empty file.'.\
         format('EOH', xml)
 
+def test_load_atp_from_cif():
+    atp = PdbChemicalComponentsRDKit(file_name=cif_filename('ATP'))
+    xml = file_name_in_subdir_for_output_files('ATP.xml')
+    xml_string = atp.xml_file_or_string()
+    tree = etree.fromstring(xml_string)
+    cml_file = open(os.path.join(test_file_path_name, 'ATP.cml'), 'r')
+    cml_tree = etree.parse(cml_file)
+    cml_root = cml_tree.getroot()
+    for item in cml_root[0].findall('formula'):
+        if item.attrib['dictRef'] == 'ebiMolecule:stereoSmiles':
+            cml_stereo = item.text
+        if item.attrib['dictRef'] == 'ebiMolecule:nonStereoSmiles':
+            cml_nonstereo = item.text
+    yield assert_equals, tree[0][2].text, cml_stereo,\
+        'xml_file_or_string must provide correct stereo smiles'
+    yield assert_equals, tree[0][3].text, cml_nonstereo,\
+        'xml_file_or_string must provide correct nonstereo smiles'
+
 #def test_sdf_write_for_all_sample_cifs():
 #    for ciffile in supply_list_of_sample_cifs():
         #if 'HEM' in ciffile:
