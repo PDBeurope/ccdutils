@@ -27,27 +27,27 @@ from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
-    xml = file_name_in_subdir_for_output_files('EOH.xml')
-    xml_string = eoh.xml_file_or_string()
-    tree = etree.fromstring(xml_string)
+    cml = file_name_in_subdir_for_output_files('EOH.cml')
+    cml_string = eoh.cml_file_or_string()
+    tree = etree.fromstring(cml_string)
     yield assert_equals, tree[0][1].text, eoh.chem_comp_name,\
-        'xml_file_or_string must provide correct systematic name'
+        'cml_file_or_string must provide correct systematic name'
     cml_file = open (os.path.join(test_file_path_name, 'EOH.cml'),'r')
     cml_tree = etree.parse(cml_file)
     cml_root = cml_tree.getroot()
     formal_charge_cml = cml_root[0].attrib['formalCharge']
     yield assert_equals, tree[0].attrib['formalCharge'], formal_charge_cml,\
-        'xml_file_or_string must provide correct formal charge'
-    eoh.xml_file_or_string(file_name=xml)
-    yield assert_true, os.path.isfile(xml) and os.path.getsize(xml) > 0, \
-        '{} call to eoh.xml_file_or_string(file="{}") must create a non-empty file.'.\
-        format('EOH', xml)
+        'cml_file_or_string must provide correct formal charge'
+    eoh.cml_file_or_string(file_name=cml)
+    yield assert_true, os.path.isfile(cml) and os.path.getsize(cml) > 0, \
+        '{} call to eoh.cml_file_or_string(file="{}") must create a non-empty file.'.\
+        format('EOH', cml)
 
 def test_load_atp_from_cif():
     atp = PdbChemicalComponentsRDKit(file_name=cif_filename('ATP'))
-    xml = file_name_in_subdir_for_output_files('ATP.xml')
-    xml_string = atp.xml_file_or_string()
-    tree = etree.fromstring(xml_string)
+    cml = file_name_in_subdir_for_output_files('ATP.cml')
+    cml_string = atp.cml_file_or_string()
+    tree = etree.fromstring(cml_string)
     cml_file = open(os.path.join(test_file_path_name, 'ATP.cml'), 'r')
     cml_tree = etree.parse(cml_file)
     cml_root = cml_tree.getroot()
@@ -57,9 +57,9 @@ def test_load_atp_from_cif():
         if item.attrib['dictRef'] == 'ebiMolecule:nonStereoSmiles':
             cml_nonstereo = item.text
     yield assert_equals, tree[0][2].text, cml_stereo,\
-        'xml_file_or_string must provide correct stereo smiles'
+        'cml_file_or_string must provide correct stereo smiles'
     yield assert_equals, tree[0][3].text, cml_nonstereo,\
-        'xml_file_or_string must provide correct nonstereo smiles'
+        'cml_file_or_string must provide correct nonstereo smiles'
 
 #def test_sdf_write_for_all_sample_cifs():
 #    for ciffile in supply_list_of_sample_cifs():

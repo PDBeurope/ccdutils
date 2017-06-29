@@ -222,11 +222,11 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 pdb_file.write(pdb_string)
         return None
 
-    def xml_file_or_string(self, file_name=None):
-        # TODO implement xml_file_or_string - not sure about options!
+    def cml_file_or_string(self, file_name=None):
+        # TODO implement cml_file_or_string - not sure about options!
         #raise NotImplementedError('to be coded')
-        top = etree.Element('xml')
-        top.set('dictRef','ebiMolecule:ebiMoleculeDict.xml')
+        top = etree.Element('cml')
+        top.set('dictRef','ebiMolecule:ebiMoleculeDict.cml')
         top.set('ebiMolecule','http://www.ebi.ac.uk/felics/molecule')
         f_charge = 0
         for atom_index in range(self.number_atoms):
@@ -257,13 +257,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             bond_entry.set('atomsRefs2',atom_1+' '+atom_2)
             bond_entry.set('order', str(bond_order))
         tree = etree.ElementTree(top)
-        xml_string = etree.tostring(top, pretty_print=True)
+        cml_string = etree.tostring(top, pretty_print=True)
         if file_name is None:
-            return xml_string
+            return cml_string
         else:
-            with open (file_name, 'w') as xml_file:
-                xml_file.write(xml_string)
-                xml_file.close()
+            with open (file_name, 'w') as cml_file:
+                cml_file.write(cml_string)
+                cml_file.close()
         return None
 
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False):
