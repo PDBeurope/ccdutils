@@ -108,7 +108,8 @@ def test_load_hem_from_cif():
     for cif_parser in cif_parser_list:
         description = ', with cif_parser={}'.format(cif_parser)
         try:
-            hem = PdbChemicalComponents(file_name=cif_filename('HEM'), cif_parser=cif_parser)
+            hem_file = os.path.join(test_file_path_name, 'HEM_edited.cif')
+            hem = PdbChemicalComponents(hem_file, cif_parser=cif_parser)
             yield assert_equals, 'HEM', hem.chem_comp_id, 'chem_comp_id' + description
             yield assert_equals, True, 'Fe' in hem.atom_elements, 'Fe in hem.atom_elements' + description
         except ImportError:
