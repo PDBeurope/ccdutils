@@ -223,8 +223,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         return None
 
     def cml_file_or_string(self, file_name=None):
-        # TODO implement cml_file_or_string - not sure about options!
-        #raise NotImplementedError('to be coded')
         top = etree.Element('cml')
         top.set('dictRef','ebiMolecule:ebiMoleculeDict.cml')
         top.set('ebiMolecule','http://www.ebi.ac.uk/felics/molecule')
@@ -241,12 +239,15 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         id_formula2 = etree.SubElement(mol, 'formula', dictRef="ebiMolecule:nonStereoSmiles")
         id_formula1.text = self.stereosmiles
         id_formula2.text = self.nonstereosmiles
-        #TODO add methods for getting smile file
         atom_array = etree.SubElement(mol, 'atomArray')
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
             atom_name = self.atom_ids[atom_index]
             atom_entry = etree.SubElement(atom_array, 'atom', id=atom_name, elementType=element)
+            (ideal_x, ideal_y, ideal_z) = self.ideal_xyz[atom_index]
+            atom_entry.set('x3', str(ideal_x))
+            atom_entry.set('y3', str(ideal_y))
+            atom_entry.set('z3', str(ideal_z))
         bond_array = etree.SubElement(mol, 'bondArray')
         for bond_index in range(self.number_bonds):
             atom_1 = self.bond_atom_name_1[bond_index]
