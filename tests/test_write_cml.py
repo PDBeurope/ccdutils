@@ -20,13 +20,13 @@ import unittest
 from lxml import etree
 
 from nose.tools import assert_equals, assert_true
-from utilities import cif_filename, file_name_in_subdir_for_output_files, test_file_path_name
+from utilities import cif_filename, file_name_in_tsts_out, test_file_path_name
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 
 def test_load_eoh_from_cif():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
-    cml = file_name_in_subdir_for_output_files('EOH.cml')
+    cml = file_name_in_tsts_out('EOH.cml')
     cml_string = eoh.cml_file_or_string()
     tree = etree.fromstring(cml_string)
     yield assert_equals, tree[0][1].text, eoh.chem_comp_name,\
@@ -44,7 +44,7 @@ def test_load_eoh_from_cif():
 
 def test_load_atp_from_cif():
     atp = PdbChemicalComponentsRDKit(file_name=cif_filename('ATP'))
-    cml = file_name_in_subdir_for_output_files('ATP.cml')
+    cml = file_name_in_tsts_out('ATP.cml')
     cml_string = atp.cml_file_or_string()
     tree = etree.fromstring(cml_string)
     cml_file = open(os.path.join(test_file_path_name, 'ATP.cml'), 'r')

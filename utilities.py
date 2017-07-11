@@ -47,18 +47,19 @@ def supply_list_of_sample_cifs():
     return sorted(glob.glob(os.path.join(test_file_path_name, '*.cif')))
 
 
-def file_name_in_subdir_for_output_files(file_name):
+def file_name_in_tsts_out(file_name):
     """
-    creates the subdirectory "tests_out" if necessary and returns the file_name in this directory, If the
-    file already exists it will remove it.
+    creates the subdirectory "out" in the "tests" subdirectory (if necessary)
+    and returns the file_name in this directory, If the file already exists it will remove it.
+    (Cannot call method file_name_in_tests_out otherwise nose thinks it is a test)
 
     Args:
         file_name (str):  the name for the file
 
     Returns:
-        str: the filename in the subdirectory tests_out
+        str: the filename in the subdirectory tests/out
     """
-    subdir = 'tests_out'
+    subdir = os.path.join(this_script_dir(), 'tests', 'out')
     if not os.path.isdir(subdir):
         os.mkdir(subdir)
     out_file_name = os.path.join(subdir, file_name)
