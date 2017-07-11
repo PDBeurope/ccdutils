@@ -15,13 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import glob
-import os
 import unittest
 
-from nose.tools import assert_equals, assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in
-from test_pdb_chemical_components import cif_filename, test_file_path_name
+from nose.tools import assert_equals
+
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from utilities import cif_filename, supply_list_of_sample_cifs
 
 
 def test_hard_code_cmo():
@@ -45,21 +44,6 @@ def test_inchikey_match_for_all_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         yield assert_equals, pdb_cc.inchikey, pdb_cc.inchikey_from_rdkit, \
             'check inchikeys match for ' + pdb_cc.chem_comp_id
-
-
-def supply_list_of_sample_cifs():
-    """
-    returns the list of sample pdb ccd cifs for test.
-
-    Args:
-        None
-
-    Returns:
-        list of filenames
-    """
-    return sorted(glob.glob(os.path.join(test_file_path_name, '*.cif')))
-
-
 
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):

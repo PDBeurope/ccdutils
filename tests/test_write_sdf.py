@@ -15,14 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import glob
 import os
 import unittest
 
-from nose.tools import assert_equals, assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in
-from test_pdb_chemical_components import cif_filename
+from nose.tools import assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in
+from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_subdir_for_output_files
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from test_pdb_ccd_rdkit_loading import supply_list_of_sample_cifs
 
 
 def test_hard_code_cmo():
@@ -93,25 +91,6 @@ def test_sdf_write_for_all_sample_cifs():
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, sdf_model_no_h)
 
-
-def file_name_in_subdir_for_output_files(file_name):
-    """
-    creates the subdirectory "tests_out" if necessary and returns the file_name in this directory, If the
-    file already exists it will remove it.
-
-    Args:
-        file_name (str):  the name for the file
-
-    Returns:
-        str: the filename in the subdirectory tests_out
-    """
-    subdir = 'tests_out'
-    if not os.path.isdir(subdir):
-        os.mkdir(subdir)
-    out_file_name = os.path.join(subdir, file_name)
-    if os.path.isfile(out_file_name):
-        os.remove(out_file_name)
-    return out_file_name
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass

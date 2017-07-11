@@ -20,8 +20,7 @@ import unittest
 
 from nose.tools import assert_true
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from test_write_sdf import file_name_in_subdir_for_output_files
-from test_pdb_ccd_rdkit_loading import supply_list_of_sample_cifs
+from utilities import supply_list_of_sample_cifs, file_name_in_subdir_for_output_files
 
 
 def test_pdb_write_for_all_sample_cifs():

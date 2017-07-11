@@ -19,9 +19,10 @@ import glob
 import os
 import unittest
 
-from nose.tools import assert_equals, assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in
-from test_pdb_chemical_components import cif_filename, test_file_path_name
+from nose.tools import assert_in, assert_true
+
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from utilities import cif_filename, test_file_path_name, file_name_in_subdir_for_output_files
 
 
 def test_load_eoh_from_cif():
@@ -71,26 +72,6 @@ def supply_list_of_sample_cifs():
         list of filenames
     """
     return sorted(glob.glob(os.path.join(test_file_path_name, '*.cif')))
-
-
-def file_name_in_subdir_for_output_files(file_name):
-    """
-    creates the subdirectory "tests_out" if necessary and returns the file_name in this directory, If the
-    file already exists it will remove it.
-
-    Args:
-        file_name (str):  the name for the file
-
-    Returns:
-        str: the filename in the subdirectory tests_out
-    """
-    subdir = 'tests_out'
-    if not os.path.isdir(subdir):
-        os.mkdir(subdir)
-    out_file_name = os.path.join(subdir, file_name)
-    if os.path.isfile(out_file_name):
-        os.remove(out_file_name)
-    return out_file_name
 
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):

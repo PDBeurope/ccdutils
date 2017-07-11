@@ -13,7 +13,7 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+import glob
 import os
 
 
@@ -26,3 +26,42 @@ def this_script_dir():
 
     """
     return os.path.dirname(os.path.abspath(__file__))
+
+
+test_file_path_name = os.path.join(this_script_dir(), 'data', 'pdb_ccd_mmcif_test_files')
+
+
+def cif_filename(code):
+    return os.path.join(test_file_path_name, code + '.cif')
+
+
+def supply_list_of_sample_cifs():
+    """
+    returns the list of sample pdb ccd cifs for test.
+
+    Args:
+
+    Returns:
+        list of filenames
+    """
+    return sorted(glob.glob(os.path.join(test_file_path_name, '*.cif')))
+
+
+def file_name_in_subdir_for_output_files(file_name):
+    """
+    creates the subdirectory "tests_out" if necessary and returns the file_name in this directory, If the
+    file already exists it will remove it.
+
+    Args:
+        file_name (str):  the name for the file
+
+    Returns:
+        str: the filename in the subdirectory tests_out
+    """
+    subdir = 'tests_out'
+    if not os.path.isdir(subdir):
+        os.mkdir(subdir)
+    out_file_name = os.path.join(subdir, file_name)
+    if os.path.isfile(out_file_name):
+        os.remove(out_file_name)
+    return out_file_name

@@ -15,20 +15,20 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from nose.tools import assert_equals, assert_true
 import os
-from os.path import expanduser
 import unittest
+from os.path import expanduser
+
+from nose.tools import assert_equals, assert_true
+
 from pdb_chemical_components import PdbChemicalComponents
-from utilities import this_script_dir
+from utilities import cif_filename, test_file_path_name
 
 # by default just use the 'auto' cif_parse (which ever can be imported).
 cif_parser_list = ('auto',)
 # but if environment variable TEST_CIF_PARSER_ALL test all possible
 if 'TEST_CIF_PARSER_ALL' in os.environ:
     cif_parser_list = ('PDBeCIF', 'CifFile')
-
-test_file_path_name = os.path.join(this_script_dir(), 'data', 'pdb_ccd_mmcif_test_files')
 
 
 def test_check_test_file_path_name_is_accessible_after_changing_dir():
@@ -58,10 +58,6 @@ def test_hard_code_cmo():
     yield assert_equals, [False], cmo.bond_aromatic, '(generated) bond_aromatic'
     yield assert_equals, ((0.607, 0., 0.), (-0.6, 0., 0.)), cmo.ideal_xyz, '(generated) ideal_xyz'
     yield assert_equals, ((-0.296, 8.526, 17.112), (0.023, 7.997, 18.053)), cmo.model_xyz, '(generated) model_xyz'
-
-
-def cif_filename(code):
-    return os.path.join(test_file_path_name, code + '.cif')
 
 
 def test_eoh_loads_with_parser():
