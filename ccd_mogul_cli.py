@@ -30,6 +30,7 @@ import os
 import sys
 from argparse import RawTextHelpFormatter
 from pdb_ccd_mogul import PdbCCDMogul
+from yattag import Doc
 
 
 def __parse_command_line_args():
@@ -72,6 +73,46 @@ def run():
         except OSError as error_message:
             print('ERROR cannot mkdir {} as {}'.format(out_dir, error_message))
             sys.exit(1)
+
+    html_file = os.path.join(out_dir, 'index.html')
+
+    html_text = prepare_html(pdb_ccd_mogul)
+    with open(html_file, "w") as text_file:
+        text_file.write(html_text)
+    print('have written report to {}'.format(html_file))
+
+
+def prepare_html(pdb_ccd_mogul):
+    doc, tag, text, line = Doc().ttl()
+
+    chem_comp_id = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_id
+    chem_comp_name = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_name
+    svg_diagram = pdb_ccd_mogul.pdb_ccd_rdkit.image_file_or_string(atom_labels=False)
+    title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
+
+    with tag('html'):
+        with tag('head'):
+            with tag('title'):
+                text(title)
+        with tag('body'):
+            with tag('h1'):
+                text(title)
+            with tag('ul', ):
+                line('li', 'chem_comp_id =' + chem_comp_id)
+                line('li', 'chem_comp_name = ' + chem_comp_name)
+            doc.asis(svg_diagram)
+            with tag('h2'):
+                text('Mogul bond results')
+            if len(pdb_ccd_mogul.store_bonds) == 0:
+                line('p', 'no bonds found')
+            else:
+                line('p', 'to be written')
+
+    result = doc.getvalue()
+    return result
+
+
+
 
 
 if __name__ == "__main__":
