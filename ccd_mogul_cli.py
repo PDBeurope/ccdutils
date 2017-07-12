@@ -32,6 +32,9 @@ from argparse import RawTextHelpFormatter
 from pdb_ccd_mogul import PdbCCDMogul
 from yattag import Doc
 
+ANGSTROM = '&Aring;'
+SIGMA = '&sigma;'
+
 
 def __parse_command_line_args():
     """
@@ -65,7 +68,6 @@ def run():
     logging.debug('mogul results for {} bonds, {} angles, {} torsions and {} rings'.
                   format(len(pdb_ccd_mogul.store_bonds), len(pdb_ccd_mogul.store_angles),
                          len(pdb_ccd_mogul.store_torsions), len(pdb_ccd_mogul.store_rings)))
-
     if not os.path.isdir(out_dir):
         try:
             os.mkdir(out_dir)
@@ -75,7 +77,6 @@ def run():
             sys.exit(1)
 
     html_file = os.path.join(out_dir, 'index.html')
-
     html_text = prepare_html(pdb_ccd_mogul)
     with open(html_file, "w") as text_file:
         text_file.write(html_text)
@@ -89,11 +90,16 @@ def prepare_html(pdb_ccd_mogul):
     chem_comp_name = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_name
     svg_diagram = pdb_ccd_mogul.pdb_ccd_rdkit.image_file_or_string(atom_labels=False)
     title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
+    bond_title, bond_rows = prepare_bond_table(pdb_ccd_mogul)
+    logging.debug(bond_title)
 
     with tag('html'):
         with tag('head'):
             with tag('title'):
                 text(title)
+            with tag('style'):
+                text('table, th, td {border: 2px solid black; border-collapse: collapse;}')
+                text('th, td { padding: 5px; text-align: center }')
         with tag('body'):
             with tag('h1'):
                 text(title)
@@ -106,13 +112,35 @@ def prepare_html(pdb_ccd_mogul):
             if len(pdb_ccd_mogul.store_bonds) == 0:
                 line('p', 'no bonds found')
             else:
-                line('p', 'to be written')
-
+                with tag('table'):
+                    with tag('tr'):
+                        for item in bond_title:
+                            with tag('th'):
+                                doc.asis(item)
+                    for row in bond_rows:
+                        with tag('tr'):
+                            for item in row:
+                                with tag('td'):
+                                    text(item)
     result = doc.getvalue()
     return result
 
 
+def prepare_bond_table(pdb_ccd_mogul):
+    title_row = ('atoms', 'actual in ' + ANGSTROM, 'Mogul mean in ' + ANGSTROM, 'difference in ' + ANGSTROM,
+                 'Mogul ' + SIGMA + ' in ' + ANGSTROM, ' Mogul # hits', '|z-value|')
+    rows = []
+    for bond in sorted(pdb_ccd_mogul.store_bonds, key=lambda b: b.z_score, reverse=True):
+        atoms = '-'.join(bond.atoms_ids)
+        actual = '{:.3f}'.format(bond.value)
+        mean = '{:.3f}'.format(bond.mean)
+        difference = '{:.3f}'.format(bond.value - bond.mean)
+        sigma = '{:.3f}'.format(bond.standard_deviation)
+        nhits = '{}'.format(bond.nhits)
+        z_score = '{:.1f}'.format(bond.z_score)
+        rows.append((atoms, actual, mean, difference, sigma, nhits, z_score))
 
+    return title_row, rows
 
 
 if __name__ == "__main__":
