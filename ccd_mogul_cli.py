@@ -81,7 +81,7 @@ def prepare_html(pdb_ccd_mogul):
 
     chem_comp_id = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_id
     chem_comp_name = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_name
-    svg_diagram = pdb_ccd_mogul.pdb_ccd_rdkit.image_file_or_string(atom_labels=False)
+    svg_diagram = pdb_ccd_mogul.pdb_ccd_rdkit.image_file_or_string(atom_labels=False, pixels_x=800, pixels_y=400)
     title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
     bond_title, bond_rows = prepare_bond_table(pdb_ccd_mogul)
     logging.debug(bond_title)

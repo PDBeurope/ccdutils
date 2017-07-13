@@ -265,15 +265,18 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 cml_file.close()
         return None
 
-    def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False):
+    def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
+                             pixels_x=400, pixels_y=200):
         """
-        writes an image of the molecule to a file using rdkit.Chem.Draw
+        writes a svf image of the molecule to a string or file using rdkit
 
         Args:
             file_name (str): the name of the file. Type normally got from the filename ending for instance .png or .svg
             wedge (bool):  wedge the bonds in the image
             atom_labels (str): include atom labels in the image
             hydrogen (str): include hydrogen atoms in the image.
+            pixels_x (int): size of image in pixels
+            pixels_y (int): size of image in pixels
 
         Returns:
             None or a string containing the svg string of the molecule
@@ -283,7 +286,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         else:
             mol_h_select = self.mol_remove_h
         AllChem.GenerateDepictionMatching3DStructure(mol_h_select, mol_h_select)
-        drawer = rdMolDraw2D.MolDraw2DSVG(400,200)
+        drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
         opts = drawer.drawOptions()
         if not atom_labels:
             molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select, wedgeBonds=wedge)
