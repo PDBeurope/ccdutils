@@ -62,6 +62,7 @@ def run():
 
     try:
         pdb_ccd_mogul = PdbCCDMogul(file_name=cif_file)
+        pdb_ccd_mogul.run_mogul()
     except ValueError as error_message:
         print('ERROR {}'.format(error_message))
         sys.exit(1)

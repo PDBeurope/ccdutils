@@ -25,8 +25,25 @@ from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 class PdbCCDMogul(object):
     """ run Mogul on PDB CCD"""
     def __init__(self, file_name=None):
+        self.settings_bond_few_hits_threshold = 5
+        self.settings_rfactor_filter = '<5%'
+        self.settings_generalisation = False
+        self.settings_summary_from_mogul = None
         logging.debug('initialize PdbCCD with cif file {}'.format(file_name))
         self.pdb_ccd_rdkit = PdbChemicalComponentsRDKit(file_name=file_name)
+        self.store_bonds = []
+        self.store_angles = []
+        self.store_torsions = []
+        self.store_rings = []
+        self.classify_bonds = []
+
+    def run_mogul(self):
+        """
+        Runs the Mogul analysis, storing results in self.store_* lists
+
+        Returns:
+            None
+        """
         # write out the molecule as an sdf file to a temporary directory
         __, sdf_temp = tempfile.mkstemp(suffix='.sdf')
         logging.debug('load into PdbChemicalComponentsRDKit and write out temporary sdf file "{}"'.format(sdf_temp))
@@ -39,20 +56,19 @@ class PdbCCDMogul(object):
         molecule.standardise_delocalised_bonds()
         logging.debug('CSD smiles string {}'.format(molecule.smiles))
         engine = conformer.GeometryAnalyser()
-        engine.settings.generalisation = False
-        engine.settings.rfactor_filter = '<5%'
-        logging.debug('engine.settings.summary()=\n{}'.format(engine.settings.summary()))
+        engine.settings.generalisation = self.settings_generalisation
+        engine.settings.rfactor_filter = self.settings_rfactor_filter
+        engine.settings.bond.few_hits_threshold = self.settings_bond_few_hits_threshold
+        self.settings_summary_from_mogul = engine.settings.summary()
+        logging.debug('engine.settings.summary()=\n{}'.format(self.settings_summary_from_mogul))
         geometry_analysed_molecule = engine.analyse_molecule(molecule)
         logging.debug('number of Mogul analysed bonds={}'.format(len(geometry_analysed_molecule.analysed_bonds)))
-        self.store_bonds = []
-        self.store_angles = []
-        self.store_torsions = []
-        self.store_rings = []
         self.store_observation(geometry_analysed_molecule, 'bond')
         self.store_observation(geometry_analysed_molecule, 'angle')
         self.store_observation(geometry_analysed_molecule, 'torsion')
         self.store_observation(geometry_analysed_molecule, 'ring')
         os.remove(sdf_temp)
+
 
     def store_observation(self, geometry_analysed_molecule, observation_type):
         if observation_type == 'bond':
@@ -90,3 +106,30 @@ class PdbCCDMogul(object):
             store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
             logging.debug(store_nt)
             place_in.append(store_nt)
+
+    def classify_observation(self, observation_type):
+        """
+        classifies Mogul results using own analysis.
+
+        Args:
+            observation_type (str): one of 'bond', 'angle', 'torsion' or 'ring'
+
+        Returns:
+           None
+
+        Notes:
+            initial idea take self.store_bonds
+
+            recalculate Z using a minimum s.d. of 0.010.
+
+            reorder according to z-score and add classification for outlier
+            "outlier": Z > 5 purple
+            "unusual":  2 >= Z < 5 violet
+            "ok" Z < 2: green
+            "too few hits": not enough Mogul hits to classify
+            store result in self.classify_bonds
+
+            for bonds
+
+        """
+        pass  # TODO to be written!

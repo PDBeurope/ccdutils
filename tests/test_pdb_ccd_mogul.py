@@ -23,13 +23,12 @@ from nose.tools import assert_equals
 
 def test_eoh_mogul():
     eoh = PdbCCDMogul(file_name=cif_filename('EOH'))
+    eoh.run_mogul()
     # Mogul result on ethanol two analyzed bonds, 1 angle
     assert_equals(len(eoh.store_bonds), 2)
     assert_equals(len(eoh.store_angles), 1)
     assert_equals(len(eoh.store_torsions), 0)
     assert_equals(len(eoh.store_rings), 0)
-    assert False  # temporary fail test to get a printout for development
-
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
