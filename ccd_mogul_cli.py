@@ -45,7 +45,7 @@ def __parse_command_line_args():
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     parser.add_argument('CIF', help='input PDB-CCD mmcif file (must be specified)')
-    parser.add_argument('OUT_DIR', help='output directory for the report (must be specified)')
+    parser.add_argument('HTML', help='output html report filename (must be specified)')
     parser.add_argument('--debug', action='store_true', help='turn on debug message logging output')
     return parser.parse_args()
 
@@ -56,9 +56,9 @@ def run():
     if args.debug:
         logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s',)
     cif_file = str(args.CIF)
-    out_dir = str(args.OUT_DIR)
+    html_file = str(args.HTML)
     logger.debug('input PDB-CCD cif file {}'.format(cif_file))
-    logger.debug('output directory {}'.format(out_dir))
+    logger.debug('output html file {}'.format(html_file))
 
     try:
         pdb_ccd_mogul = PdbCCDMogul(file_name=cif_file)
@@ -69,15 +69,7 @@ def run():
     logging.debug('mogul results for {} bonds, {} angles, {} torsions and {} rings'.
                   format(len(pdb_ccd_mogul.store_bonds), len(pdb_ccd_mogul.store_angles),
                          len(pdb_ccd_mogul.store_torsions), len(pdb_ccd_mogul.store_rings)))
-    if not os.path.isdir(out_dir):
-        try:
-            os.mkdir(out_dir)
-            logging.debug('have made output directory {}'.format(out_dir))
-        except OSError as error_message:
-            print('ERROR cannot mkdir {} as {}'.format(out_dir, error_message))
-            sys.exit(1)
 
-    html_file = os.path.join(out_dir, 'index.html')
     html_text = prepare_html(pdb_ccd_mogul)
     with open(html_file, "w") as text_file:
         text_file.write(html_text)
