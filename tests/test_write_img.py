@@ -22,7 +22,7 @@ import unittest
 from nose.tools import assert_in, assert_true
 
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from utilities import cif_filename, test_file_path_name, file_name_in_tsts_out
+from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
 
 
 def test_load_eoh_from_cif():
@@ -60,19 +60,6 @@ def test_sdf_write_for_all_sample_cifs():
         yield assert_true, os.path.isfile(img_no_h_label_wedge) and os.path.getsize(img_no_h_label_wedge) > 0, \
             '{} call to eoh.image_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, img_no_h_label_wedge)
-
-def supply_list_of_sample_cifs():
-    """
-    returns the list of sample pdb ccd cifs for test.
-
-    Args:
-        None
-
-    Returns:
-        list of filenames
-    """
-    return sorted(glob.glob(os.path.join(test_file_path_name, '*.cif')))
-
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
