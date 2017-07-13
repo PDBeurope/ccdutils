@@ -121,17 +121,18 @@ def prepare_html(pdb_ccd_mogul):
 
 def prepare_bond_table(pdb_ccd_mogul):
     title_row = ('atoms', 'actual in ' + ANGSTROM, 'Mogul mean in ' + ANGSTROM, 'difference in ' + ANGSTROM,
-                 'Mogul ' + SIGMA + ' in ' + ANGSTROM, ' Mogul # hits', '|z-value|')
+                 'Mogul ' + SIGMA + ' in ' + ANGSTROM, ' Mogul # hits', 'Z*-score', 'classification')
     rows = []
-    for bond in sorted(pdb_ccd_mogul.store_bonds, key=lambda b: b.z_score, reverse=True):
+    for bond in sorted(pdb_ccd_mogul.classify_bonds, key=lambda b: b.zorder, reverse=True):
         atoms = '-'.join(bond.atoms_ids)
         actual = '{:.3f}'.format(bond.value)
         mean = '{:.3f}'.format(bond.mean)
         difference = '{:.3f}'.format(bond.value - bond.mean)
         sigma = '{:.3f}'.format(bond.standard_deviation)
         nhits = '{}'.format(bond.nhits)
-        z_score = '{:.1f}'.format(bond.z_score)
-        rows.append((atoms, actual, mean, difference, sigma, nhits, z_score))
+        z_score = '{:.2f}'.format(bond.zstar)
+        classification = bond.classification
+        rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
 
     return title_row, rows
 

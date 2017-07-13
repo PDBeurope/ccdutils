@@ -68,6 +68,7 @@ class PdbCCDMogul(object):
         self.store_observation(geometry_analysed_molecule, 'torsion')
         self.store_observation(geometry_analysed_molecule, 'ring')
         os.remove(sdf_temp)
+        self.classify_observation('bond')
 
 
     def store_observation(self, geometry_analysed_molecule, observation_type):
@@ -120,16 +121,54 @@ class PdbCCDMogul(object):
         Notes:
             initial idea take self.store_bonds
 
-            recalculate Z using a minimum s.d. of 0.010.
-
+            recalculate Z* using a minimum s.d. of 0.010 - store in Zstar
             reorder according to z-score and add classification for outlier
             "outlier": Z > 5 purple
             "unusual":  2 >= Z < 5 violet
             "ok" Z < 2: green
             "too few hits": not enough Mogul hits to classify
-            store result in self.classify_bonds
-
-            for bonds
-
+            store result in self.classify_bonds.Z
         """
-        pass  # TODO to be written!
+        if observation_type == 'bond':
+            work_from = self.store_bonds
+            place_in = self.classify_bonds
+            sd_min = 0.010
+            few_hits_threshold = self.settings_bond_few_hits_threshold
+        else:
+            raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
+
+        for thing in work_from:
+            if thing.nhits == 0:
+                zstar = None
+            else:
+                zstar = (thing.value - thing.mean)/max(thing.standard_deviation,sd_min)
+            if thing.nhits >= few_hits_threshold:
+                zorder = abs(zstar)
+            elif thing.nhits != 0:
+                zorder = -100. + zstar
+            else:
+                zorder = -101.
+            logging.debug('zstar={} zorder={}'.format(zstar, zorder))
+            if zorder > 5.:
+                classification = 'outlier'
+            elif zorder > 2.:
+                classification = 'unusual'
+            elif zorder > 0.:
+                classification = 'ok'
+            else:
+                classification = 'too few hits'
+            store = thing._asdict()
+            store['zstar'] = zstar
+            store['zorder'] = zorder
+            store['classification'] = classification
+            store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
+            logging.debug(store_nt)
+            place_in.append(store_nt)
+
+
+
+
+
+
+
+
