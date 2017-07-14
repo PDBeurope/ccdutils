@@ -266,7 +266,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         return None
 
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
-                             pixels_x=400, pixels_y=200, highlight_bonds=None):
+                             pixels_x=400, pixels_y=200, highlight_bonds=None, black=False):
         """
         writes a svf image of the molecule to a string or file using rdkit
 
@@ -278,6 +278,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             pixels_x (int): size of image in pixels
             pixels_y (int): size of image in pixels
             highlight_bonds: an ordered dictionary of bonds to highlight key (atom_index_0, atom_index_1) to (r,g,b)
+            black (bool): wipe out atom colors and make molecule picture black
 
         Returns:
             None or a string containing the svg string of the molecule
@@ -300,7 +301,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if highlight_bonds is None:
             drawer.DrawMolecule(molecule_to_draw)
         else:
-             # highlight the atoms on each end of the bond in the colour
+            # highlight the atoms on each end of the bond in the colour
             highlight_atoms_colours = {}
             for key in highlight_bonds:
                 highlight_atoms_colours[key[0]] = highlight_bonds[key]
@@ -324,6 +325,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                                 highlightBondColors=highlight_bonds_colours)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText().replace('svg:','')
+        if black:
+            svg = svg.replace('#FF0000', '#000000')  # get rid of red (oxygen)
         if file_name is None:
             return svg
         else:
