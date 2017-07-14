@@ -66,10 +66,12 @@ def test_svg_highlight_bonds():
     this_img = file_name_in_tsts_out('test_svg_highlight_bonds.svg')
     # highlight first four bonds
     highlight_bonds = collections.OrderedDict()
-    highlight_bonds[(0,1)] = (0., 136./255., 55./255.) # C1-O1 dark green
-    highlight_bonds[(0,2)] = (166./255., 219./255., 160./255.)  # C1-C2 light green
-    highlight_bonds[(2,3)] = (194./255., 165./255., 207./255.)  # C2-O2 light purple
-    highlight_bonds[(2,4)] = (123./255., 50./255., 148./255.)   # C2-C3 dark purple
+    highlight_bonds[(0,1)] = (145./255., 191./255., 219./255.) # C1-O1 mid blue
+    highlight_bonds[(0,2)] = (224./255., 243./255., 248./255.)  # C1-C2 light blue
+    highlight_bonds[(2,3)] = (254./255., 224./255., 144./255.)  # C2-O2 light orange
+    highlight_bonds[(2,4)] = (252./255., 141./255., 89./255.)   # C2-C3 mid orange
+    highlight_bonds[(4,5)] = (215./255., 48./255., 39./255.)   # C3-O3 blood orange
+
     mol.image_file_or_string(file_name=this_img, hydrogen=False, atom_labels=False, wedge=False,
                              highlight_bonds=highlight_bonds)
 
