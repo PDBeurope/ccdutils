@@ -151,10 +151,14 @@ class PdbCCDMogul(object):
             logging.debug('zstar={} zorder={}'.format(zstar, zorder))
             if zorder > 5.:
                 classification = 'outlier'
-            elif zorder > 2.:
+            elif zorder > 3.5:
+                classification = 'very-unusual'
+            elif zorder > 2.0:
                 classification = 'unusual'
+            elif zorder > 1.:
+                classification = 'common'
             elif zorder > 0.:
-                classification = 'ok'
+                classification = 'very-common'
             else:
                 classification = 'too few hits'
             store = thing._asdict()

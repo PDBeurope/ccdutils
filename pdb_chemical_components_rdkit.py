@@ -326,7 +326,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText().replace('svg:','')
         if black:
-            svg = svg.replace('#FF0000', '#000000')  # get rid of red (oxygen)
+            svg = svg.replace('#FF0000', '#000000')  # get rid of red oxygen
+            svg = svg.replace('#0000FF', '#000000')  # get rid of blue nitrogen
+            svg = svg.replace('#FF7F00', '#000000')  # get rid of orange phosphorous
+            svg = svg.replace('#CCCC00', '#000000')  # get rid of yellow sulphur
+
+
+
         if file_name is None:
             return svg
         else:

@@ -25,8 +25,8 @@ proof of concept - Mogul analysis of PDB-CCD coordinates
    http://grade.globalphasing.org/tut/erice_workshop/introtutorial/buster/00_MapOnly.report/ligand/
 """
 import argparse
+import collections
 import logging
-import os
 import sys
 from argparse import RawTextHelpFormatter
 from pdb_ccd_mogul import PdbCCDMogul
@@ -34,6 +34,12 @@ from yattag import Doc
 
 ANGSTROM = '&Aring;'
 SIGMA = '&sigma;'
+CLASSIFICATION_COLOR = {'outlier': (215. / 255., 48. / 255., 39. / 255.),  # blood orange
+                        'very-unusual': (252. / 255., 141. / 255., 89. / 255.),  # mid orange
+                        'unusual': (254. / 255., 224. / 255., 144. / 255.),  # yellow/orange
+                        'common': (145. / 255., 191. / 255., 219. / 255.),  # mid blue
+                        'very-common': (69. / 255., 117. / 255., 180. / 255.)  # blue
+                        }
 
 
 def __parse_command_line_args():
@@ -81,9 +87,9 @@ def prepare_html(pdb_ccd_mogul):
 
     chem_comp_id = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_id
     chem_comp_name = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_name
-    svg_diagram = pdb_ccd_mogul.pdb_ccd_rdkit.image_file_or_string(atom_labels=False, pixels_x=800, pixels_y=400)
+    svg_diagram = pdb_ccd_mogul.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=800, pixels_y=400)
     title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
-    bond_title, bond_rows = prepare_bond_table(pdb_ccd_mogul)
+    bond_title, bond_rows, bond_svg = prepare_bond_table(pdb_ccd_mogul)
     logging.debug(bond_title)
 
     with tag('html'):
@@ -105,7 +111,11 @@ def prepare_html(pdb_ccd_mogul):
             if len(pdb_ccd_mogul.store_bonds) == 0:
                 line('p', 'no bonds found')
             else:
+
                 with tag('table'):
+                    with tag('tr', align='center'):
+                        with tag('td', colspan=len(bond_title)):
+                            doc.asis(bond_svg)
                     with tag('tr'):
                         for item in bond_title:
                             with tag('th'):
@@ -130,11 +140,25 @@ def prepare_bond_table(pdb_ccd_mogul):
         difference = '{:.3f}'.format(bond.value - bond.mean)
         sigma = '{:.3f}'.format(bond.standard_deviation)
         nhits = '{}'.format(bond.nhits)
-        z_score = '{:.2f}'.format(bond.zstar)
+        try:
+            z_score = '{:.2f}'.format(bond.zstar)
+        except ValueError:
+            z_score = ' '
         classification = bond.classification
         rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
 
-    return title_row, rows
+    highlight_bonds = collections.OrderedDict()
+    for bond in sorted(pdb_ccd_mogul.classify_bonds, key=lambda b: b.zorder):
+        classification = bond.classification
+        if classification == 'too few hits':
+            pass
+        else:
+            highlight_bonds[(min(bond.indices), max(bond.indices))] =  CLASSIFICATION_COLOR[classification]
+
+    svg_string = pdb_ccd_mogul.pdb_ccd_rdkit.image_file_or_string( hydrogen=False, atom_labels=False, wedge=False,
+                                                                   highlight_bonds=highlight_bonds, black=True,
+                                                                   pixels_x=800, pixels_y=400)
+    return title_row, rows, svg_string
 
 
 if __name__ == "__main__":
