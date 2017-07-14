@@ -266,7 +266,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         return None
 
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
-                             pixels_x=400, pixels_y=200):
+                             pixels_x=400, pixels_y=200, highlight_bonds=None):
         """
         writes a svf image of the molecule to a string or file using rdkit
 
@@ -277,6 +277,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             hydrogen (str): include hydrogen atoms in the image.
             pixels_x (int): size of image in pixels
             pixels_y (int): size of image in pixels
+            highlight_bonds: an ordered dictionary of bonds to highlight key (atom_index_0, atom_index_1) to (r,g,b)
 
         Returns:
             None or a string containing the svg string of the molecule
@@ -295,8 +296,32 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 atom_index = atom.GetIdx()
                 atom_name = self.atom_ids[atom_index]
                 opts.atomLabels[atom_index] = atom_name
-            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select)
-        drawer.DrawMolecule(molecule_to_draw)
+            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select, wedgeBonds=wedge)
+        if highlight_bonds is None:
+            drawer.DrawMolecule(molecule_to_draw)
+        else:
+             # highlight the atoms on each end of the bond in the colour
+            highlight_atoms_colours = {}
+            for key in highlight_bonds:
+                highlight_atoms_colours[key[0]] = highlight_bonds[key]
+                highlight_atoms_colours[key[1]] = highlight_bonds[key]
+            # find the bond in the rdkit molecule
+            highlight_bonds_colours = {}
+            for key in highlight_bonds:
+                at_index_0 = key[0]
+                at_index_1 = key[1]
+                for bond in molecule_to_draw.GetBonds():
+                    bond_index_0 = bond.GetBeginAtomIdx()
+                    bond_index_1 = bond.GetEndAtomIdx()
+                    if (at_index_0 == bond_index_0 and at_index_1 == bond_index_1) or \
+                       (at_index_0 == bond_index_1 and at_index_1 == bond_index_0):
+                        highlight_bonds_colours[bond.GetIdx()] = highlight_bonds[key]
+                        break
+            drawer.DrawMolecule(molecule_to_draw,
+                                highlightAtoms=highlight_atoms_colours.keys(),
+                                highlightAtomColors=highlight_atoms_colours,
+                                highlightBonds=highlight_bonds_colours.keys(),
+                                highlightBondColors=highlight_bonds_colours)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText().replace('svg:','')
         if file_name is None:

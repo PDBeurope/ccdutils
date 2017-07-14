@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import glob
+import collections
 import os
 import unittest
 
@@ -25,7 +25,7 @@ from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
 
 
-def test_load_eoh_from_cif():
+def test_eoh_svg():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
     img_with_h_no_label = file_name_in_tsts_out('EOH.img_withH_no_label.svg')
     eoh.image_file_or_string(file_name=img_with_h_no_label, hydrogen=True, atom_labels=False)
@@ -45,7 +45,7 @@ def test_atp_svg():
     yield assert_in, 'PA', atp_svg, 'The svg file must contain the atom name PA'
     
 
-def test_sdf_write_for_all_sample_cifs():
+def test_svg_write_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
         #if 'HEM' in ciffile:
         #   continue
@@ -60,6 +60,18 @@ def test_sdf_write_for_all_sample_cifs():
         yield assert_true, os.path.isfile(img_no_h_label_wedge) and os.path.getsize(img_no_h_label_wedge) > 0, \
             '{} call to eoh.image_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, img_no_h_label_wedge)
+
+def test_svg_highlight_bonds():
+    mol = PdbChemicalComponentsRDKit(file_name=cif_filename('GOL'))
+    this_img = file_name_in_tsts_out('test_svg_highlight_bonds.svg')
+    # highlight first four bonds
+    highlight_bonds = collections.OrderedDict()
+    highlight_bonds[(0,1)] = (0., 136./255., 55./255.) # C1-O1 dark green
+    highlight_bonds[(0,2)] = (166./255., 219./255., 160./255.)  # C1-C2 light green
+    highlight_bonds[(2,3)] = (194./255., 165./255., 207./255.)  # C2-O2 light purple
+    highlight_bonds[(2,4)] = (123./255., 50./255., 148./255.)   # C2-C3 dark purple
+    mol.image_file_or_string(file_name=this_img, hydrogen=False, atom_labels=False, wedge=False,
+                             highlight_bonds=highlight_bonds)
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
