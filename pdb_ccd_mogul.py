@@ -30,6 +30,22 @@ CLASSIFICATION_COLOR = {'outlier': (215. / 255., 48. / 255., 39. / 255.),  # blo
                         'common': (145. / 255., 191. / 255., 219. / 255.),  # mid blue
                         'very-common': (69. / 255., 117. / 255., 180. / 255.)  # blue
                         }
+JQUERY_SCRIPT = '''
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $("#bond_details").hide();
+    $("#angle_details").hide();
+    $("#torsion_details").hide();
+    $("#ring_details").hide();
+    $(".toggle").click(function(){
+        var details = "#".concat($(this).val(), "_details")
+        var show_button = "#".concat($(this).val(), "_show_button")
+        $(details).toggle();
+        $(show_button).toggle();
+    });
+});
+</script>'''
 
 
 class PdbCCDMogul(object):
@@ -197,6 +213,7 @@ class PdbCCDMogul(object):
                 with tag('style'):
                     text('table, th, td {border: 2px solid black; border-collapse: collapse;}')
                     text('th, td { padding: 5px; text-align: center }')
+                doc.asis(JQUERY_SCRIPT)
             with tag('body'):
                 with tag('h1'):
                     text(title)
@@ -210,16 +227,22 @@ class PdbCCDMogul(object):
                     line('p', 'no bonds found')
                 else:
                     doc.asis(bond_svg)
-                    with tag('table'):
-                        with tag('tr'):
-                            for item in bond_title:
-                                with tag('th'):
-                                    doc.asis(item)
-                        for row in bond_rows:
-                            with tag('tr'):
-                                for item in row:
-                                    with tag('td'):
-                                        text(item)
+                    with tag('div', id="bond_show_button"):
+                        with tag('button', klass='toggle', value='bond'):
+                            text('Show detailed table')
+                    with tag('div', id="bond_details"):
+                        with tag('button', klass='toggle', value='bond'):
+                            text('Hide detailed table')
+                            with tag('table'):
+                                with tag('tr'):
+                                    for item in bond_title:
+                                        with tag('th'):
+                                            doc.asis(item)
+                                for row in bond_rows:
+                                    with tag('tr'):
+                                        for item in row:
+                                            with tag('td'):
+                                                text(item)
         result = doc.getvalue()
         return result
 
