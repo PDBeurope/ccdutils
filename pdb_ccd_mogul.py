@@ -20,6 +20,16 @@ import os
 import tempfile
 from ccdc import io, conformer
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from yattag import Doc
+
+ANGSTROM = '&Aring;'
+SIGMA = '&sigma;'
+CLASSIFICATION_COLOR = {'outlier': (215. / 255., 48. / 255., 39. / 255.),  # blood orange
+                        'very-unusual': (252. / 255., 141. / 255., 89. / 255.),  # mid orange
+                        'unusual': (254. / 255., 224. / 255., 144. / 255.),  # yellow/orange
+                        'common': (145. / 255., 191. / 255., 219. / 255.),  # mid blue
+                        'very-common': (69. / 255., 117. / 255., 180. / 255.)  # blue
+                        }
 
 
 class PdbCCDMogul(object):
@@ -170,9 +180,76 @@ class PdbCCDMogul(object):
             place_in.append(store_nt)
 
 
+    def prepare_html(self):
+        doc, tag, text, line = Doc().ttl()
 
+        chem_comp_id = self.pdb_ccd_rdkit.chem_comp_id
+        chem_comp_name = self.pdb_ccd_rdkit.chem_comp_name
+        svg_diagram = self.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=800, pixels_y=400)
+        title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
+        bond_title, bond_rows, bond_svg = self.prepare_bond_table()
+        logging.debug(bond_title)
 
+        with tag('html'):
+            with tag('head'):
+                with tag('title'):
+                    text(title)
+                with tag('style'):
+                    text('table, th, td {border: 2px solid black; border-collapse: collapse;}')
+                    text('th, td { padding: 5px; text-align: center }')
+            with tag('body'):
+                with tag('h1'):
+                    text(title)
+                with tag('ul', ):
+                    line('li', 'chem_comp_id =' + chem_comp_id)
+                    line('li', 'chem_comp_name = ' + chem_comp_name)
+                doc.asis(svg_diagram)
+                with tag('h2'):
+                    text('Mogul bond results')
+                if len(self.store_bonds) == 0:
+                    line('p', 'no bonds found')
+                else:
+                    doc.asis(bond_svg)
+                    with tag('table'):
+                        with tag('tr'):
+                            for item in bond_title:
+                                with tag('th'):
+                                    doc.asis(item)
+                        for row in bond_rows:
+                            with tag('tr'):
+                                for item in row:
+                                    with tag('td'):
+                                        text(item)
+        result = doc.getvalue()
+        return result
 
+    def prepare_bond_table(self):
+        title_row = ('atoms', 'actual in ' + ANGSTROM, 'Mogul mean in ' + ANGSTROM, 'difference in ' + ANGSTROM,
+                     'Mogul ' + SIGMA + ' in ' + ANGSTROM, ' Mogul # hits', 'Z*-score', 'classification')
+        rows = []
+        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder, reverse=True):
+            atoms = '-'.join(bond.atoms_ids)
+            actual = '{:.3f}'.format(bond.value)
+            mean = '{:.3f}'.format(bond.mean)
+            difference = '{:.3f}'.format(bond.value - bond.mean)
+            sigma = '{:.3f}'.format(bond.standard_deviation)
+            nhits = '{}'.format(bond.nhits)
+            try:
+                z_score = '{:.2f}'.format(bond.zstar)
+            except ValueError:
+                z_score = ' '
+            classification = bond.classification
+            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
 
-
+        highlight_bonds = collections.OrderedDict()
+        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder):
+            classification = bond.classification
+            if classification == 'too few hits':
+                pass
+            else:
+                highlight_bonds[(min(bond.indices), max(bond.indices))] =  CLASSIFICATION_COLOR[classification]
+        svg_string = self.pdb_ccd_rdkit.image_file_or_string( hydrogen=False, atom_labels=False, wedge=False,
+                                                                   highlight_bonds=highlight_bonds, black=True,
+                                                                   pixels_x=800, pixels_y=400)
+        return title_row, rows, svg_string
 
