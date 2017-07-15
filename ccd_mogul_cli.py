@@ -112,10 +112,8 @@ def prepare_html(pdb_ccd_mogul):
                 line('p', 'no bonds found')
             else:
 
+                doc.asis(bond_svg)
                 with tag('table'):
-                    with tag('tr', align='center'):
-                        with tag('td', colspan=len(bond_title)):
-                            doc.asis(bond_svg)
                     with tag('tr'):
                         for item in bond_title:
                             with tag('th'):
