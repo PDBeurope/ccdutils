@@ -46,6 +46,8 @@ $(document).ready(function(){
     });
 });
 </script>'''
+PIXELS_X = 500
+PIXELS_Y = 300
 
 
 class PdbCCDMogul(object):
@@ -201,7 +203,7 @@ class PdbCCDMogul(object):
 
         chem_comp_id = self.pdb_ccd_rdkit.chem_comp_id
         chem_comp_name = self.pdb_ccd_rdkit.chem_comp_name
-        svg_diagram = self.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=800, pixels_y=400)
+        svg_diagram = self.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
         title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
         bond_title, bond_rows, bond_svg = self.prepare_bond_table()
         logging.debug(bond_title)
@@ -272,7 +274,7 @@ class PdbCCDMogul(object):
             else:
                 highlight_bonds[(min(bond.indices), max(bond.indices))] =  CLASSIFICATION_COLOR[classification]
         svg_string = self.pdb_ccd_rdkit.image_file_or_string( hydrogen=False, atom_labels=False, wedge=False,
-                                                                   highlight_bonds=highlight_bonds, black=True,
-                                                                   pixels_x=800, pixels_y=400)
+                                                              highlight_bonds=highlight_bonds, black=True,
+                                                              pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
         return title_row, rows, svg_string
 
