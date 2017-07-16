@@ -49,7 +49,14 @@ CLASSIFICATION_HTML_COLOR = {5:'#D73027',
                              2:'#91BFDB',
                              1:'#4575B4',
                              0:'#FFFFFF'}
-
+STYLE='''
+<style>
+table, th, td {border: 2px solid black; border-collapse: collapse;}
+th, td { padding: 5px; text-align: center }
+table.no_border, th.no_border, td.no_border { border: 0px ; border-collapse: collapse;}
+th.key, td.key { border: 4px solid white; text-align: left}
+</style>
+'''
 JQUERY_SCRIPT = '''
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
@@ -307,9 +314,7 @@ class PdbCCDMogul(object):
             with tag('head'):
                 with tag('title'):
                     text(title)
-                with tag('style'):
-                    text('table, th, td {border: 2px solid black; border-collapse: collapse;}')
-                    text('th, td { padding: 5px; text-align: center }')
+                doc.asis(STYLE)
                 doc.asis(JQUERY_SCRIPT)
             with tag('body'):
                 with tag('h1'):
@@ -317,6 +322,7 @@ class PdbCCDMogul(object):
                 with tag('ul', ):
                     line('li', 'chem_comp_id =' + chem_comp_id)
                     line('li', 'chem_comp_name = ' + chem_comp_name)
+                    line('li', "This analysis of the wwPDB chemical component definition 'ideal' coordinates.")
                 doc.asis(svg_diagram)
                 for observation_type in MOGUL_OBSERVATION_TYPES:
                    some_html = self.prepare_html_section( observation_type, doc, tag, text, line)
@@ -341,9 +347,15 @@ class PdbCCDMogul(object):
         with tag('h2'):
             text(section_title)
         if observation_type not in self.detailed_html_table:
-            line('p', 'no ' + observation_type + 's found')
+            line('p', 'no ' + observation_type + 's found or NOT YET CODED!')
         else:
-            doc.asis(self.svg_coloured_diagram[observation_type])
+             # svg and key in little table
+            with tag('table', klass='no_border'):
+                with tag('tr',  klass='no_border'):
+                    with tag('td', klass='no_border'):
+                        doc.asis(self.svg_coloured_diagram[observation_type])
+                    with tag('td', klass='no_border'):
+                        self.bond_angle_key( doc, tag, text, line)
             with tag('div', id=observation_type + '_show_button'):
                 with tag('button', klass='toggle', value=observation_type):
                     text('Show detailed table showing results for each ' + observation_type)
@@ -364,4 +376,17 @@ class PdbCCDMogul(object):
                                 text(row[-2])
                 with tag('button', klass='toggle', value='bond'):
                     text('Hide detailed table')
- 
+
+    def bond_angle_key( self, doc, tag, text, line): 
+        z_next = ''
+        with tag('table'):
+            for class_num, name in CLASSIFICATION_NAME.items():
+               if class_num == 0:
+                    break
+               with tag('tr',  klass='key'):
+                   with tag('td', bgcolor=CLASSIFICATION_HTML_COLOR[class_num], klass='key'):
+                       text(name)
+                   with tag('td', klass='key'):
+                       z_limit = '{} &gt; Z* {}'.format(CLASSIFICATION_ZLIMIT[class_num], z_next)
+                       z_next = '&ge; {}'.format( CLASSIFICATION_ZLIMIT[class_num]) 
+                       doc.asis(z_limit)
