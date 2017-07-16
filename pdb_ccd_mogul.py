@@ -61,12 +61,13 @@ $(document).ready(function(){
 </script>'''
 PIXELS_X = 500
 PIXELS_Y = 300
-
+MOGUL_OBSERVATION_TYPES = ('bond', 'angle', 'torsion', 'ring')
 
 class PdbCCDMogul(object):
     """ run Mogul on PDB CCD"""
     def __init__(self, file_name=None):
         self.settings_bond_few_hits_threshold = 5
+        self.settings_angle_few_hits_threshold = 5
         self.settings_rfactor_filter = '<5%'
         self.settings_generalisation = False
         self.settings_summary_from_mogul = None
@@ -77,6 +78,9 @@ class PdbCCDMogul(object):
         self.store_torsions = []
         self.store_rings = []
         self.classify_bonds = []
+        self.classify_angles = []
+        self.detailed_html_table = {}
+        """dictionary for each observation, giving detailed html table: 1st row is the header, rest the data"""
 
     def run_mogul(self):
         """
@@ -100,17 +104,17 @@ class PdbCCDMogul(object):
         engine.settings.generalisation = self.settings_generalisation
         engine.settings.rfactor_filter = self.settings_rfactor_filter
         engine.settings.bond.few_hits_threshold = self.settings_bond_few_hits_threshold
+        engine.settings.angle.few_hits_threshold = self.settings_angle_few_hits_threshold
         self.settings_summary_from_mogul = engine.settings.summary()
         logging.debug('engine.settings.summary()=\n{}'.format(self.settings_summary_from_mogul))
         geometry_analysed_molecule = engine.analyse_molecule(molecule)
         logging.debug('number of Mogul analysed bonds={}'.format(len(geometry_analysed_molecule.analysed_bonds)))
-        self.store_observation(geometry_analysed_molecule, 'bond')
-        self.store_observation(geometry_analysed_molecule, 'angle')
-        self.store_observation(geometry_analysed_molecule, 'torsion')
-        self.store_observation(geometry_analysed_molecule, 'ring')
+        for observation_type in MOGUL_OBSERVATION_TYPES:
+            self.store_observation(geometry_analysed_molecule, observation_type)
         os.remove(sdf_temp)
-        self.classify_observation('bond')
-
+        for observation_type in MOGUL_OBSERVATION_TYPES:
+            self.classify_observation(observation_type)
+            self.prepare_html_table(observation_type)
 
     def store_observation(self, geometry_analysed_molecule, observation_type):
         if observation_type == 'bond':
@@ -175,6 +179,15 @@ class PdbCCDMogul(object):
             place_in = self.classify_bonds
             sd_min = 0.010
             few_hits_threshold = self.settings_bond_few_hits_threshold
+        elif observation_type == 'angle':
+            work_from = self.store_angles
+            place_in = self.classify_angles
+            sd_min = 0.1
+            few_hits_threshold = self.settings_angle_few_hits_threshold
+        elif observation_type == 'torsion':
+            return  # TODO code up!
+        elif observation_type == 'ring':
+            return  # TODO code up!
         else:
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
 
@@ -202,6 +215,70 @@ class PdbCCDMogul(object):
             logging.debug(store_nt)
             place_in.append(store_nt)
 
+    def prepare_html_table(self, observation_type):
+        if observation_type == 'bond':
+            work_from = self.classify_bonds
+            units = ANGSTROM
+            sf_format = '{:.3f}'
+        elif observation_type == 'angle':
+            work_from = self.classify_angles
+            units = 'degrees'
+            sf_format = '{:.1f}'
+        elif observation_type == 'torsion':
+            return  # TODO code up!
+        elif observation_type == 'ring':
+            return  # TODO code up!
+        else:
+            raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
+        rows = []
+        title_row = ('atoms', 'actual in ' + units, 'Mogul mean in ' + units, 'difference in ' + units,
+                     'Mogul ' + SIGMA + ' in ' + units, ' Mogul # hits', 'Z*-score', 'classification')
+        rows.append(title_row)
+        for thing in sorted(work_from, key=lambda t: t.zorder, reverse=True):
+            atoms = '-'.join(thing.atoms_ids)
+            actual = sf_format.format(thing.value)
+            mean = sf_format.format(thing.mean)
+            difference = sf_format.format(thing.value - thing.mean)
+            sigma = sf_format.format(thing.standard_deviation)
+            nhits = '{}'.format(thing.nhits)
+            try:
+                z_score = '{:.2f}'.format(thing.zstar)
+            except ValueError:
+                z_score = ' '
+            classification = CLASSIFICATION_NAME[thing.classification]
+            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
+        self.detailed_html_table[observation_type] = rows
+
+    def prepare_bond_table(self):
+        title_row = ('atoms', 'actual in ' + ANGSTROM, 'Mogul mean in ' + ANGSTROM, 'difference in ' + ANGSTROM,
+                     'Mogul ' + SIGMA + ' in ' + ANGSTROM, ' Mogul # hits', 'Z*-score', 'classification')
+        rows = []
+        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder, reverse=True):
+            atoms = '-'.join(bond.atoms_ids)
+            actual = '{:.3f}'.format(bond.value)
+            mean = '{:.3f}'.format(bond.mean)
+            difference = '{:.3f}'.format(bond.value - bond.mean)
+            sigma = '{:.3f}'.format(bond.standard_deviation)
+            nhits = '{}'.format(bond.nhits)
+            try:
+                z_score = '{:.2f}'.format(bond.zstar)
+            except ValueError:
+                z_score = ' '
+            classification = CLASSIFICATION_NAME[bond.classification]
+            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
+
+        highlight_bonds = OrderedDict()
+        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder):
+            classification = bond.classification
+            if classification == 0:  # too few hits
+                pass
+            else:
+                highlight_bonds[(min(bond.indices), max(bond.indices))] =  CLASSIFICATION_COLOR[classification]
+        svg_string = self.pdb_ccd_rdkit.image_file_or_string( hydrogen=False, atom_labels=False, wedge=False,
+                                                              highlight_bonds=highlight_bonds, black=True,
+                                                              pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
+        return title_row, rows, svg_string
+
 
     def prepare_html(self):
         doc, tag, text, line = Doc().ttl()
@@ -210,7 +287,9 @@ class PdbCCDMogul(object):
         chem_comp_name = self.pdb_ccd_rdkit.chem_comp_name
         svg_diagram = self.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
         title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
-        bond_title, bond_rows, bond_svg = self.prepare_bond_table()
+        bond_title = self.detailed_html_table['bond'][0]
+        bond_rows = self.detailed_html_table['bond'][1:]
+        bond_svg = self.prepare_bond_table()[2]
         logging.debug(bond_title)
 
         with tag('html'):
@@ -255,33 +334,4 @@ class PdbCCDMogul(object):
         result = doc.getvalue()
         return result
 
-    def prepare_bond_table(self):
-        title_row = ('atoms', 'actual in ' + ANGSTROM, 'Mogul mean in ' + ANGSTROM, 'difference in ' + ANGSTROM,
-                     'Mogul ' + SIGMA + ' in ' + ANGSTROM, ' Mogul # hits', 'Z*-score', 'classification')
-        rows = []
-        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder, reverse=True):
-            atoms = '-'.join(bond.atoms_ids)
-            actual = '{:.3f}'.format(bond.value)
-            mean = '{:.3f}'.format(bond.mean)
-            difference = '{:.3f}'.format(bond.value - bond.mean)
-            sigma = '{:.3f}'.format(bond.standard_deviation)
-            nhits = '{}'.format(bond.nhits)
-            try:
-                z_score = '{:.2f}'.format(bond.zstar)
-            except ValueError:
-                z_score = ' '
-            classification = CLASSIFICATION_NAME[bond.classification]
-            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
-
-        highlight_bonds = OrderedDict()
-        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder):
-            classification = bond.classification
-            if classification == 0:  # too few hits
-                pass
-            else:
-                highlight_bonds[(min(bond.indices), max(bond.indices))] =  CLASSIFICATION_COLOR[classification]
-        svg_string = self.pdb_ccd_rdkit.image_file_or_string( hydrogen=False, atom_labels=False, wedge=False,
-                                                              highlight_bonds=highlight_bonds, black=True,
-                                                              pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
-        return title_row, rows, svg_string
 
