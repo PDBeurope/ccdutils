@@ -43,6 +43,13 @@ CLASSIFICATION_COLOR = {5: (215. / 255., 48. / 255., 39. / 255.),  # blood orang
                         2: (145. / 255., 191. / 255., 219. / 255.),  # mid blue
                         1: (69. / 255., 117. / 255., 180. / 255.),  # blue
                         0: None }
+CLASSIFICATION_HTML_COLOR = {5:'#D73027',
+                             4:'#FC8D59', 
+                             3:'#FEE090',
+                             2:'#91BFDB',
+                             1:'#4575B4',
+                             0:'#FFFFFF'}
+
 JQUERY_SCRIPT = '''
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
@@ -237,7 +244,7 @@ class PdbCCDMogul(object):
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
         rows = []
         title_row = ('atoms', 'actual in ' + units, 'Mogul mean in ' + units, 'difference in ' + units,
-                     'Mogul ' + SIGMA + ' in ' + units, ' Mogul # hits', 'Z*-score', 'classification')
+                     'Mogul ' + SIGMA + ' in ' + units, ' Mogul # hits', 'Z*-score', 'classification', 'color')
         rows.append(title_row)
         for thing in sorted(work_from, key=lambda t: t.zorder, reverse=True):
             atoms = '-'.join(thing.atoms_ids)
@@ -251,7 +258,8 @@ class PdbCCDMogul(object):
             except ValueError:
                 z_score = ' '
             classification = CLASSIFICATION_NAME[thing.classification]
-            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
+            html_color = CLASSIFICATION_HTML_COLOR[thing.classification]
+            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification, html_color))
         self.detailed_html_table[observation_type] = rows
  
     def prepare_svg_coloured_diagram(self, observation_type):
@@ -341,17 +349,19 @@ class PdbCCDMogul(object):
                     text('Show detailed table showing results for each ' + observation_type)
             with tag('div', id=observation_type + "_details"):
                 with tag('button', klass='toggle', value=observation_type):
-                    text('Hide hide detailed table')
+                    text('Hide detailed table')
                 with tag('table'):
                     with tag('tr'):
-                        for item in self.detailed_html_table[observation_type][0]:
+                        for item in self.detailed_html_table[observation_type][0][:-1]:
                             with tag('th'):
                                 doc.asis(item)
                     for row in self.detailed_html_table[observation_type][1:]:
                         with tag('tr'):
-                            for item in row:
+                            for item in row[:-2]:  # all but the last two
                                 with tag('td'):
                                     text(item)
+                            with tag('td', bgcolor=row[-1]):
+                                text(row[-2])
                 with tag('button', klass='toggle', value='bond'):
-                    text('Hide hide detailed table')
+                    text('Hide detailed table')
  
