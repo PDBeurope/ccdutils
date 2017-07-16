@@ -38,7 +38,7 @@ CLASSIFICATION_ZLIMIT = OrderedDict([(5, 5.0),
                                      (1, 0.0),
                                      (0, -9999999.0)])
 CLASSIFICATION_COLOR = {5: (215. / 255., 48. / 255., 39. / 255.),  # blood orange
-                        3: (252. / 255., 141. / 255., 89. / 255.),  # mid orange
+                        4: (252. / 255., 141. / 255., 89. / 255.),  # mid orange
                         3: (254. / 255., 224. / 255., 144. / 255.),  # yellow/orange
                         2: (145. / 255., 191. / 255., 219. / 255.),  # mid blue
                         1: (69. / 255., 117. / 255., 180. / 255.),  # blue
@@ -79,8 +79,12 @@ class PdbCCDMogul(object):
         self.store_rings = []
         self.classify_bonds = []
         self.classify_angles = []
+        self.classify_torsions = []
+        self.classify_rings = []
         self.detailed_html_table = {}
         """dictionary for each observation, giving detailed html table: 1st row is the header, rest the data"""
+        self.svg_coloured_diagram = {}
+        """for each observation type"""
 
     def run_mogul(self):
         """
@@ -115,6 +119,7 @@ class PdbCCDMogul(object):
         for observation_type in MOGUL_OBSERVATION_TYPES:
             self.classify_observation(observation_type)
             self.prepare_html_table(observation_type)
+            self.prepare_svg_coloured_diagram(observation_type)
 
     def store_observation(self, geometry_analysed_molecule, observation_type):
         if observation_type == 'bond':
@@ -182,7 +187,7 @@ class PdbCCDMogul(object):
         elif observation_type == 'angle':
             work_from = self.store_angles
             place_in = self.classify_angles
-            sd_min = 0.1
+            sd_min = 1.0
             few_hits_threshold = self.settings_angle_few_hits_threshold
         elif observation_type == 'torsion':
             return  # TODO code up!
@@ -199,7 +204,7 @@ class PdbCCDMogul(object):
             if thing.nhits >= few_hits_threshold:
                 zorder = abs(zstar)
             elif thing.nhits != 0:
-                zorder = -100. + zstar
+                zorder = -100. + abs(zstar)
             else:
                 zorder = -101.
             logging.debug('zstar={} zorder={}'.format(zstar, zorder))
@@ -248,37 +253,40 @@ class PdbCCDMogul(object):
             classification = CLASSIFICATION_NAME[thing.classification]
             rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
         self.detailed_html_table[observation_type] = rows
-
-    def prepare_bond_table(self):
-        title_row = ('atoms', 'actual in ' + ANGSTROM, 'Mogul mean in ' + ANGSTROM, 'difference in ' + ANGSTROM,
-                     'Mogul ' + SIGMA + ' in ' + ANGSTROM, ' Mogul # hits', 'Z*-score', 'classification')
-        rows = []
-        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder, reverse=True):
-            atoms = '-'.join(bond.atoms_ids)
-            actual = '{:.3f}'.format(bond.value)
-            mean = '{:.3f}'.format(bond.mean)
-            difference = '{:.3f}'.format(bond.value - bond.mean)
-            sigma = '{:.3f}'.format(bond.standard_deviation)
-            nhits = '{}'.format(bond.nhits)
-            try:
-                z_score = '{:.2f}'.format(bond.zstar)
-            except ValueError:
-                z_score = ' '
-            classification = CLASSIFICATION_NAME[bond.classification]
-            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
-
+ 
+    def prepare_svg_coloured_diagram(self, observation_type):
+        if observation_type == 'bond':
+            work_from = self.classify_bonds
+        elif observation_type == 'angle':
+            work_from = self.classify_angles
+        elif observation_type == 'torsion':
+            return  # TODO code up!
+        elif observation_type == 'ring':
+            return  # TODO code up!
+        else:
+            raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
         highlight_bonds = OrderedDict()
-        for bond in sorted(self.classify_bonds, key=lambda b: b.zorder):
-            classification = bond.classification
+        for thing in sorted(work_from, key=lambda b: b.zorder):
+            classification = thing.classification
             if classification == 0:  # too few hits
                 pass
-            else:
-                highlight_bonds[(min(bond.indices), max(bond.indices))] =  CLASSIFICATION_COLOR[classification]
+            elif observation_type == 'bond':
+                highlight_bonds[(min(thing.indices), max(thing.indices))] =  CLASSIFICATION_COLOR[classification]
+            elif observation_type == 'angle':
+                logging.debug('thing.indices is {} thing.atom_ids={} classification={}'.format(thing.indices, thing.atoms_ids, classification))
+                first_bond_in_angle = (min(thing.indices[0:2]), max(thing.indices[0:2]))
+                second_bond_in_angle = (min(thing.indices[1:3]), max(thing.indices[1:3]))
+                logging.debug(' first_bond_in_angle is {}'.format(first_bond_in_angle))
+                logging.debug(' second_bond_in_angle is {}'.format(second_bond_in_angle))
+                for this_bond in first_bond_in_angle, second_bond_in_angle:
+                    if this_bond in highlight_bonds:
+                        del highlight_bonds[this_bond]
+                    highlight_bonds[this_bond] =  CLASSIFICATION_COLOR[classification]
+        logging.debug('hightlight_bonds={}'.format(highlight_bonds))
         svg_string = self.pdb_ccd_rdkit.image_file_or_string( hydrogen=False, atom_labels=False, wedge=False,
                                                               highlight_bonds=highlight_bonds, black=True,
                                                               pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
-        return title_row, rows, svg_string
-
+        self.svg_coloured_diagram[observation_type] = svg_string
 
     def prepare_html(self):
         doc, tag, text, line = Doc().ttl()
@@ -287,11 +295,6 @@ class PdbCCDMogul(object):
         chem_comp_name = self.pdb_ccd_rdkit.chem_comp_name
         svg_diagram = self.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
         title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
-        bond_title = self.detailed_html_table['bond'][0]
-        bond_rows = self.detailed_html_table['bond'][1:]
-        bond_svg = self.prepare_bond_table()[2]
-        logging.debug(bond_title)
-
         with tag('html'):
             with tag('head'):
                 with tag('title'):
@@ -307,31 +310,48 @@ class PdbCCDMogul(object):
                     line('li', 'chem_comp_id =' + chem_comp_id)
                     line('li', 'chem_comp_name = ' + chem_comp_name)
                 doc.asis(svg_diagram)
-                with tag('h2'):
-                    text('bond lengths')
-                if len(self.store_bonds) == 0:
-                    line('p', 'no bonds found')
-                else:
-                    doc.asis(bond_svg)
-                    with tag('div', id="bond_show_button"):
-                        with tag('button', klass='toggle', value='bond'):
-                            text('Show detailed table showing results for each bond')
-                    with tag('div', id="bond_details"):
-                        with tag('button', klass='toggle', value='bond'):
-                            text('Hide hide detailed table')
-                        with tag('table'):
-                            with tag('tr'):
-                                for item in bond_title:
-                                    with tag('th'):
-                                        doc.asis(item)
-                            for row in bond_rows:
-                                with tag('tr'):
-                                    for item in row:
-                                        with tag('td'):
-                                            text(item)
-                        with tag('button', klass='toggle', value='bond'):
-                            text('Hide hide detailed table')
+                for observation_type in MOGUL_OBSERVATION_TYPES:
+                   some_html = self.prepare_html_section( observation_type, doc, tag, text, line)
         result = doc.getvalue()
         return result
 
-
+    def prepare_html_section( self, observation_type, doc, tag, text, line):
+        if observation_type == 'bond':
+            section_title = 'bond lengths'
+            this_classify = self.classify_bonds
+        elif observation_type == 'angle':
+            section_title = 'bond angles'
+            this_classify = self.classify_angles
+        elif observation_type == 'torsion':
+            section_title = 'torsions'
+            this_classify = self.classify_angles
+        elif observation_type == 'ring':
+            section_title = 'rings'
+            this_classify = self.classify_angles
+        else:
+            raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
+        with tag('h2'):
+            text(section_title)
+        if observation_type not in self.detailed_html_table:
+            line('p', 'no ' + observation_type + 's found')
+        else:
+            doc.asis(self.svg_coloured_diagram[observation_type])
+            with tag('div', id=observation_type + '_show_button'):
+                with tag('button', klass='toggle', value=observation_type):
+                    text('Show detailed table showing results for each ' + observation_type)
+            with tag('div', id=observation_type + "_details"):
+                with tag('button', klass='toggle', value=observation_type):
+                    text('Hide hide detailed table')
+                with tag('table'):
+                    with tag('tr'):
+                        for item in self.detailed_html_table[observation_type][0]:
+                            with tag('th'):
+                                doc.asis(item)
+                    for row in self.detailed_html_table[observation_type][1:]:
+                        with tag('tr'):
+                            for item in row:
+                                with tag('td'):
+                                    text(item)
+                with tag('button', klass='toggle', value='bond'):
+                    text('Hide hide detailed table')
+ 
