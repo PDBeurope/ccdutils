@@ -21,15 +21,28 @@ import tempfile
 from ccdc import io, conformer
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from yattag import Doc
+from collections import OrderedDict
 
 ANGSTROM = '&Aring;'
 SIGMA = '&sigma;'
-CLASSIFICATION_COLOR = {'outlier': (215. / 255., 48. / 255., 39. / 255.),  # blood orange
-                        'very-unusual': (252. / 255., 141. / 255., 89. / 255.),  # mid orange
-                        'unusual': (254. / 255., 224. / 255., 144. / 255.),  # yellow/orange
-                        'common': (145. / 255., 191. / 255., 219. / 255.),  # mid blue
-                        'very-common': (69. / 255., 117. / 255., 180. / 255.)  # blue
-                        }
+CLASSIFICATION_NAME = OrderedDict([(5, 'outlier'),
+                                   (4, 'very-unusual'), 
+                                   (3, 'unusual'), 
+                                   (2, 'common'), 
+                                   (1, 'very-common'), 
+                                   (0, 'too few hits')])
+CLASSIFICATION_ZLIMIT = OrderedDict([(5, 5.0), 
+                                     (4, 3.5),
+                                     (3, 2.0),
+                                     (2, 1.0),
+                                     (1, 0.0),
+                                     (0, -9999999.0)])
+CLASSIFICATION_COLOR = {5: (215. / 255., 48. / 255., 39. / 255.),  # blood orange
+                        3: (252. / 255., 141. / 255., 89. / 255.),  # mid orange
+                        3: (254. / 255., 224. / 255., 144. / 255.),  # yellow/orange
+                        2: (145. / 255., 191. / 255., 219. / 255.),  # mid blue
+                        1: (69. / 255., 117. / 255., 180. / 255.),  # blue
+                        0: None }
 JQUERY_SCRIPT = '''
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script>
@@ -177,18 +190,10 @@ class PdbCCDMogul(object):
             else:
                 zorder = -101.
             logging.debug('zstar={} zorder={}'.format(zstar, zorder))
-            if zorder > 5.:
-                classification = 'outlier'
-            elif zorder > 3.5:
-                classification = 'very-unusual'
-            elif zorder > 2.0:
-                classification = 'unusual'
-            elif zorder > 1.:
-                classification = 'common'
-            elif zorder > 0.:
-                classification = 'very-common'
-            else:
-                classification = 'too few hits'
+            for class_num, limit in CLASSIFICATION_ZLIMIT.items():
+                if zorder > limit:
+                    classification = class_num
+                    break
             store = thing._asdict()
             store['zstar'] = zstar
             store['zorder'] = zorder
@@ -265,13 +270,13 @@ class PdbCCDMogul(object):
                 z_score = '{:.2f}'.format(bond.zstar)
             except ValueError:
                 z_score = ' '
-            classification = bond.classification
+            classification = CLASSIFICATION_NAME[bond.classification]
             rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification))
 
-        highlight_bonds = collections.OrderedDict()
+        highlight_bonds = OrderedDict()
         for bond in sorted(self.classify_bonds, key=lambda b: b.zorder):
             classification = bond.classification
-            if classification == 'too few hits':
+            if classification == 0:  # too few hits
                 pass
             else:
                 highlight_bonds[(min(bond.indices), max(bond.indices))] =  CLASSIFICATION_COLOR[classification]
