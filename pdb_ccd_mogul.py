@@ -224,27 +224,29 @@ class PdbCCDMogul(object):
                     line('li', 'chem_comp_name = ' + chem_comp_name)
                 doc.asis(svg_diagram)
                 with tag('h2'):
-                    text('Mogul bond results')
+                    text('bond lengths')
                 if len(self.store_bonds) == 0:
                     line('p', 'no bonds found')
                 else:
                     doc.asis(bond_svg)
                     with tag('div', id="bond_show_button"):
                         with tag('button', klass='toggle', value='bond'):
-                            text('Show detailed table')
+                            text('Show detailed table showing results for each bond')
                     with tag('div', id="bond_details"):
                         with tag('button', klass='toggle', value='bond'):
-                            text('Hide detailed table')
-                            with tag('table'):
+                            text('Hide hide detailed table')
+                        with tag('table'):
+                            with tag('tr'):
+                                for item in bond_title:
+                                    with tag('th'):
+                                        doc.asis(item)
+                            for row in bond_rows:
                                 with tag('tr'):
-                                    for item in bond_title:
-                                        with tag('th'):
-                                            doc.asis(item)
-                                for row in bond_rows:
-                                    with tag('tr'):
-                                        for item in row:
-                                            with tag('td'):
-                                                text(item)
+                                    for item in row:
+                                        with tag('td'):
+                                            text(item)
+                        with tag('button', klass='toggle', value='bond'):
+                            text('Hide hide detailed table')
         result = doc.getvalue()
         return result
 
