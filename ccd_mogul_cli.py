@@ -64,10 +64,7 @@ def run():
     logging.debug('mogul results for {} bonds, {} angles, {} torsions and {} rings'.
                   format(len(pdb_ccd_mogul.store_bonds), len(pdb_ccd_mogul.store_angles),
                          len(pdb_ccd_mogul.store_torsions), len(pdb_ccd_mogul.store_rings)))
-
-    html_text = pdb_ccd_mogul.prepare_html()
-    with open(html_file, "w") as text_file:
-        text_file.write(html_text)
+    pdb_ccd_mogul.prepare_file_html(html_file)
     print('have written report to {}'.format(html_file))
 
 

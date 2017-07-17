@@ -303,6 +303,11 @@ class PdbCCDMogul(object):
                                                               pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
         self.svg_coloured_diagram[observation_type] = svg_string
 
+    def prepare_file_html(self, html_file_name):
+        html_text = self.prepare_html()
+        with open(html_file_name, "w") as text_file:
+            text_file.write(html_text)
+
     def prepare_html(self):
         doc, tag, text, line = Doc().ttl()
 
@@ -322,7 +327,7 @@ class PdbCCDMogul(object):
                 with tag('ul', ):
                     line('li', 'chem_comp_id =' + chem_comp_id)
                     line('li', 'chem_comp_name = ' + chem_comp_name)
-                    line('li', "This analysis of the wwPDB chemical component definition 'ideal' coordinates.")
+                    line('li', "This analysis is of the wwPDB chemical component definition 'ideal' coordinates.")
                 doc.asis(svg_diagram)
                 for observation_type in MOGUL_OBSERVATION_TYPES:
                    some_html = self.prepare_html_section( observation_type, doc, tag, text, line)
@@ -344,7 +349,7 @@ class PdbCCDMogul(object):
             this_classify = self.classify_angles
         else:
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
-        with tag('h2'):
+        with tag('h3'):
             text(section_title)
         if observation_type not in self.detailed_html_table:
             line('p', 'no ' + observation_type + 's found or NOT YET CODED!')

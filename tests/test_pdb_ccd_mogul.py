@@ -15,10 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import traceback
+import os
 import unittest
 from pdb_ccd_mogul import PdbCCDMogul
-from utilities import cif_filename
-from nose.tools import assert_equals
+from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
+from nose.tools import assert_equals, assert_true, assert_false
 
 
 def test_eoh_mogul():
@@ -30,5 +32,21 @@ def test_eoh_mogul():
     assert_equals(len(eoh.store_torsions), 0)
     assert_equals(len(eoh.store_rings), 0)
 
+
+def test_html_write_for_all_sample_cifs():
+    for cif_file in supply_list_of_sample_cifs():
+        pdb_ccd_mogul = PdbCCDMogul(file_name=cif_file)
+        chem_comp_id = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_id
+        html_out_file = file_name_in_tsts_out(chem_comp_id + '.pdb_ccd_ideal_mogul_report.html')
+        try:
+            pdb_ccd_mogul.run_mogul()
+            pdb_ccd_mogul.prepare_file_html(html_out_file)
+        except Exception as err:
+            yield assert_false, 'exception {}\ntraceback{}'.format(err, traceback.format_exc())
+            next 
+        yield assert_true, os.path.isfile(html_out_file) and os.path.getsize(html_out_file) > 0, \
+            '{} call to pdb_ccd_mogul.prepare_file_html("{}") must create a non-empty file.'.\
+            format(chem_comp_id, html_out_file)
+ 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
