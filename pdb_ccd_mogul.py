@@ -258,25 +258,26 @@ class PdbCCDMogul(object):
             return  # TODO code up!
         else:
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
-        rows = []
-        title_row = ('atoms', 'actual in ' + units, 'Mogul mean in ' + units, 'difference in ' + units,
-                     'Mogul ' + SIGMA + ' in ' + units, ' Mogul # hits', 'Z*-score', 'classification', 'color')
-        rows.append(title_row)
-        for thing in sorted(work_from, key=lambda t: t.zorder, reverse=True):
-            atoms = '-'.join(thing.atoms_ids)
-            actual = sf_format.format(thing.value)
-            mean = sf_format.format(thing.mean)
-            difference = sf_format.format(thing.value - thing.mean)
-            sigma = sf_format.format(thing.standard_deviation)
-            nhits = '{}'.format(thing.nhits)
-            try:
-                z_score = '{:.2f}'.format(thing.zstar)
-            except ValueError:
-                z_score = ' '
-            classification = CLASSIFICATION_NAME[thing.classification]
-            html_color = CLASSIFICATION_HTML_COLOR[thing.classification]
-            rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification, html_color))
-        self.detailed_html_table[observation_type] = rows
+        if len(work_from) > 0:
+            rows = []
+            title_row = ('atoms', 'actual in ' + units, 'Mogul mean in ' + units, 'difference in ' + units,
+                         'Mogul ' + SIGMA + ' in ' + units, ' Mogul # hits', 'Z*-score', 'classification', 'color')
+            rows.append(title_row)
+            for thing in sorted(work_from, key=lambda t: t.zorder, reverse=True):
+                atoms = '-'.join(thing.atoms_ids)
+                actual = sf_format.format(thing.value)
+                mean = sf_format.format(thing.mean)
+                difference = sf_format.format(thing.value - thing.mean)
+                sigma = sf_format.format(thing.standard_deviation)
+                nhits = '{}'.format(thing.nhits)
+                try:
+                    z_score = '{:.2f}'.format(thing.zstar)
+                except ValueError:
+                    z_score = ' '
+                classification = CLASSIFICATION_NAME[thing.classification]
+                html_color = CLASSIFICATION_HTML_COLOR[thing.classification]
+                rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification, html_color))
+            self.detailed_html_table[observation_type] = rows
  
     def prepare_svg_coloured_diagram(self, observation_type):
         if observation_type == 'bond':
@@ -335,12 +336,27 @@ class PdbCCDMogul(object):
                 with tag('h1'):
                     text(title)
                 with tag('ul', ):
-                    line('li', 'chem_comp_id =' + chem_comp_id)
-                    line('li', 'chem_comp_name = ' + chem_comp_name)
+                    with tag('li'):
+                        text('code: ')
+                        with tag('a', href='https://gitlab.com/pdbe/ccd_utils/'):
+                            text('https://gitlab.com/pdbe/ccd_utils/')
+                    with tag('li'):
+                        text('development notes: ')
+                        with tag('a', href='https://gitlab.com/pdbe/ccd_utils/issues/20'):
+                            text('https://gitlab.com/pdbe/ccd_utils/issues/20')
+                    line('li', 'chem_comp_id ' + chem_comp_id)
+                    line('li', 'chem_comp_name ' + chem_comp_name)
                     line('li', "This analysis is of the wwPDB chemical component definition 'ideal' coordinates.")
+                with tag('h3'):
+                    text('atom labels: ')
                 doc.asis(svg_diagram)
                 for observation_type in MOGUL_OBSERVATION_TYPES:
                     self.prepare_html_section(observation_type, doc, tag, text, line)
+                with tag('h3'):
+                    text('Mogul run conditions')
+                with tag('i'):
+                    text('TODO: add Mogul run conditions')
+
         result = doc.getvalue()
         return result
 
@@ -367,6 +383,8 @@ class PdbCCDMogul(object):
                         doc.asis(self.svg_coloured_diagram[observation_type])
                     with tag('td', klass='no_border'):
                         self.bond_angle_key(doc, tag, text, line)
+            with tag('i'):
+                text('TODO: add table with metrics - number and % for outliers, very-unusual, usual plus rmsZ*')
             with tag('div', id=observation_type + '_show_button'):
                 with tag('button', klass='toggle', value=observation_type):
                     text('Show detailed table showing results for each ' + observation_type)
