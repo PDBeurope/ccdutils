@@ -25,7 +25,6 @@ proof of concept - Mogul analysis of PDB-CCD coordinates
    http://grade.globalphasing.org/tut/erice_workshop/introtutorial/buster/00_MapOnly.report/ligand/
 """
 import argparse
-import collections
 import logging
 import sys
 from argparse import RawTextHelpFormatter
