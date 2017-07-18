@@ -42,14 +42,14 @@ CLASSIFICATION_COLOR = {5: (215. / 255., 48. / 255., 39. / 255.),  # blood orang
                         3: (254. / 255., 224. / 255., 144. / 255.),  # yellow/orange
                         2: (145. / 255., 191. / 255., 219. / 255.),  # mid blue
                         1: (69. / 255., 117. / 255., 180. / 255.),  # blue
-                        0: None }
-CLASSIFICATION_HTML_COLOR = {5:'#D73027',
-                             4:'#FC8D59', 
-                             3:'#FEE090',
-                             2:'#91BFDB',
-                             1:'#4575B4',
-                             0:'#FFFFFF'}
-STYLE='''
+                        0: None}
+CLASSIFICATION_HTML_COLOR = {5: '#D73027',
+                             4: '#FC8D59',
+                             3: '#FEE090',
+                             2: '#91BFDB',
+                             1: '#4575B4',
+                             0: '#FFFFFF'}
+STYLE = '''
 <style>
 table, th, td {border: 2px solid black; border-collapse: collapse;}
 th, td { padding: 5px; text-align: center }
@@ -76,6 +76,7 @@ $(document).ready(function(){
 PIXELS_X = 500
 PIXELS_Y = 300
 MOGUL_OBSERVATION_TYPES = ('bond', 'angle', 'torsion', 'ring')
+
 
 class PdbCCDMogul(object):
     """ run Mogul on PDB CCD"""
@@ -214,7 +215,7 @@ class PdbCCDMogul(object):
             if thing.nhits == 0:
                 zstar = None
             else:
-                zstar = (thing.value - thing.mean)/max(thing.standard_deviation,sd_min)
+                zstar = (thing.value - thing.mean)/max(thing.standard_deviation, sd_min)
             if thing.nhits >= few_hits_threshold:
                 zorder = abs(zstar)
             elif thing.nhits != 0:
@@ -222,6 +223,7 @@ class PdbCCDMogul(object):
             else:
                 zorder = -101.
             logging.debug('zstar={} zorder={}'.format(zstar, zorder))
+            classification = None
             for class_num, limit in CLASSIFICATION_ZLIMIT.items():
                 if zorder > limit:
                     classification = class_num
@@ -286,9 +288,10 @@ class PdbCCDMogul(object):
             if classification == 0:  # too few hits
                 pass
             elif observation_type == 'bond':
-                highlight_bonds[(min(thing.indices), max(thing.indices))] =  CLASSIFICATION_COLOR[classification]
+                highlight_bonds[(min(thing.indices), max(thing.indices))] = CLASSIFICATION_COLOR[classification]
             elif observation_type == 'angle':
-                logging.debug('thing.indices is {} thing.atom_ids={} classification={}'.format(thing.indices, thing.atoms_ids, classification))
+                logging.debug('thing.indices is {} thing.atom_ids={} classification={}'.
+                              format(thing.indices, thing.atoms_ids, classification))
                 first_bond_in_angle = (min(thing.indices[0:2]), max(thing.indices[0:2]))
                 second_bond_in_angle = (min(thing.indices[1:3]), max(thing.indices[1:3]))
                 logging.debug(' first_bond_in_angle is {}'.format(first_bond_in_angle))
@@ -296,11 +299,11 @@ class PdbCCDMogul(object):
                 for this_bond in first_bond_in_angle, second_bond_in_angle:
                     if this_bond in highlight_bonds:
                         del highlight_bonds[this_bond]
-                    highlight_bonds[this_bond] =  CLASSIFICATION_COLOR[classification]
+                    highlight_bonds[this_bond] = CLASSIFICATION_COLOR[classification]
         logging.debug('hightlight_bonds={}'.format(highlight_bonds))
-        svg_string = self.pdb_ccd_rdkit.image_file_or_string( hydrogen=False, atom_labels=False, wedge=False,
-                                                              highlight_bonds=highlight_bonds, black=True,
-                                                              pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
+        svg_string = self.pdb_ccd_rdkit.image_file_or_string(hydrogen=False, atom_labels=False, wedge=False,
+                                                             highlight_bonds=highlight_bonds, black=True,
+                                                             pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
         self.svg_coloured_diagram[observation_type] = svg_string
 
     def prepare_file_html(self, html_file_name):
@@ -330,23 +333,19 @@ class PdbCCDMogul(object):
                     line('li', "This analysis is of the wwPDB chemical component definition 'ideal' coordinates.")
                 doc.asis(svg_diagram)
                 for observation_type in MOGUL_OBSERVATION_TYPES:
-                   some_html = self.prepare_html_section( observation_type, doc, tag, text, line)
+                    self.prepare_html_section(observation_type, doc, tag, text, line)
         result = doc.getvalue()
         return result
 
-    def prepare_html_section( self, observation_type, doc, tag, text, line):
+    def prepare_html_section(self, observation_type, doc, tag, text, line):
         if observation_type == 'bond':
             section_title = 'bond lengths'
-            this_classify = self.classify_bonds
         elif observation_type == 'angle':
             section_title = 'bond angles'
-            this_classify = self.classify_angles
         elif observation_type == 'torsion':
             section_title = 'torsions'
-            this_classify = self.classify_angles
         elif observation_type == 'ring':
             section_title = 'rings'
-            this_classify = self.classify_angles
         else:
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
         with tag('h3'):
@@ -354,13 +353,13 @@ class PdbCCDMogul(object):
         if observation_type not in self.detailed_html_table:
             line('p', 'no ' + observation_type + 's found or NOT YET CODED!')
         else:
-             # svg and key in little table
+            # svg and key in little table
             with tag('table', klass='no_border'):
                 with tag('tr',  klass='no_border'):
                     with tag('td', klass='no_border'):
                         doc.asis(self.svg_coloured_diagram[observation_type])
                     with tag('td', klass='no_border'):
-                        self.bond_angle_key( doc, tag, text, line)
+                        self.bond_angle_key(doc, tag, text, line)
             with tag('div', id=observation_type + '_show_button'):
                 with tag('button', klass='toggle', value=observation_type):
                     text('Show detailed table showing results for each ' + observation_type)
@@ -382,16 +381,17 @@ class PdbCCDMogul(object):
                 with tag('button', klass='toggle', value='bond'):
                     text('Hide detailed table')
 
-    def bond_angle_key( self, doc, tag, text, line): 
+    @staticmethod
+    def bond_angle_key( doc, tag, text, line):
         z_next = ''
         with tag('table'):
             for class_num, name in CLASSIFICATION_NAME.items():
-               if class_num == 0:
+                if class_num == 0:
                     break
-               with tag('tr',  klass='key'):
-                   with tag('td', bgcolor=CLASSIFICATION_HTML_COLOR[class_num], klass='key'):
-                       text(name)
-                   with tag('td', klass='key'):
-                       z_limit = '{} &gt; Z* {}'.format(CLASSIFICATION_ZLIMIT[class_num], z_next)
-                       z_next = '&ge; {}'.format( CLASSIFICATION_ZLIMIT[class_num]) 
-                       doc.asis(z_limit)
+                with tag('tr',  klass='key'):
+                    with tag('td', bgcolor=CLASSIFICATION_HTML_COLOR[class_num], klass='key'):
+                        text(name)
+                    with tag('td', klass='key'):
+                        z_limit = '{} &gt; Z* {}'.format(CLASSIFICATION_ZLIMIT[class_num], z_next)
+                        z_next = '&ge; {}'.format(CLASSIFICATION_ZLIMIT[class_num])
+                        doc.asis(z_limit)

@@ -273,8 +273,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         Args:
             file_name (str): the name of the file. Type normally got from the filename ending for instance .png or .svg
             wedge (bool):  wedge the bonds in the image
-            atom_labels (str): include atom labels in the image
-            hydrogen (str): include hydrogen atoms in the image.
+            atom_labels (bool): include atom labels in the image
+            hydrogen (bool): include hydrogen atoms in the image.
             pixels_x (int): size of image in pixels
             pixels_y (int): size of image in pixels
             highlight_bonds: an ordered dictionary of bonds to highlight key (atom_index_0, atom_index_1) to (r,g,b)
