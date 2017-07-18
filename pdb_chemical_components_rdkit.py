@@ -136,6 +136,25 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         self.rdkit_mol_conformer_id_ideal = self.rdkit_mol.AddConformer(ideal_conformer, assignId=True)
         self.rdkit_mol_conformer_id_model = self.rdkit_mol.AddConformer(model_conformer, assignId=True)
 
+    def load_xyz_into_conformer(self, their_xyz):
+        """
+        loads a set of 3D coordinations as a rdkit conformer
+        
+        Args:
+            their_xyz: the xyz coordinates of (x, y, z) one for each atom
+
+        Returns:
+            (int) the conformer id 
+        """
+        """  """
+        new_conformer = Chem.Conformer(self.number_atoms)
+        for atom_index in range(self.number_atoms):
+            (x, y, z) = their_xyz[atom_index]
+            rdkit_xyz = rdGeometry.Point3D(x, y, z)
+            new_conformer.SetAtomPosition(atom_index, rdkit_xyz)
+        conformer_id = self.rdkit_mol.AddConformer(new_conformer, assignId=True)
+        return conformer_id
+
     @property
     def inchikey_from_rdkit(self):
         if self._inchikey_from_rdkit is None:
@@ -143,7 +162,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
         return self._inchikey_from_rdkit
 
-    def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=False):
+    def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=False, xyz=None):
         """
         write a sdf file or return a string containing the molecule as a sdf file
 
@@ -152,12 +171,15 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             ideal (bool): write the ideal coordinates (True) or model coordinates (False)? Default True: ideal.
             hydrogen (bool): include hydrogen atoms in the sdf? Default True: yes)
             alias (bool): use the alias feature to include atom names in the sdf? Default False no.
+            xyz: list of (x,y,z) coordinates to be written instead of ideal or model
 
         Returns:
             None or a string containing the molecule converted to sdf
         """
         fname = self.chem_comp_id + '.sdf'
-        if ideal:
+        if xyz is not None:
+            conformer_id = self.load_xyz_into_conformer(their_xyz=xyz)
+        elif ideal:
             conformer_id = self.rdkit_mol_conformer_id_ideal
         else:
             conformer_id = self.rdkit_mol_conformer_id_model

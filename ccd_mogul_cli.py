@@ -56,6 +56,7 @@ def run():
 
     try:
         pdb_ccd_mogul = PdbCCDMogul(file_name=cif_file)
+        logger.debug('ideal coords {}'.format(pdb_ccd_mogul.pdb_ccd_rdkit.ideal_xyz))
         pdb_ccd_mogul.run_mogul()
     except ValueError as error_message:
         print('ERROR {}'.format(error_message))

@@ -111,7 +111,14 @@ class PdbCCDMogul(object):
         # write out the molecule as an sdf file to a temporary directory
         __, sdf_temp = tempfile.mkstemp(suffix='.sdf')
         logging.debug('load into PdbChemicalComponentsRDKit and write out temporary sdf file "{}"'.format(sdf_temp))
-        self.pdb_ccd_rdkit.sdf_file_or_string(file_name=sdf_temp)
+        override_xyz = None
+        if self.pdb_ccd_rdkit.ideal_xyz[0][2] == 0.000:
+            logging.debug('ideal xyz first z coordinate is 0.000')
+            override_xyz = []
+            for xyz in self.pdb_ccd_rdkit.ideal_xyz:
+                override_xyz.append((xyz[0]+0.001, xyz[1]+0.001, xyz[2]+0.001))
+            logging.debug(override_xyz)
+        self.pdb_ccd_rdkit.sdf_file_or_string(file_name=sdf_temp, xyz=override_xyz)
         if not os.path.isfile(sdf_temp) or os.path.getsize(sdf_temp) == 0:
             raise RuntimeError('cannot write out sdf file')
         mol_reader = io.MoleculeReader(sdf_temp)
