@@ -41,12 +41,11 @@ def test_html_write_for_all_sample_cifs():
         try:
             pdb_ccd_mogul.run_mogul()
             pdb_ccd_mogul.prepare_file_html(html_out_file)
+            yield assert_true, os.path.isfile(html_out_file) and os.path.getsize(html_out_file) > 0, \
+                '{} call to pdb_ccd_mogul.prepare_file_html("{}") must create a non-empty file.'.\
+                format(chem_comp_id, html_out_file)
         except Exception as err:
             yield assert_false, 'exception {}\ntraceback{}'.format(err, traceback.format_exc())
-            next 
-        yield assert_true, os.path.isfile(html_out_file) and os.path.getsize(html_out_file) > 0, \
-            '{} call to pdb_ccd_mogul.prepare_file_html("{}") must create a non-empty file.'.\
-            format(chem_comp_id, html_out_file)
- 
+
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
