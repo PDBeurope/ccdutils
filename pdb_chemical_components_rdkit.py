@@ -216,25 +216,25 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         atom_pdb_residue_info.SetOccupancy(1.0)
         atom_pdb_residue_info.SetChainId('A')
         atom_pdb_residue_info.SetResidueNumber(1)
+        atom_pdb_residue_info.SetIsHeteroAtom(True)
         for atom in self.rdkit_mol.GetAtoms():
             atom_index = atom.GetIdx()
             pdbx_align = self.atom_pdbx_align[atom_index]
-            element = self.atom_elements[atom_index]
             atom_name = self.atom_ids[atom_index]
-            if len(atom_name) < 4:
-                atom_name = atom_name + ' ' * (3 - len(atom_name) + (pdbx_align == '0'))
             if pdbx_align == '1':
                 atom_name = ' ' + atom_name
+            atom_name = '{:<4}'.format(atom_name)  # make sure it is 4 characters
             atom_pdb_residue_info.SetName(atom_name)
             atom.SetMonomerInfo(atom_pdb_residue_info)
         if ideal:
             conformer_id = self.rdkit_mol_conformer_id_ideal
         else:
             conformer_id = self.rdkit_mol_conformer_id_model
-        pdb_title1 = 'HEADER    NONAME 07-Jun-17\nTITLE     Produced by PDBeChem\nCOMPND    {}\n'.format(
-            self.chem_comp_id)
-        pdb_title2 = 'AUTHOR    EBI-PDBe Generated\nREVDAT   1  07-Jun-17     0\n'
-        pdb_string = pdb_title1 + pdb_title2 + Chem.MolToPDBBlock(self.rdkit_mol, conformer_id)
+        ideal_or_model = 'ideal' if ideal else 'model'
+        pdb_title = 'TITLE     {} coordinates'.format(ideal_or_model)
+        pdb_title += ' for PDB Chemical Component Definition {}\n'.format(self.chem_comp_id)
+        pdb_title += 'AUTHOR    ccd_utils using RDKit\n'
+        pdb_string = pdb_title + Chem.MolToPDBBlock(self.rdkit_mol, conformer_id)
         if file_name is None:
             return pdb_string
         else:
