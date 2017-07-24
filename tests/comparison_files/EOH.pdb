@@ -1,0 +1,24 @@
+HEADER    NONAME 20-Feb-16
+TITLE     Produced by PDBeChem
+COMPND    EOH      
+AUTHOR    EBI-PDBe Generated
+REVDAT   1  20-Feb-16     0
+ATOM      1  C1  EOH     0       0.007  -0.569   0.000  1.00 20.00           C+0
+ATOM      2  C2  EOH     0      -1.285   0.250  -0.000  1.00 20.00           C+0
+ATOM      3  O   EOH     0       1.130   0.315  -0.000  1.00 20.00           O+0
+ATOM      4  H11 EOH     0       0.039  -1.197   0.890  1.00 20.00           H+0
+ATOM      5  H12 EOH     0       0.039  -1.197  -0.890  1.00 20.00           H+0
+ATOM      6  H21 EOH     0      -1.317   0.878   0.890  1.00 20.00           H+0
+ATOM      7  H22 EOH     0      -1.317   0.878  -0.890  1.00 20.00           H+0
+ATOM      8  H23 EOH     0      -2.142  -0.424   0.000  1.00 20.00           H+0
+ATOM      9  HO  EOH     0       1.986  -0.137   0.000  1.00 20.00           H+0
+CONECT    1    2    4    5    3
+CONECT    2    1    6    7    8
+CONECT    3    1    9
+CONECT    4    1
+CONECT    5    1
+CONECT    6    2
+CONECT    7    2
+CONECT    8    2
+CONECT    9    3
+END
