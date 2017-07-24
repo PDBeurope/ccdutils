@@ -28,7 +28,7 @@ def this_script_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-test_file_path_name = os.path.join(this_script_dir(), 'data', 'pdb_ccd_mmcif_test_files')
+test_file_path_name = os.path.join(this_script_dir(), 'tests', 'ccd_mmcif_test_files')
 
 
 def cif_filename(code):
