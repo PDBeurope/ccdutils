@@ -1,0 +1,100 @@
+HEADER    NONAME 20-Feb-16
+TITLE     Produced by PDBeChem
+COMPND    ATP      
+AUTHOR    EBI-PDBe Generated
+REVDAT   1  20-Feb-16     0
+ATOM      1  PG  ATP     0       1.200  -0.226  -6.850  1.00 20.00           P+0
+ATOM      2  O1G ATP     0       1.740   1.140  -6.672  1.00 20.00           O+0
+ATOM      3  O2G ATP     0       2.123  -1.036  -7.891  1.00 20.00           O+0
+ATOM      4  O3G ATP     0      -0.302  -0.139  -7.421  1.00 20.00           O+0
+ATOM      5  PB  ATP     0       0.255  -0.130  -4.446  1.00 20.00           P+0
+ATOM      6  O1B ATP     0       0.810   1.234  -4.304  1.00 20.00           O+0
+ATOM      7  O2B ATP     0      -1.231  -0.044  -5.057  1.00 20.00           O+0
+ATOM      8  O3B ATP     0       1.192  -0.990  -5.433  1.00 20.00           O+0
+ATOM      9  PA  ATP     0      -0.745   0.068  -2.071  1.00 20.00           P+0
+ATOM     10  O1A ATP     0      -2.097   0.143  -2.669  1.00 20.00           O+0
+ATOM     11  O2A ATP     0      -0.125   1.549  -1.957  1.00 20.00           O+0
+ATOM     12  O3A ATP     0       0.203  -0.840  -3.002  1.00 20.00           O+0
+ATOM     13  O5' ATP     0      -0.844  -0.587  -0.604  1.00 20.00           O+0
+ATOM     14  C5' ATP     0      -1.694   0.260   0.170  1.00 20.00           C+0
+ATOM     15  C4' ATP     0      -1.831  -0.309   1.584  1.00 20.00           C+0
+ATOM     16  O4' ATP     0      -0.542  -0.355   2.234  1.00 20.00           O+0
+ATOM     17  C3' ATP     0      -2.683   0.630   2.465  1.00 20.00           C+0
+ATOM     18  O3' ATP     0      -4.033   0.165   2.534  1.00 20.00           O+0
+ATOM     19  C2' ATP     0      -2.011   0.555   3.856  1.00 20.00           C+0
+ATOM     20  O2' ATP     0      -2.926   0.043   4.827  1.00 20.00           O+0
+ATOM     21  C1' ATP     0      -0.830  -0.418   3.647  1.00 20.00           C+0
+ATOM     22  N9  ATP     0       0.332   0.015   4.425  1.00 20.00           N+0
+ATOM     23  C8  ATP     0       1.302   0.879   4.012  1.00 20.00           C+0
+ATOM     24  N7  ATP     0       2.184   1.042   4.955  1.00 20.00           N+0
+ATOM     25  C5  ATP     0       1.833   0.300   6.033  1.00 20.00           C+0
+ATOM     26  C6  ATP     0       2.391   0.077   7.303  1.00 20.00           C+0
+ATOM     27  N6  ATP     0       3.564   0.706   7.681  1.00 20.00           N+0
+ATOM     28  N1  ATP     0       1.763  -0.747   8.135  1.00 20.00           N+0
+ATOM     29  C2  ATP     0       0.644  -1.352   7.783  1.00 20.00           C+0
+ATOM     30  N3  ATP     0       0.088  -1.178   6.602  1.00 20.00           N+0
+ATOM     31  C4  ATP     0       0.644  -0.371   5.704  1.00 20.00           C+0
+ATOM     32 HOG2 ATP     0       2.100  -0.546  -8.725  1.00 20.00           H+0
+ATOM     33 HOG3 ATP     0      -0.616  -1.048  -7.522  1.00 20.00           H+0
+ATOM     34 HOB2 ATP     0      -1.554  -0.952  -5.132  1.00 20.00           H+0
+ATOM     35 HOA2 ATP     0       0.752   1.455  -1.563  1.00 20.00           H+0
+ATOM     36 H5'1 ATP     0      -2.678   0.312  -0.296  1.00 20.00           H+0
+ATOM     37 H5'2 ATP     0      -1.263   1.259   0.221  1.00 20.00           H+0
+ATOM     38  H4' ATP     0      -2.275  -1.304   1.550  1.00 20.00           H+0
+ATOM     39  H3' ATP     0      -2.651   1.649   2.078  1.00 20.00           H+0
+ATOM     40 HO3' ATP     0      -4.515   0.788   3.094  1.00 20.00           H+0
+ATOM     41  H2' ATP     0      -1.646   1.537   4.157  1.00 20.00           H+0
+ATOM     42 HO2' ATP     0      -3.667   0.662   4.867  1.00 20.00           H+0
+ATOM     43  H1' ATP     0      -1.119  -1.430   3.931  1.00 20.00           H+0
+ATOM     44  H8  ATP     0       1.334   1.357   3.044  1.00 20.00           H+0
+ATOM     45 HN61 ATP     0       3.938   0.548   8.562  1.00 20.00           H+0
+ATOM     46 HN62 ATP     0       4.015   1.303   7.064  1.00 20.00           H+0
+ATOM     47  H2  ATP     0       0.166  -2.014   8.490  1.00 20.00           H+0
+CONECT    1    2    3    8    4
+CONECT    2    1
+CONECT    3   32    1
+CONECT    4   33    1
+CONECT    5    6    7   12    8
+CONECT    6    5
+CONECT    7   34    5
+CONECT    8    5    1
+CONECT    9   10   11   12   13
+CONECT   10    9
+CONECT   11   35    9
+CONECT   12    9    5
+CONECT   13   14    9
+CONECT   14   15   36   37   13
+CONECT   15   17   14   38   16
+CONECT   16   21   15
+CONECT   17   19   15   39   18
+CONECT   18   17   40
+CONECT   19   21   17   41   20
+CONECT   20   19   42
+CONECT   21   19   43   22   16
+CONECT   22   21   31   23
+CONECT   23   44   24   22
+CONECT   24   25   23
+CONECT   25   31   26   24
+CONECT   26   25   28   27
+CONECT   27   26   45   46
+CONECT   28   29   26
+CONECT   29   47   28   30
+CONECT   30   29   31
+CONECT   31   25   30   22
+CONECT   32    3
+CONECT   33    4
+CONECT   34    7
+CONECT   35   11
+CONECT   36   14
+CONECT   37   14
+CONECT   38   15
+CONECT   39   17
+CONECT   40   18
+CONECT   41   19
+CONECT   42   20
+CONECT   43   21
+CONECT   44   23
+CONECT   45   27
+CONECT   46   27
+CONECT   47   29
+END
