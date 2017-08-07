@@ -22,7 +22,7 @@ from os.path import expanduser
 from nose.tools import assert_equals, assert_true
 
 from pdb_chemical_components import PdbChemicalComponents
-from utilities import cif_filename, test_file_path_name
+from utilities import cif_filename, test_cif_path_name
 
 # by default just use the 'auto' cif_parse (which ever can be imported).
 cif_parser_list = ('auto',)
@@ -34,7 +34,7 @@ if 'TEST_CIF_PARSER_ALL' in os.environ:
 def test_check_test_file_path_name_is_accessible_after_changing_dir():
     home = expanduser("~")
     os.chdir(home)
-    assert_true(os.path.isdir(test_file_path_name))
+    assert_true(os.path.isdir(test_cif_path_name))
 
 
 def test_hard_code_cmo():
@@ -104,7 +104,7 @@ def test_load_hem_from_cif():
     for cif_parser in cif_parser_list:
         description = ', with cif_parser={}'.format(cif_parser)
         try:
-            hem_file = os.path.join(test_file_path_name, 'HEM_edited.cif')
+            hem_file = os.path.join(test_cif_path_name, 'HEM_edited.cif')
             hem = PdbChemicalComponents(hem_file, cif_parser=cif_parser)
             yield assert_equals, 'HEM', hem.chem_comp_id, 'chem_comp_id' + description
             yield assert_equals, True, 'Fe' in hem.atom_elements, 'Fe in hem.atom_elements' + description

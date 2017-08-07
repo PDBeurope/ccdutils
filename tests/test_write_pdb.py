@@ -18,9 +18,9 @@
 import os
 import unittest
 
-from nose.tools import assert_true
+from nose.tools import assert_true, assert_equals
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from utilities import supply_list_of_sample_cifs, file_name_in_tsts_out
+from utilities import supply_list_of_sample_cifs, file_name_in_tsts_out, cif_filename, test_comparison_files_path
 
 
 def test_pdb_write_for_all_sample_cifs():
@@ -36,6 +36,30 @@ def test_pdb_write_for_all_sample_cifs():
         yield assert_true, os.path.isfile(pdb_model_with_h) and os.path.getsize(pdb_model_with_h) > 0, \
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, pdb_model_with_h)
+
+
+def test_atp_atom_records_against_previous_pdbechem():
+    """
+    compare ccd PDB HETATM records (ideal coordinates) with ATOM from the previous PDBeChem pdb file for ATP
+    """
+    ciffile = cif_filename('ATP')
+    pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
+    pdb_string = pdb_cc.pdb_file_or_string(ideal=True)
+    lines = pdb_string.split('\n')
+    lines_hetatm = list(filter(lambda x: x.startswith('HETATM'), lines))
+    comparison_file = os.path.join(test_comparison_files_path, 'ATP.pdb')
+    with open(comparison_file, 'r') as comp_file:
+        lines = comp_file.read().splitlines()
+    lines_atom = list(filter(lambda x: x.startswith('ATOM'), lines))
+    for line_no in range(len(lines_atom)):
+        line = lines_atom[line_no]
+        line = line.replace('ATOM  ', 'HETATM')  # comparison file used ATOM rather than HETATM
+        line = line.replace('    0  ', 'A   1  ')  # chain id and residue number have changed to A 1
+        line = line.replace('+0', '  ')  # charge at end of line (incorrect in prvious)
+        lines_atom[line_no] = line
+    assert_equals(len(lines_hetatm), len(lines_atom))  # number HETATM/ATOM line ccd_utils/comparison file ==
+    for line_no in range(len(lines_hetatm)):
+        assert_equals(lines_hetatm[line_no], lines_atom[line_no])  # HETATM/ATOM line cf ccd_utils/comparison file
 
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):

@@ -20,7 +20,7 @@ import unittest
 from lxml import etree
 
 from nose.tools import assert_equals, assert_true
-from utilities import cif_filename, file_name_in_tsts_out, test_file_path_name
+from utilities import cif_filename, file_name_in_tsts_out, test_cif_path_name
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 
@@ -31,7 +31,7 @@ def test_load_eoh_from_cif():
     tree = etree.fromstring(cml_string)
     yield assert_equals, tree[0][1].text, eoh.chem_comp_name,\
         'cml_file_or_string must provide correct systematic name'
-    cml_file = open (os.path.join(test_file_path_name, 'EOH.cml'),'r')
+    cml_file = open (os.path.join(test_cif_path_name, 'EOH.cml'), 'r')
     cml_tree = etree.parse(cml_file)
     cml_root = cml_tree.getroot()
     formal_charge_cml = cml_root[0].attrib['formalCharge']
@@ -47,7 +47,7 @@ def test_load_atp_from_cif():
     cml = file_name_in_tsts_out('ATP.cml')
     cml_string = atp.cml_file_or_string()
     tree = etree.fromstring(cml_string)
-    cml_file = open(os.path.join(test_file_path_name, 'ATP.cml'), 'r')
+    cml_file = open(os.path.join(test_cif_path_name, 'ATP.cml'), 'r')
     cml_tree = etree.parse(cml_file)
     cml_root = cml_tree.getroot()
     for item in cml_root[0].findall('formula'):

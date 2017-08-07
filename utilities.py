@@ -28,11 +28,11 @@ def this_script_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-test_file_path_name = os.path.join(this_script_dir(), 'tests', 'ccd_mmcif_test_files')
-
+test_cif_path_name = os.path.join(this_script_dir(), 'tests', 'ccd_mmcif_test_files')
+test_comparison_files_path = os.path.join(this_script_dir(), 'tests', 'comparison_files')
 
 def cif_filename(code):
-    return os.path.join(test_file_path_name, code + '.cif')
+    return os.path.join(test_cif_path_name, code + '.cif')
 
 
 def supply_list_of_sample_cifs():
@@ -44,7 +44,7 @@ def supply_list_of_sample_cifs():
     Returns:
         list of filenames
     """
-    return sorted(glob.glob(os.path.join(test_file_path_name, '*.cif')))
+    return sorted(glob.glob(os.path.join(test_cif_path_name, '*.cif')))
 
 
 def file_name_in_tsts_out(file_name):
