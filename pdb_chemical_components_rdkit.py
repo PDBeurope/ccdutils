@@ -290,36 +290,36 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
                              pixels_x=400, pixels_y=200, highlight_bonds=None, black=False):
         """
-        writes a svf image of the molecule to a string or file using rdkit
+        produces a svg image of the molecule to a string or file using RDKit.
 
         Args:
-            file_name (str): the name of the file. Type normally got from the filename ending for instance .png or .svg
+            file_name (str): the name of the output svg file or None to return the svg as a string.
             wedge (bool):  wedge the bonds in the image
             atom_labels (bool): include atom labels in the image
             hydrogen (bool): include hydrogen atoms in the image.
             pixels_x (int): size of image in pixels
             pixels_y (int): size of image in pixels
             highlight_bonds: an ordered dictionary of bonds to highlight key (atom_index_0, atom_index_1) to (r,g,b)
-            black (bool): wipe out atom colors and make molecule picture black
+            black (bool): wipe out atom colors and make the molecular diagram black (highlight_bonds are not affected).
 
         Returns:
-            None or a string containing the svg string of the molecule
+            None or a string containing the svg string of the molecule.
         """
         if hydrogen:
-            mol_h_select = self.rdkit_mol
+            mol_to_draw = self.rdkit_mol
         else:
-            mol_h_select = self.mol_remove_h
-        AllChem.GenerateDepictionMatching3DStructure(mol_h_select, mol_h_select)
+            mol_to_draw = self.mol_remove_h
+        AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
         drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
         opts = drawer.drawOptions()
         if not atom_labels:
-            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select, wedgeBonds=wedge)
+            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
         else:
             for atom in self.rdkit_mol.GetAtoms():
                 atom_index = atom.GetIdx()
                 atom_name = self.atom_ids[atom_index]
                 opts.atomLabels[atom_index] = atom_name
-            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_h_select, wedgeBonds=wedge)
+            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
         if highlight_bonds is None:
             drawer.DrawMolecule(molecule_to_draw)
         else:
@@ -346,15 +346,12 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                                 highlightBonds=highlight_bonds_colours.keys(),
                                 highlightBondColors=highlight_bonds_colours)
         drawer.FinishDrawing()
-        svg = drawer.GetDrawingText().replace('svg:','')
+        svg = drawer.GetDrawingText().replace('svg:', '')
         if black:
             svg = svg.replace('#FF0000', '#000000')  # get rid of red oxygen
             svg = svg.replace('#0000FF', '#000000')  # get rid of blue nitrogen
             svg = svg.replace('#FF7F00', '#000000')  # get rid of orange phosphorous
             svg = svg.replace('#CCCC00', '#000000')  # get rid of yellow sulphur
-
-
-
         if file_name is None:
             return svg
         else:
