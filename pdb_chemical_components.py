@@ -393,56 +393,45 @@ class PdbChemicalComponents(object):
             RuntimeError: if a new unrecognized item has appeared
         """
         import mmCif.mmcifIO as mmcifIO
-        import logging
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
-        cif_obj = cif_parser.read(file_name, output='cif_dictionary')
+        cif_obj = cif_parser.read(file_name, output='cif_wrapper')
         data_block = list(cif_obj.values())[0]
-        chem_comp = data_block['_chem_comp']
+        # noinspection PyProtectedMember
+        chem_comp = data_block._chem_comp
         for thing in 'id', 'name', 'pdbx_release_status':
-            value = chem_comp[thing]
+            value = chem_comp[thing][0]
             setattr(self, "chem_comp_" + thing, value)
         self._atoms = []
-        chem_comp_atom_block = data_block['_chem_comp_atom']
+        # noinspection PyProtectedMember
+        chem_comp_atom = data_block._chem_comp_atom
         empty_atom = self.empty_chem_comp_atom()
-        for atom_index in range(len(chem_comp_atom_block['comp_id'])):
-            this_atom = self.empty_chem_comp_atom()
-            for data_item in chem_comp_atom_block:
-                val = chem_comp_atom_block[data_item][atom_index]
-                this_atom[data_item] = val
+        for atom in chem_comp_atom:
+            self._atoms.append(atom)
             # check the no new attributes have been set
-            for key in this_atom:
+            for key in atom:
                 if key not in empty_atom:
-                     raise RuntimeError('unrecognized item "{}" in chem_comp_atom'.format(key))
-            self._atoms.append(this_atom)
+                    raise RuntimeError('unrecognized item "{}" in chem_comp_atom'.format(key))
         self.bonds = []
-        chem_comp_bond_block = data_block['_chem_comp_bond']
-        logging.debug('chem_comp_bond_block={}'.format(chem_comp_bond_block))
-        chem_comp_bond_block_comp_id = chem_comp_bond_block['comp_id']
-        if isinstance(chem_comp_bond_block_comp_id, list):
-            for bond_index in range(len(chem_comp_bond_block_comp_id)):
-                # logging.debug('bond_index={}'.format(bond_index))
-                atom_id_1 = chem_comp_bond_block['atom_id_1'][bond_index]
-                atom_id_2 = chem_comp_bond_block['atom_id_2'][bond_index]
-                value_order = chem_comp_bond_block['value_order'][bond_index]
-                pdbx_aromatic_flag = chem_comp_bond_block['pdbx_aromatic_flag'][bond_index]
-                pdbx_stereo_config = chem_comp_bond_block['pdbx_stereo_config'][bond_index]
-                this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
-                                      pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
-                self.bonds.append(this_bond)
-        else: # have one bond like in cmo
-            raise NotImplementedError('one bond')
-
-        pdbx_chem_comp_descriptor = data_block['_pdbx_chem_comp_descriptor']
-        for descriptor_index in range(len(pdbx_chem_comp_descriptor['comp_id'])):
-            type = pdbx_chem_comp_descriptor['type'][descriptor_index]
-            program = pdbx_chem_comp_descriptor['type'][descriptor_index]
-            descriptor =  pdbx_chem_comp_descriptor['descriptor'][descriptor_index]
-            if type == 'InChIKey':
-                self.inchikey = descriptor
-            if type == 'SMILES_CANONICAL' and program == 'CACTVS':
-                self.stereosmiles = descriptor
-            if type == 'SMILES' and program== 'ACDLabs':
-                self.nonstereosmiles =descriptor
+        # noinspection PyProtectedMember
+        chem_comp_bond = data_block._chem_comp_bond
+        for bond in chem_comp_bond:
+            atom_id_1 = bond['atom_id_1']
+            atom_id_2 = bond['atom_id_2']
+            value_order = bond['value_order']
+            pdbx_aromatic_flag = bond['pdbx_aromatic_flag']
+            pdbx_stereo_config = bond['pdbx_stereo_config']
+            this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
+                                  pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
+            self.bonds.append(this_bond)
+        # noinspection PyProtectedMember
+        pdbx_chem_comp_descriptor = data_block._pdbx_chem_comp_descriptor
+        for descriptor in pdbx_chem_comp_descriptor:
+            if descriptor['type'] == 'InChIKey':
+                self.inchikey = descriptor['descriptor']
+            if descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
+                self.stereosmiles = descriptor['descriptor']
+            if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
+                self.nonstereosmiles =descriptor['descriptor']
 
     def read_ccd_from_file_ciffile(self, file_name):
         """
