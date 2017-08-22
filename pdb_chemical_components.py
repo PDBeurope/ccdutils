@@ -395,6 +395,9 @@ class PdbChemicalComponents(object):
         import mmCif.mmcifIO as mmcifIO
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
         cif_obj = cif_parser.read(file_name, output='cif_wrapper')
+        self.read_ccd_from_pdbecif_cif_obj(cif_obj)
+
+    def read_ccd_from_pdbecif_cif_obj(self, cif_obj):
         data_block = list(cif_obj.values())[0]
         # noinspection PyProtectedMember
         chem_comp = data_block._chem_comp
