@@ -45,12 +45,13 @@ class PdbChemicalComponents(object):
                              'pdbx_ordinal')
     """list of the items used in _chem_comp_atom"""
 
-    def __init__(self, file_name=None, cif_parser='auto'):
+    def __init__(self, file_name=None, cif_dictionary=None, cif_parser='auto'):
         """
         initializer - creates a PdbChemicalComponents object normally from a cif file
 
         Args:
             file_name (str): the filename of the PDB CCD file
+            cif_dictionary: an ordered dictionary produced by PDBeCIF parser
             cif_parser (str): the cif parser to use. One of 'auto' or 'PDBeCIF' or'CifFile' or 'test_hard_code_cmo'
         """
         self.chem_comp_id = None
@@ -84,6 +85,10 @@ class PdbChemicalComponents(object):
         elif file_name is not None:
             self.read_ccd_from_cif_file(file_name)
             self.setup_bond_lists()
+        elif cif_dictionary is not None:
+            self.read_ccd_from_pdbecif_cif_dictionary(cif_dictionary)
+            self.setup_bond_lists()
+
 
     @staticmethod
     def empty_chem_comp_atom():
@@ -395,9 +400,35 @@ class PdbChemicalComponents(object):
         import mmCif.mmcifIO as mmcifIO
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
         cif_obj = cif_parser.read(file_name, output='cif_wrapper')
-        self.read_ccd_from_pdbecif_cif_obj(cif_obj)
+        self._read_ccd_from_pdbecif_cif_obj(cif_obj)
 
-    def read_ccd_from_pdbecif_cif_obj(self, cif_obj):
+    def read_ccd_from_pdbecif_cif_dictionary(self, mmcif_dict):
+        """
+        reads the chemical component from a 'cif_dictionary'
+
+        Args:
+            mmcif_dict: PDBeCIF cif dictionary - normally an ordered dictionary
+
+        Returns:
+            None
+        """
+        from mmCif import CIFWrapper
+        token_ordering = True
+        # next line taken from CifFileReader method read
+        cif_obj = dict(((block_id, CIFWrapper(block_data, data_id=block_id, preserve_token_order=token_ordering))
+                        for block_id, block_data in list(mmcif_dict.items())))
+        self._read_ccd_from_pdbecif_cif_obj(cif_obj)
+
+    def _read_ccd_from_pdbecif_cif_obj(self, cif_obj):
+        """
+        reads the chemical component from a PDBeCIF cif object.
+
+        Args:
+            cif_obj: PDBeCIF cif object.
+
+        Returns:
+            None
+        """
         data_block = list(cif_obj.values())[0]
         # noinspection PyProtectedMember
         chem_comp = data_block._chem_comp

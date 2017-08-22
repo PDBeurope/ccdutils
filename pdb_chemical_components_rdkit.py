@@ -26,8 +26,8 @@ from lxml import etree
 class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     """ PdbChemicalComponents class with extension to produce RDKit Mol"""
 
-    def __init__(self, file_name=None, cif_parser='auto'):
-        super(PdbChemicalComponentsRDKit, self).__init__(file_name, cif_parser)
+    def __init__(self, file_name=None, cif_dictionary=None, cif_parser='auto'):
+        super(PdbChemicalComponentsRDKit, self).__init__(file_name, cif_dictionary, cif_parser)
         self.rdkit_mol = None
         self.rdkit_mol_conformer_id_ideal = None
         """The RDKit conformer ID for the ideal cooordinate (int)."""
