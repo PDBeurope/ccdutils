@@ -30,7 +30,8 @@ def this_script_dir():
 
 test_cif_path_name = os.path.join(this_script_dir(), 'tests', 'ccd_mmcif_test_files')
 test_comparison_files_path = os.path.join(this_script_dir(), 'tests', 'comparison_files')
-
+test_components_cif_first_file_comps = os.path.join(this_script_dir(),
+                                                    'tests', 'components_cif', 'components.cif.first_five_comps')
 def cif_filename(code):
     return os.path.join(test_cif_path_name, code + '.cif')
 
