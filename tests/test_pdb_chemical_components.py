@@ -99,6 +99,16 @@ def test_load_eoh_from_cif():
         except ImportError:
             pass
 
+def test_load_cmo_from_cif():
+    for cif_parser in cif_parser_list:
+        description = ', with cif_parser={}'.format(cif_parser)
+        try:
+            cmo = PdbChemicalComponents(file_name=cif_filename('CMO'), cif_parser=cif_parser)
+            yield assert_equals, 'CMO', cmo.chem_comp_id, 'chem_comp_id' + description
+            yield assert_equals, 1, cmo.number_bonds, 'number_bonds' + description
+        except ImportError:
+            pass
+
 
 def test_load_hem_from_cif():
     for cif_parser in cif_parser_list:
