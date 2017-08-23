@@ -37,7 +37,7 @@ def test_load_eoh_from_cif_write_it_out():
             read_back_pdb_ccd = PdbChemicalComponents(file_name=out_cif_file_name, cif_parser=cif_parser)
             yield assert_equals, 'EOH', read_back_pdb_ccd.chem_comp_id, 'readback chem_comp_id' + description
             yield assert_equals, 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N', read_back_pdb_ccd.inchikey, 'readback inchikey'
-            yield assert_equals, orig_pdbccd, read_back_pdb_ccd, 'check equality of orig_pdbccd and read_back_pdb_ccd'
+            yield assert_true, orig_pdbccd == read_back_pdb_ccd, 'check equality of orig_pdbccd and read_back_pdb_ccd'
         except ImportError:
             pass
 

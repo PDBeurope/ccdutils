@@ -32,6 +32,3 @@ class SplitComponentsCif(object):
             individual_cif_dictionary[data_block_id] = data_block
             pdb_ccd = PdbChemicalComponentsRDKit(cif_dictionary=individual_cif_dictionary)
             yield pdb_ccd
-
-
-

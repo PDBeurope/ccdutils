@@ -45,6 +45,8 @@ class PdbChemicalComponents(object):
                              'pdbx_ordinal')
     """list of the items used in _chem_comp_atom"""
 
+    Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
+
     def __init__(self, file_name=None, cif_dictionary=None, cif_parser='auto'):
         """
         initializer - creates a PdbChemicalComponents object normally from a cif file
@@ -67,7 +69,6 @@ class PdbChemicalComponents(object):
         self.__ideal_xyz = None
         self.__model_xyz = None
         self.__pdbx_align = None
-        self.Bond = namedtuple('Bond', 'atom_id_1 atom_id_2 value_order pdbx_aromatic_flag pdbx_stereo_config')
         self.bonds = []
         self.bond_atom_index_1 = []
         """list of int: one for each of self.bonds the index of the matching atom_id_1 in self.atoms"""
@@ -532,3 +533,18 @@ class PdbChemicalComponents(object):
             this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
                                   pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
             self.bonds.append(this_bond)
+
+    def __eq__(self, other):
+        if type(other) is not type(self):
+            return False
+        for key, value in self.__dict__.items():
+            if key == 'pdbecif_cif_obj':
+                pass
+            else:
+                other_value = other.__dict__[key]
+                if value != other_value:
+                    return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
