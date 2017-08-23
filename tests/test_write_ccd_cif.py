@@ -31,12 +31,10 @@ def test_load_eoh_from_cif_write_it_out():
         description = ', with cif_parser={}'.format(cif_parser)
         try:
             orig_pdbccd = PdbChemicalComponents(file_name=cif_filename('EOH'), cif_parser=cif_parser)
-            yield assert_equals, 'EOH', orig_pdbccd.chem_comp_id, 'chem_comp_id' + description
-            yield assert_equals, 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N', orig_pdbccd.inchikey, 'inchikey' + description
-            output_cif = file_name_in_tsts_out('EOH_test_write.cif')
-            orig_pdbccd.write_ccd_cif(output_cif)
-            yield assert_true, os.path.isfile(output_cif)
-            read_back_pdb_ccd = PdbChemicalComponents(file_name=output_cif, cif_parser=cif_parser)
+            out_cif_file_name = file_name_in_tsts_out('EOH_test_write.cif')
+            orig_pdbccd.write_ccd_cif(out_cif_file_name)
+            yield assert_true, os.path.isfile(out_cif_file_name), 'have written cif file {}'.format(out_cif_file_name)
+            read_back_pdb_ccd = PdbChemicalComponents(file_name=out_cif_file_name, cif_parser=cif_parser)
             yield assert_equals, 'EOH', read_back_pdb_ccd.chem_comp_id, 'readback chem_comp_id' + description
             yield assert_equals, 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N', read_back_pdb_ccd.inchikey, 'readback inchikey'
             yield assert_equals, orig_pdbccd, read_back_pdb_ccd, 'check equality of orig_pdbccd and read_back_pdb_ccd'

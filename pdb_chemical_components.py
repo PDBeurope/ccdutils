@@ -80,6 +80,7 @@ class PdbChemicalComponents(object):
         self.bond_aromatic = []
         """list of bool: one for each of self.bonds boolean conversion of pdbx_aromatic_flag (Y or N)"""
         self.cif_parser = cif_parser
+        self.pdbecif_cif_obj = None
         if cif_parser == 'test_hard_code_cmo':
             self.__load_carbon_monoxide_hard_coded()
         elif file_name is not None:
@@ -88,7 +89,6 @@ class PdbChemicalComponents(object):
         elif cif_dictionary is not None:
             self.read_ccd_from_pdbecif_cif_dictionary(cif_dictionary)
             self.setup_bond_lists()
-
 
     @staticmethod
     def empty_chem_comp_atom():
@@ -399,8 +399,8 @@ class PdbChemicalComponents(object):
         """
         import mmCif.mmcifIO as mmcifIO
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
-        cif_obj = cif_parser.read(file_name, output='cif_wrapper')
-        self._read_ccd_from_pdbecif_cif_obj(cif_obj)
+        self.pdbecif_cif_obj = cif_parser.read(file_name, output='cif_wrapper')
+        self._read_ccd_from_pdbecif_cif_obj()
 
     def read_ccd_from_pdbecif_cif_dictionary(self, mmcif_dict):
         """
@@ -415,21 +415,19 @@ class PdbChemicalComponents(object):
         from mmCif import CIFWrapper
         token_ordering = True
         # next line taken from CifFileReader method read
-        cif_obj = dict(((block_id, CIFWrapper(block_data, data_id=block_id, preserve_token_order=token_ordering))
-                        for block_id, block_data in list(mmcif_dict.items())))
-        self._read_ccd_from_pdbecif_cif_obj(cif_obj)
+        self.pdbecif_cif_obj = \
+            dict(((block_id, CIFWrapper(block_data, data_id=block_id, preserve_token_order=token_ordering))
+                  for block_id, block_data in list(mmcif_dict.items())))
+        self._read_ccd_from_pdbecif_cif_obj()
 
-    def _read_ccd_from_pdbecif_cif_obj(self, cif_obj):
+    def _read_ccd_from_pdbecif_cif_obj(self):
         """
         reads the chemical component from a PDBeCIF cif object.
-
-        Args:
-            cif_obj: PDBeCIF cif object.
 
         Returns:
             None
         """
-        data_block = list(cif_obj.values())[0]
+        data_block = list(self.pdbecif_cif_obj.values())[0]
         # noinspection PyProtectedMember
         chem_comp = data_block._chem_comp
         for thing in 'id', 'name', 'pdbx_release_status':
@@ -465,7 +463,27 @@ class PdbChemicalComponents(object):
             if descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
                 self.stereosmiles = descriptor['descriptor']
             if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
-                self.nonstereosmiles =descriptor['descriptor']
+                self.nonstereosmiles = descriptor['descriptor']
+
+    def write_ccd_cif(self, output_ccd_cif_file_name):
+        """
+        writes out the read in pdb_ccd as a cif file.
+
+        Args:
+            output_ccd_cif_file_name (str): file name for the output
+
+        Returns:
+            None
+
+        Notes:
+            Currently limited to PDBeCIF parser. Currently output is same as input.
+        """
+        if self.pdbecif_cif_obj is None:
+            raise NotImplementedError('cannot write_ccd_cif currently only supported if using PDBeCIF parser')
+        import mmCif.mmcifIO as mmcifIO
+        cif_file_writer = mmcifIO.CifFileWriter(output_ccd_cif_file_name, preserve_order=True)
+        cif_wrapper = list(self.pdbecif_cif_obj.values())[0]
+        cif_file_writer.write(cif_wrapper)
 
     def read_ccd_from_file_ciffile(self, file_name):
         """
