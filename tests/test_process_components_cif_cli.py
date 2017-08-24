@@ -33,6 +33,7 @@ class TestProcessComponentsCIFTestCase(CommandLineTestCase):
         test_output_dir = file_name_in_tsts_out('test_process_components_cif_cli')
         if os.path.isdir(test_output_dir):
             shutil.rmtree(test_output_dir)
+        chem_comp_ids = ('000', '001', '002', '003', '004')
         args = self.parser.parse_args([test_components_cif, test_output_dir, '--debug'])
         process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR,  args.debug)
         yield assert_true, os.path.isdir(test_output_dir), 'output directory {} must be created'.format(test_output_dir)
@@ -40,4 +41,6 @@ class TestProcessComponentsCIFTestCase(CommandLineTestCase):
         yield assert_true, os.path.isdir(test_output_dir), 'files sub-directory {} must be created'.format(files_dir)
         mmcif_dir = os.path.join(files_dir, 'mmcif')
         yield assert_true, os.path.isdir(test_output_dir), 'mmcif sub-directory {} must be created'.format(mmcif_dir)
-
+        for chem_comp_id in chem_comp_ids:
+            cif_file = os.path.join(mmcif_dir, chem_comp_id + '.cif')
+            yield assert_true, os.path.isfile(cif_file), 'individual cif file {} must be created'.format(cif_file)
