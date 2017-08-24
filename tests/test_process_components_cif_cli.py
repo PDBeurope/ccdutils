@@ -1,14 +1,17 @@
 # Unittest of the process_components_cif_cli.py command line script
 # method based on http://dustinrcollins.com/testing-python-command-line-apps
+# adapted to use nose
 
 import os
 import shutil
+
+from nose.tools import assert_raises, assert_true
+
 from process_components_cif_cli import create_parser, process_components_cif
-from unittest import TestCase
 from utilities import test_components_cif_first_file_comps, file_name_in_tsts_out
 
 
-class CommandLineTestCase(TestCase):
+class CommandLineTestCase():
     """
     Base TestCase class, sets up a CLI parser
     """
@@ -18,13 +21,12 @@ class CommandLineTestCase(TestCase):
         cls.parser = parser
 
 
-class ProcessComponentsCIFTestCase(CommandLineTestCase):
+class TestProcessComponentsCIFTestCase(CommandLineTestCase):
     def test_with_empty_args(self):
         """
-        User passes no args, should fail with SystemExit
+        User passes no args, should produce a usage statement and then raise SystemExit. Usage statement will start
         """
-        with self.assertRaises(SystemExit):
-            self.parser.parse_args([])
+        assert_raises(SystemExit, self.parser.parse_args, [])
 
     def test_with_components_cif_first_file_comps(self):
         test_components_cif = test_components_cif_first_file_comps
@@ -33,8 +35,9 @@ class ProcessComponentsCIFTestCase(CommandLineTestCase):
             shutil.rmtree(test_output_dir)
         args = self.parser.parse_args([test_components_cif, test_output_dir, '--debug'])
         process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR,  args.debug)
-        self.assertTrue(os.path.isdir(test_output_dir), 'output directory {} must be created'.format(test_output_dir))
+        yield assert_true, os.path.isdir(test_output_dir), 'output directory {} must be created'.format(test_output_dir)
         files_dir = os.path.join(test_output_dir, 'files')
-        self.assertTrue(os.path.isdir(test_output_dir), 'files sub-directory {} must be created'.format(files_dir))
+        yield assert_true, os.path.isdir(test_output_dir), 'files sub-directory {} must be created'.format(files_dir)
         mmcif_dir = os.path.join(files_dir, 'mmcif')
-        self.assertTrue(os.path.isdir(test_output_dir), 'files sub-directory {} must be created'.format(mmcif_dir))
+        yield assert_true, os.path.isdir(test_output_dir), 'mmcif sub-directory {} must be created'.format(mmcif_dir)
+

@@ -61,7 +61,7 @@ def process_components_cif(components_cif, output_dir, debug):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     logger.debug('components_cif={} output_dir={}'.format(components_cif, output_dir))
-    raise NotImplementedError('process_components_cif not yet implemented')
+    # raise NotImplementedError('process_components_cif not yet implemented')
 
 
 def main():
