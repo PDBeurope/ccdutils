@@ -282,7 +282,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if file_name is None:
             return cml_string
         else:
-            with open (file_name, 'w') as cml_file:
+            with open (file_name, 'wb') as cml_file:
                 cml_file.write(cml_string)
                 cml_file.close()
         return None
