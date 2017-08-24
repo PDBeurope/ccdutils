@@ -32,6 +32,8 @@ test_cif_path_name = os.path.join(this_script_dir(), 'tests', 'ccd_mmcif_test_fi
 test_comparison_files_path = os.path.join(this_script_dir(), 'tests', 'comparison_files')
 test_components_cif_first_file_comps = os.path.join(this_script_dir(),
                                                     'tests', 'components_cif', 'components.cif.first_five_comps')
+
+
 def cif_filename(code):
     return os.path.join(test_cif_path_name, code + '.cif')
 
@@ -48,7 +50,7 @@ def supply_list_of_sample_cifs():
     return sorted(glob.glob(os.path.join(test_cif_path_name, '*.cif')))
 
 
-def file_name_in_tsts_out(file_name):
+def file_name_in_tsts_out(file_name, remove_existing=True):
     """
     creates the subdirectory "out" in the "tests" subdirectory (if necessary)
     and returns the file_name in this directory, If the file already exists it will remove it.
@@ -56,6 +58,7 @@ def file_name_in_tsts_out(file_name):
 
     Args:
         file_name (str):  the name for the file
+        remove_existing (bool): remove existing file?
 
     Returns:
         str: the filename in the subdirectory tests/out
@@ -64,6 +67,6 @@ def file_name_in_tsts_out(file_name):
     if not os.path.isdir(subdir):
         os.mkdir(subdir)
     out_file_name = os.path.join(subdir, file_name)
-    if os.path.isfile(out_file_name):
+    if remove_existing and os.path.isfile(out_file_name):
         os.remove(out_file_name)
     return out_file_name

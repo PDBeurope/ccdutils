@@ -31,28 +31,43 @@ import logging
 from argparse import RawTextHelpFormatter
 
 
-def __parse_command_line_args():
+def create_parser():
     """
-    Sets up and parses the command line options.
+    Sets up parse the command line options.
 
     Returns:
-         the arguments name space
+         ArgumentParser parser
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     parser.add_argument('COMPONENTS_CIF', help='input PDB-CCD components.cif file (must be specified)')
     parser.add_argument('OUTPUT_DIR', help='directory for output (must be specified)')
     parser.add_argument('--debug', action='store_true', help='turn on debug message logging output')
-    return parser.parse_args()
+    return parser
 
 
-def run():
+def process_components_cif(components_cif, output_dir, debug):
+    """
+    processes components.cif for PDBeChem type output
+
+    Args:
+        components_cif (str): file name/path for components.cif or a test version
+        output_dir (str): path for the directory where output will be written
+        debug (bool): produce debug type logging
+
+    Returns:
+
+    """
     logger = logging.getLogger(' ')
-    args = __parse_command_line_args()
-    if args.debug:
+    if debug:
         logging.basicConfig(level=logging.DEBUG)
-    components_cif = str(args.COMPONENTS_CIF)
-    output_dir = str(args.OUTPUT_DIR)
-    logger.debug('components_cif={} output_dir ={}'.format(components_cif, output_dir))
+    logger.debug('components_cif={} output_dir={}'.format(components_cif, output_dir))
+    raise NotImplementedError('process_components_cif not yet implemented')
+
+
+def main():
+    parser = create_parser()
+    args = parser.parse_args()
+    process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
 
 if __name__ == "__main__":
-    run()
+    main()
