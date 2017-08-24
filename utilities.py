@@ -13,8 +13,21 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import errno
 import glob
+import shutil
 import os
+
+
+def create_directory_using_mkdir_unless_it_exists(path, clean_existing=False):
+    if clean_existing:
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+    try:
+        os.mkdir(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
 
 def this_script_dir():

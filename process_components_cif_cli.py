@@ -28,8 +28,14 @@ In addition creates chem.xml and chem_comp.list for all components.
 """
 import argparse
 import logging
+import os
+import sys
 from argparse import RawTextHelpFormatter
 
+from split_components_cif import SplitComponentsCif
+from utilities import create_directory_using_mkdir_unless_it_exists
+
+clean_existing = True # might want an update run mode?
 
 def create_parser():
     """
@@ -60,8 +66,25 @@ def process_components_cif(components_cif, output_dir, debug):
     logger = logging.getLogger(' ')
     if debug:
         logging.basicConfig(level=logging.DEBUG)
+    else:
+         logging.basicConfig(level=logging.WARNING)
     logger.debug('components_cif={} output_dir={}'.format(components_cif, output_dir))
-    # raise NotImplementedError('process_components_cif not yet implemented')
+    create_directory_using_mkdir_unless_it_exists(output_dir)
+    files_dir = os.path.join(output_dir, 'files')
+    create_directory_using_mkdir_unless_it_exists(files_dir, clean_existing)
+    mmcif_dir = os.path.join(files_dir, 'mmcif')
+    create_directory_using_mkdir_unless_it_exists(mmcif_dir)
+    split_cc = SplitComponentsCif(components_cif)
+    logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
+                format(components_cif, len(split_cc.cif_dictionary)))
+    for pdb_cc_rdkit in split_cc.individual_pdb_ccd_rdkit():
+        chem_comp_id = pdb_cc_rdkit.chem_comp_id
+        logger.debug('chem_comp_id={}'.format(chem_comp_id))
+        ccd_cif = os.path.join(mmcif_dir, chem_comp_id + '.cif')
+        pdb_cc_rdkit.write_ccd_cif(ccd_cif)
+        if not os.path.isfile(ccd_cif):
+            sys.exit('failed to write file {}'.format(ccd_cif))
+        logger.debug('have written PDB-CCD cif to {}'.format(ccd_cif))
 
 
 def main():

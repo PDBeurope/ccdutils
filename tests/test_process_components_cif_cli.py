@@ -40,7 +40,7 @@ class TestProcessComponentsCIFTestCase(CommandLineTestCase):
         files_dir = os.path.join(test_output_dir, 'files')
         yield assert_true, os.path.isdir(test_output_dir), 'files sub-directory {} must be created'.format(files_dir)
         mmcif_dir = os.path.join(files_dir, 'mmcif')
-        yield assert_true, os.path.isdir(test_output_dir), 'mmcif sub-directory {} must be created'.format(mmcif_dir)
+        yield assert_true, os.path.isdir(mmcif_dir), 'mmcif sub-directory {} must be created'.format(mmcif_dir)
         for chem_comp_id in chem_comp_ids:
             cif_file = os.path.join(mmcif_dir, chem_comp_id + '.cif')
             yield assert_true, os.path.isfile(cif_file), 'individual cif file {} must be created'.format(cif_file)
