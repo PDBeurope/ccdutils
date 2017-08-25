@@ -106,8 +106,12 @@ def process_components_cif(components_cif, output_dir, debug):
                 pdb_cc_rdkit.pdb_file_or_string(file_name=output_file, ideal=False)
             elif subdir == 'cml':
                 pdb_cc_rdkit.cml_file_or_string(file_name=output_file)
+            elif subdir == 'xyz':
+                pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=True)
+            elif subdir == 'xyz_r':
+                pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=False)
             else:
-                logger.warn('need to write {} handling!'.format(subdir))
+                raise NotImplementedError('unrecognized subdir {}'.format(subdir))
             if os.path.isfile(output_file):
                 logger.debug('written file {}'.format(output_file))
             else:
