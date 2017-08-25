@@ -1,13 +1,13 @@
 # Unittest of the process_components_cif_cli.py command line script
 # method based on http://dustinrcollins.com/testing-python-command-line-apps
 # adapted to use nose
-
+import glob
 import os
 import shutil
 
-from nose.tools import assert_raises, assert_true
+from nose.tools import assert_raises, assert_true, assert_equal
 
-from process_components_cif_cli import create_parser, process_components_cif
+from process_components_cif_cli import create_parser, process_components_cif, file_subdirs
 from utilities import test_components_cif_first_file_comps, file_name_in_tsts_out
 
 
@@ -39,8 +39,12 @@ class TestProcessComponentsCIFTestCase(CommandLineTestCase):
         yield assert_true, os.path.isdir(test_output_dir), 'output directory {} must be created'.format(test_output_dir)
         files_dir = os.path.join(test_output_dir, 'files')
         yield assert_true, os.path.isdir(test_output_dir), 'files sub-directory {} must be created'.format(files_dir)
-        mmcif_dir = os.path.join(files_dir, 'mmcif')
-        yield assert_true, os.path.isdir(mmcif_dir), 'mmcif sub-directory {} must be created'.format(mmcif_dir)
-        for chem_comp_id in chem_comp_ids:
-            cif_file = os.path.join(mmcif_dir, chem_comp_id + '.cif')
-            yield assert_true, os.path.isfile(cif_file), 'individual cif file {} must be created'.format(cif_file)
+        for subdir in file_subdirs:
+            path = os.path.join(files_dir, subdir)
+            yield assert_true, os.path.isdir(path), '{} sub-directory {} must be created'.format(subdir, path)
+            for chem_comp_id in chem_comp_ids:
+                # simple check that there is a single file starting with the chem_comp_id
+                file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*')
+                yield assert_equal, len(file_for_chem_comp_id), 1, \
+                    'there should be a file matching {}* in {}'.format(chem_comp_id, subdir)
+

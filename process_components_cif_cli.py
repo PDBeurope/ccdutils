@@ -29,13 +29,14 @@ In addition creates chem.xml and chem_comp.list for all components.
 import argparse
 import logging
 import os
-import sys
 from argparse import RawTextHelpFormatter
 
 from split_components_cif import SplitComponentsCif
 from utilities import create_directory_using_mkdir_unless_it_exists
 
-clean_existing = True # might want an update run mode?
+
+clean_existing = True  # might want an update run mode later but for now remove existing directories/files
+file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
 
 def create_parser():
     """
@@ -67,24 +68,50 @@ def process_components_cif(components_cif, output_dir, debug):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
-         logging.basicConfig(level=logging.WARNING)
+        logging.basicConfig(level=logging.WARNING)
     logger.debug('components_cif={} output_dir={}'.format(components_cif, output_dir))
     create_directory_using_mkdir_unless_it_exists(output_dir)
     files_dir = os.path.join(output_dir, 'files')
     create_directory_using_mkdir_unless_it_exists(files_dir, clean_existing)
-    mmcif_dir = os.path.join(files_dir, 'mmcif')
-    create_directory_using_mkdir_unless_it_exists(mmcif_dir)
+    file_subdirs_path = {}
+    for subdir in file_subdirs:
+        file_subdirs_path[subdir] = os.path.join(files_dir, subdir)
+        create_directory_using_mkdir_unless_it_exists(file_subdirs_path[subdir])
+        logger.debug('have created files subdir {}'.format(file_subdirs_path[subdir]))
     split_cc = SplitComponentsCif(components_cif)
     logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
-                format(components_cif, len(split_cc.cif_dictionary)))
+                 format(components_cif, len(split_cc.cif_dictionary)))
     for pdb_cc_rdkit in split_cc.individual_pdb_ccd_rdkit():
         chem_comp_id = pdb_cc_rdkit.chem_comp_id
         logger.debug('chem_comp_id={}'.format(chem_comp_id))
-        ccd_cif = os.path.join(mmcif_dir, chem_comp_id + '.cif')
-        pdb_cc_rdkit.write_ccd_cif(ccd_cif)
-        if not os.path.isfile(ccd_cif):
-            sys.exit('failed to write file {}'.format(ccd_cif))
-        logger.debug('have written PDB-CCD cif to {}'.format(ccd_cif))
+        for subdir in file_subdirs:
+            if subdir == 'mmcif':
+                file_type = '.cif'
+            else:
+                file_type = '.' + subdir[:3]
+            output_file = os.path.join(file_subdirs_path[subdir], chem_comp_id + file_type)
+            if subdir == 'mmcif':
+                pdb_cc_rdkit.write_ccd_cif(output_file)
+            elif subdir == 'sdf':
+                pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=True)
+            elif subdir == 'sdf_nh':
+                pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=False)
+            elif subdir == 'sdf_r':
+                pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=False, hydrogen=True)
+            elif subdir == 'sdf_r_nh':
+                pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=False, hydrogen=False)
+            elif subdir == 'pdb':
+                pdb_cc_rdkit.pdb_file_or_string(file_name=output_file, ideal=True)
+            elif subdir == 'pdb_r':
+                pdb_cc_rdkit.pdb_file_or_string(file_name=output_file, ideal=False)
+            elif subdir == 'cml':
+                pdb_cc_rdkit.cml_file_or_string(file_name=output_file)
+            else:
+                logger.warn('need to write {} handling!'.format(subdir))
+            if os.path.isfile(output_file):
+                logger.debug('written file {}'.format(output_file))
+            else:
+                logger.warn('failed to write {}'.format(output_file))
 
 
 def main():
