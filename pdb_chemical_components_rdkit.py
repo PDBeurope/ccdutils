@@ -282,10 +282,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if file_name is None:
             return cml_string
         else:
-            with open (file_name, 'wb') as cml_file:
+            with open(file_name, 'wb') as cml_file:
                 cml_file.write(cml_string)
                 cml_file.close()
-        return None
+            return None
 
     def xyz_file_or_string(self, file_name=None, ideal=True):
         """
@@ -298,7 +298,22 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         Returns:
             None or a string containing the molecule converted to xyz
         """
-        return 'xyz_file_or_string not yet implemented'
+        ret_str = '{}\n'.format(self.number_atoms)
+        ret_str += '{}\n'.format(self.chem_comp_id)
+        for atom_index in range(self.number_atoms):
+            element = self.atom_elements[atom_index]
+            if ideal:
+                (x, y, z) = self.ideal_xyz[atom_index]
+            else:
+                (x, y, z) = self.model_xyz[atom_index]
+            ret_str += '{: <2}{:9.4f} {:9.4f} {:9.4f}\n'.format(element, x, y, z)
+        if file_name is None:
+            return ret_str
+        else:
+            with open(file_name, 'w') as file_out:
+                file_out.write(ret_str)
+                file_out.close()
+            return None
 
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
                              pixels_x=400, pixels_y=200, highlight_bonds=None, black=False):
