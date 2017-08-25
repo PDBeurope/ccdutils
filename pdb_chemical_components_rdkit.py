@@ -287,6 +287,19 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 cml_file.close()
         return None
 
+    def xyz_file_or_string(self, file_name=None, ideal=True):
+        """
+        write a xyz format file or return a string containing the molecule in xyz format
+
+        Args:
+            file_name (str): optional filename
+            ideal (bool): write the ideal coordinates (True) or model coordinates (False)? Default True: ideal.
+
+        Returns:
+            None or a string containing the molecule converted to xyz
+        """
+        return 'xyz_file_or_string not yet implemented'
+
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
                              pixels_x=400, pixels_y=200, highlight_bonds=None, black=False):
         """
