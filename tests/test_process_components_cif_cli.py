@@ -38,4 +38,13 @@ def test_with_components_cif_first_file_comps():
             # simple check that there is a single file starting with the chem_comp_id
             file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*')
             yield assert_equal, len(file_for_chem_comp_id), 1, \
-                  'there should be a file matching {}* in {}'.format(chem_comp_id, subdir)
+                'there should be a file matching {}* in {}'.format(chem_comp_id, subdir)
+    chem_comp_dot_list_file = os.path.join(test_output_dir, 'chem_comp.list')
+    yield assert_true, os.path.isfile(chem_comp_dot_list_file), \
+        'chem_comp.list file: {} must be created'.format(chem_comp_dot_list_file)
+    with open(chem_comp_dot_list_file, 'r') as chem_comp_file:
+        lines = chem_comp_file.read().splitlines()
+        yield assert_equal, lines, chem_comp_ids, 'chem_comp.list file should contain list of ccd''s one per line'
+
+
+
