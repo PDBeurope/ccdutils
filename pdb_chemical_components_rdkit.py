@@ -288,7 +288,29 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             return None
 
     def chem_comp_xml(self):
-        return 'method chem_comp_xml to be written'
+        """
+        provides xml records for the ccd needed for the PDBeChem chem_comp.xml/chem.xml
+        
+        Returns:
+            str: string containing <chemComp> xml data.
+        """
+        top = etree.Element('chemComp')
+        id = etree.SubElement(top, 'id')
+        id.text = self.chem_comp_id
+        name = etree.SubElement(top, 'name')
+        name.text = self.chem_comp_name
+        formula = etree.SubElement(top, 'formula')
+        formula.text = self.chem_comp_formula
+        systematic_name = etree.SubElement(top, 'systematicName')
+        systematic_name.text = 'TODO'  # TODO
+        stereo_smiles = etree.SubElement(top, 'stereoSmiles')
+        stereo_smiles.text = 'TODO'  # TODO
+        non_stereo_smiles = etree.SubElement(top, 'nonStereoSmiles')
+        non_stereo_smiles.text = 'TODO'  # TODO
+        inchi = etree.SubElement(top, 'InChi')
+        inchi.text = 'TODO'  # TODO
+        xml_string = etree.tostring(top, pretty_print=True)
+        return xml_string
 
     def xyz_file_or_string(self, file_name=None, ideal=True):
         """
