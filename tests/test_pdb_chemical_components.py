@@ -77,6 +77,7 @@ def test_load_eoh_from_cif():
             eoh = PdbChemicalComponents(file_name=cif_filename('EOH'), cif_parser=cif_parser)
             yield assert_equals, 'EOH', eoh.chem_comp_id, 'chem_comp_id' + description
             yield assert_equals, 'ETHANOL', eoh.chem_comp_name, 'chem_comp_name' + description
+            yield assert_equals, 'C2 H6 O', eoh.chem_comp_formula, 'chem_comp_formula' + description
             yield assert_equals, 'REL', eoh.chem_comp_pdbx_release_status, 'chem_comp_pdbx_release_status'
             yield assert_equals, 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N', eoh.inchikey, 'inchikey' + description
             yield assert_equals, 9, eoh.number_atoms, 'number_atoms' + description

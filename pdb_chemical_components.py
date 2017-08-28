@@ -58,6 +58,7 @@ class PdbChemicalComponents(object):
         """
         self.chem_comp_id = None
         self.chem_comp_name = None
+        self.chem_comp_formula = None
         self.chem_comp_pdbx_release_status = None
         self.inchikey = None
         self._atoms = []
@@ -431,7 +432,7 @@ class PdbChemicalComponents(object):
         data_block = list(self.pdbecif_cif_obj.values())[0]
         # noinspection PyProtectedMember
         chem_comp = data_block._chem_comp
-        for thing in 'id', 'name', 'pdbx_release_status':
+        for thing in 'id', 'name', 'formula', 'pdbx_release_status':
             value = chem_comp[thing][0]
             setattr(self, "chem_comp_" + thing, value)
         self._atoms = []
