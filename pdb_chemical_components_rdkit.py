@@ -287,6 +287,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 cml_file.close()
             return None
 
+    def chem_comp_xml(self):
+        return 'method chem_comp_xml to be written'
+
     def xyz_file_or_string(self, file_name=None, ideal=True):
         """
         write a xyz format file or return a string containing the molecule in xyz format
