@@ -309,6 +309,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         non_stereo_smiles.text = self.smiles_cactvs
         inchi = etree.SubElement(top, 'InChi')
         inchi.text = self.inchi
+        inchikey = etree.SubElement(top, 'InChIKey')
+        inchikey.text = self.inchikey
         xml_string = etree.tostring(top, pretty_print=True)
         xml_string = xml_string.decode('utf-8')  # needed for python3
         return xml_string

@@ -34,10 +34,12 @@ def test_chem_comp_for_eoh_and_glu():
         #     <InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>
         #   </chemComp>
         if chem_comp_id is 'EOH':
-            old_records = ('<chemComp>', '<id>EOH</id>', '<name>ETHANOL</name>', '<formula>C2 H6 O</formula>',
+            old_records = ['<chemComp>', '<id>EOH</id>', '<name>ETHANOL</name>', '<formula>C2 H6 O</formula>',
                            '<systematicName>ethanol</systematicName>', '<stereoSmiles>CCO</stereoSmiles>',
                            '<nonStereoSmiles>CCO</nonStereoSmiles>', '<InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>',
-                           '</chemComp>')
+                           '</chemComp>']
+            # want inchikey
+            old_records.append('<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>')
         else:
             #   <chemComp>
             #   <id>GLU</id>
@@ -48,13 +50,15 @@ def test_chem_comp_for_eoh_and_glu():
             #   <nonStereoSmiles>N[CH](CCC(O)=O)C(O)=O</nonStereoSmiles>
             #   <InChi>InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1</InChi>
             # </chemComp>
-            old_records = ('<chemComp>', '<id>GLU</id>', '<name>GLUTAMIC ACID</name>', '<formula>C5 H9 N O4</formula>',
+            old_records = ['<chemComp>', '<id>GLU</id>', '<name>GLUTAMIC ACID</name>', '<formula>C5 H9 N O4</formula>',
                            '<systematicName>(2S)-2-azanylpentanedioic acid</systematicName>',
                            '<stereoSmiles>N[C@@H](CCC(O)=O)C(O)=O</stereoSmiles>',
                            '<nonStereoSmiles>N[CH](CCC(O)=O)C(O)=O</nonStereoSmiles>',
                            '<InChi>InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1'
                            '</InChi>',
-                           '</chemComp>')
+                           '</chemComp>']
+            # also want inchikey:
+            old_records.append('<InChIKey>WHUUTDBJXJRKMK-VKHMYHEASA-N</InChIKey>')
         ccd = PdbChemicalComponentsRDKit(file_name=cif_filename(chem_comp_id))
         chem_comp_xml = ccd.chem_comp_xml()
         lines = chem_comp_xml.splitlines()
