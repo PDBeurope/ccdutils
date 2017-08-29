@@ -5,7 +5,7 @@ import glob
 import os
 import shutil
 
-from nose.tools import assert_raises, assert_true, assert_equal
+from nose.tools import assert_raises, assert_true, assert_equal, assert_in
 
 from process_components_cif_cli import create_parser, process_components_cif, file_subdirs
 from utilities import test_components_cif_first_file_comps, file_name_in_tsts_out
@@ -40,9 +40,19 @@ def test_with_components_cif_first_file_comps():
             yield assert_equal, len(file_for_chem_comp_id), 1, \
                 'there should be a file matching {}* in {}'.format(chem_comp_id, subdir)
     chem_comp_dot_list_file = os.path.join(test_output_dir, 'chem_comp.list')
-    yield assert_true, os.path.isfile(chem_comp_dot_list_file), \
-        'chem_comp.list file: {} must be created'.format(chem_comp_dot_list_file)
-    with open(chem_comp_dot_list_file, 'r') as chem_comp_file:
-        lines = chem_comp_file.read().splitlines()
-        yield assert_equal, lines, list(chem_comp_ids), \
-            'chem_comp.list file should contain list of ccd''s one per line'
+    try:
+        with open(chem_comp_dot_list_file, 'r') as chem_comp_file:
+            lines = chem_comp_file.read().splitlines()
+            yield assert_equal, lines, list(chem_comp_ids), \
+                'chem_comp.list file should contain list of ccd''s one per line'
+    except IOError as message:
+        yield assert_true, False, 'problem opening chem_comp.list "{}"'.format(message)
+    chem_dot_xml_file_name = os.path.join(test_output_dir, 'chem.xml')
+    try:
+        with open(chem_dot_xml_file_name, 'r') as chem_dot_xml_file:
+            lines = chem_dot_xml_file.read().splitlines()
+            yield assert_in, '<id>000</id>', lines, 'chem.xml should contain <id>000</id>'
+            yield assert_in, '<id>004</id>', lines, 'chem.xml should contain <id>004</id>'
+            yield assert_in, '<name>(2S)-amino(phenyl)ethanoic acid</name>', lines, 'chem.xml should contain name of 004'
+    except IOError as message:
+        yield assert_true, False, 'problem opening chem.xml "{}"'.format(message)
