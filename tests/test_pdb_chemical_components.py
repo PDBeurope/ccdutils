@@ -102,16 +102,25 @@ def test_load_eoh_from_cif():
 
 
 def test_load_glu_from_cif():
+    # tests descriptor and identifier parsing
     for cif_parser in cif_parser_list:
         description = ', with cif_parser={}'.format(cif_parser)
         try:
             glu = PdbChemicalComponents(file_name=cif_filename('GLU'), cif_parser=cif_parser)
-            yield assert_equals, 'N[CH](CCC(O)=O)C(O)=O', glu.smiles_cactvs, \
-                'SMILES_CACTVS ' + description
+            yield assert_equals, 'O=C(O)C(N)CCC(=O)O', glu.smiles_acdlabs, \
+                'SMILES_ACDLABS ' + description
             yield assert_equals, 'N[C@@H](CCC(O)=O)C(O)=O', glu.smiles_canonical_cactvs, \
                 'SMILES_CANONICAL_CACTVS ' + description
+            yield assert_equals, 'N[CH](CCC(O)=O)C(O)=O', glu.smiles_cactvs, \
+                'SMILES_CACTVS ' + description
+            yield assert_equals, 'C(CC(=O)O)[C@@H](C(=O)O)N', glu.smiles_canonical_openeye, \
+                'SMILES_CANONICAL_OpenEye ' + description
+            yield assert_equals, 'C(CC(=O)O)C(C(=O)O)N', glu.smiles_openeye, \
+                'SMILES_OpenEye ' + description
             yield assert_equals, 'InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1', \
                 glu.inchi, 'InChi ' + description
+            yield assert_equals, 'L-glutamic acid', glu.systematic_name_acdlabs, \
+                'systematic_name_acdlabs' + description
             yield assert_equals, '(2S)-2-azanylpentanedioic acid', glu.systematic_name_openeye, \
                 'systematic_name_openeye' + description
         except ImportError:

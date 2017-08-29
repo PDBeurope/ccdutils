@@ -14,6 +14,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
 import os
 from collections import namedtuple, OrderedDict
 
@@ -60,7 +61,15 @@ class PdbChemicalComponents(object):
         self.chem_comp_name = None
         self.chem_comp_formula = None
         self.chem_comp_pdbx_release_status = None
+        self.smiles_acdlabs = None
+        self.smiles_canonical_cactvs = None
+        self.smiles_cactvs = None
+        self.smiles_canonical_openeye = None
+        self.smiles_openeye = None
+        self.inchi = None
         self.inchikey = None
+        self.systematic_name_openeye = None
+        self.systematic_name_acdlabs = None
         self._atoms = []
         """list of ordered dictionary"""
         self.__atom_ids = None
@@ -457,15 +466,59 @@ class PdbChemicalComponents(object):
             this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
                                   pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
             self.bonds.append(this_bond)
+        self._pdbecif_parse_pdbx_chem_comp_descriptor(data_block)
+        self._pdbecif_parse_pdbx_chem_comp_identifier(data_block)
+
+    def _pdbecif_parse_pdbx_chem_comp_descriptor(self, data_block):
+        """
+        parses contents of _pdbx_chem_comp_descriptor block, SMILES strings &  inchi stuff
+
+        Args:
+            data_block: PDBeCIF datablock obtained from PDB-CCD
+
+        Returns:
+            None
+
+        """
         # noinspection PyProtectedMember
         pdbx_chem_comp_descriptor = data_block._pdbx_chem_comp_descriptor
         for descriptor in pdbx_chem_comp_descriptor:
-            if descriptor['type'] == 'InChIKey':
-                self.inchikey = descriptor['descriptor']
-            if descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
-                self.stereosmiles = descriptor['descriptor']
             if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
-                self.nonstereosmiles = descriptor['descriptor']
+                self.smiles_acdlabs = descriptor['descriptor']
+            elif descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
+                self.smiles_canonical_cactvs = descriptor['descriptor']
+            elif descriptor['type'] == 'SMILES' and descriptor['program'] == 'CACTVS':
+                self.smiles_cactvs = descriptor['descriptor']
+            elif descriptor['type'] == 'SMILES_CANONICAL' and 'OpenEye' in descriptor['program']:
+                self.smiles_canonical_openeye = descriptor['descriptor']
+            elif descriptor['type'] == 'SMILES' and 'OpenEye' in descriptor['program']:
+                self.smiles_openeye = descriptor['descriptor']
+            elif descriptor['type'] == 'InChI':
+                self.inchi = descriptor['descriptor']
+            elif descriptor['type'] == 'InChIKey':
+                self.inchikey = descriptor['descriptor']
+            else:
+                logging.warn('unrecognized pdbx_chem_comp_descriptor {}'.format(descriptor))
+
+    def _pdbecif_parse_pdbx_chem_comp_identifier(self, data_block):
+        """
+        parses contents of _pdbx_chem_comp_identifier block to obtain systematic names
+
+        Args:
+            data_block: PDBeCIF datablock obtained from PDB-CCD
+
+        Returns:
+
+        """
+        pdbx_chem_comp_identifier = data_block._pdbx_chem_comp_identifier
+        for identifier in pdbx_chem_comp_identifier:
+            if identifier['type'] == 'SYSTEMATIC NAME' and identifier['program'] == 'ACDLabs':
+                self.systematic_name_acdlabs = identifier['identifier']
+            elif identifier['type'] == 'SYSTEMATIC NAME' and 'OpenEye' in identifier['program']:
+                self.systematic_name_openeye = identifier['identifier']
+            else:
+                logging.warn('unrecognized chem_comp_identifier {} '.format(identifier))
+
 
     def write_ccd_cif(self, output_ccd_cif_file_name):
         """

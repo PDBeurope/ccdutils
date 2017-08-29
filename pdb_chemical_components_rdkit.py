@@ -257,8 +257,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         id_systematic.text = self.chem_comp_name
         id_formula1 = etree.SubElement(mol, 'formula', dictRef="ebiMolecule:stereoSmiles")
         id_formula2 = etree.SubElement(mol, 'formula', dictRef="ebiMolecule:nonStereoSmiles")
-        id_formula1.text = self.stereosmiles
-        id_formula2.text = self.nonstereosmiles
+        id_formula1.text = self.smiles_canonical_cactvs
+        id_formula2.text = self.smiles_acdlabs
         atom_array = etree.SubElement(mol, 'atomArray')
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
@@ -310,6 +310,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         inchi = etree.SubElement(top, 'InChi')
         inchi.text = 'TODO'  # TODO
         xml_string = etree.tostring(top, pretty_print=True)
+        # xml_string = xml_string.decode("utf-8")
         return xml_string
 
     def xyz_file_or_string(self, file_name=None, ideal=True):
