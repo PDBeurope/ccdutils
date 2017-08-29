@@ -273,11 +273,11 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             atom_1 = self.bond_atom_name_1[bond_index]
             atom_2 = self.bond_atom_name_2[bond_index]
             bond_order = Chem.rdchem.BondType(self.bond_order[bond_index])
-            #print bond_order
+            # print bond_order
             bond_entry = etree.SubElement(bond_array, 'bond')
-            bond_entry.set('atomsRefs2',atom_1+' '+atom_2)
+            bond_entry.set('atomsRefs2', atom_1+' '+atom_2)
             bond_entry.set('order', str(bond_order))
-        tree = etree.ElementTree(top)
+        # tree = etree.ElementTree(top)
         cml_string = etree.tostring(top, pretty_print=True)
         if file_name is None:
             return cml_string
@@ -295,22 +295,22 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             str: string containing <chemComp> xml data.
         """
         top = etree.Element('chemComp')
-        id = etree.SubElement(top, 'id')
-        id.text = self.chem_comp_id
+        this_id = etree.SubElement(top, 'id')
+        this_id.text = self.chem_comp_id
         name = etree.SubElement(top, 'name')
         name.text = self.chem_comp_name
         formula = etree.SubElement(top, 'formula')
         formula.text = self.chem_comp_formula
         systematic_name = etree.SubElement(top, 'systematicName')
-        systematic_name.text = 'TODO'  # TODO
+        systematic_name.text = self.systematic_name_openeye
         stereo_smiles = etree.SubElement(top, 'stereoSmiles')
-        stereo_smiles.text = 'TODO'  # TODO
+        stereo_smiles.text = self.smiles_canonical_cactvs
         non_stereo_smiles = etree.SubElement(top, 'nonStereoSmiles')
-        non_stereo_smiles.text = 'TODO'  # TODO
+        non_stereo_smiles.text = self.smiles_cactvs
         inchi = etree.SubElement(top, 'InChi')
-        inchi.text = 'TODO'  # TODO
+        inchi.text = self.inchi
         xml_string = etree.tostring(top, pretty_print=True)
-        # xml_string = xml_string.decode("utf-8")
+        xml_string = xml_string.decode('utf-8')  # needed for python3
         return xml_string
 
     def xyz_file_or_string(self, file_name=None, ideal=True):
