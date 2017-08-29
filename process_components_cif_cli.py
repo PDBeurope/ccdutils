@@ -73,7 +73,10 @@ def process_components_cif(components_cif, output_dir, debug):
     logger.debug('components_cif={} output_dir={}'.format(components_cif, output_dir))
     create_directory_using_mkdir_unless_it_exists(output_dir)
     chem_comp_dot_list_file_name = os.path.join(output_dir, 'chem_comp.list')
-    with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file:
+    chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
+    with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file, \
+         open(chem_dot_xml_file_name, 'w') as chem_dot_xml_file:
+        chem_dot_xml_file.write('<chemCompList>\n')
         files_dir = os.path.join(output_dir, 'files')
         create_directory_using_mkdir_unless_it_exists(files_dir, clean_existing)
         file_subdirs_path = {}
@@ -88,6 +91,7 @@ def process_components_cif(components_cif, output_dir, debug):
             chem_comp_id = pdb_cc_rdkit.chem_comp_id
             logger.debug('chem_comp_id={}'.format(chem_comp_id))
             chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
+            chem_dot_xml_file.write(pdb_cc_rdkit.chem_comp_xml())
             for subdir in file_subdirs:
                 if subdir == 'mmcif':
                     file_type = '.cif'
@@ -120,6 +124,7 @@ def process_components_cif(components_cif, output_dir, debug):
                     logger.debug('written file {}'.format(output_file))
                 else:
                     logger.warn('failed to write {}'.format(output_file))
+        chem_dot_xml_file.write('</chemCompList>\n')
 
 
 def main():

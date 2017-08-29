@@ -51,8 +51,11 @@ def test_with_components_cif_first_file_comps():
     try:
         with open(chem_dot_xml_file_name, 'r') as chem_dot_xml_file:
             lines = chem_dot_xml_file.read().splitlines()
-            yield assert_in, '<id>000</id>', lines, 'chem.xml should contain <id>000</id>'
-            yield assert_in, '<id>004</id>', lines, 'chem.xml should contain <id>004</id>'
-            yield assert_in, '<name>(2S)-amino(phenyl)ethanoic acid</name>', lines, 'chem.xml should contain name of 004'
+            strip_lines = [item.strip() for item in lines]
+            yield assert_in, '</chemCompList>',  strip_lines, 'chem.xml should contain </chemCompList>'
+            yield assert_in, '<id>000</id>', strip_lines, 'chem.xml should contain <id>000</id>'
+            yield assert_in, '<id>004</id>', strip_lines, 'chem.xml should contain <id>004</id>'
+            yield assert_in, '<name>(2S)-amino(phenyl)ethanoic acid</name>', strip_lines, \
+                'chem.xml should contain name of 004'
     except IOError as message:
         yield assert_true, False, 'problem opening chem.xml "{}"'.format(message)
