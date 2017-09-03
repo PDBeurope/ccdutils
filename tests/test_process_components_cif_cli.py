@@ -7,7 +7,7 @@ import shutil
 
 from nose.tools import assert_raises, assert_true, assert_equal, assert_in
 
-from process_components_cif_cli import create_parser, process_components_cif, file_subdirs
+from process_components_cif_cli import create_parser, process_components_cif, file_subdirs, images_subdirs
 from utilities import test_components_cif_first_file_comps, file_name_in_tsts_out
 
 
@@ -30,7 +30,7 @@ def test_with_components_cif_first_file_comps():
     process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
     yield assert_true, os.path.isdir(test_output_dir), 'output directory {} must be created'.format(test_output_dir)
     files_dir = os.path.join(test_output_dir, 'files')
-    yield assert_true, os.path.isdir(test_output_dir), 'files sub-directory {} must be created'.format(files_dir)
+    yield assert_true, os.path.isdir(files_dir), 'files sub-directory {} must be created'.format(files_dir)
     for subdir in file_subdirs:
         path = os.path.join(files_dir, subdir)
         yield assert_true, os.path.isdir(path), '{} sub-directory {} must be created'.format(subdir, path)
@@ -59,3 +59,14 @@ def test_with_components_cif_first_file_comps():
                 'chem.xml should contain name of 004'
     except IOError as message:
         yield assert_true, False, 'problem opening chem.xml "{}"'.format(message)
+    images_dir = os.path.join(test_output_dir, 'images')
+    yield assert_true, os.path.isdir(images_dir), 'images sub-directory {} must be created'.format(images_dir)
+    for subdir in images_subdirs:
+        path = os.path.join(images_dir, subdir)
+        yield assert_true, os.path.isdir(path), '{} sub-directory {} must be created'.format(subdir, path)
+        for chem_comp_id in chem_comp_ids:
+            # simple check that there is a single file starting with the chem_comp_id
+            file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*.xml')
+            yield assert_equal, len(file_for_chem_comp_id), 1, \
+                'there should be an xml file matching {}*.xml in {}'.format(chem_comp_id, subdir)
+

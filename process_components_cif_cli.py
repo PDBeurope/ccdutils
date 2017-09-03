@@ -37,7 +37,7 @@ from utilities import create_directory_using_mkdir_unless_it_exists
 
 clean_existing = True  # might want an update run mode later but for now remove existing directories/files
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
-
+images_subdirs = 'large', 'small', 'hydrogen'
 
 def create_parser():
     """
