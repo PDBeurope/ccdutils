@@ -78,13 +78,8 @@ def process_components_cif(components_cif, output_dir, debug):
     with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file, \
             open(chem_dot_xml_file_name, 'w') as chem_dot_xml_file:
         chem_dot_xml_file.write('<chemCompList>\n')
-        files_dir = os.path.join(output_dir, 'files')
-        create_directory_using_mkdir_unless_it_exists(files_dir, clean_existing)
-        file_subdirs_path = {}
-        for subdir in file_subdirs:
-            file_subdirs_path[subdir] = os.path.join(files_dir, subdir)
-            create_directory_using_mkdir_unless_it_exists(file_subdirs_path[subdir])
-            logger.debug('have created files subdir {}'.format(file_subdirs_path[subdir]))
+        files_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'files', file_subdirs)
+        images_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'images', images_subdirs)
         split_cc = SplitComponentsCif(components_cif)
         logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
                      format(components_cif, len(split_cc.cif_dictionary)))
@@ -93,8 +88,32 @@ def process_components_cif(components_cif, output_dir, debug):
             logger.debug('chem_comp_id={}'.format(chem_comp_id))
             chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
             chem_dot_xml_file.write(pdb_cc_rdkit.chem_comp_xml())
-            _write_coordinate_files_for_ccd(logger, file_subdirs_path, pdb_cc_rdkit, chem_comp_id)
+            _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
         chem_dot_xml_file.write('</chemCompList>\n')
+
+
+def _create_files_or_images_subdirs( logger, output_dir, files_or_images, subdirs_list):
+    """
+    creates the 'files' or 'images' directory and the required subdirectories in it
+
+    Args:
+        logger: logging object
+        output_dir (str):  the output directory
+        files_or_images (str): either 'files' or 'images'
+        subdirs_list: list of subdirectories to be created.
+
+    Returns:
+        dictionary giving the path to each subdir type
+
+    """
+    files_or_images_dir = os.path.join(output_dir, files_or_images)
+    create_directory_using_mkdir_unless_it_exists(files_or_images_dir, clean_existing)
+    subdirs_path = {}
+    for subdir in subdirs_list:
+        subdirs_path[subdir] = os.path.join(files_or_images_dir, subdir)
+        create_directory_using_mkdir_unless_it_exists(subdirs_path[subdir])
+        logger.debug('have created {} subdir {}'.format(files_or_images, subdirs_path[subdir]))
+    return subdirs_path
 
 
 def _write_coordinate_files_for_ccd(logger, file_subdirs_path, pdb_cc_rdkit, chem_comp_id):
