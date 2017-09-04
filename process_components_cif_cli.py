@@ -33,6 +33,8 @@ from argparse import RawTextHelpFormatter
 
 import cairosvg
 
+from PIL import Image
+
 from split_components_cif import SplitComponentsCif
 from utilities import create_directory_using_mkdir_unless_it_exists
 
@@ -181,6 +183,7 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
     for subdir in subdirs_path.keys():
         output_svg = os.path.join(subdirs_path[subdir], chem_comp_id + '.svg')
         output_png = os.path.join(subdirs_path[subdir], chem_comp_id + '.png')
+        output_gif = os.path.join(subdirs_path[subdir], chem_comp_id + '.gif')
         if subdir == 'large':
             pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=400, pixels_y=400,
                                               wedge=True, atom_labels=True, hydrogen=False)
@@ -203,6 +206,14 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
             logger.debug('written file {}'.format(output_png))
         else:
             logger.warn('failed to write {}'.format(output_png))
+            return
+
+        img = Image.open(output_png)
+        img.save(output_gif)
+        if os.path.isfile(output_gif):
+            logger.debug('written file {}'.format(output_gif))
+        else:
+            logger.warn('failed to write {}'.format(output_gif))
             return
 
 

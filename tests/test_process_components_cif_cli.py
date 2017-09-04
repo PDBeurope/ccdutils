@@ -65,7 +65,7 @@ def test_with_components_cif_first_file_comps():
         path = os.path.join(images_dir, subdir)
         yield assert_true, os.path.isdir(path), '{} sub-directory {} must be created'.format(subdir, path)
         for chem_comp_id in chem_comp_ids:
-            for file_type in 'svg', 'png':
+            for file_type in 'svg', 'png', 'gif':
                 # simple check that there is a single file starting with the chem_comp_id
                 file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*.' + file_type)
                 yield assert_equal, len(file_for_chem_comp_id), 1, \
