@@ -39,6 +39,7 @@ clean_existing = True  # might want an update run mode later but for now remove 
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
 images_subdirs = 'large', 'small', 'hydrogen'
 
+
 def create_parser():
     """
     Sets up parse the command line options.
@@ -75,7 +76,7 @@ def process_components_cif(components_cif, output_dir, debug):
     chem_comp_dot_list_file_name = os.path.join(output_dir, 'chem_comp.list')
     chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
     with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file, \
-         open(chem_dot_xml_file_name, 'w') as chem_dot_xml_file:
+            open(chem_dot_xml_file_name, 'w') as chem_dot_xml_file:
         chem_dot_xml_file.write('<chemCompList>\n')
         files_dir = os.path.join(output_dir, 'files')
         create_directory_using_mkdir_unless_it_exists(files_dir, clean_existing)
@@ -92,39 +93,55 @@ def process_components_cif(components_cif, output_dir, debug):
             logger.debug('chem_comp_id={}'.format(chem_comp_id))
             chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
             chem_dot_xml_file.write(pdb_cc_rdkit.chem_comp_xml())
-            for subdir in file_subdirs:
-                if subdir == 'mmcif':
-                    file_type = '.cif'
-                else:
-                    file_type = '.' + subdir[:3]
-                output_file = os.path.join(file_subdirs_path[subdir], chem_comp_id + file_type)
-                if subdir == 'mmcif':
-                    pdb_cc_rdkit.write_ccd_cif(output_file)
-                elif subdir == 'sdf':
-                    pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=True)
-                elif subdir == 'sdf_nh':
-                    pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=False)
-                elif subdir == 'sdf_r':
-                    pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=False, hydrogen=True)
-                elif subdir == 'sdf_r_nh':
-                    pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=False, hydrogen=False)
-                elif subdir == 'pdb':
-                    pdb_cc_rdkit.pdb_file_or_string(file_name=output_file, ideal=True)
-                elif subdir == 'pdb_r':
-                    pdb_cc_rdkit.pdb_file_or_string(file_name=output_file, ideal=False)
-                elif subdir == 'cml':
-                    pdb_cc_rdkit.cml_file_or_string(file_name=output_file)
-                elif subdir == 'xyz':
-                    pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=True)
-                elif subdir == 'xyz_r':
-                    pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=False)
-                else:
-                    raise NotImplementedError('unrecognized subdir {}'.format(subdir))
-                if os.path.isfile(output_file):
-                    logger.debug('written file {}'.format(output_file))
-                else:
-                    logger.warn('failed to write {}'.format(output_file))
+            _write_coordinate_files_for_ccd(logger, file_subdirs_path, pdb_cc_rdkit, chem_comp_id)
         chem_dot_xml_file.write('</chemCompList>\n')
+
+
+def _write_coordinate_files_for_ccd(logger, file_subdirs_path, pdb_cc_rdkit, chem_comp_id):
+    """
+    writes the coordinate files for a particular ccd
+
+    Args:
+        logger: logging object
+        file_subdirs_path: dictionary giving the path to each subdir type
+        pdb_cc_rdkit (PdbChemicalComponentsRDKit): object for ccd to be written
+        chem_comp_id (str): the chem comp id aka 3 letter code for the ccd (eg ATP)
+
+    Returns:
+        None
+    """
+    for subdir in file_subdirs:
+        if subdir == 'mmcif':
+            file_type = '.cif'
+        else:
+            file_type = '.' + subdir[:3]
+        output_file = os.path.join(file_subdirs_path[subdir], chem_comp_id + file_type)
+        if subdir == 'mmcif':
+            pdb_cc_rdkit.write_ccd_cif(output_file)
+        elif subdir == 'sdf':
+            pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=True)
+        elif subdir == 'sdf_nh':
+            pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=False)
+        elif subdir == 'sdf_r':
+            pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=False, hydrogen=True)
+        elif subdir == 'sdf_r_nh':
+            pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=False, hydrogen=False)
+        elif subdir == 'pdb':
+            pdb_cc_rdkit.pdb_file_or_string(file_name=output_file, ideal=True)
+        elif subdir == 'pdb_r':
+            pdb_cc_rdkit.pdb_file_or_string(file_name=output_file, ideal=False)
+        elif subdir == 'cml':
+            pdb_cc_rdkit.cml_file_or_string(file_name=output_file)
+        elif subdir == 'xyz':
+            pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=True)
+        elif subdir == 'xyz_r':
+            pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=False)
+        else:
+            raise NotImplementedError('unrecognized subdir {}'.format(subdir))
+        if os.path.isfile(output_file):
+            logger.debug('written file {}'.format(output_file))
+        else:
+            logger.warn('failed to write {}'.format(output_file))
 
 
 def main():
