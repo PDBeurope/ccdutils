@@ -66,7 +66,7 @@ def test_with_components_cif_first_file_comps():
         yield assert_true, os.path.isdir(path), '{} sub-directory {} must be created'.format(subdir, path)
         for chem_comp_id in chem_comp_ids:
             # simple check that there is a single file starting with the chem_comp_id
-            file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*.xml')
+            file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*.svg')
             yield assert_equal, len(file_for_chem_comp_id), 1, \
-                'there should be an xml file matching {}*.xml in {}'.format(chem_comp_id, subdir)
+                'there should be an svg file matching {}*.svg in {}'.format(chem_comp_id, subdir)
 

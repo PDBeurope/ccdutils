@@ -89,10 +89,11 @@ def process_components_cif(components_cif, output_dir, debug):
             chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
             chem_dot_xml_file.write(pdb_cc_rdkit.chem_comp_xml())
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
+            _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
         chem_dot_xml_file.write('</chemCompList>\n')
 
 
-def _create_files_or_images_subdirs( logger, output_dir, files_or_images, subdirs_list):
+def _create_files_or_images_subdirs(logger, output_dir, files_or_images, subdirs_list):
     """
     creates the 'files' or 'images' directory and the required subdirectories in it
 
@@ -116,13 +117,13 @@ def _create_files_or_images_subdirs( logger, output_dir, files_or_images, subdir
     return subdirs_path
 
 
-def _write_coordinate_files_for_ccd(logger, file_subdirs_path, pdb_cc_rdkit, chem_comp_id):
+def _write_coordinate_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id):
     """
     writes the coordinate files for a particular ccd
 
     Args:
         logger: logging object
-        file_subdirs_path: dictionary giving the path to each subdir type
+        subdirs_path: dictionary giving the path to each subdir type
         pdb_cc_rdkit (PdbChemicalComponentsRDKit): object for ccd to be written
         chem_comp_id (str): the chem comp id aka 3 letter code for the ccd (eg ATP)
 
@@ -134,7 +135,7 @@ def _write_coordinate_files_for_ccd(logger, file_subdirs_path, pdb_cc_rdkit, che
             file_type = '.cif'
         else:
             file_type = '.' + subdir[:3]
-        output_file = os.path.join(file_subdirs_path[subdir], chem_comp_id + file_type)
+        output_file = os.path.join(subdirs_path[subdir], chem_comp_id + file_type)
         if subdir == 'mmcif':
             pdb_cc_rdkit.write_ccd_cif(output_file)
         elif subdir == 'sdf':
@@ -155,6 +156,38 @@ def _write_coordinate_files_for_ccd(logger, file_subdirs_path, pdb_cc_rdkit, che
             pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=True)
         elif subdir == 'xyz_r':
             pdb_cc_rdkit.xyz_file_or_string(file_name=output_file, ideal=False)
+        else:
+            raise NotImplementedError('unrecognized subdir {}'.format(subdir))
+        if os.path.isfile(output_file):
+            logger.debug('written file {}'.format(output_file))
+        else:
+            logger.warn('failed to write {}'.format(output_file))
+
+
+def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id):
+    """
+    writes the image files for a particular ccd
+
+    Args:
+        logger: logging object
+        subdirs_path: dictionary giving the path to each subdir type
+        pdb_cc_rdkit (PdbChemicalComponentsRDKit): object for ccd to be written
+        chem_comp_id (str): the chem comp id aka 3 letter code for the ccd (eg ATP)
+
+    Returns:
+        None
+    """
+    for subdir in subdirs_path.keys():
+        output_file = os.path.join(subdirs_path[subdir], chem_comp_id + '.svg')
+        if subdir == 'large':
+            pdb_cc_rdkit.image_file_or_string(file_name=output_file, pixels_x=400, pixels_y=400,
+                                              wedge=True, atom_labels=True, hydrogen=False)
+        elif subdir == 'small':
+            pdb_cc_rdkit.image_file_or_string(file_name=output_file, pixels_x=100, pixels_y=100,
+                                              wedge=True, atom_labels=False, hydrogen=False)
+        elif subdir == 'hydrogen':
+            pdb_cc_rdkit.image_file_or_string(file_name=output_file, pixels_x=600, pixels_y=600,
+                                              wedge=True, atom_labels=True, hydrogen=True)
         else:
             raise NotImplementedError('unrecognized subdir {}'.format(subdir))
         if os.path.isfile(output_file):
