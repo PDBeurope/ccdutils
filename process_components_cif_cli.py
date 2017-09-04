@@ -31,9 +31,10 @@ import logging
 import os
 from argparse import RawTextHelpFormatter
 
+import cairosvg
+
 from split_components_cif import SplitComponentsCif
 from utilities import create_directory_using_mkdir_unless_it_exists
-
 
 clean_existing = True  # might want an update run mode later but for now remove existing directories/files
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
@@ -178,22 +179,31 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         None
     """
     for subdir in subdirs_path.keys():
-        output_file = os.path.join(subdirs_path[subdir], chem_comp_id + '.svg')
+        output_svg = os.path.join(subdirs_path[subdir], chem_comp_id + '.svg')
+        output_png = os.path.join(subdirs_path[subdir], chem_comp_id + '.png')
         if subdir == 'large':
-            pdb_cc_rdkit.image_file_or_string(file_name=output_file, pixels_x=400, pixels_y=400,
+            pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=400, pixels_y=400,
                                               wedge=True, atom_labels=True, hydrogen=False)
         elif subdir == 'small':
-            pdb_cc_rdkit.image_file_or_string(file_name=output_file, pixels_x=100, pixels_y=100,
+            pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=100, pixels_y=100,
                                               wedge=True, atom_labels=False, hydrogen=False)
         elif subdir == 'hydrogen':
-            pdb_cc_rdkit.image_file_or_string(file_name=output_file, pixels_x=600, pixels_y=600,
+            pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=600, pixels_y=600,
                                               wedge=True, atom_labels=True, hydrogen=True)
         else:
             raise NotImplementedError('unrecognized subdir {}'.format(subdir))
-        if os.path.isfile(output_file):
-            logger.debug('written file {}'.format(output_file))
+        if os.path.isfile(output_svg):
+            logger.debug('written file {}'.format(output_svg))
         else:
-            logger.warn('failed to write {}'.format(output_file))
+            logger.warn('failed to write {}'.format(output_svg))
+            return
+
+        cairosvg.svg2png(file_obj=open(output_svg, "rb"), write_to=output_png)
+        if os.path.isfile(output_png):
+            logger.debug('written file {}'.format(output_png))
+        else:
+            logger.warn('failed to write {}'.format(output_png))
+            return
 
 
 def main():
