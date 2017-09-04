@@ -71,3 +71,6 @@ def test_with_components_cif_first_file_comps():
                 yield assert_equal, len(file_for_chem_comp_id), 1, \
                     'there should be an {} file matching {}*.{} in {}'.\
                     format(file_type, file_type, chem_comp_id, subdir)
+    readme_dot_html_file = os.path.join(test_output_dir, 'readme.htm')
+    yield assert_true, os.path.isfile(readme_dot_html_file) and os.path.getsize(readme_dot_html_file) > 0, \
+          ' readme_dot_html_file {} must be a non-empty file.'.format(readme_dot_html_file)
