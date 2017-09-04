@@ -30,10 +30,12 @@ import argparse
 import logging
 import os
 from argparse import RawTextHelpFormatter
+from collections import OrderedDict
 
 import cairosvg
 
 from PIL import Image
+from yattag import Doc, indent
 
 from split_components_cif import SplitComponentsCif
 from utilities import create_directory_using_mkdir_unless_it_exists
@@ -94,6 +96,63 @@ def process_components_cif(components_cif, output_dir, debug):
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
         chem_dot_xml_file.write('</chemCompList>\n')
+    _create_readme_dot_html(logger, output_dir)
+
+
+def _create_readme_dot_html(logger, output_dir):
+    doc, tag, text, line = Doc().ttl()
+    title = 'wwPDB ligand dictionary resources'
+    with tag('html'):
+        with tag('head'):
+            with tag('title'):
+                text(title)
+        with tag('body'):
+            with tag('h1'):
+                text(title)
+            with tag('p'):
+                text('This area provides various data files and images for the wwPDB ligand dictionary ')
+                ccd_url ='http://www.wwpdb.org/ccd.html'
+                with tag('a', href=ccd_url):
+                    text(ccd_url)
+                doc.stag('br')
+                text('and is part of the PDBeChem web application ')
+                with tag('a', href='http://pdbe.org/chem'):
+                    text('PDBeChem')
+            with tag('p'):
+                text('It is updated weekly on the same schedule of the PDB release and PDBe database update.')
+            with tag('h2'):
+                text('Contents:')
+            with tag('h3'):
+                text('General')
+            with tag('ul', ):
+                with tag('li'):
+                    text('List of 3 letter codes in the ligand dictionary: ')
+                    with tag('a', href='chem_comp.list'):
+                        text('chem_comp.list')
+                with tag('li'):
+                    text('XML file with summary information for each ligand: ')
+                    with tag('a', href='chem.xml'):
+                        text('chem.xml')
+            with tag('h3'):
+                text('Images')
+            descriptions = OrderedDict()
+            descriptions['images/large'] = 'Large images with atom names but without hydrogen atoms: '
+            descriptions['images/small'] = 'Small images without hydrogen atoms: '
+            descriptions['images/hydrogen'] = 'Large images with atom names and hydrogen atoms: '
+            with tag('ul', ):
+                for key, value in descriptions.items():
+                    with tag('li'):
+                        text(value)
+                        with tag('tt'):
+                            text(key + ' ')
+                        with tag('a', href=key):
+                            text('FTP')
+
+    html = indent(doc.getvalue())
+    readme_dot_html_file_name = os.path.join(output_dir, 'readme.htm')
+    with open(readme_dot_html_file_name, 'w') as readme_dot_html_file:
+        readme_dot_html_file.write(html)
+
 
 
 def _create_files_or_images_subdirs(logger, output_dir, files_or_images, subdirs_list):
