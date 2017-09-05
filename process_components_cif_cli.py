@@ -42,7 +42,7 @@ from utilities import create_directory_using_mkdir_unless_it_exists
 
 clean_existing = True  # might want an update run mode later but for now remove existing directories/files
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
-images_subdirs = 'large', 'small', 'hydrogen'
+images_subdirs = 'large', 'small', 'hydrogen', 'svg_with_atom_labels', 'svg_without_atom_labels'
 
 
 def create_parser():
@@ -152,14 +152,18 @@ def _create_readme_dot_html(logger, output_dir):
                     text('XML file with summary information for each ligand: ')
                     with tag('a', href='chem.xml'):
                         text('chem.xml')
-            for section in 'Images', 'Files':
+            for section in '2D chemical diagrams', 'Files':
                 with tag('h3'):
-                    text(section)
+                    text(section + ' for each chemical component')
                 descriptions = OrderedDict()
-                if section == 'Images':
-                    descriptions['images/large'] = 'Large images with atom names but without hydrogen atoms: '
-                    descriptions['images/small'] = 'Small images without hydrogen atoms: '
-                    descriptions['images/hydrogen'] = 'Large images with atom names and hydrogen atoms: '
+                if section != 'Files':
+                    descriptions['images/svg_without_atom_labels'] = 'svg images without atom names: '
+                    descriptions['images/svg_with_atom_labels'] = 'svg images with atom names: '
+                    descriptions['images/large'] = 'Large gif images with atom names but without hydrogen atoms ' \
+                                                   '(deprecated): '
+                    descriptions['images/small'] = 'Small gif images without hydrogen atoms (deprecated): '
+                    descriptions['images/hydrogen'] = 'Large gif images with atom names and hydrogen atoms ' \
+                                                      '(deprecated): '
                 else:
                     descriptions['files/sdf'] = 'Molfile (SDF) with ideal coordinates and hydrogen atoms: '
                     descriptions['files/sdf_r'] = 'Molfile (SDF) with representative coordinates and hydrogen atoms:'
@@ -285,6 +289,16 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         elif subdir == 'hydrogen':
             pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=600, pixels_y=600,
                                               wedge=True, atom_labels=True, hydrogen=True)
+        elif subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
+            subdir_path_plus_first_character_of_c_c_id = os.path.join(subdirs_path[subdir], chem_comp_id[:1])
+            create_directory_using_mkdir_unless_it_exists(subdir_path_plus_first_character_of_c_c_id)
+            output_svg = os.path.join(subdir_path_plus_first_character_of_c_c_id, chem_comp_id + '.svg')
+            if 'without' in subdir:
+                labels = False
+            else:
+                labels = True
+            pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=400, pixels_y=400,
+                                              wedge=True, atom_labels=labels, hydrogen=False)
         else:
             raise NotImplementedError('unrecognized subdir {}'.format(subdir))
         if os.path.isfile(output_svg):
@@ -292,6 +306,9 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         else:
             logger.warn('failed to write {}'.format(output_svg))
             continue
+
+        if subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
+            continue  # do not convert to png/gif
 
         try:
             cairosvg.svg2png(file_obj=open(output_svg, "rb"), write_to=output_png)
@@ -306,7 +323,6 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
             logger.warn('failed to write {}'.format(output_png))
             continue
 
-
         img = Image.open(output_png)
         img.save(output_gif)
         if os.path.isfile(output_gif):
@@ -314,6 +330,9 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         else:
             logger.warn('failed to write {}'.format(output_gif))
             continue
+        for this_file in output_svg, output_png:
+            os.remove(this_file)
+            logger.debug('removed file {}'.format(this_file))
 
 
 def _create_tar_balls(logger, subdirs_path):

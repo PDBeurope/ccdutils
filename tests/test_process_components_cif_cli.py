@@ -62,15 +62,19 @@ def test_with_components_cif_first_file_comps():
     images_dir = os.path.join(test_output_dir, 'images')
     yield assert_true, os.path.isdir(images_dir), 'images sub-directory {} must be created'.format(images_dir)
     for subdir in images_subdirs:
-        path = os.path.join(images_dir, subdir)
         yield assert_true, os.path.isdir(path), '{} sub-directory {} must be created'.format(subdir, path)
         for chem_comp_id in chem_comp_ids:
-            for file_type in 'svg', 'png', 'gif':
-                # simple check that there is a single file starting with the chem_comp_id
-                file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*.' + file_type)
-                yield assert_equal, len(file_for_chem_comp_id), 1, \
-                    'there should be an {} file matching {}*.{} in {}'.\
-                    format(file_type, file_type, chem_comp_id, subdir)
+            if subdir[:3] == 'svg':
+                file_type = 'svg'
+                path = os.path.join(images_dir, subdir, chem_comp_id[:1])
+            else:
+                path = os.path.join(images_dir, subdir)
+                file_type = 'gif'
+            # simple check that there is a single file starting with the chem_comp_id
+            file_for_chem_comp_id = glob.glob1(path, chem_comp_id + '*.' + file_type)
+            yield assert_equal, len(file_for_chem_comp_id), 1, \
+                'there should be an {} file matching {}*.{} in {}'.\
+                format(file_type, file_type, chem_comp_id, path)
     readme_dot_html_file = os.path.join(test_output_dir, 'readme.htm')
     yield assert_true, os.path.isfile(readme_dot_html_file) and os.path.getsize(readme_dot_html_file) > 0, \
         'readme_dot_html_file {} must be a non-empty file.'.format(readme_dot_html_file)
