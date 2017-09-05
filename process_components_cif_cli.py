@@ -100,6 +100,17 @@ def process_components_cif(components_cif, output_dir, debug):
 
 
 def _create_readme_dot_html(logger, output_dir):
+    """
+    writes file to become http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/readme.htm
+
+    Args:
+        logger: logging object
+        output_dir (str):  the output directory
+
+
+    Returns:
+        None
+    """
     doc, tag, text, line = Doc().ttl()
     title = 'wwPDB ligand dictionary resources'
     with tag('html'):
@@ -133,25 +144,40 @@ def _create_readme_dot_html(logger, output_dir):
                     text('XML file with summary information for each ligand: ')
                     with tag('a', href='chem.xml'):
                         text('chem.xml')
-            with tag('h3'):
-                text('Images')
-            descriptions = OrderedDict()
-            descriptions['images/large'] = 'Large images with atom names but without hydrogen atoms: '
-            descriptions['images/small'] = 'Small images without hydrogen atoms: '
-            descriptions['images/hydrogen'] = 'Large images with atom names and hydrogen atoms: '
-            with tag('ul', ):
-                for key, value in descriptions.items():
-                    with tag('li'):
-                        text(value)
-                        with tag('tt'):
-                            text(key + ' ')
-                        with tag('a', href=key):
-                            text('FTP')
-
+            for section in 'Images', 'Files':
+                with tag('h3'):
+                    text(section)
+                descriptions = OrderedDict()
+                if section == 'Images':
+                    descriptions['images/large'] = 'Large images with atom names but without hydrogen atoms: '
+                    descriptions['images/small'] = 'Small images without hydrogen atoms: '
+                    descriptions['images/hydrogen'] = 'Large images with atom names and hydrogen atoms: '
+                else:
+                    descriptions['files/sdf'] = 'Molfile (SDF) with ideal coordinates and hydrogen atoms: '
+                    descriptions['files/sdf_r'] = 'Molfile (SDF) with representative coordinates and hydrogen atoms:'
+                    descriptions['files/sdf_nh'] = 'Molfile (SDF) with ideal coordinates without hydrogen atoms: '
+                    descriptions['files/sdf_r_nh'] = \
+                        'Molfile (SDF) with representative coordinates without hydrogen atoms: '
+                    descriptions['files/pdb'] = 'PDB with ideal coordinates: '
+                    descriptions['files/pdb_r'] = 'PDB with representative coordinates:'
+                    descriptions['files/cml'] = 'CML: '
+                    descriptions['files/mmcif'] = 'mmcif individual PDB chemical component definitions: '
+                with tag('ul', ):
+                    for key, value in descriptions.items():
+                        with tag('li'):
+                            text(value)
+                            with tag('tt'):
+                                text(key + ' ')
+                            with tag('a', href=key):
+                                text('FTP')
+                            text(' - ')
+                            with tag('a', href=key + '.tar.gz'):
+                                text('gzipped tar ball')
     html = indent(doc.getvalue())
     readme_dot_html_file_name = os.path.join(output_dir, 'readme.htm')
     with open(readme_dot_html_file_name, 'w') as readme_dot_html_file:
         readme_dot_html_file.write(html)
+        logger.debug('Have written {}'.format(readme_dot_html_file_name))
 
 
 
