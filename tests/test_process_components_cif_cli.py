@@ -73,4 +73,10 @@ def test_with_components_cif_first_file_comps():
                     format(file_type, file_type, chem_comp_id, subdir)
     readme_dot_html_file = os.path.join(test_output_dir, 'readme.htm')
     yield assert_true, os.path.isfile(readme_dot_html_file) and os.path.getsize(readme_dot_html_file) > 0, \
-          ' readme_dot_html_file {} must be a non-empty file.'.format(readme_dot_html_file)
+        'readme_dot_html_file {} must be a non-empty file.'.format(readme_dot_html_file)
+
+    for this_dir, this_subdirs in {files_dir: file_subdirs, images_dir: images_subdirs}.items():
+        for subdir in this_subdirs:
+            tar_ball_file_name = os.path.join(this_dir, subdir + '.tar.gz')
+            yield assert_true, os.path.isfile(tar_ball_file_name) and os.path.getsize(tar_ball_file_name) > 0, \
+                'tar_ball {} must be a non-empty file.'.format(tar_ball_file_name)
