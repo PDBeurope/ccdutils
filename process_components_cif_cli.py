@@ -285,14 +285,21 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
             logger.debug('written file {}'.format(output_svg))
         else:
             logger.warn('failed to write {}'.format(output_svg))
-            return
+            continue
 
-        cairosvg.svg2png(file_obj=open(output_svg, "rb"), write_to=output_png)
+        try:
+            cairosvg.svg2png(file_obj=open(output_svg, "rb"), write_to=output_png)
+        except Exception as ex:
+            logging.error('cairosvg.svg2png raised exception on file {}'.format(output_svg))
+            logging.error('... exception type: {} message: {}'.format(type(ex).__name__, ex))
+            import traceback
+            print(traceback.format_exc())
         if os.path.isfile(output_png):
             logger.debug('written file {}'.format(output_png))
         else:
             logger.warn('failed to write {}'.format(output_png))
-            return
+            continue
+
 
         img = Image.open(output_png)
         img.save(output_gif)
@@ -300,7 +307,7 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
             logger.debug('written file {}'.format(output_gif))
         else:
             logger.warn('failed to write {}'.format(output_gif))
-            return
+            continue
 
 
 def _create_tar_balls(logger, subdirs_path):
