@@ -95,6 +95,12 @@ def process_components_cif(components_cif, output_dir, debug):
             chem_dot_xml_file.write(pdb_cc_rdkit.chem_comp_xml())
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
+            if pdb_cc_rdkit.inchikey != pdb_cc_rdkit.inchikey_from_rdkit:
+                logger.warn(' chem_comp_id={} inchikey mismatch!'.format(chem_comp_id))
+                logger.warn(' InChIKey from ccd {}'.format(pdb_cc_rdkit.inchikey))
+                logger.warn(' InChIKey RDKit    {}'.format(pdb_cc_rdkit.inchikey_from_rdkit))
+                logger.warn(' InChi from ccd    {}'.format(pdb_cc_rdkit.inchi))
+                logger.warn(' InChi from RDKit  {}'.format(pdb_cc_rdkit.inchi_from_rdkit))
         chem_dot_xml_file.write('</chemCompList>\n')
     _create_readme_dot_html(logger, output_dir)
     _create_tar_balls(logger, files_subdirs_path)
@@ -290,8 +296,8 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         try:
             cairosvg.svg2png(file_obj=open(output_svg, "rb"), write_to=output_png)
         except Exception as ex:
-            logging.error('cairosvg.svg2png raised exception on file {}'.format(output_svg))
-            logging.error('... exception type: {} message: {}'.format(type(ex).__name__, ex))
+            logger.error('cairosvg.svg2png raised exception on file {}'.format(output_svg))
+            logger.error('... exception type: {} message: {}'.format(type(ex).__name__, ex))
             import traceback
             print(traceback.format_exc())
         if os.path.isfile(output_png):

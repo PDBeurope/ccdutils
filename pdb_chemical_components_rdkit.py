@@ -34,6 +34,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         self.rdkit_mol_conformer_id_model = None
         """The RDKit conformer ID for the model cooordinate (int)."""
         self.__setup_rdkit_mol()
+        self._inchi_from_rdkit = None
         self._inchikey_from_rdkit = None
 
     def __setup_rdkit_mol(self):
@@ -156,9 +157,15 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         return conformer_id
 
     @property
+    def inchi_from_rdkit(self):
+        if self._inchi_from_rdkit is None:
+            self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.rdkit_mol)
+        return self._inchi_from_rdkit
+
+    @property
     def inchikey_from_rdkit(self):
         if self._inchikey_from_rdkit is None:
-            inchi = Chem.inchi.MolToInchi(self.rdkit_mol)
+            inchi = self.inchi_from_rdkit
             self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
         return self._inchikey_from_rdkit
 
