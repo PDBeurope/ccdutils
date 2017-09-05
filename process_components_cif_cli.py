@@ -97,6 +97,8 @@ def process_components_cif(components_cif, output_dir, debug):
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
         chem_dot_xml_file.write('</chemCompList>\n')
     _create_readme_dot_html(logger, output_dir)
+    _create_tar_balls(logger, files_subdirs_path)
+    _create_tar_balls(logger, images_subdirs_path)
 
 
 def _create_readme_dot_html(logger, output_dir):
@@ -122,7 +124,7 @@ def _create_readme_dot_html(logger, output_dir):
                 text(title)
             with tag('p'):
                 text('This area provides various data files and images for the wwPDB ligand dictionary ')
-                ccd_url ='http://www.wwpdb.org/ccd.html'
+                ccd_url = 'http://www.wwpdb.org/ccd.html'
                 with tag('a', href=ccd_url):
                     text(ccd_url)
                 doc.stag('br')
@@ -178,7 +180,6 @@ def _create_readme_dot_html(logger, output_dir):
     with open(readme_dot_html_file_name, 'w') as readme_dot_html_file:
         readme_dot_html_file.write(html)
         logger.debug('Have written {}'.format(readme_dot_html_file_name))
-
 
 
 def _create_files_or_images_subdirs(logger, output_dir, files_or_images, subdirs_list):
@@ -300,6 +301,31 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         else:
             logger.warn('failed to write {}'.format(output_gif))
             return
+
+
+def _create_tar_balls(logger, subdirs_path):
+    """
+    creates .tar.gz tarballs for each subdirectory in either files or images
+
+    Args:
+        logger: logging object
+        subdirs_path: dictionary giving the path to each subdir type
+
+    Returns:
+        None
+    """
+    logger.debug('_create_tar_balls called for {}'.format(subdirs_path))
+    for subdir, path in subdirs_path.items():
+        path_for_tar_ball = os.path.dirname(path)
+        tar_ball_file = subdir + '.tar.gz'
+        command = 'cd {}; tar czf {} {}'.format(path_for_tar_ball, tar_ball_file, subdir)
+        logger.debug('command {}'.format(command))
+        os.system(command)
+        tar_ball_file = os.path.join(path_for_tar_ball, tar_ball_file)
+        if os.path.isfile(tar_ball_file):
+            logger.debug('written tarball {}'.format(tar_ball_file))
+        else:
+            logger.warn('failed to write {}'.format(tar_ball_file))
 
 
 def main():
