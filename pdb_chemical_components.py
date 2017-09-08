@@ -517,13 +517,16 @@ class PdbChemicalComponents(object):
 
         """
         pdbx_chem_comp_identifier = data_block._pdbx_chem_comp_identifier
-        for identifier in pdbx_chem_comp_identifier:
-            if identifier['type'] == 'SYSTEMATIC NAME' and identifier['program'] == 'ACDLabs':
-                self.systematic_name_acdlabs = identifier['identifier']
-            elif identifier['type'] == 'SYSTEMATIC NAME' and 'OpenEye' in identifier['program']:
-                self.systematic_name_openeye = identifier['identifier']
-            else:
-                logging.warn('unrecognized chem_comp_identifier {} '.format(identifier))
+        if pdbx_chem_comp_identifier is None:
+            pass
+        else:
+            for identifier in pdbx_chem_comp_identifier:
+                if identifier['type'] == 'SYSTEMATIC NAME' and identifier['program'] == 'ACDLabs':
+                    self.systematic_name_acdlabs = identifier['identifier']
+                elif identifier['type'] == 'SYSTEMATIC NAME' and 'OpenEye' in identifier['program']:
+                    self.systematic_name_openeye = identifier['identifier']
+                else:
+                    logging.warn('unrecognized chem_comp_identifier {} '.format(identifier))
 
 
     def write_ccd_cif(self, output_ccd_cif_file_name):
