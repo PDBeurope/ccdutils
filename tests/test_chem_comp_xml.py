@@ -15,7 +15,7 @@
 # under the License.
 #
 
-from nose.tools import assert_true, assert_false
+from nose.tools import assert_true, assert_false, assert_in, assert_not_in
 
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from utilities import cif_filename
@@ -37,9 +37,10 @@ def test_chem_comp_for_eoh_and_glu():
             old_records = ['<chemComp>', '<id>EOH</id>', '<name>ETHANOL</name>', '<formula>C2 H6 O</formula>',
                            '<systematicName>ethanol</systematicName>', '<stereoSmiles>CCO</stereoSmiles>',
                            '<nonStereoSmiles>CCO</nonStereoSmiles>', '<InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>',
-                           '</chemComp>']
-            # want inchikey
-            old_records.append('<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>')
+                           '</chemComp>',
+                           # now want inchikey - not in old
+                           '<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>'
+                           ]
         else:
             #   <chemComp>
             #   <id>GLU</id>
@@ -56,9 +57,9 @@ def test_chem_comp_for_eoh_and_glu():
                            '<nonStereoSmiles>N[CH](CCC(O)=O)C(O)=O</nonStereoSmiles>',
                            '<InChi>InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1'
                            '</InChi>',
-                           '</chemComp>']
-            # also want inchikey:
-            old_records.append('<InChIKey>WHUUTDBJXJRKMK-VKHMYHEASA-N</InChIKey>')
+                           '</chemComp>',
+                           '<InChIKey>WHUUTDBJXJRKMK-VKHMYHEASA-N</InChIKey>'
+                           ]
         ccd = PdbChemicalComponentsRDKit(file_name=cif_filename(chem_comp_id))
         chem_comp_xml = ccd.chem_comp_xml()
         lines = chem_comp_xml.splitlines()
@@ -74,3 +75,10 @@ def test_chem_comp_for_eoh_and_glu():
                 any_fail = True
         yield assert_false, any_fail, 'echo {} chem_comp_xml after any failure: "{}"'.\
             format(chem_comp_id, chem_comp_xml)
+
+
+def test_chem_comp_for_sy9_should_not_have_systematic_name():
+    ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('SY9'))
+    chem_comp_xml = ccd.chem_comp_xml()
+    yield assert_in, '<id>SY9</id>', chem_comp_xml
+    yield assert_not_in, 'systematicName', chem_comp_xml
