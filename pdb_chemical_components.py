@@ -247,14 +247,20 @@ class PdbChemicalComponents(object):
 
         Returns:
             tuple of tuple( x, y, z) for each atom. x, y, z are floats
+
+        Notes:
+            if there is a conversion error returns coordinates None for the atom in place of x, y, z
         """
         if self.__model_xyz is None:
             self.__model_xyz = []
             for atom in self._atoms:
-                float_x = float(atom['model_Cartn_x'])
-                float_y = float(atom['model_Cartn_y'])
-                float_z = float(atom['model_Cartn_z'])
-                self.__model_xyz.append((float_x, float_y, float_z))
+                try:
+                    float_x = float(atom['model_Cartn_x'])
+                    float_y = float(atom['model_Cartn_y'])
+                    float_z = float(atom['model_Cartn_z'])
+                    self.__model_xyz.append((float_x, float_y, float_z))
+                except ValueError:
+                    self.__model_xyz.append(None)
             self.__model_xyz = tuple(self.__model_xyz)
         return self.__model_xyz
 

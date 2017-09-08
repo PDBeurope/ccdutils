@@ -37,17 +37,21 @@ def test_pdb_write_for_all_sample_cifs():
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, pdb_model_with_h)
 
+def test_XXX_atom_records_against_previous_pdbechem():
+    for three_letter_code, ideal in {'ATP': True, '00O': False}.items():
+        yield assert_true, XXX_atom_records_against_previous_pdbechem(three_letter_code, ideal), \
+              'check atom record against previous for {} ideal {}'.format(three_letter_code, ideal)
 
-def test_atp_atom_records_against_previous_pdbechem():
+def XXX_atom_records_against_previous_pdbechem( three_letter_code, ideal):
     """
     compare ccd PDB HETATM records (ideal coordinates) with ATOM from the previous PDBeChem pdb file for ATP
     """
-    ciffile = cif_filename('ATP')
+    ciffile = cif_filename(three_letter_code)
     pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
-    pdb_string = pdb_cc.pdb_file_or_string(ideal=True)
+    pdb_string = pdb_cc.pdb_file_or_string(ideal=ideal)
     lines = pdb_string.split('\n')
     lines_hetatm = list(filter(lambda x: x.startswith('HETATM'), lines))
-    comparison_file = os.path.join(test_comparison_files_path, 'ATP.pdb')
+    comparison_file = os.path.join(test_comparison_files_path, three_letter_code + '.pdb')
     with open(comparison_file, 'r') as comp_file:
         lines = comp_file.read().splitlines()
     lines_atom = list(filter(lambda x: x.startswith('ATOM'), lines))
@@ -60,6 +64,7 @@ def test_atp_atom_records_against_previous_pdbechem():
     assert_equals(len(lines_hetatm), len(lines_atom))  # number HETATM/ATOM line ccd_utils/comparison file ==
     for line_no in range(len(lines_hetatm)):
         assert_equals(lines_hetatm[line_no], lines_atom[line_no])  # HETATM/ATOM line cf ccd_utils/comparison file
+    return True
 
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):

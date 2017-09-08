@@ -129,7 +129,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         model_conformer = Chem.Conformer(self.number_atoms)
         for atom_index in range(self.number_atoms):
             (ideal_x, ideal_y, ideal_z) = self.ideal_xyz[atom_index]
-            (model_x, model_y, model_z) = self.model_xyz[atom_index]
+            (model_x, model_y, model_z) = self.replace_None_with_0_0_0(self.model_xyz[atom_index])
             rdkit_xyz = rdGeometry.Point3D(ideal_x, ideal_y, ideal_z)
             rdkit_model_xyz = rdGeometry.Point3D(model_x, model_y, model_z)
             ideal_conformer.SetAtomPosition(atom_index, rdkit_xyz)
@@ -340,7 +340,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             if ideal:
                 (x, y, z) = self.ideal_xyz[atom_index]
             else:
-                (x, y, z) = self.model_xyz[atom_index]
+                (x, y, z) = self.replace_None_with_0_0_0(self.model_xyz[atom_index])
             ret_str += '{: <2}{:9.4f} {:9.4f} {:9.4f}\n'.format(element, x, y, z)
         if file_name is None:
             return ret_str
@@ -422,3 +422,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 img_file.write(svg)
                 img_file.close()
         return None
+
+    @staticmethod
+    def replace_None_with_0_0_0( xyz_coordinates_tuple):
+        if xyz_coordinates_tuple is None:
+            return (0., 0., 0.)
+        else:
+            return xyz_coordinates_tuple
