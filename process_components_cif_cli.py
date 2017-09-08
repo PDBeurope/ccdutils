@@ -85,10 +85,12 @@ def process_components_cif(components_cif, output_dir, debug):
         chem_dot_xml_file.write('<chemCompList>\n')
         files_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'files', file_subdirs)
         images_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'images', images_subdirs)
-        split_cc = SplitComponentsCif(components_cif)
+        split_cc = SplitComponentsCif(components_cif, logger=logger)
         logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
                      format(components_cif, len(split_cc.cif_dictionary)))
         for pdb_cc_rdkit in split_cc.individual_pdb_ccd_rdkit():
+            if pdb_cc_rdkit is None:
+                continue  # problem with this chemical component skip to next
             chem_comp_id = pdb_cc_rdkit.chem_comp_id
             logger.debug('chem_comp_id={}'.format(chem_comp_id))
             chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
@@ -357,7 +359,7 @@ def _create_tar_balls(logger, subdirs_path):
         if os.path.isfile(tar_ball_file):
             logger.debug('written tarball {}'.format(tar_ball_file))
         else:
-            logger.warn('failed to write {}'.format(tar_ball_file))
+            logger.error('failed to write {}'.format(tar_ball_file))
 
 
 def main():
