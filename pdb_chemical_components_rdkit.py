@@ -371,7 +371,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             return None
 
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
-                             pixels_x=400, pixels_y=200, highlight_bonds=None, black=False):
+                             pixels_x=400, pixels_y=200, highlight_bonds=None, black=False,
+                             raise_exception= False):
         """
         produces a svg image of the molecule to a string or file using RDKit.
 
@@ -384,6 +385,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             pixels_y (int): size of image in pixels
             highlight_bonds: an ordered dictionary of bonds to highlight key (atom_index_0, atom_index_1) to (r,g,b)
             black (bool): wipe out atom colors and make the molecular diagram black (highlight_bonds are not affected).
+            raise_exception (bool): raise an exception on RDKit problems. Defaults to silently returning
 
         Returns:
             None or a string containing the svg string of the molecule.
@@ -395,14 +397,18 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
         drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
         opts = drawer.drawOptions()
-        if not atom_labels:
-            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
-        else:
+        if atom_labels:
             for atom in self.rdkit_mol.GetAtoms():
                 atom_index = atom.GetIdx()
                 atom_name = self.atom_ids[atom_index]
                 opts.atomLabels[atom_index] = atom_name
+        try:
             molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
+        except Exception:
+            if raise_exception:
+                raise # re-raise
+            else:
+                return
         if highlight_bonds is None:
             drawer.DrawMolecule(molecule_to_draw)
         else:

@@ -19,7 +19,7 @@ import collections
 import os
 import unittest
 
-from nose.tools import assert_in, assert_true
+from nose.tools import assert_in, assert_true, raises
 
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
@@ -40,7 +40,6 @@ def test_eoh_svg():
 
 def test_atp_svg():
     atp = PdbChemicalComponentsRDKit(file_name=cif_filename('ATP'))
-    img_no_h_label_wdege = file_name_in_tsts_out('ATP.img_noH_no_label.svg')
     atp_svg = atp.image_file_or_string(hydrogen=False, atom_labels=True, wedge=True)
     yield assert_in, 'PA', atp_svg, 'The svg file must contain the atom name PA'
     
@@ -52,8 +51,10 @@ def test_svg_write_for_all_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         img_no_h_no_label = file_name_in_tsts_out(pdb_cc.chem_comp_id + '.img_noH_no_label.svg')
         pdb_cc.image_file_or_string(file_name=img_no_h_no_label, hydrogen=False, atom_labels=False)
+        if pdb_cc.chem_comp_id == '0OD':
+            continue
         yield assert_true, os.path.isfile(img_no_h_no_label) and os.path.getsize(img_no_h_no_label) > 0, \
-            '{} call to eoh.image_file_or_string(file="{}") must create a non-empty file.'.\
+            '{} call to image_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, img_no_h_no_label)
         img_no_h_label_wedge = file_name_in_tsts_out(pdb_cc.chem_comp_id + '.img_label_wedge.svg')
         pdb_cc.image_file_or_string(file_name=img_no_h_label_wedge, hydrogen=False, atom_labels=True, wedge=True)
@@ -74,6 +75,14 @@ def test_svg_highlight_bonds():
 
     mol.image_file_or_string(file_name=this_img, hydrogen=False, atom_labels=False, wedge=False,
                              highlight_bonds=highlight_bonds, black=True)
+
+@raises(ValueError)
+def test_0OD_raises_exception():
+    # 0OD has problem in image production - if raise_exception is set then must get exception
+    ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('0OD'))
+    ccd.image_file_or_string(hydrogen=False, atom_labels=True, wedge=True, raise_exception=True)
+
+
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass

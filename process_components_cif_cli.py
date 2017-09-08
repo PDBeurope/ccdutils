@@ -98,15 +98,15 @@ def process_components_cif(components_cif, output_dir, debug):
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             if pdb_cc_rdkit.inchikey != pdb_cc_rdkit.inchikey_from_rdkit:
-                logger.warn(' chem_comp_id={} inchikey mismatch!'.format(chem_comp_id))
-                logger.warn(' InChIKey from ccd {}'.format(pdb_cc_rdkit.inchikey))
-                logger.warn(' InChIKey RDKit    {}'.format(pdb_cc_rdkit.inchikey_from_rdkit))
-                logger.warn(' InChi from ccd    {}'.format(pdb_cc_rdkit.inchi))
-                logger.warn(' InChi from RDKit  {}'.format(pdb_cc_rdkit.inchi_from_rdkit))
+                logger.warn(' {} inchikey mismatch!'.format(chem_comp_id))
+                logger.warn(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
+                logger.warn(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
+                logger.warn(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
+                logger.warn(' {} InChi from RDKit  {}'.format(chem_comp_id, pdb_cc_rdkit.inchi_from_rdkit))
             if pdb_cc_rdkit.ideal_xyz_has_missing_values:
-                logger.warn(' chem_comp_id={} ideal coordinates have missing values'.format(chem_comp_id))
+                logger.warn(' {} ideal coordinates have missing values'.format(chem_comp_id))
             if pdb_cc_rdkit.model_xyz_has_missing_values:
-                logger.warn(' chem_comp_id={} model coordinates have missing values'.format(chem_comp_id))
+                logger.warn(' {} model coordinates have missing values'.format(chem_comp_id))
         chem_dot_xml_file.write('</chemCompList>\n')
     _create_readme_dot_html(logger, output_dir)
     _create_tar_balls(logger, files_subdirs_path)
@@ -310,8 +310,8 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         if os.path.isfile(output_svg):
             logger.debug('written file {}'.format(output_svg))
         else:
-            logger.warn('failed to write {}'.format(output_svg))
-            continue
+            logger.warn(' {} problem writing images'.format(chem_comp_id))
+            return # do not try any further images - they will all fail
 
         if subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
             continue  # do not convert to png/gif
