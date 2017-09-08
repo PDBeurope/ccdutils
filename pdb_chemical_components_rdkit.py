@@ -128,8 +128,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         ideal_conformer = Chem.Conformer(self.number_atoms)
         model_conformer = Chem.Conformer(self.number_atoms)
         for atom_index in range(self.number_atoms):
-            (ideal_x, ideal_y, ideal_z) = self.replace_None_with_0_0_0(self.ideal_xyz[atom_index])
-            (model_x, model_y, model_z) = self.replace_None_with_0_0_0(self.model_xyz[atom_index])
+            (ideal_x, ideal_y, ideal_z) = self.replace_none_with_0_0_0(self.ideal_xyz[atom_index])
+            (model_x, model_y, model_z) = self.replace_none_with_0_0_0(self.model_xyz[atom_index])
             rdkit_xyz = rdGeometry.Point3D(ideal_x, ideal_y, ideal_z)
             rdkit_model_xyz = rdGeometry.Point3D(model_x, model_y, model_z)
             ideal_conformer.SetAtomPosition(atom_index, rdkit_xyz)
@@ -271,7 +271,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             element = self.atom_elements[atom_index]
             atom_name = self.atom_ids[atom_index]
             atom_entry = etree.SubElement(atom_array, 'atom', id=atom_name, elementType=element)
-            (ideal_x, ideal_y, ideal_z) = self.ideal_xyz[atom_index]
+            (ideal_x, ideal_y, ideal_z) = self.replace_none_with_0_0_0(self.ideal_xyz[atom_index])
             atom_entry.set('x3', str(ideal_x))
             atom_entry.set('y3', str(ideal_y))
             atom_entry.set('z3', str(ideal_z))
@@ -340,9 +340,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
             if ideal:
-                (x, y, z) = self.replace_None_with_0_0_0(self.ideal_xyz[atom_index])
+                (x, y, z) = self.replace_none_with_0_0_0(self.ideal_xyz[atom_index])
             else:
-                (x, y, z) = self.replace_None_with_0_0_0(self.model_xyz[atom_index])
+                (x, y, z) = self.replace_none_with_0_0_0(self.model_xyz[atom_index])
             ret_str += '{: <2}{:9.4f} {:9.4f} {:9.4f}\n'.format(element, x, y, z)
         if file_name is None:
             return ret_str
@@ -426,8 +426,18 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         return None
 
     @staticmethod
-    def replace_None_with_0_0_0( xyz_coordinates_tuple):
+    def replace_none_with_0_0_0(xyz_coordinates_tuple):
+        """
+        deals with missing coordinates - replacing None values with (0., 0., 0.)
+
+        Args:
+            xyz_coordinates_tuple: tuple (x, y, z) or None
+
+        Returns:
+            tuple (x, y, z)
+
+        """
         if xyz_coordinates_tuple is None:
-            return (0., 0., 0.)
+            return 0., 0., 0.
         else:
             return xyz_coordinates_tuple
