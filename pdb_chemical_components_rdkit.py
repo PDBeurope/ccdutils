@@ -158,15 +158,33 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
     @property
     def inchi_from_rdkit(self):
+        """
+        provides the InChI
+
+        Returns:
+            str: the InChI or 'ERROR' if there was an error finding it.
+        """
         if self._inchi_from_rdkit is None:
-            self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.rdkit_mol)
+            try:
+                self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.rdkit_mol)
+            except ValueError:
+                self._inchi_from_rdkit = 'ERROR'
         return self._inchi_from_rdkit
 
     @property
     def inchikey_from_rdkit(self):
+        """
+        provides the InChIKey
+
+        Returns:
+            str: the InChIKey or 'ERROR' if there was an error finding it.
+        """
         if self._inchikey_from_rdkit is None:
             inchi = self.inchi_from_rdkit
-            self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
+            if inchi != 'ERROR':
+                self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
+            else:
+                self._inchikey_from_rdkit = 'ERROR'
         return self._inchikey_from_rdkit
 
     def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=False, xyz=None):
