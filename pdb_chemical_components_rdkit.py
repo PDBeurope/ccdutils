@@ -308,8 +308,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         name.text = self.chem_comp_name
         formula = etree.SubElement(top, 'formula')
         formula.text = self.chem_comp_formula
-        systematic_name = etree.SubElement(top, 'systematicName')
-        systematic_name.text = self.systematic_name_openeye
+        systematic_name_text = self.systematic_name_openeye
+        if systematic_name_text  is not None:
+            systematic_name = etree.SubElement(top, 'systematicName')
+            systematic_name.text = systematic_name_text
         stereo_smiles = etree.SubElement(top, 'stereoSmiles')
         stereo_smiles.text = self.smiles_canonical_cactvs
         non_stereo_smiles = etree.SubElement(top, 'nonStereoSmiles')
