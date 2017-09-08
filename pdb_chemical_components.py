@@ -230,13 +230,7 @@ class PdbChemicalComponents(object):
             tuple of tuple( x, y, z) for each atom. x, y, z are floats
         """
         if self.__ideal_xyz is None:
-            self.__ideal_xyz = []
-            for atom in self._atoms:
-                float_x = float(atom['pdbx_model_Cartn_x_ideal'])
-                float_y = float(atom['pdbx_model_Cartn_y_ideal'])
-                float_z = float(atom['pdbx_model_Cartn_z_ideal'])
-                self.__ideal_xyz.append((float_x, float_y, float_z))
-            self.__ideal_xyz = tuple(self.__ideal_xyz)
+            self.__ideal_xyz = self.__supply_model_or_ideal_coords(ideal=True)
         return self.__ideal_xyz
 
     @property
@@ -252,17 +246,37 @@ class PdbChemicalComponents(object):
             if there is a conversion error returns coordinates None for the atom in place of x, y, z
         """
         if self.__model_xyz is None:
-            self.__model_xyz = []
-            for atom in self._atoms:
-                try:
-                    float_x = float(atom['model_Cartn_x'])
-                    float_y = float(atom['model_Cartn_y'])
-                    float_z = float(atom['model_Cartn_z'])
-                    self.__model_xyz.append((float_x, float_y, float_z))
-                except ValueError:
-                    self.__model_xyz.append(None)
-            self.__model_xyz = tuple(self.__model_xyz)
+            self.__model_xyz = self.__supply_model_or_ideal_coords(ideal=False)
         return self.__model_xyz
+
+    def __supply_model_or_ideal_coords(self, ideal=True):
+        """
+        to avoid code duplicationin ideal_xyz and model_xyz
+
+        Args:
+            ideal (bool): ideal or model?
+
+        Returns:
+            tuple of tuple( x, y, z) for each atom. x, y, z are floats
+
+        Notes:
+            if there is a conversion error returns coordinates None for the atom in place of x, y, z
+        """
+        this_xyz = []
+        if ideal:
+            xyz_fields = ('pdbx_model_Cartn_x_ideal', 'pdbx_model_Cartn_y_ideal', 'pdbx_model_Cartn_z_ideal')
+        else:
+            xyz_fields = ('model_Cartn_x', 'model_Cartn_y', 'model_Cartn_z')
+        for atom in self._atoms:
+            try:
+                float_x = float(atom[xyz_fields[0]])
+                float_y = float(atom[xyz_fields[1]])
+                float_z = float(atom[xyz_fields[2]])
+                this_xyz.append((float_x, float_y, float_z))
+            except ValueError:
+                this_xyz.append(None)
+        this_xyz = tuple(this_xyz)
+        return this_xyz
 
     def __load_carbon_monoxide_hard_coded(self):
         """

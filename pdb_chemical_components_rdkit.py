@@ -128,7 +128,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         ideal_conformer = Chem.Conformer(self.number_atoms)
         model_conformer = Chem.Conformer(self.number_atoms)
         for atom_index in range(self.number_atoms):
-            (ideal_x, ideal_y, ideal_z) = self.ideal_xyz[atom_index]
+            (ideal_x, ideal_y, ideal_z) = self.replace_None_with_0_0_0(self.ideal_xyz[atom_index])
             (model_x, model_y, model_z) = self.replace_None_with_0_0_0(self.model_xyz[atom_index])
             rdkit_xyz = rdGeometry.Point3D(ideal_x, ideal_y, ideal_z)
             rdkit_model_xyz = rdGeometry.Point3D(model_x, model_y, model_z)
@@ -340,7 +340,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
             if ideal:
-                (x, y, z) = self.ideal_xyz[atom_index]
+                (x, y, z) = self.replace_None_with_0_0_0(self.ideal_xyz[atom_index])
             else:
                 (x, y, z) = self.replace_None_with_0_0_0(self.model_xyz[atom_index])
             ret_str += '{: <2}{:9.4f} {:9.4f} {:9.4f}\n'.format(element, x, y, z)
