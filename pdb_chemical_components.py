@@ -234,6 +234,13 @@ class PdbChemicalComponents(object):
         return self.__ideal_xyz
 
     @property
+    def ideal_xyz_has_missing_values(self):
+        if None in self.ideal_xyz:
+            return True
+        else:
+            return False
+
+    @property
     def model_xyz(self):
         """
         The model coordinates from chem_comp.model_Cartn_x, chem_comp.model_Cartn_y,
@@ -248,6 +255,13 @@ class PdbChemicalComponents(object):
         if self.__model_xyz is None:
             self.__model_xyz = self.__supply_model_or_ideal_coords(ideal=False)
         return self.__model_xyz
+
+    @property
+    def model_xyz_has_missing_values(self):
+        if None in self.model_xyz:
+            return True
+        else:
+            return False
 
     def __supply_model_or_ideal_coords(self, ideal=True):
         """

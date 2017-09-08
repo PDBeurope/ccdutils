@@ -103,6 +103,10 @@ def process_components_cif(components_cif, output_dir, debug):
                 logger.warn(' InChIKey RDKit    {}'.format(pdb_cc_rdkit.inchikey_from_rdkit))
                 logger.warn(' InChi from ccd    {}'.format(pdb_cc_rdkit.inchi))
                 logger.warn(' InChi from RDKit  {}'.format(pdb_cc_rdkit.inchi_from_rdkit))
+            if pdb_cc_rdkit.ideal_xyz_has_missing_values:
+                logger.warn(' chem_comp_id={} ideal coordinates have missing values'.format(chem_comp_id))
+            if pdb_cc_rdkit.model_xyz_has_missing_values:
+                logger.warn(' chem_comp_id={} model coordinates have missing values'.format(chem_comp_id))
         chem_dot_xml_file.write('</chemCompList>\n')
     _create_readme_dot_html(logger, output_dir)
     _create_tar_balls(logger, files_subdirs_path)
