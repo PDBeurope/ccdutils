@@ -43,7 +43,7 @@ def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         inchikey_from_rdkit = pdb_cc.inchikey_from_rdkit
-        if pdb_cc.chem_comp_id in ('HEM', 'CDL', '08T'):
+        if pdb_cc.chem_comp_id in ('HEM', 'CDL', '08T', '0OD'):
             yield assert_not_equals, pdb_cc.inchikey, inchikey_from_rdkit, \
                 'know inchikeys do not match for ' + pdb_cc.chem_comp_id
         else:
