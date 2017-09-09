@@ -18,7 +18,7 @@
 import os
 import unittest
 
-from nose.tools import assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in
+from nose.tools import assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in, assert_false
 from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
@@ -72,6 +72,11 @@ def test_sdf_write_for_all_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         sdf_ideal_with_h = file_name_in_tsts_out(pdb_cc.chem_comp_id + '.ideal_withH.sdf')
         pdb_cc.sdf_file_or_string(file_name=sdf_ideal_with_h)
+        if pdb_cc.chem_comp_id in '10R':
+            yield assert_false, os.path.isfile(sdf_ideal_with_h), \
+                  '{} call sdf_file_or_string does not produce sdf file as problematic ligand'. \
+                  format(pdb_cc.chem_comp_id)
+            continue
         yield assert_true, os.path.isfile(sdf_ideal_with_h) and os.path.getsize(sdf_ideal_with_h) > 0, \
             '{} call to pdb_cc.sdf_file_or_string(file="{}") must create a non-empty file.'.\
             format(pdb_cc.chem_comp_id, sdf_ideal_with_h)

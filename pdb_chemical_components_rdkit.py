@@ -187,7 +187,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 self._inchikey_from_rdkit = 'ERROR'
         return self._inchikey_from_rdkit
 
-    def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=False, xyz=None):
+    def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=False,
+                           xyz=None, raise_exception=False):
         """
         write a sdf file or return a string containing the molecule as a sdf file
 
@@ -197,6 +198,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             hydrogen (bool): include hydrogen atoms in the sdf? Default True: yes)
             alias (bool): use the alias feature to include atom names in the sdf? Default False no.
             xyz: list of (x,y,z) coordinates to be written instead of ideal or model
+            raise_exception (bool): raise an exception on RDKit problems. Defaults to silently returning
 
         Returns:
             None or a string containing the molecule converted to sdf
@@ -215,7 +217,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
         self.__sdf_alias_on_off(mol_h_select, alias=alias)
 
-        sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
+        try:
+            sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
+        except Exception:
+            if raise_exception:
+                raise # re-raise
+            else:
+                return
         sdf_string = fname + sdf_string
         if file_name is None:
             return sdf_string
