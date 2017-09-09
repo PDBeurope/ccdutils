@@ -394,15 +394,16 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             mol_to_draw = self.rdkit_mol
         else:
             mol_to_draw = self.mol_remove_h
-        AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
-        drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
-        opts = drawer.drawOptions()
-        if atom_labels:
-            for atom in self.rdkit_mol.GetAtoms():
-                atom_index = atom.GetIdx()
-                atom_name = self.atom_ids[atom_index]
-                opts.atomLabels[atom_index] = atom_name
+
         try:
+            AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
+            drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
+            opts = drawer.drawOptions()
+            if atom_labels:
+                for atom in self.rdkit_mol.GetAtoms():
+                    atom_index = atom.GetIdx()
+                    atom_name = self.atom_ids[atom_index]
+                    opts.atomLabels[atom_index] = atom_name
             molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
         except Exception:
             if raise_exception:
