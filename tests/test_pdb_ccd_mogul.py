@@ -18,34 +18,41 @@
 import traceback
 import os
 import unittest
-from pdb_ccd_mogul import PdbCCDMogul
 from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
 from nose.tools import assert_equals, assert_true, assert_false
 
-
-def test_eoh_mogul():
-    eoh = PdbCCDMogul(file_name=cif_filename('EOH'))
-    eoh.run_mogul()
-    # Mogul result on ethanol two analyzed bonds, 1 angle
-    assert_equals(len(eoh.store_bonds), 2)
-    assert_equals(len(eoh.store_angles), 1)
-    assert_equals(len(eoh.store_torsions), 0)
-    assert_equals(len(eoh.store_rings), 0)
+try:
+    from pdb_ccd_mogul import PdbCCDMogul
 
 
-def test_html_write_for_all_sample_cifs():
-    for cif_file in supply_list_of_sample_cifs():
-        pdb_ccd_mogul = PdbCCDMogul(file_name=cif_file)
-        chem_comp_id = pdb_ccd_mogul.pdb_ccd_rdkit.chem_comp_id
-        html_out_file = file_name_in_tsts_out(chem_comp_id + '.pdb_ccd_ideal_mogul_report.html')
-        try:
-            pdb_ccd_mogul.run_mogul()
-            pdb_ccd_mogul.prepare_file_html(html_out_file)
-            yield assert_true, os.path.isfile(html_out_file) and os.path.getsize(html_out_file) > 0, \
-                '{} call to pdb_ccd_mogul.prepare_file_html("{}") must create a non-empty file.'.\
-                format(chem_comp_id, html_out_file)
-        except Exception as err:
-            yield assert_false, 'exception {}\ntraceback{}'.format(err, traceback.format_exc())
+    def test_eoh_mogul():
+        eoh = PdbCCDMogul(file_name=cif_filename('EOH'))
+        eoh.run_mogul()
+        # Mogul result on ethanol two analyzed bonds, 1 angle
+        assert_equals(len(eoh.store_bonds), 2)
+        assert_equals(len(eoh.store_angles), 1)
+        assert_equals(len(eoh.store_torsions), 0)
+        assert_equals(len(eoh.store_rings), 0)
+
+
+    def test_html_write_for_all_sample_cifs():
+        for cif_file in supply_list_of_sample_cifs():
+            pdb_ccd_mog = PdbCCDMogul(file_name=cif_file)
+            chem_comp_id = pdb_ccd_mog.pdb_ccd_rdkit.chem_comp_id
+            html_out_file = file_name_in_tsts_out(chem_comp_id + '.pdb_ccd_ideal_mogul_report.html')
+            try:
+                pdb_ccd_mog.run_mogul()
+                pdb_ccd_mog.prepare_file_html(html_out_file)
+                yield assert_true, os.path.isfile(html_out_file) and os.path.getsize(html_out_file) > 0, \
+                    '{} call to pdb_ccd_mogul.prepare_file_html("{}") must create a non-empty file.'.\
+                    format(chem_comp_id, html_out_file)
+            except Exception as e_mess:
+                yield assert_false, 'exception {}\ntraceback{}'.format(e_mess, traceback.format_exc())
+except ImportError:
+
+    def test_import_error_skip_test():
+        yield assert_true, 'skipping test_pdb_ccd_mogul.py tests because of ImportError (for ccdc)'
+
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
