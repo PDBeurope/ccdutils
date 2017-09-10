@@ -107,6 +107,8 @@ def process_components_cif(components_cif, output_dir, debug):
                 logger.warn(' {} ideal coordinates have missing values'.format(chem_comp_id))
             if pdb_cc_rdkit.model_xyz_has_missing_values:
                 logger.warn(' {} model coordinates have missing values'.format(chem_comp_id))
+            if pdb_cc_rdkit.atom_charges_missing_values:
+                logger.warn(' {} atom charges have missing values'.format(chem_comp_id))
         chem_dot_xml_file.write('</chemCompList>\n')
     _create_readme_dot_html(logger, output_dir)
     _create_tar_balls(logger, files_subdirs_path)

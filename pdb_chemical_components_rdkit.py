@@ -73,6 +73,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             rdkit_atom = Chem.Atom(element)
             rdkit_atom.SetProp('name', atom_name)  # from sameer_prototype_chem.py
             charge = self.atom_charges[atom_index]
+            if charge is None:
+                charge = 0
             rdkit_atom.SetFormalCharge(charge)
             self.rdkit_mol.AddAtom(rdkit_atom)
 
@@ -282,6 +284,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         f_charge = 0
         for atom_index in range(self.number_atoms):
             charge = self.atom_charges[atom_index]
+            if charge is None:
+                charge = 0
             f_charge += charge
         mol = etree.SubElement(top, 'molecule', id=self.chem_comp_id, formalCharge=str(f_charge))
         id_inchi = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:inchi')

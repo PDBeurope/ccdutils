@@ -181,18 +181,26 @@ class PdbChemicalComponents(object):
         the formal charges for the atoms in the chem_comp_atom list
 
         Returns:
-            (int): the chem_comp.charge value for each atom
+            tuple[int]: the chem_comp.charge value for each atom or None if there is a conversion error.
 
-        Raises:
-            TODO custom exception if there is an error in the conversion
         """
         if self.__charges is None:
             self.__charges = []
             for atom in self._atoms:
-                charge = int(atom['charge'])
+                try:
+                    charge = int(atom['charge'])
+                except ValueError:
+                    charge = None
                 self.__charges.append(charge)
             self.__charges = tuple(self.__charges)
         return self.__charges
+
+    @property
+    def atom_charges_missing_values(self):
+        if None in self.atom_charges:
+            return True
+        else:
+            return False
 
     @property
     def atom_pdbx_align(self):
