@@ -491,15 +491,16 @@ class PdbChemicalComponents(object):
         self.bonds = []
         # noinspection PyProtectedMember
         chem_comp_bond = data_block._chem_comp_bond
-        for bond in chem_comp_bond:
-            atom_id_1 = bond['atom_id_1']
-            atom_id_2 = bond['atom_id_2']
-            value_order = bond['value_order']
-            pdbx_aromatic_flag = bond['pdbx_aromatic_flag']
-            pdbx_stereo_config = bond['pdbx_stereo_config']
-            this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
-                                  pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
-            self.bonds.append(this_bond)
+        if chem_comp_bond is not None:
+            for bond in chem_comp_bond:
+                atom_id_1 = bond['atom_id_1']
+                atom_id_2 = bond['atom_id_2']
+                value_order = bond['value_order']
+                pdbx_aromatic_flag = bond['pdbx_aromatic_flag']
+                pdbx_stereo_config = bond['pdbx_stereo_config']
+                this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
+                                      pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
+                self.bonds.append(this_bond)
         self._pdbecif_parse_pdbx_chem_comp_descriptor(data_block)
         self._pdbecif_parse_pdbx_chem_comp_identifier(data_block)
 
