@@ -73,6 +73,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             if element == 'D':
                 element = 'H'
                 isotope = 2
+            elif element == 'X':
+                element = 'O'
+                isotope = 14
             atom_name = self.atom_ids[atom_index]
             rdkit_atom = Chem.Atom(element)
             rdkit_atom.SetProp('name', atom_name)  # from sameer_prototype_chem.py
