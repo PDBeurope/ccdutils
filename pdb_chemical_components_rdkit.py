@@ -69,10 +69,16 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         """
         for atom_index in range(self.number_atoms):
             element = self.atom_elements[atom_index]
+            isotope = None
+            if element == 'D':
+                element = 'H'
+                isotope = 2
             atom_name = self.atom_ids[atom_index]
             rdkit_atom = Chem.Atom(element)
             rdkit_atom.SetProp('name', atom_name)  # from sameer_prototype_chem.py
             charge = self.atom_charges[atom_index]
+            if isotope is not None:
+                rdkit_atom.SetIsotope(isotope)
             if charge is None:
                 charge = 0
             rdkit_atom.SetFormalCharge(charge)
