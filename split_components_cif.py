@@ -16,9 +16,6 @@
 #
 import mmCif.mmcifIO as mmcifIO
 import pprint
-import traceback
-
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 
 class SplitComponentsCif(object):
@@ -33,14 +30,25 @@ class SplitComponentsCif(object):
         else:
             self.logger_or_print = logger.error
 
-    def individual_pdb_ccd_rdkit(self):
+    def individual_cif_dictionary(self):
+        """
+        gives each datablock as an individual (python) dictionary
+
+        Yields:
+            each data in the cif file in turn as an individual cif python dictionary.
+        """
         for data_block_id, data_block in self.cif_dictionary.items():
             individual_cif_dictionary = {data_block_id: data_block}
-            try:
-                pdb_ccd = PdbChemicalComponentsRDKit(cif_dictionary=individual_cif_dictionary)
-                yield pdb_ccd
-            except Exception as ex:
-                self.logger_or_print('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(data_block_id))
-                self.logger_or_print('... exception type: {} message: {}'.format(type(ex).__name__, ex))
-                self.logger_or_print(traceback.format_exc())
-                yield None
+            yield individual_cif_dictionary
+
+    @staticmethod
+    def write_individual_cif_dictionary(individual_cif_dictionary, file_name):
+        """
+        writes an individual_cif_dictionary to a file
+
+        Args:
+            individual_cif_dictionary: an individual cif dictionary containing  {data_block_id: data_block}
+            file_name (str): Name for file
+        """
+        cfd = mmcifIO.CifFileWriter(file_name, preserve_order=True)
+        cfd.write(individual_cif_dictionary)

@@ -29,14 +29,15 @@ In addition creates chem.xml and chem_comp.list for all components.
 import argparse
 import logging
 import os
+import traceback
 from argparse import RawTextHelpFormatter
 from collections import OrderedDict
 
 import cairosvg
-
 from PIL import Image
 from yattag import Doc, indent
 
+from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from split_components_cif import SplitComponentsCif
 from utilities import create_directory_using_mkdir_unless_it_exists
 
@@ -88,8 +89,15 @@ def process_components_cif(components_cif, output_dir, debug):
         split_cc = SplitComponentsCif(components_cif, logger=logger)
         logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
                      format(components_cif, len(split_cc.cif_dictionary)))
-        for pdb_cc_rdkit in split_cc.individual_pdb_ccd_rdkit():
-            if pdb_cc_rdkit is None:
+        for individual_dict in  split_cc.individual_cif_dictionary():
+            _write_individual_ccd_mmcif(logger, files_subdirs_path['mmcif'], individual_dict)
+            try:
+                pdb_cc_rdkit = PdbChemicalComponentsRDKit(cif_dictionary=individual_dict)
+            except Exception as ex:
+                block_id = list(individual_dict)[0]
+                logger.warn('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(block_id))
+                logger.warn('... exception type: {} message: {}'.format(type(ex).__name__, ex))
+                logger.warn(traceback.format_exc())
                 continue  # problem with this chemical component skip to next
             chem_comp_id = pdb_cc_rdkit.chem_comp_id
             logger.debug('chem_comp_id={}'.format(chem_comp_id))
@@ -224,6 +232,16 @@ def _create_files_or_images_subdirs(logger, output_dir, files_or_images, subdirs
     return subdirs_path
 
 
+def _write_individual_ccd_mmcif(logger, path, individual_dict):
+    block_id = list(individual_dict)[0]
+    output_file = os.path.join(path, block_id + '.cif')
+    SplitComponentsCif.write_individual_cif_dictionary(individual_dict, output_file)
+    if os.path.isfile(output_file):
+        logger.debug('written individual cif file {}'.format(output_file))
+    else:
+        logger.warn('failed to write individual cif {}'.format(output_file))
+
+
 def _write_coordinate_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id):
     """
     writes the coordinate files for a particular ccd
@@ -239,13 +257,10 @@ def _write_coordinate_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_com
     """
     for subdir in file_subdirs:
         if subdir == 'mmcif':
-            file_type = '.cif'
-        else:
-            file_type = '.' + subdir[:3]
+            continue
+        file_type = '.' + subdir[:3]
         output_file = os.path.join(subdirs_path[subdir], chem_comp_id + file_type)
-        if subdir == 'mmcif':
-            pdb_cc_rdkit.write_ccd_cif(output_file)
-        elif subdir == 'sdf':
+        if subdir == 'sdf':
             pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=True)
         elif subdir == 'sdf_nh':
             pdb_cc_rdkit.sdf_file_or_string(file_name=output_file, ideal=True, hydrogen=False)
