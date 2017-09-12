@@ -490,12 +490,13 @@ class PdbChemicalComponents(object):
         # noinspection PyProtectedMember
         chem_comp_atom = data_block._chem_comp_atom
         empty_atom = self.empty_chem_comp_atom()
-        for atom in chem_comp_atom:
-            self._atoms.append(atom)
-            # check the no new attributes have been set
-            for key in atom:
-                if key not in empty_atom:
-                    raise RuntimeError('unrecognized item "{}" in chem_comp_atom'.format(key))
+        if chem_comp_atom is not None:
+            for atom in chem_comp_atom:
+                self._atoms.append(atom)
+                # check the no new attributes have been set
+                for key in atom:
+                    if key not in empty_atom:
+                        raise RuntimeError('unrecognized item "{}" in chem_comp_atom'.format(key))
         self.bonds = []
         # noinspection PyProtectedMember
         chem_comp_bond = data_block._chem_comp_bond
@@ -525,23 +526,26 @@ class PdbChemicalComponents(object):
         """
         # noinspection PyProtectedMember
         pdbx_chem_comp_descriptor = data_block._pdbx_chem_comp_descriptor
-        for descriptor in pdbx_chem_comp_descriptor:
-            if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
-                self.smiles_acdlabs = descriptor['descriptor']
-            elif descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
-                self.smiles_canonical_cactvs = descriptor['descriptor']
-            elif descriptor['type'] == 'SMILES' and descriptor['program'] == 'CACTVS':
-                self.smiles_cactvs = descriptor['descriptor']
-            elif descriptor['type'] == 'SMILES_CANONICAL' and 'OpenEye' in descriptor['program']:
-                self.smiles_canonical_openeye = descriptor['descriptor']
-            elif descriptor['type'] == 'SMILES' and 'OpenEye' in descriptor['program']:
-                self.smiles_openeye = descriptor['descriptor']
-            elif descriptor['type'] == 'InChI':
-                self.inchi = descriptor['descriptor']
-            elif descriptor['type'] == 'InChIKey':
-                self.inchikey = descriptor['descriptor']
-            else:
-                logging.warn('unrecognized pdbx_chem_comp_descriptor {}'.format(descriptor))
+        if pdbx_chem_comp_descriptor is None:
+            pass
+        else:
+            for descriptor in pdbx_chem_comp_descriptor:
+                if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
+                    self.smiles_acdlabs = descriptor['descriptor']
+                elif descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
+                    self.smiles_canonical_cactvs = descriptor['descriptor']
+                elif descriptor['type'] == 'SMILES' and descriptor['program'] == 'CACTVS':
+                    self.smiles_cactvs = descriptor['descriptor']
+                elif descriptor['type'] == 'SMILES_CANONICAL' and 'OpenEye' in descriptor['program']:
+                    self.smiles_canonical_openeye = descriptor['descriptor']
+                elif descriptor['type'] == 'SMILES' and 'OpenEye' in descriptor['program']:
+                    self.smiles_openeye = descriptor['descriptor']
+                elif descriptor['type'] == 'InChI':
+                    self.inchi = descriptor['descriptor']
+                elif descriptor['type'] == 'InChIKey':
+                    self.inchikey = descriptor['descriptor']
+                else:
+                    logging.warn('unrecognized pdbx_chem_comp_descriptor {}'.format(descriptor))
 
     def _pdbecif_parse_pdbx_chem_comp_identifier(self, data_block):
         """
