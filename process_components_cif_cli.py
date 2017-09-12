@@ -105,8 +105,8 @@ def process_components_cif(components_cif, output_dir, debug):
             chem_dot_xml_file.write(pdb_cc_rdkit.chem_comp_xml())
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
-            if pdb_cc_rdkit.inchikey != pdb_cc_rdkit.inchikey_from_rdkit:
-                logger.warn(' {} inchikey mismatch!'.format(chem_comp_id))
+            if pdb_cc_rdkit.inchikey[:14] != pdb_cc_rdkit.inchikey_from_rdkit[:14]:
+                logger.warn(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
                 logger.warn(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
                 logger.warn(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
                 logger.warn(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
