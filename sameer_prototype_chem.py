@@ -52,12 +52,12 @@ if __name__ == "__main__":
     
     cif_parser = mmcif.CifFileReader(input='data', preserve_order=True)
    
-    cif_in_dir = os.path.join(data_dir, 'ccd_mmcif_test_files')
-    sdf_out_dir = os.path.join(this_script_dir, 'sdf_out')
-    svg_out_dir = os.path.join(this_script_dir, 'svg_out')
+    cif_in_dir = os.path.join(this_script_dir, 'tests', 'ccd_mmcif_test_files')
+    sdf_out_dir = os.path.join(this_script_dir, 'tests', 'out', 'sdf_out')
+    svg_out_dir = os.path.join(this_script_dir, 'tests', 'out', 'svg_out')
     for out_dir in [sdf_out_dir, svg_out_dir]:  # make output directories if necessary
         if not os.path.isdir(out_dir):
-            os.mkdir(out_dir, 0755)
+            os.mkdir(out_dir)
     imgFileName = ''
     
     for fileName in os.listdir(cif_in_dir):
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         cifObj = cif_parser.read(os.path.join(cif_in_dir, fileName), output='cif_wrapper')
         chem_comp = list(cifObj.values())[0]
         chem_comp_id = chem_comp._chem_comp['id'][0]
-        print chem_comp_id
+        print(chem_comp_id)
 #        imgFileName = path2+chem_comp._chem_comp['id'][0]+".png"
 #        print imgFileName
         atoms=chem_comp._chem_comp_atom
@@ -94,12 +94,12 @@ if __name__ == "__main__":
             pdb_x = float(atom['model_Cartn_x'])
             pdb_y = float(atom['model_Cartn_y'])
             pdb_z = float(atom['model_Cartn_z'])
-            print pdb_x," ",pdb_y," ",pdb_z
+            print(pdb_x," ",pdb_y," ",pdb_z)
             
             ideal_x = float(atom['pdbx_model_Cartn_x_ideal'])
             ideal_y = float(atom['pdbx_model_Cartn_y_ideal'])
             ideal_z = float(atom['pdbx_model_Cartn_z_ideal'])
-            print ideal_x," ",ideal_y," ",ideal_z
+            print(ideal_x," ",ideal_y," ",ideal_z)
            
 
             
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 #            rdAtom.SetProp('_CIPCode',stereo)
             
             if (stereo != 'N'):
-                print StereoType[stereo]
+                print(StereoType[stereo])
                 Chem.Atom.SetChiralTag(rdAtom,StereoType[stereo])
             
             
@@ -233,7 +233,7 @@ if __name__ == "__main__":
 #                    print '___________________'
                 matches[smiles[frag]]=atomname
         
-        print matches
-        print '***************************'
+        print(matches)
+        print('***************************')
     
     

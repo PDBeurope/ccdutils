@@ -24,7 +24,7 @@ def load_smiles_to_fragment_name_from_file(fragment_file_name):
     try:
         fragment_file = open(fragment_file_name, 'r')
     except IOError as err:
-        print "Error cannot open fragment file {0} error is '{1}'".format(fragment_file_name, err.strerror)
+        print("Error cannot open fragment file {} error is '{}'".format(fragment_file_name, err.strerror))
         sys.exit(1)
     smiles_to_fragment_name = {}
     lines = fragment_file.read().splitlines()
