@@ -29,13 +29,11 @@ class FragmentLibrary(object):
         self.smiles_to_fragment_name = {}
         """{} smiles to fragment name dict {str,str}"""
         self.smiles_to_rdkit_molecule = {}
+        self._load()
 
-    def load(self):
-        """
-        loads fragment library from the file in data.
-        """
-        self._load_smiles_to_fragment_name_from_file(fragment_library_file_path)
-        self._create_smiles_to_rdkit_mol()
+    @property
+    def number_of_entries(self):
+        return len(self.smiles_to_fragment_name)
 
     def fragments_for_pdb_chemical_components_rdkit(self, pdb_ccd_rdkit):
         """
@@ -47,6 +45,14 @@ class FragmentLibrary(object):
             the fragments in the molecule ????
         """
         raise NotImplementedError('to be written')
+
+    def _load(self):
+        """
+        loads fragment library from the file in data.
+        """
+        self._load_smiles_to_fragment_name_from_file(fragment_library_file_path)
+        self._create_smiles_to_rdkit_mol()
+
 
     def _load_smiles_to_fragment_name_from_file(self, fragment_file_name):
         """
@@ -71,10 +77,9 @@ class FragmentLibrary(object):
             name, smile = line.split(':')
             smile = smile.replace('\t', '')  # take out tabs
             self.smiles_to_fragment_name[smile] = name
-        number_of_entries = len(self.smiles_to_fragment_name)
         logging.debug('method load_smiles_from_smi_text_file:')
         logging.debug('Have loaded smiles_to_fragment_name dictionary with {} '
-                      'entries from file {}'.format(number_of_entries, fragment_file_name))
+                      'entries from file {}'.format(self.number_of_entries, fragment_file_name))
         logging.debug('\tdump entries:\n' + pprint.pformat(self.smiles_to_fragment_name))
 
     def _create_smiles_to_rdkit_mol(self):
