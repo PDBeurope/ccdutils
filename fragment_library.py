@@ -44,7 +44,9 @@ class FragmentLibrary(object):
         Returns:
             the fragments in the molecule ????
         """
-        raise NotImplementedError('to be written')
+        fragments = {}
+        return fragments
+
 
     def _load(self):
         """

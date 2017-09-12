@@ -1,6 +1,8 @@
 import unittest
 from fragment_library import FragmentLibrary
+from utilities import cif_filename
 from rdkit import Chem
+from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 
 class TestFragmentLibrary(unittest.TestCase):
@@ -17,6 +19,15 @@ class TestFragmentLibrary(unittest.TestCase):
         frag = FragmentLibrary()
         rdkit_mol_phenyl = frag.smiles_to_rdkit_molecule['c1ccccc1']
         self.assertEqual('c1ccccc1', Chem.MolToSmiles(rdkit_mol_phenyl))
+
+    def test_fragments_for_glu(self):
+        frag = FragmentLibrary()
+        ciffile = cif_filename('GLU')
+        pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=ciffile)
+        fragments = frag.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)
+        self.assertTrue('peptide' in fragments)
+        self.assertEquals({fragments['peptide'], ['O', 'C', 'CA', 'N']}, )
+
 
 
 if __name__ == '__main__':
