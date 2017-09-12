@@ -45,6 +45,7 @@ test_cif_path_name = os.path.join(this_script_dir(), 'tests', 'ccd_mmcif_test_fi
 test_comparison_files_path = os.path.join(this_script_dir(), 'tests', 'comparison_files')
 test_components_cif_first_file_comps = os.path.join(this_script_dir(),
                                                     'tests', 'components_cif', 'components.cif.first_five_comps')
+fragment_library_file_path = os.path.join(this_script_dir(), 'data', 'fragment_library.txt')
 
 
 def cif_filename(code):

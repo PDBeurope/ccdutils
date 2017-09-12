@@ -4,6 +4,7 @@ import pprint
 import logging
 from utilities import this_script_dir
 from rdkit import Chem
+from utilities import fragment_library_file_path
 
 
 def load_smiles_to_fragment_name_from_file(fragment_file_name):
@@ -81,9 +82,7 @@ def main():
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging_level)
     logging.info('ccd_find_fragments: start')
 
-    data_dir = os.path.join(this_script_dir(), 'data')
-    fragment_file_name = os.path.join(data_dir, 'smi.text')
-    smiles_to_fragment_name = load_smiles_to_fragment_name_from_file(fragment_file_name)
+    smiles_to_fragment_name = load_smiles_to_fragment_name_from_file(fragment_library_file_path)
     smiles_to_rdkit_mol = create_smiles_to_rdkit_mol(smiles_to_fragment_name.keys())
 
     if logging_level == logging.DEBUG:
@@ -98,10 +97,10 @@ def main():
                                  Chem.MolToSmiles(smiles_to_rdkit_mol[smile]),
                                  test_inchi, test_inchikey))
 
-    cif_file = os.path.join(data_dir, '007.cif')  # temporary for testing.
-    logging.debug('temporary for testing using cif file {}'.format(cif_file))
-    my_rwmol = cif_file_to_rwmol(cif_file)
-    logging.debug('temporary for testing my_rwmol returned as {}'.format(my_rwmol))
+    # cif_file = os.path.join(data_dir, '007.cif')  # temporary for testing.
+    # logging.debug('temporary for testing using cif file {}'.format(cif_file))
+    # my_rwmol = cif_file_to_rwmol(cif_file)
+    # logging.debug('temporary for testing my_rwmol returned as {}'.format(my_rwmol))
 
 
 if __name__ == "__main__":
