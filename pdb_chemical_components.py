@@ -557,6 +557,7 @@ class PdbChemicalComponents(object):
         Returns:
 
         """
+        # noinspection PyProtectedMember
         pdbx_chem_comp_identifier = data_block._pdbx_chem_comp_identifier
         if pdbx_chem_comp_identifier is None:
             pass
@@ -568,7 +569,6 @@ class PdbChemicalComponents(object):
                     self.systematic_name_openeye = identifier['identifier']
                 else:
                     logging.warn('unrecognized chem_comp_identifier {} '.format(identifier))
-
 
     def write_ccd_cif(self, output_ccd_cif_file_name):
         """
