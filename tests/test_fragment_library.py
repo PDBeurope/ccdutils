@@ -22,12 +22,11 @@ class TestFragmentLibrary(unittest.TestCase):
 
     def test_fragments_for_glu(self):
         frag = FragmentLibrary()
-        ciffile = cif_filename('GLU')
-        pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=ciffile)
+        cif_file = cif_filename('GLU')
+        pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=cif_file)
         fragments = frag.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)
         self.assertTrue('peptide' in fragments)
-        self.assertEquals({fragments['peptide'], ['O', 'C', 'CA', 'N']}, )
-
+        self.assertEquals(fragments['peptide'], ['O', 'C', 'CA', 'N'])
 
 
 if __name__ == '__main__':

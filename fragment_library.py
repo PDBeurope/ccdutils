@@ -45,6 +45,17 @@ class FragmentLibrary(object):
             the fragments in the molecule ????
         """
         fragments = {}
+        rdkit_mol = pdb_ccd_rdkit.rdkit_mol
+        for smiles, frag_rdkit_mol in self.smiles_to_rdkit_molecule.items():
+            if rdkit_mol.HasSubstructMatch(frag_rdkit_mol):
+                fragment_name = self.smiles_to_fragment_name[smiles]
+                logging.debug('match to "{}"'.format(fragment_name))
+                for all_index in rdkit_mol.GetSubstructMatches(frag_rdkit_mol):
+                    logging.debug('all_index={}'.format(all_index))
+                    atom_names = []
+                    for atom_index in all_index:
+                        atom_names.append(pdb_ccd_rdkit.atom_ids[atom_index])
+                    fragments[fragment_name] = atom_names
         return fragments
 
 
