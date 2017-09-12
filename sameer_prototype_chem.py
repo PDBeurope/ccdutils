@@ -20,6 +20,8 @@ from rdkit.Chem.Draw import rdMolDraw2D
 
 from mmCif import *
 import mmCif.mmcifIO as mmcif
+from utilities import supply_list_of_sample_cifs
+
 
 #from Chem import rdchem
 BondType = {  'SING': Chem.rdchem.BondType.SINGLE, 'DOUB': Chem.rdchem.BondType.DOUBLE,'AROM': Chem.rdchem.BondType.AROMATIC }
@@ -60,7 +62,12 @@ if __name__ == "__main__":
             os.mkdir(out_dir)
     imgFileName = ''
     
-    for fileName in os.listdir(cif_in_dir):
+    for fileName in supply_list_of_sample_cifs():
+        skip = ('00O', '03R', '0OD', '10R', '3CD', 'ASX', 'CDL', 'CMO', 'D3O', 'NA', 'UNL')
+        if any(substring in fileName for substring in skip):
+            continue
+        print('fileName={}'.format(fileName))
+
         mol2 = Chem.MolFromSmiles('')
         mol2.UpdatePropertyCache(strict=False)
         
@@ -87,22 +94,23 @@ if __name__ == "__main__":
             if atomType in ElementType:
                 atomType = ElementType[atomType]
             
+
             id = atom['pdbx_ordinal']
             arom = atom['pdbx_aromatic_flag']
-            ring = atom['pdbx_aromatic_flag']   
+            ring = atom['pdbx_aromatic_flag']
             stereo = atom['pdbx_stereo_config']
             pdb_x = float(atom['model_Cartn_x'])
             pdb_y = float(atom['model_Cartn_y'])
             pdb_z = float(atom['model_Cartn_z'])
             print(pdb_x," ",pdb_y," ",pdb_z)
-            
+
             ideal_x = float(atom['pdbx_model_Cartn_x_ideal'])
             ideal_y = float(atom['pdbx_model_Cartn_y_ideal'])
             ideal_z = float(atom['pdbx_model_Cartn_z_ideal'])
             print(ideal_x," ",ideal_y," ",ideal_z)
-           
 
-            
+
+
             
             rdAtom = Chem.Atom(atomType)
             rdAtom.SetProp('name',atomName)
