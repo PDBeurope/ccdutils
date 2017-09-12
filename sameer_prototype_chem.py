@@ -20,7 +20,7 @@ from rdkit.Chem.Draw import rdMolDraw2D
 
 from mmCif import *
 import mmCif.mmcifIO as mmcif
-from utilities import supply_list_of_sample_cifs
+from utilities import supply_list_of_sample_cifs, fragment_library_file_path
 
 
 #from Chem import rdchem
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     smiles={}
     FragmentMols = {}
     
-    fragmentFile = os.path.join(data_dir, 'smi.text')
+    fragmentFile = fragment_library_file_path
     open(fragmentFile, 'r')
     
     lines = [line.strip("\n").strip("\t").strip("\r").replace("\n","").replace("\t","").replace("\r","") for line in open(fragmentFile)]
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         skip = ('00O', '03R', '0OD', '10R', '3CD', 'ASX', 'CDL', 'CMO', 'D3O', 'NA', 'UNL')
         if any(substring in fileName for substring in skip):
             continue
-        print('fileName={}'.format(fileName))
+        # print('fileName={}'.format(fileName))
 
         mol2 = Chem.MolFromSmiles('')
         mol2.UpdatePropertyCache(strict=False)
@@ -102,12 +102,12 @@ if __name__ == "__main__":
             pdb_x = float(atom['model_Cartn_x'])
             pdb_y = float(atom['model_Cartn_y'])
             pdb_z = float(atom['model_Cartn_z'])
-            print(pdb_x," ",pdb_y," ",pdb_z)
+            # print(pdb_x," ",pdb_y," ",pdb_z)
 
             ideal_x = float(atom['pdbx_model_Cartn_x_ideal'])
             ideal_y = float(atom['pdbx_model_Cartn_y_ideal'])
             ideal_z = float(atom['pdbx_model_Cartn_z_ideal'])
-            print(ideal_x," ",ideal_y," ",ideal_z)
+            # print(ideal_x," ",ideal_y," ",ideal_z)
 
 
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 #            rdAtom.SetProp('_CIPCode',stereo)
             
             if (stereo != 'N'):
-                print(StereoType[stereo])
+                # print(StereoType[stereo])
                 Chem.Atom.SetChiralTag(rdAtom,StereoType[stereo])
             
             
