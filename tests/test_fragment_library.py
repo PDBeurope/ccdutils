@@ -13,12 +13,12 @@ class TestFragmentLibrary(unittest.TestCase):
         self.assertNotEqual(0, self.frag.number_of_entries)
 
     def test_phenyl_in_fragment(self):
-        self.assertIn('phenyl', self.frag.smiles_to_fragment_name.values())
-        self.assertEqual('phenyl', self.frag.smiles_to_fragment_name['c1ccccc1'])
+        self.assertIn('phenyl', self.frag.fragment_name_to_smiles)
+        self.assertEqual('c1ccccc1', self.frag.fragment_name_to_smiles['phenyl'])
 
     def test_rdkit_mol_smiles_for_phenyl(self):
         frag = FragmentLibrary()
-        rdkit_mol_phenyl = frag.smiles_to_rdkit_molecule['c1ccccc1']
+        rdkit_mol_phenyl = frag.fragment_name_to_rdkit_molecule['phenyl']
         self.assertEqual('c1ccccc1', Chem.MolToSmiles(rdkit_mol_phenyl))
 
     def test_fragments_for_glu(self):

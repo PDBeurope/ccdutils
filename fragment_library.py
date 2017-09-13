@@ -14,26 +14,19 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-# import logging
-# import pprint
-import sys
-
 from rdkit import Chem
-
 from utilities import fragment_library_file_path
 
 
 class FragmentLibrary(object):
     def __init__(self):
-        self.smiles_to_fragment_name = {}
-        """{} smiles to fragment name dict {str,str}"""
-        self.smiles_to_rdkit_molecule = {}
+        self.fragment_name_to_smiles = {}
+        self.fragment_name_to_rdkit_molecule = {}
         self._load()
 
     @property
     def number_of_entries(self):
-        return len(self.smiles_to_fragment_name)
+        return len(self.fragment_name_to_smiles)
 
     def fragments_for_pdb_chemical_components_rdkit(self, pdb_ccd_rdkit):
         """
@@ -50,9 +43,8 @@ class FragmentLibrary(object):
         """
         fragments = {}
         rdkit_mol = pdb_ccd_rdkit.mol_remove_h
-        for smiles, frag_rdkit_mol in self.smiles_to_rdkit_molecule.items():
+        for fragment_name, frag_rdkit_mol in self.fragment_name_to_rdkit_molecule.items():
             if rdkit_mol.HasSubstructMatch(frag_rdkit_mol):
-                fragment_name = self.smiles_to_fragment_name[smiles]
                 fragments[fragment_name] = []
                 # logging.debug('match to "{}"'.format(fragment_name))
                 for all_index in rdkit_mol.GetSubstructMatches(frag_rdkit_mol):
@@ -67,12 +59,12 @@ class FragmentLibrary(object):
         """
         loads fragment library from the file in data.
         """
-        self._load_smiles_to_fragment_name_from_file(fragment_library_file_path)
-        self._create_smiles_to_rdkit_mol()
+        self._load_fragment_name_to_smiles_from_file(fragment_library_file_path)
+        self._create_frag_name_to_rdkit_mol()
 
-    def _load_smiles_to_fragment_name_from_file(self, fragment_file_name):
+    def _load_fragment_name_to_smiles_from_file(self, fragment_file_name):
         """
-        loads the smiles to fragment name dictionary from the given file.
+        loads the fragment name to file dictionary from the given file.
 
         Args:
             fragment_file_name (str): the fragment file name (normally smi.text in the data directory)
@@ -82,27 +74,19 @@ class FragmentLibrary(object):
             cyclopropane:C1CC1
             phenyl:c1ccccc1
         """
-        try:
-            fragment_file = open(fragment_file_name, 'r')
-        except IOError as err:
-            print("Error cannot open fragment file {} error is '{}'".format(fragment_file_name, err.strerror))
-            sys.exit(1)
-        self.smiles_to_fragment_name = {}
-        lines = fragment_file.read().splitlines()
-        for line in lines:
-            name, smile = line.split(':')
-            smile = smile.replace('\t', '')  # take out tabs
-            self.smiles_to_fragment_name[smile] = name
-        # logging.debug('method load_smiles_from_smi_text_file:')
-        # logging.debug('Have loaded smiles_to_fragment_name dictionary with {} '
-        #               'entries from file {}'.format(self.number_of_entries, fragment_file_name))
-        # logging.debug('\tdump entries:\n' + pprint.pformat(self.smiles_to_fragment_name))
+        with open(fragment_file_name, 'r') as fragment_file:
+            self.fragment_name_to_smiles = {}
+            lines = fragment_file.read().splitlines()
+            for line in lines:
+                name, smile = line.split(':')
+                smile = smile.replace('\t', '')  # take out tabs
+                self.fragment_name_to_smiles[name] = smile
 
-    def _create_smiles_to_rdkit_mol(self):
+    def _create_frag_name_to_rdkit_mol(self):
         """
-        creates a dictionary with an rdkit molecule for each SMILES string in the input list.
+        creates a dictionary with an rdkit molecule for each fragment in the input list.
         """
-        self.smiles_to_rdkit_molecule = {}
-        for smile in self.smiles_to_fragment_name.keys():
+        self.fragment_name_to_rdkit_molecule = {}
+        for fragment_name, smile in self.fragment_name_to_smiles.items():
             rdkit_mol = Chem.MolFromSmiles(smile)
-            self.smiles_to_rdkit_molecule[smile] = rdkit_mol
+            self.fragment_name_to_rdkit_molecule[fragment_name] = rdkit_mol
