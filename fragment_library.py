@@ -15,8 +15,8 @@
 # under the License.
 #
 
-import logging
-import pprint
+# import logging
+# import pprint
 import sys
 
 from rdkit import Chem
@@ -37,27 +37,31 @@ class FragmentLibrary(object):
 
     def fragments_for_pdb_chemical_components_rdkit(self, pdb_ccd_rdkit):
         """
-
         Args:
             pdb_ccd_rdkit: A PdbChemicalComponentsRDKit molecule
 
         Returns:
-            the fragments in the molecule ????
+            the fragments in the molecule - a dictionary fragment name: list of (list of atom ids/names)
+
+        Notes
+            There can be more than one match to a fragment in the same molecule - for instance cyclodextrin has 7
+            pyranose rings. Each one will have a separate list of atom ids (names) that match the fragment.
+            ence there is a list of these separate lists.
         """
         fragments = {}
-        rdkit_mol = pdb_ccd_rdkit.rdkit_mol
+        rdkit_mol = pdb_ccd_rdkit.mol_remove_h
         for smiles, frag_rdkit_mol in self.smiles_to_rdkit_molecule.items():
             if rdkit_mol.HasSubstructMatch(frag_rdkit_mol):
                 fragment_name = self.smiles_to_fragment_name[smiles]
-                logging.debug('match to "{}"'.format(fragment_name))
+                fragments[fragment_name] = []
+                # logging.debug('match to "{}"'.format(fragment_name))
                 for all_index in rdkit_mol.GetSubstructMatches(frag_rdkit_mol):
-                    logging.debug('all_index={}'.format(all_index))
+                    # logging.debug('all_index={}'.format(all_index))
                     atom_names = []
                     for atom_index in all_index:
                         atom_names.append(pdb_ccd_rdkit.atom_ids[atom_index])
-                    fragments[fragment_name] = atom_names
+                    fragments[fragment_name].append(atom_names)
         return fragments
-
 
     def _load(self):
         """
@@ -65,7 +69,6 @@ class FragmentLibrary(object):
         """
         self._load_smiles_to_fragment_name_from_file(fragment_library_file_path)
         self._create_smiles_to_rdkit_mol()
-
 
     def _load_smiles_to_fragment_name_from_file(self, fragment_file_name):
         """
@@ -90,10 +93,10 @@ class FragmentLibrary(object):
             name, smile = line.split(':')
             smile = smile.replace('\t', '')  # take out tabs
             self.smiles_to_fragment_name[smile] = name
-        logging.debug('method load_smiles_from_smi_text_file:')
-        logging.debug('Have loaded smiles_to_fragment_name dictionary with {} '
-                      'entries from file {}'.format(self.number_of_entries, fragment_file_name))
-        logging.debug('\tdump entries:\n' + pprint.pformat(self.smiles_to_fragment_name))
+        # logging.debug('method load_smiles_from_smi_text_file:')
+        # logging.debug('Have loaded smiles_to_fragment_name dictionary with {} '
+        #               'entries from file {}'.format(self.number_of_entries, fragment_file_name))
+        # logging.debug('\tdump entries:\n' + pprint.pformat(self.smiles_to_fragment_name))
 
     def _create_smiles_to_rdkit_mol(self):
         """
