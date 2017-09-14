@@ -15,7 +15,7 @@
 # under the License.
 #
 import os 
-from nose.tools import assert_true, assert_false, assert_in, assert_not_in
+from nose.tools import assert_true, assert_false
 
 from chem_comp_xml import ChemCompXMl
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
@@ -39,7 +39,7 @@ def test_chem_comp_for_eoh_and_glu():
                    '<nonStereoSmiles>CCO</nonStereoSmiles>', '<InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>',
                    '</chemComp>',
                    # now want inchikey - not in old
-                   '<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>'
+                   '<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>',
                    ]
     lines = cc_xml_string.splitlines()
     any_fail = False
@@ -52,6 +52,8 @@ def test_chem_comp_for_eoh_and_glu():
         yield assert_true, match, 'cc_xml_string should contain "{}"'.format(old_record)
         if not match:
             any_fail = True
+    if not any_fail:
+        cc_xml_string = ' '
     yield assert_false, any_fail, 'echo cc_xml_string after any failure: "{}"'.format(cc_xml_string)
 
 
@@ -60,8 +62,8 @@ def test_chem_comp_for_sy9_should_not_have_systematic_name():
     ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('SY9'))
     cc_xml.store_ccd(ccd)
     cc_xml_string = cc_xml.to_string()
-    yield assert_in, '<id>SY9</id>', cc_xml_string
-    yield assert_not_in, 'systematicName', cc_xml_string
+    yield assert_true, '<id>SY9</id>' in cc_xml_string, '<id>SY9</id> in cc_xml_string'
+    yield assert_false, 'systematicName' in cc_xml_string, 'systematicName not in cc_xml_string'
 
 
 def test_to_file():
@@ -72,3 +74,13 @@ def test_to_file():
     cc_xml.to_file(file_name)
     yield assert_true, os.path.isfile(file_name) and os.path.getsize(file_name) > 0, \
         'call to cc_xml.to_file({}) must create a non-empty file.'.format(file_name)
+
+
+def test_fragments_in_atp():
+    cc_xml = ChemCompXMl()
+    ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('ATP'))
+    cc_xml.store_ccd(ccd)
+    cc_xml_string = cc_xml.to_string()
+    yield assert_true, '<fragment id="1" name="adenine">' in cc_xml_string, 'ATP fragment record for adenine'
+    yield assert_true, '<fragment id="1" name="ribose">' in cc_xml_string, 'ATP fragment record for ribose'
+    yield assert_true, '<atom_id>C2\'</atom_id>' in cc_xml_string, 'ATP fragment atom record'

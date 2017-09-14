@@ -52,11 +52,15 @@ def test_with_components_cif_first_file_comps():
         with open(chem_dot_xml_file_name, 'r') as chem_dot_xml_file:
             lines = chem_dot_xml_file.read().splitlines()
             strip_lines = [item.strip() for item in lines]
-            yield assert_in, '</chemCompList>',  strip_lines, 'chem.xml should contain </chemCompList>'
-            yield assert_in, '<id>000</id>', strip_lines, 'chem.xml should contain <id>000</id>'
-            yield assert_in, '<id>004</id>', strip_lines, 'chem.xml should contain <id>004</id>'
-            yield assert_in, '<name>(2S)-amino(phenyl)ethanoic acid</name>', strip_lines, \
-                'chem.xml should contain name of 004'
+            for test_str in ('</chemCompList>', '<id>000</id>', '<id>004</id>',
+                             '<name>(2S)-amino(phenyl)ethanoic acid</name>', '<fragment id="2" name="phenyl">'):
+                yield assert_true, test_str in strip_lines, 'chem.xml should contain {}'.format(test_str)
+            # yield assert_true, '<id>000</id>' in strip_lines, 'chem.xml should contain <id>000</id>'
+            # yield assert_true, '<id>004</id>'in strip_lines, 'chem.xml should contain <id>004</id>'
+            # yield assert_true, '<name>(2S)-amino(phenyl)ethanoic acid</name>' in strip_lines, \
+            #     'chem.xml should contain name of 004'
+            # yield assert_true, '<fragment id="2" name="phenyl"> 'in strip_lines, 'chem.xml should contain '
+
     except IOError as message:
         yield assert_true, False, 'problem opening chem.xml "{}"'.format(message)
     images_dir = os.path.join(test_output_dir, 'images')

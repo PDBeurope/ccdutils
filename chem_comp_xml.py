@@ -15,6 +15,7 @@
 # under the License.
 #
 from lxml import etree
+from fragment_library import FragmentLibrary
 
 
 class ChemCompXMl(object):
@@ -23,6 +24,7 @@ class ChemCompXMl(object):
 
     def __init__(self):
         self.top = etree.Element('chemCompList')
+        self.fragment_library = FragmentLibrary()
 
     def store_ccd(self, pdb_ccd):
         """
@@ -31,34 +33,44 @@ class ChemCompXMl(object):
         Args:
             pdb_ccd: a PdbChemicalComponents for a chemical component
         """
-        this_chem_comp = etree.SubElement(self.top, 'chemComp')
-        this_id = etree.SubElement(this_chem_comp, 'id')
+        chem_comp = etree.SubElement(self.top, 'chemComp')
+        this_id = etree.SubElement(chem_comp, 'id')
         this_id.text = pdb_ccd.chem_comp_id
-        name = etree.SubElement(this_chem_comp, 'name')
+        name = etree.SubElement(chem_comp, 'name')
         name.text = pdb_ccd.chem_comp_name
-        formula = etree.SubElement(this_chem_comp, 'formula')
+        formula = etree.SubElement(chem_comp, 'formula')
         formula.text = pdb_ccd.chem_comp_formula
         systematic_name_text = pdb_ccd.systematic_name_openeye
         if systematic_name_text is not None:
-            systematic_name = etree.SubElement(this_chem_comp, 'systematicName')
+            systematic_name = etree.SubElement(chem_comp, 'systematicName')
             systematic_name.text = systematic_name_text
-        stereo_smiles = etree.SubElement(this_chem_comp, 'stereoSmiles')
+        stereo_smiles = etree.SubElement(chem_comp, 'stereoSmiles')
         stereo_smiles.text = pdb_ccd.smiles_canonical_cactvs
-        non_stereo_smiles = etree.SubElement(this_chem_comp, 'nonStereoSmiles')
+        non_stereo_smiles = etree.SubElement(chem_comp, 'nonStereoSmiles')
         non_stereo_smiles.text = pdb_ccd.smiles_cactvs
-        inchi = etree.SubElement(this_chem_comp, 'InChi')
+        inchi = etree.SubElement(chem_comp, 'InChi')
         inchi.text = pdb_ccd.inchi
-        inchikey = etree.SubElement(this_chem_comp, 'InChIKey')
+        inchikey = etree.SubElement(chem_comp, 'InChIKey')
         inchikey.text = pdb_ccd.inchikey
+        fragments = self.fragment_library.fragments_for_pdb_chemical_components_rdkit(pdb_ccd)
+        if len(fragments.keys()) > 0:
+            for fragment_name, matches in sorted(fragments.items()):
+                id = 1
+                for match in matches:
+                    fragment = etree.SubElement(chem_comp, 'fragment', name=fragment_name, id=str(id))
+                    id += 1
+                    for atom_name in match:
+                        atom_id = etree.SubElement(fragment, 'atom_id')
+                        atom_id.text = atom_name
 
-    def to_string(self):
+    def to_string(self, pretty_print=True):
         """
         produces a string representation of the chem_comp.xml
 
         Returns:
             str: a string with the chem_comp.xml pretty printed
         """
-        xml_string = etree.tostring(self.top, pretty_print=True)
+        xml_string = etree.tostring(self.top, pretty_print=pretty_print)
         xml_string = xml_string.decode('utf-8')  # needed for python3
         return xml_string
 
