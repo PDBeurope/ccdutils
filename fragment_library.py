@@ -67,18 +67,18 @@ class FragmentLibrary(object):
         loads the fragment name to file dictionary from the given file.
 
         Args:
-            fragment_file_name (str): the fragment file name (normally smi.text in the data directory)
+            fragment_file_name (str): the fragment file name 
 
         Note:
-            fragment_file_name has format
-            cyclopropane:C1CC1
-            phenyl:c1ccccc1
+            fragment_file_name has SMILES format:
+            C1CC1 cyclopropane
+            c1ccccc1 phenyl
         """
         with open(fragment_file_name, 'r') as fragment_file:
             self.fragment_name_to_smiles = {}
             lines = fragment_file.read().splitlines()
             for line in lines:
-                name, smile = line.split(':')
+                smile, name = line.split(' ')
                 smile = smile.replace('\t', '')  # take out tabs
                 self.fragment_name_to_smiles[name] = smile
 
