@@ -14,71 +14,61 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
+import os 
 from nose.tools import assert_true, assert_false, assert_in, assert_not_in
 
+from chem_comp_xml import ChemCompXMl
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from utilities import cif_filename
+from utilities import cif_filename, file_name_in_tsts_out
 
 
 def test_chem_comp_for_eoh_and_glu():
+    cc_xml = ChemCompXMl()
     for chem_comp_id in 'EOH', 'GLU':
-        # record from old /nfs/ftp/pub/databases/msd/pdbechem/chem.xml
-        #   <chemComp>
-        #     <id>EOH</id>
-        #     <name>ETHANOL</name>
-        #     <formula>C2 H6 O</formula>
-        #     <systematicName>ethanol</systematicName>
-        #     <stereoSmiles>CCO</stereoSmiles>
-        #     <nonStereoSmiles>CCO</nonStereoSmiles>
-        #     <InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>
-        #   </chemComp>
-        if chem_comp_id is 'EOH':
-            old_records = ['<chemComp>', '<id>EOH</id>', '<name>ETHANOL</name>', '<formula>C2 H6 O</formula>',
-                           '<systematicName>ethanol</systematicName>', '<stereoSmiles>CCO</stereoSmiles>',
-                           '<nonStereoSmiles>CCO</nonStereoSmiles>', '<InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>',
-                           '</chemComp>',
-                           # now want inchikey - not in old
-                           '<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>'
-                           ]
-        else:
-            #   <chemComp>
-            #   <id>GLU</id>
-            #   <name>GLUTAMIC ACID</name>
-            #   <formula>C5 H9 N O4</formula>
-            #   <systematicName>(2S)-2-azanylpentanedioic acid</systematicName>
-            #   <stereoSmiles>N[C@@H](CCC(O)=O)C(O)=O</stereoSmiles>
-            #   <nonStereoSmiles>N[CH](CCC(O)=O)C(O)=O</nonStereoSmiles>
-            #   <InChi>InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1</InChi>
-            # </chemComp>
-            old_records = ['<chemComp>', '<id>GLU</id>', '<name>GLUTAMIC ACID</name>', '<formula>C5 H9 N O4</formula>',
-                           '<systematicName>(2S)-2-azanylpentanedioic acid</systematicName>',
-                           '<stereoSmiles>N[C@@H](CCC(O)=O)C(O)=O</stereoSmiles>',
-                           '<nonStereoSmiles>N[CH](CCC(O)=O)C(O)=O</nonStereoSmiles>',
-                           '<InChi>InChI=1S/C5H9NO4/c6-3(5(9)10)1-2-4(7)8/h3H,1-2,6H2,(H,7,8)(H,9,10)/t3-/m0/s1'
-                           '</InChi>',
-                           '</chemComp>',
-                           '<InChIKey>WHUUTDBJXJRKMK-VKHMYHEASA-N</InChIKey>'
-                           ]
         ccd = PdbChemicalComponentsRDKit(file_name=cif_filename(chem_comp_id))
-        chem_comp_xml = ccd.chem_comp_xml()
-        lines = chem_comp_xml.splitlines()
-        any_fail = False
-        for old_record in old_records:
-            match = False
-            for line in lines:
-                if old_record in line:
-                    match = True
-                    break
-            yield assert_true, match, '{} chem_comp_xml should contain "{}"'.format(chem_comp_id, old_record)
-            if not match:
-                any_fail = True
-        yield assert_false, any_fail, 'echo {} chem_comp_xml after any failure: "{}"'.\
-            format(chem_comp_id, chem_comp_xml)
+        cc_xml.store_ccd(ccd)
+    cc_xml_string = cc_xml.to_string()
+    old_records = ['<chemComp>', '<id>EOH</id>', '<name>ETHANOL</name>', '<formula>C2 H6 O</formula>',
+                   '<systematicName>ethanol</systematicName>', '<stereoSmiles>CCO</stereoSmiles>',
+                   '<nonStereoSmiles>CCO</nonStereoSmiles>', '<InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>',
+                   '</chemComp>',
+                   # now want inchikey - not in old
+                   '<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>',
+                   '<chemComp>', '<id>EOH</id>', '<name>ETHANOL</name>', '<formula>C2 H6 O</formula>',
+                   '<systematicName>ethanol</systematicName>', '<stereoSmiles>CCO</stereoSmiles>',
+                   '<nonStereoSmiles>CCO</nonStereoSmiles>', '<InChi>InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3</InChi>',
+                   '</chemComp>',
+                   # now want inchikey - not in old
+                   '<InChIKey>LFQSCWFLJHTTHZ-UHFFFAOYSA-N</InChIKey>'
+                   ]
+    lines = cc_xml_string.splitlines()
+    any_fail = False
+    for old_record in old_records:
+        match = False
+        for line in lines:
+            if old_record in line:
+                match = True
+                break
+        yield assert_true, match, 'cc_xml_string should contain "{}"'.format(old_record)
+        if not match:
+            any_fail = True
+    yield assert_false, any_fail, 'echo cc_xml_string after any failure: "{}"'.format(cc_xml_string)
 
 
 def test_chem_comp_for_sy9_should_not_have_systematic_name():
+    cc_xml = ChemCompXMl()
     ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('SY9'))
-    chem_comp_xml = ccd.chem_comp_xml()
-    yield assert_in, '<id>SY9</id>', chem_comp_xml
-    yield assert_not_in, 'systematicName', chem_comp_xml
+    cc_xml.store_ccd(ccd)
+    cc_xml_string = cc_xml.to_string()
+    yield assert_in, '<id>SY9</id>', cc_xml_string
+    yield assert_not_in, 'systematicName', cc_xml_string
+
+
+def test_to_file():
+    cc_xml = ChemCompXMl()
+    ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('SY9'))
+    cc_xml.store_ccd(ccd)
+    file_name = file_name_in_tsts_out('test_chem_comp_xml.xml')
+    cc_xml.to_file(file_name)
+    yield assert_true, os.path.isfile(file_name) and os.path.getsize(file_name) > 0, \
+        'call to cc_xml.to_file({}) must create a non-empty file.'.format(file_name)
