@@ -333,36 +333,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 cml_file.close()
             return None
 
-    def chem_comp_xml(self):
-        """
-        provides xml records for the ccd needed for the PDBeChem chem_comp.xml/chem.xml
-        
-        Returns:
-            str: string containing <chemComp> xml data.
-        """
-        top = etree.Element('chemComp')
-        this_id = etree.SubElement(top, 'id')
-        this_id.text = self.chem_comp_id
-        name = etree.SubElement(top, 'name')
-        name.text = self.chem_comp_name
-        formula = etree.SubElement(top, 'formula')
-        formula.text = self.chem_comp_formula
-        systematic_name_text = self.systematic_name_openeye
-        if systematic_name_text  is not None:
-            systematic_name = etree.SubElement(top, 'systematicName')
-            systematic_name.text = systematic_name_text
-        stereo_smiles = etree.SubElement(top, 'stereoSmiles')
-        stereo_smiles.text = self.smiles_canonical_cactvs
-        non_stereo_smiles = etree.SubElement(top, 'nonStereoSmiles')
-        non_stereo_smiles.text = self.smiles_cactvs
-        inchi = etree.SubElement(top, 'InChi')
-        inchi.text = self.inchi
-        inchikey = etree.SubElement(top, 'InChIKey')
-        inchikey.text = self.inchikey
-        xml_string = etree.tostring(top, pretty_print=True)
-        xml_string = xml_string.decode('utf-8')  # needed for python3
-        return xml_string
-
     def xyz_file_or_string(self, file_name=None, ideal=True):
         """
         write a xyz format file or return a string containing the molecule in xyz format

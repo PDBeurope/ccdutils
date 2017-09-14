@@ -37,6 +37,7 @@ import cairosvg
 from PIL import Image
 from yattag import Doc, indent
 
+from chem_comp_xml import ChemCompXMl
 from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from split_components_cif import SplitComponentsCif
 from utilities import create_directory_using_mkdir_unless_it_exists
@@ -81,9 +82,8 @@ def process_components_cif(components_cif, output_dir, debug):
     create_directory_using_mkdir_unless_it_exists(output_dir)
     chem_comp_dot_list_file_name = os.path.join(output_dir, 'chem_comp.list')
     chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
-    with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file, \
-            open(chem_dot_xml_file_name, 'w') as chem_dot_xml_file:
-        chem_dot_xml_file.write('<chemCompList>\n')
+    cc_xml = ChemCompXMl()
+    with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file:
         files_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'files', file_subdirs)
         images_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'images', images_subdirs)
         split_cc = SplitComponentsCif(components_cif, logger=logger)
@@ -102,7 +102,7 @@ def process_components_cif(components_cif, output_dir, debug):
             chem_comp_id = pdb_cc_rdkit.chem_comp_id
             logger.debug('chem_comp_id={}'.format(chem_comp_id))
             chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
-            chem_dot_xml_file.write(pdb_cc_rdkit.chem_comp_xml())
+            cc_xml.store_ccd(pdb_cc_rdkit)
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             if pdb_cc_rdkit.inchikey[:14] != pdb_cc_rdkit.inchikey_from_rdkit[:14]:
@@ -117,10 +117,10 @@ def process_components_cif(components_cif, output_dir, debug):
                 logger.warn(' {} model coordinates have missing values'.format(chem_comp_id))
             if pdb_cc_rdkit.atom_charges_missing_values:
                 logger.warn(' {} atom charges have missing values'.format(chem_comp_id))
-        chem_dot_xml_file.write('</chemCompList>\n')
     _create_readme_dot_html(logger, output_dir)
     _create_tar_balls(logger, files_subdirs_path)
     _create_tar_balls(logger, images_subdirs_path)
+    cc_xml.to_file(chem_dot_xml_file_name)
 
 
 def _create_readme_dot_html(logger, output_dir):
