@@ -51,10 +51,16 @@ class TestFragmentLibrary(unittest.TestCase):
         cif_file = cif_filename('ATP')
         pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=cif_file)
         fragments = self.frag.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)
-        self.assertIn('adenine', fragments)
-        self.assertEqual(1, len(fragments['adenine']))
-        self.assertEquals(sorted(fragments['adenine'][0]),
-                          sorted(['N1', 'C2', 'N3', 'C4', 'C5', 'C6', 'N6', 'N7', 'C8', 'N9']))
+        my_frags = {'adenine': ['N1', 'C2', 'N3', 'C4', 'C5', 'C6', 'N6', 'N7', 'C8', 'N9'],
+                    'purine': ['N1', 'C2', 'N3', 'C4', 'C5', 'C6', 'N7', 'C8', 'N9'],
+                    'pyrimidine':  ['N1', 'C2', 'N3', 'C4', 'C5', 'C6'],
+                    'imidazole': ['C4', 'C5', 'N7', 'C8', 'N9'],
+                    'ribose': ["C1'", "C2'", "C3'", "C4'", "C5'", "O2'", "O3'", "O4'", "O5'"]}
+        for f_name, atoms in my_frags.items():
+            self.assertIn(f_name, fragments)
+            self.assertEqual(1, len(fragments[f_name]))
+            self.assertEquals(sorted(fragments[f_name][0]), sorted(atoms), 'check atoms in {}'.format(f_name))
+
 
 if __name__ == '__main__':
     unittest.main()
