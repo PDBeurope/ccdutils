@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # software from PDBe: Protein Data Bank in Europe; http://pdbe.org
 #
 # Copyright 2017 EMBL - European Bioinformatics Institute
@@ -14,14 +15,19 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+from collections import OrderedDict
 from rdkit import Chem
-from utilities import fragment_library_file_path
+from utilities import fragment_library_file_path, this_script_dir
 
 
 class FragmentLibrary(object):
+    """
+    store common fragments from
+    """
     def __init__(self):
-        self.fragment_name_to_smiles = {}
-        self.fragment_name_to_rdkit_molecule = {}
+        self.fragment_name_to_smiles = OrderedDict()
+        self.fragment_name_to_rdkit_molecule = OrderedDict()
         self._load()
 
     @property
@@ -75,7 +81,7 @@ class FragmentLibrary(object):
             c1ccccc1 phenyl
         """
         with open(fragment_file_name, 'r') as fragment_file:
-            self.fragment_name_to_smiles = {}
+            self.fragment_name_to_smiles = OrderedDict()
             lines = fragment_file.read().splitlines()
             for line in lines:
                 smile, name = line.split(' ')
@@ -86,7 +92,22 @@ class FragmentLibrary(object):
         """
         creates a dictionary with an rdkit molecule for each fragment in the input list.
         """
-        self.fragment_name_to_rdkit_molecule = {}
+        self.fragment_name_to_rdkit_molecule = OrderedDict()
         for fragment_name, smile in self.fragment_name_to_smiles.items():
             rdkit_mol = Chem.MolFromSmiles(smile)
             self.fragment_name_to_rdkit_molecule[fragment_name] = rdkit_mol
+
+
+def produce_png_img_of_all_fragments():
+    from rdkit.Chem import Draw
+    frag_library = FragmentLibrary()
+    ms = list(frag_library.fragment_name_to_rdkit_molecule.values())
+    labels = list(frag_library.fragment_name_to_smiles.keys())
+    img = Draw.MolsToGridImage(ms, legends=labels, molsPerRow=10)
+    img_file_name = os.path.join(this_script_dir(), 'data', 'fragment_library.png')
+    img.save(img_file_name)
+    print('Have written image of all the fragments to {}'.format(img_file_name))
+
+
+if __name__ == "__main__":
+    produce_png_img_of_all_fragments()
