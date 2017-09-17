@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # software from PDBe: Protein Data Bank in Europe; http://pdbe.org
 #
 # Copyright 2017 EMBL - European Bioinformatics Institute
@@ -37,10 +36,10 @@ import cairosvg
 from PIL import Image
 from yattag import Doc, indent
 
-from chem_comp_xml import ChemCompXMl
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from split_components_cif import SplitComponentsCif
-from utilities import create_directory_using_mkdir_unless_it_exists
+from pdbeccdutils.chem_comp_xml import ChemCompXMl
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.split_components_cif import SplitComponentsCif
+from pdbeccdutils.utilities import create_directory_using_mkdir_unless_it_exists
 
 clean_existing = True  # might want an update run mode later but for now remove existing directories/files
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
@@ -387,6 +386,3 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
-
-if __name__ == "__main__":
-    main()

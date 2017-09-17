@@ -15,7 +15,7 @@
 # under the License.
 #
 from lxml import etree
-from fragment_library import FragmentLibrary
+from pdbeccdutils.fragment_library import FragmentLibrary
 
 
 class ChemCompXMl(object):

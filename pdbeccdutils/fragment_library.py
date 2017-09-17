@@ -18,7 +18,7 @@
 import os
 from collections import OrderedDict
 from rdkit import Chem
-from utilities import fragment_library_file_path, this_script_dir
+from pdbeccdutils.utilities import fragment_library_file_path, this_script_dir
 
 
 class FragmentLibrary(object):

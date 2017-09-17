@@ -14,7 +14,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from pdb_chemical_components import PdbChemicalComponents
+from pdbeccdutils.pdb_chemical_components import PdbChemicalComponents
 from rdkit import Chem
 from rdkit.Geometry import rdGeometry
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
