@@ -31,7 +31,7 @@
 
   ```
   pip install https://github.com/glenveegee/PDBeCIF/zipball/master \
-  https://gitlab.com/pdbe/ccd_utils/repository/master/archive.zip
+  https://gitlab.com/pdbe/ccd_utils/repository/latest_release/archive.zip
   ```
 
 

@@ -43,6 +43,7 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     cif_file = str(args.CIF)
     logger.debug('CIF is %s' % cif_file)
+    raise NotImplementedError('need to write')
 
 if __name__ == "__main__":
     main()
