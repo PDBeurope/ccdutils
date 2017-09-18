@@ -5,18 +5,23 @@ import glob
 import os
 import shutil
 
-from nose.tools import assert_raises, assert_true, assert_equal, assert_in
+from nose.tools import assert_raises, assert_true, assert_equal
 
-from process_components_cif_cli import create_parser, process_components_cif, file_subdirs, images_subdirs
-from utilities import test_components_cif_first_file_comps, file_name_in_tsts_out
+from pdbeccdutils.process_components_cif_cli import create_parser, process_components_cif, file_subdirs, images_subdirs
+from pdbeccdutils.utilities import test_components_cif_first_file_comps, file_name_in_tsts_out
 
 
 def test_with_empty_args():
     """
-    User passes no args, should produce a usage statement and then raise SystemExit. Usage statement will start
+    User passes no args, should produce a usage statement and then raise SystemExit. Usage statement will appear
     """
     parser = create_parser()
     assert_raises(SystemExit, parser.parse_args, [])
+
+
+def test_input_file_that_cannot_exist_raises_system_exit():
+    assert_raises(SystemExit, process_components_cif(components_cif='/////impossible_to_open_file',
+                                                     output_dir=None, debug=False))
 
 
 def test_with_components_cif_first_file_comps():
