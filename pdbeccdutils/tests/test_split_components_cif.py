@@ -3,10 +3,9 @@ import unittest
 
 from nose.tools import assert_true
 
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from split_components_cif import SplitComponentsCif
-from utilities import file_name_in_tsts_out
-from utilities import test_components_cif_first_file_comps
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.split_components_cif import SplitComponentsCif
+from pdbeccdutils.utilities import file_name_in_tsts_out, test_components_cif_first_file_comps
 
 
 class TestSplitComponentsCif(unittest.TestCase):
@@ -35,6 +34,10 @@ class TestSplitComponentsCif(unittest.TestCase):
             chem_comp_id = pdb_cc_rdkit.chem_comp_id
             chem_comp_id_s.append(chem_comp_id)
         self.assertEqual(['000', '001', '002', '003', '004'], chem_comp_id_s)
+
+    def test_loading_file_that_does_not_exist_raises_ioerror(self):
+        with self.assertRaises(IOError):
+            SplitComponentsCif('/////impossible')
 
 
 def test_write_individual_cif_dictionary():
