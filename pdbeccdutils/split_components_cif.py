@@ -25,6 +25,8 @@ class SplitComponentsCif(object):
     def __init__(self, file_name, logger=None):
         cif_parser = mmcifIO.CifFileReader(input='data', preserve_order=True)
         self.cif_dictionary = cif_parser.read(file_name, output='cif_dictionary')
+        if self.cif_dictionary is None:
+            raise IOError('problem reading file {}'.format(file_name))
         if logger is None:
             self.logger_or_print = pprint.pprint
         else:
