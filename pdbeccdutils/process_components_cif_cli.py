@@ -88,15 +88,15 @@ def process_components_cif(components_cif, output_dir, debug):
         split_cc = SplitComponentsCif(components_cif, logger=logger)
         logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
                      format(components_cif, len(split_cc.cif_dictionary)))
-        for individual_dict in  split_cc.individual_cif_dictionary():
+        for individual_dict in split_cc.individual_cif_dictionary():
             _write_individual_ccd_mmcif(logger, files_subdirs_path['mmcif'], individual_dict)
             try:
                 pdb_cc_rdkit = PdbChemicalComponentsRDKit(cif_dictionary=individual_dict)
             except Exception as ex:
                 block_id = list(individual_dict)[0]
-                logger.warn('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(block_id))
-                logger.warn('... exception type: {} message: {}'.format(type(ex).__name__, ex))
-                logger.warn(traceback.format_exc())
+                logger.warning('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(block_id))
+                logger.warning('... exception type: {} message: {}'.format(type(ex).__name__, ex))
+                logger.warning(traceback.format_exc())
                 continue  # problem with this chemical component skip to next
             chem_comp_id = pdb_cc_rdkit.chem_comp_id
             logger.debug('chem_comp_id={}'.format(chem_comp_id))
@@ -105,17 +105,17 @@ def process_components_cif(components_cif, output_dir, debug):
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             if pdb_cc_rdkit.inchikey[:14] != pdb_cc_rdkit.inchikey_from_rdkit[:14]:
-                logger.warn(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
-                logger.warn(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
-                logger.warn(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
-                logger.warn(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
-                logger.warn(' {} InChi from RDKit  {}'.format(chem_comp_id, pdb_cc_rdkit.inchi_from_rdkit))
+                logger.warning(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
+                logger.warning(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
+                logger.warning(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
+                logger.warning(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
+                logger.warning(' {} InChi from RDKit  {}'.format(chem_comp_id, pdb_cc_rdkit.inchi_from_rdkit))
             if pdb_cc_rdkit.ideal_xyz_has_missing_values:
-                logger.warn(' {} ideal coordinates have missing values'.format(chem_comp_id))
+                logger.warning(' {} ideal coordinates have missing values'.format(chem_comp_id))
             if pdb_cc_rdkit.model_xyz_has_missing_values:
-                logger.warn(' {} model coordinates have missing values'.format(chem_comp_id))
+                logger.warning(' {} model coordinates have missing values'.format(chem_comp_id))
             if pdb_cc_rdkit.atom_charges_missing_values:
-                logger.warn(' {} atom charges have missing values'.format(chem_comp_id))
+                logger.warning(' {} atom charges have missing values'.format(chem_comp_id))
     _create_readme_dot_html(logger, output_dir)
     _create_tar_balls(logger, files_subdirs_path)
     _create_tar_balls(logger, images_subdirs_path)
@@ -238,7 +238,7 @@ def _write_individual_ccd_mmcif(logger, path, individual_dict):
     if os.path.isfile(output_file):
         logger.debug('written individual cif file {}'.format(output_file))
     else:
-        logger.warn('failed to write individual cif {}'.format(output_file))
+        logger.warning('failed to write individual cif {}'.format(output_file))
 
 
 def _write_coordinate_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id):
@@ -282,7 +282,7 @@ def _write_coordinate_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_com
         if os.path.isfile(output_file):
             logger.debug('written file {}'.format(output_file))
         else:
-            logger.warn('failed to write {}'.format(output_file))
+            logger.warning('failed to write {}'.format(output_file))
 
 
 def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id):
@@ -326,8 +326,8 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         if os.path.isfile(output_svg):
             logger.debug('written file {}'.format(output_svg))
         else:
-            logger.warn(' {} problem writing images'.format(chem_comp_id))
-            return # do not try any further images - they will all fail
+            logger.warning(' {} problem writing images'.format(chem_comp_id))
+            return  # do not try any further images - they will all fail
 
         if subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
             continue  # do not convert to png/gif
@@ -342,7 +342,7 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         if os.path.isfile(output_png):
             logger.debug('written file {}'.format(output_png))
         else:
-            logger.warn('failed to write {}'.format(output_png))
+            logger.warning('failed to write {}'.format(output_png))
             continue
 
         img = Image.open(output_png)
@@ -350,7 +350,7 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         if os.path.isfile(output_gif):
             logger.debug('written file {}'.format(output_gif))
         else:
-            logger.warn('failed to write {}'.format(output_gif))
+            logger.warning('failed to write {}'.format(output_gif))
             continue
         for this_file in output_svg, output_png:
             os.remove(this_file)
