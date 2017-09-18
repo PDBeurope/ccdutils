@@ -30,9 +30,17 @@
   Once you have installed RDKit, as described above then install PDBeCIF and ccd_utils using pip:
 
   ```
-  pip install https://github.com/glenveegee/PDBeCIF/zipball/master \
-  https://gitlab.com/pdbe/ccd_utils/repository/latest_release/archive.zip
+  pip install https://github.com/glenveegee/PDBeCIF/zipball/master 
+  pip install https://gitlab.com/pdbe/ccd_utils/repository/latest_release/archive.zip
   ```
+* Alternatively if you want to contribute to the project fork the repository and clone
+  it. Then after getting rdkit setup, in the top `ccd_utils` directory:
+  
+  ```
+  pip install https://github.com/glenveegee/PDBeCIF/zipball/master
+  pip install -e . 
+  ```
+  
 
 
 
