@@ -8,7 +8,7 @@ import shutil
 from nose.tools import assert_raises, assert_true, assert_equal
 
 from pdbeccdutils.process_components_cif_cli import create_parser, process_components_cif, file_subdirs, images_subdirs
-from pdbeccdutils.utilities import test_components_cif_first_file_comps, file_name_in_tsts_out
+from pdbeccdutils.utilities import test_components_cif_first_file_comps, file_name_in_tsts_out, cif_filename
 
 
 def test_with_empty_args():
@@ -22,6 +22,17 @@ def test_with_empty_args():
 def test_input_file_that_cannot_exist_raises_system_exit():
     assert_raises(SystemExit, process_components_cif(components_cif='/////impossible_to_open_file',
                                                      output_dir=None, debug=False))
+
+
+def test_with_problematic_cif_7om():
+    cif_file = cif_filename('7OM')
+    test_output_dir = file_name_in_tsts_out('test_process_components_cif_cli')
+    if os.path.isdir(test_output_dir):
+        shutil.rmtree(test_output_dir)
+    parser = create_parser()
+    args = parser.parse_args([cif_file, test_output_dir, '--debug'])
+    process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
+    yield assert_true, os.path.isdir(test_output_dir), 'output directory  {} must be created'.format(test_output_dir)
 
 
 def test_with_components_cif_first_file_comps():
