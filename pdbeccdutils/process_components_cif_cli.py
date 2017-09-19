@@ -173,11 +173,11 @@ def _create_readme_dot_html(logger, output_dir):
                 if section != 'Files':
                     descriptions['images/svg_without_atom_labels'] = 'svg images without atom names: '
                     descriptions['images/svg_with_atom_labels'] = 'svg images with atom names: '
-                    descriptions['images/large'] = 'Large gif images with atom names but without hydrogen atoms ' \
-                                                   '(deprecated): '
-                    descriptions['images/small'] = 'Small gif images without hydrogen atoms (deprecated): '
-                    descriptions['images/hydrogen'] = 'Large gif images with atom names and hydrogen atoms ' \
-                                                      '(deprecated): '
+                    # descriptions['images/large'] = 'Large gif images with atom names but without hydrogen atoms ' \
+                    #                                '(deprecated): '
+                    # descriptions['images/small'] = 'Small gif images without hydrogen atoms (deprecated): '
+                    # descriptions['images/hydrogen'] = 'Large gif images with atom names and hydrogen atoms ' \
+                    #                                   '(deprecated): '
                 else:
                     descriptions['files/sdf'] = 'Molfile (SDF) with ideal coordinates and hydrogen atoms: '
                     descriptions['files/sdf_r'] = 'Molfile (SDF) with representative coordinates and hydrogen atoms:'
