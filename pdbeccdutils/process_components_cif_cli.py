@@ -103,7 +103,7 @@ def process_components_cif(components_cif, output_dir, debug):
             cc_xml.store_ccd(pdb_cc_rdkit)
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
-            if pdb_cc_rdkit.inchikey[:14] != pdb_cc_rdkit.inchikey_from_rdkit[:14]:
+            if not pdb_cc_rdkit.inchikey_from_rdkit_matches_ccd(connectivity_only=True):
                 logger.warning(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
                 logger.warning(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
                 logger.warning(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))

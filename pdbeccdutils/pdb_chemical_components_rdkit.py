@@ -198,6 +198,28 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 self._inchikey_from_rdkit = 'ERROR'
         return self._inchikey_from_rdkit
 
+    def inchikey_from_rdkit_matches_ccd(self, connectivity_only=False):
+        """
+        checks whether inchikey matches between ccd and rdkit
+        
+        Args:
+            connectivity_only (bool): restrict to the first 14 character - the connectivity information.
+
+        Returns:
+            bool: True for match 
+
+        """
+        if self.inchikey is None or self.inchikey_from_rdkit == 'ERROR':
+            return False
+        if connectivity_only:
+            if len(self.inchikey) < 14 or len(self.inchikey_from_rdkit) < 14:
+                return False
+            elif self.inchikey[:14] != self.inchikey_from_rdkit[:14]:
+                return False
+        elif self.inchikey != self.inchikey_from_rdkit:
+            return False
+        return True
+
     def sdf_file_or_string(self, file_name=None, ideal=True, hydrogen=True, alias=False,
                            xyz=None, raise_exception=False):
         """

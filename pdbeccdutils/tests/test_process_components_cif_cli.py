@@ -26,7 +26,7 @@ def test_input_file_that_cannot_exist_raises_system_exit():
 
 def test_with_problematic_cif_7om():
     cif_file = cif_filename('7OM')
-    test_output_dir = file_name_in_tsts_out('test_process_components_cif_cli')
+    test_output_dir = file_name_in_tsts_out('test_process_components_cif_70M')
     if os.path.isdir(test_output_dir):
         shutil.rmtree(test_output_dir)
     parser = create_parser()
@@ -38,7 +38,7 @@ def test_with_problematic_cif_7om():
 def test_with_components_cif_first_file_comps():
     parser = create_parser()
     test_components_cif = test_components_cif_first_file_comps
-    test_output_dir = file_name_in_tsts_out('test_process_components_cif_cli')
+    test_output_dir = file_name_in_tsts_out('test_process_components_cif')
     if os.path.isdir(test_output_dir):
         shutil.rmtree(test_output_dir)
     chem_comp_ids = ('000', '001', '002', '003', '004')
