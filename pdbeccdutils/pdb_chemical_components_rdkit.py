@@ -427,7 +427,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                                 highlightBonds=highlight_bonds_colours.keys(),
                                 highlightBondColors=highlight_bonds_colours)
         drawer.FinishDrawing()
-        svg = drawer.GetDrawingText().replace('svg:', '')
+        svg = drawer.GetDrawingText()
+        # next line might be needed to get svg to display in Jupyter notebook?
+        # svg = svg.replace('svg:', '')
         if black:
             svg = svg.replace('#FF0000', '#000000')  # get rid of red oxygen
             svg = svg.replace('#0000FF', '#000000')  # get rid of blue nitrogen
