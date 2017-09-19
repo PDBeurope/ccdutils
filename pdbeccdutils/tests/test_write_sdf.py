@@ -19,8 +19,9 @@ import os
 import unittest
 
 from nose.tools import assert_in, assert_not_equal, assert_is_instance, assert_true, assert_not_in, assert_false
-from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
 
 
 def test_hard_code_cmo():

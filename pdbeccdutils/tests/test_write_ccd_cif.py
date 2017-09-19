@@ -20,8 +20,8 @@ import unittest
 
 from nose.tools import assert_equals, assert_true
 
-from pdb_chemical_components import PdbChemicalComponents
-from utilities import cif_filename, file_name_in_tsts_out
+from pdbeccdutils.pdb_chemical_components import PdbChemicalComponents
+from pdbeccdutils.utilities import cif_filename, file_name_in_tsts_out
 
 # currently limited to PDBeCIF!
 cif_parser_list = ('PDBeCIF',)

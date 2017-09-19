@@ -14,12 +14,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os 
+import os
+
 from nose.tools import assert_true, assert_false
 
-from chem_comp_xml import ChemCompXMl
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from utilities import cif_filename, file_name_in_tsts_out
+from pdbeccdutils.chem_comp_xml import ChemCompXMl
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.utilities import cif_filename, file_name_in_tsts_out
 
 
 def test_chem_comp_for_eoh_and_glu():

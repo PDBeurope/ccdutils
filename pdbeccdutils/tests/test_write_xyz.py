@@ -18,8 +18,8 @@ import os
 import unittest
 
 from nose.tools import assert_equals, assert_in, assert_true
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from utilities import cif_filename, file_name_in_tsts_out
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.utilities import cif_filename, file_name_in_tsts_out
 
 
 def test_xyz_for_eoh_ideal():

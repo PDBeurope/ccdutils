@@ -19,8 +19,9 @@ import os
 import unittest
 
 from nose.tools import assert_true, assert_equals
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from utilities import supply_list_of_sample_cifs, file_name_in_tsts_out, cif_filename, test_comparison_files_path
+
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.utilities import supply_list_of_sample_cifs, file_name_in_tsts_out, cif_filename, test_comparison_files_path
 
 
 def test_pdb_write_for_all_sample_cifs():

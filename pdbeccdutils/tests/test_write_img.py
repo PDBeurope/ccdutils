@@ -21,8 +21,8 @@ import unittest
 
 from nose.tools import assert_in, assert_true, assert_false, raises
 
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
-from utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
 
 
 def test_eoh_svg():

@@ -21,8 +21,8 @@ from os.path import expanduser
 
 from nose.tools import assert_equals, assert_true
 
-from pdb_chemical_components import PdbChemicalComponents
-from utilities import cif_filename, test_cif_path_name
+from pdbeccdutils.pdb_chemical_components import PdbChemicalComponents
+from pdbeccdutils.utilities import cif_filename, test_cif_path_name
 
 # by default just use the 'auto' cif_parse (which ever can be imported).
 cif_parser_list = ('auto',)

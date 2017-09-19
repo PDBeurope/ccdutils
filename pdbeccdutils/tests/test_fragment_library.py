@@ -1,8 +1,10 @@
 import unittest
-from fragment_library import FragmentLibrary
-from utilities import cif_filename
+
 from rdkit import Chem
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+
+from pdbeccdutils.fragment_library import FragmentLibrary
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.utilities import cif_filename
 
 
 class TestFragmentLibrary(unittest.TestCase):

@@ -17,11 +17,12 @@
 #
 import os
 import unittest
-from lxml import etree
 
+from lxml import etree
 from nose.tools import assert_equals, assert_true
-from utilities import cif_filename, file_name_in_tsts_out, test_cif_path_name
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.utilities import cif_filename, file_name_in_tsts_out, test_cif_path_name
 
 
 def test_load_eoh_from_cif():
