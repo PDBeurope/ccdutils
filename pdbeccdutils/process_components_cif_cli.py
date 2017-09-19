@@ -32,8 +32,8 @@ import traceback
 from argparse import RawTextHelpFormatter
 from collections import OrderedDict
 
-import cairosvg
-from PIL import Image
+# import cairosvg
+# from PIL import Image
 from yattag import Doc, indent
 
 from pdbeccdutils.chem_comp_xml import ChemCompXMl
@@ -43,8 +43,7 @@ from pdbeccdutils.utilities import create_directory_using_mkdir_unless_it_exists
 
 clean_existing = True  # might want an update run mode later but for now remove existing directories/files
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
-images_subdirs = 'large', 'small', 'hydrogen', 'svg_with_atom_labels', 'svg_without_atom_labels'
-
+images_subdirs = 'svg_with_atom_labels', 'svg_without_atom_labels'  # , 'large', 'small', 'hydrogen',
 
 def create_parser():
     """
@@ -299,19 +298,10 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         None
     """
     for subdir in subdirs_path.keys():
-        output_svg = os.path.join(subdirs_path[subdir], chem_comp_id + '.svg')
-        output_png = os.path.join(subdirs_path[subdir], chem_comp_id + '.png')
-        output_gif = os.path.join(subdirs_path[subdir], chem_comp_id + '.gif')
-        if subdir == 'large':
-            pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=400, pixels_y=400,
-                                              wedge=True, atom_labels=True, hydrogen=False)
-        elif subdir == 'small':
-            pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=100, pixels_y=100,
-                                              wedge=True, atom_labels=False, hydrogen=False)
-        elif subdir == 'hydrogen':
-            pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=600, pixels_y=600,
-                                              wedge=True, atom_labels=True, hydrogen=True)
-        elif subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
+        # output_svg = os.path.join(subdirs_path[subdir], chem_comp_id + '.svg')
+        # output_png = os.path.join(subdirs_path[subdir], chem_comp_id + '.png')
+        # output_gif = os.path.join(subdirs_path[subdir], chem_comp_id + '.gif')
+        if subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
             subdir_path_plus_first_character_of_c_c_id = os.path.join(subdirs_path[subdir], chem_comp_id[:1])
             create_directory_using_mkdir_unless_it_exists(subdir_path_plus_first_character_of_c_c_id)
             output_svg = os.path.join(subdir_path_plus_first_character_of_c_c_id, chem_comp_id + '.svg')
@@ -321,6 +311,15 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
                 labels = True
             pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=400, pixels_y=400,
                                               wedge=True, atom_labels=labels, hydrogen=False)
+        # elif subdir == 'large':
+        #     pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=400, pixels_y=400,
+        #                                       wedge=True, atom_labels=True, hydrogen=False)
+        # elif subdir == 'small':
+        #     pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=100, pixels_y=100,
+        #                                       wedge=True, atom_labels=False, hydrogen=False)
+        # elif subdir == 'hydrogen':
+        #     pdb_cc_rdkit.image_file_or_string(file_name=output_svg, pixels_x=600, pixels_y=600,
+        #                                       wedge=True, atom_labels=True, hydrogen=True)
         else:
             raise NotImplementedError('unrecognized subdir {}'.format(subdir))
         if os.path.isfile(output_svg):
@@ -329,32 +328,32 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
             logger.warning(' {} problem writing images'.format(chem_comp_id))
             return  # do not try any further images - they will all fail
 
-        if subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
-            continue  # do not convert to png/gif
-
-        try:
-            cairosvg.svg2png(file_obj=open(output_svg, "rb"), write_to=output_png)
-        except Exception as ex:
-            logger.error('cairosvg.svg2png raised exception on file {}'.format(output_svg))
-            logger.error('... exception type: {} message: {}'.format(type(ex).__name__, ex))
-            import traceback
-            print(traceback.format_exc())
-        if os.path.isfile(output_png):
-            logger.debug('written file {}'.format(output_png))
-        else:
-            logger.warning('failed to write {}'.format(output_png))
-            continue
-
-        img = Image.open(output_png)
-        img.save(output_gif)
-        if os.path.isfile(output_gif):
-            logger.debug('written file {}'.format(output_gif))
-        else:
-            logger.warning('failed to write {}'.format(output_gif))
-            continue
-        for this_file in output_svg, output_png:
-            os.remove(this_file)
-            logger.debug('removed file {}'.format(this_file))
+        # if subdir in ('svg_with_atom_labels', 'svg_without_atom_labels'):
+        #     continue  # do not convert to png/gif
+        #
+        # try:
+        #     cairosvg.svg2png(file_obj=open(output_svg, "rb"), write_to=output_png)
+        # except Exception as ex:
+        #     logger.error('cairosvg.svg2png raised exception on file {}'.format(output_svg))
+        #     logger.error('... exception type: {} message: {}'.format(type(ex).__name__, ex))
+        #     import traceback
+        #     print(traceback.format_exc())
+        # if os.path.isfile(output_png):
+        #     logger.debug('written file {}'.format(output_png))
+        # else:
+        #     logger.warning('failed to write {}'.format(output_png))
+        #     continue
+        #
+        # img = Image.open(output_png)
+        # img.save(output_gif)
+        # if os.path.isfile(output_gif):
+        #     logger.debug('written file {}'.format(output_gif))
+        # else:
+        #     logger.warning('failed to write {}'.format(output_gif))
+        #     continue
+        # for this_file in output_svg, output_png:
+        #     os.remove(this_file)
+        #     logger.debug('removed file {}'.format(this_file))
 
 
 def _create_tar_balls(logger, subdirs_path):
