@@ -23,7 +23,7 @@ http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/
 
 To do this components.cif is split into individual PDB chemical component
 definitions cif files, sdf files, pdb files and image files.
-In addition creates chem.xml and chem_comp.list for all components.
+In addition creates chem_comp.xml and chem_comp.list for all components.
 """
 import argparse
 import logging
@@ -55,7 +55,14 @@ def create_parser():
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     parser.add_argument('COMPONENTS_CIF', help='input PDB-CCD components.cif file (must be specified)')
-    parser.add_argument('OUTPUT_DIR', help='directory for output (must be specified)')
+    parser.add_argument('--output_dir', '-o',
+                        help='create an output directory with files suitable for PDBeChem ftp directory')
+    parser.add_argument('--chem_comp_xml',
+                        help='write chem_comp.xml file to this file.')
+    parser.add_argument('--test_first', type=int,
+                        help='only process the first TEST_FIRST chemical component definitions (for testing).')
+    parser.add_argument('--library',
+                        help='use this fragment library in place of the one supplied with the code.')
     parser.add_argument('--debug', action='store_true', help='turn on debug message logging output')
     return parser
 
@@ -409,4 +416,4 @@ def _create_tar_balls(logger, subdirs_path):
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
+    process_components_cif(args.COMPONENTS_CIF, args.output_dir, args.debug)
