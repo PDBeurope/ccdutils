@@ -45,6 +45,7 @@ clean_existing = True  # might want an update run mode later but for now remove 
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
 images_subdirs = 'svg_with_atom_labels', 'svg_without_atom_labels'  # , 'large', 'small', 'hydrogen',
 
+
 def create_parser():
     """
     Sets up parse the command line options.
@@ -103,18 +104,8 @@ def process_components_cif(components_cif, output_dir, debug):
             cc_xml.store_ccd(pdb_cc_rdkit)
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
-            if not pdb_cc_rdkit.inchikey_from_rdkit_matches_ccd(connectivity_only=True):
-                logger.warning(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
-                logger.warning(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
-                logger.warning(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
-                logger.warning(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
-                logger.warning(' {} InChi from RDKit  {}'.format(chem_comp_id, pdb_cc_rdkit.inchi_from_rdkit))
-            if pdb_cc_rdkit.ideal_xyz_has_missing_values:
-                logger.warning(' {} ideal coordinates have missing values'.format(chem_comp_id))
-            if pdb_cc_rdkit.model_xyz_has_missing_values:
-                logger.warning(' {} model coordinates have missing values'.format(chem_comp_id))
-            if pdb_cc_rdkit.atom_charges_missing_values:
-                logger.warning(' {} atom charges have missing values'.format(chem_comp_id))
+            _warn_if_inchikeys_connectivity_do_not_match(logger, pdb_cc_rdkit, chem_comp_id)
+            _warn_about_missing_values(logger, pdb_cc_rdkit, chem_comp_id)
     _create_readme_dot_html(logger, output_dir)
     _create_tar_balls(logger, files_subdirs_path)
     _create_tar_balls(logger, images_subdirs_path)
@@ -354,6 +345,40 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         # for this_file in output_svg, output_png:
         #     os.remove(this_file)
         #     logger.debug('removed file {}'.format(this_file))
+
+
+def _warn_if_inchikeys_connectivity_do_not_match(logger, pdb_cc_rdkit, chem_comp_id):
+    """
+    warns to logger if the InChiKey-connectivity from RDKit does not match that from the PDB-CCD
+
+    Args:
+        logger: logging object
+        pdb_cc_rdkit (PdbChemicalComponentsRDKit): object for ccd to be written
+        chem_comp_id (str): the chem comp id aka 3 letter code for the ccd (eg ATP)
+    """
+    if not pdb_cc_rdkit.inchikey_from_rdkit_matches_ccd(connectivity_only=True):
+        logger.warning(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
+        logger.warning(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
+        logger.warning(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
+        logger.warning(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
+        logger.warning(' {} InChi from RDKit  {}'.format(chem_comp_id, pdb_cc_rdkit.inchi_from_rdkit))
+
+
+def _warn_about_missing_values(logger, pdb_cc_rdkit, chem_comp_id):
+    """
+    warns to logger if there are missing coordinates or charges in the PDB-CCD
+
+    Args:
+        logger: logging object
+        pdb_cc_rdkit (PdbChemicalComponentsRDKit): object for ccd to be written
+        chem_comp_id (str): the chem comp id aka 3 letter code for the ccd (eg ATP)
+    """
+    if pdb_cc_rdkit.ideal_xyz_has_missing_values:
+        logger.warning(' {} ideal coordinates have missing values'.format(chem_comp_id))
+    if pdb_cc_rdkit.model_xyz_has_missing_values:
+        logger.warning(' {} model coordinates have missing values'.format(chem_comp_id))
+    if pdb_cc_rdkit.atom_charges_missing_values:
+        logger.warning(' {} atom charges have missing values'.format(chem_comp_id))
 
 
 def _create_tar_balls(logger, subdirs_path):
