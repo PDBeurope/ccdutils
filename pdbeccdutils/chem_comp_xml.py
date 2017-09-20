@@ -20,22 +20,28 @@ from pdbeccdutils.fragment_library import FragmentLibrary
 
 class ChemCompXMl(object):
     """deals with creating records/file with information for the file
-    http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/chem.xml """
+    http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/chem.xml
+    and also
+    http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/chem_comp.list
+    """
 
     def __init__(self):
         self.top = etree.Element('chemCompList')
         self.fragment_library = FragmentLibrary()
+        self.chem_comp_id_list = []
 
     def store_ccd(self, pdb_ccd):
         """
-        stores a chemical component in the chem.xml
+        stores a chemical component in the chem.xml and the chem_comp_id in the list.
 
         Args:
             pdb_ccd: a PdbChemicalComponents for a chemical component
         """
+        chem_comp_id = pdb_ccd.chem_comp_id
+        self.chem_comp_id_list.append(chem_comp_id)
         chem_comp = etree.SubElement(self.top, 'chemComp')
         this_id = etree.SubElement(chem_comp, 'id')
-        this_id.text = pdb_ccd.chem_comp_id
+        this_id.text = chem_comp_id
         name = etree.SubElement(chem_comp, 'name')
         name.text = pdb_ccd.chem_comp_name
         formula = etree.SubElement(chem_comp, 'formula')
@@ -85,3 +91,22 @@ class ChemCompXMl(object):
         with open(chem_dot_xml_file_name, 'w') as chem_dot_xml_file:
             chem_dot_xml_file.write(self.to_string())
 
+    def chem_comp_id_list_to_string(self):
+        """
+        provides the list of chem_comp_ids as a string with new lines
+
+        Returns:
+            str: the list of chem_comp_ids with a \n after each one
+
+        """
+        return '\n'.join(self.chem_comp_id_list + [''])
+
+    def chem_comp_id_list_to_file(self, file_name):
+        """
+        writes out the chem_comp.list file
+
+        Args:
+            file_name (str): the name for the file.
+        """
+        with open(file_name, 'w') as this_file:
+            this_file.write(self.chem_comp_id_list_to_string())
