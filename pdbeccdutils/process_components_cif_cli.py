@@ -76,6 +76,7 @@ def process_components_cif(args):
     """
     components_cif = args.COMPONENTS_CIF
     output_dir = args.output_dir
+    test_first = args.test_first
     debug = args.debug
     logger = logging.getLogger(' ')
     if debug:
@@ -105,6 +106,10 @@ def process_components_cif(args):
     logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
                  format(components_cif, len(split_cc.cif_dictionary)))
     for individual_dict in split_cc.individual_cif_dictionary():
+        if test_first is not None:
+            if test_first <= 0:
+                break
+            test_first -= 1
         if output_dir is not None:
             _write_individual_ccd_mmcif(logger, files_subdirs_path['mmcif'], individual_dict)
         try:
