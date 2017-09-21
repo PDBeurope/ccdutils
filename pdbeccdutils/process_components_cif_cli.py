@@ -78,6 +78,7 @@ def process_components_cif(args):
     output_dir = args.output_dir
     test_first = args.test_first
     debug = args.debug
+    library = args.library
     logger = logging.getLogger(' ')
     if debug:
         logging.basicConfig(level=logging.DEBUG)
@@ -97,7 +98,10 @@ def process_components_cif(args):
         images_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'images', images_subdirs)
     if args.chem_comp_xml is not None:
         chem_dot_xml_file_name = args.chem_comp_xml
-    cc_xml = ChemCompXMl()
+    try:
+        cc_xml = ChemCompXMl(library)
+    except IOError as e_detail:
+        raise SystemExit(e_detail)
 
     try:
         split_cc = SplitComponentsCif(components_cif, logger=logger)

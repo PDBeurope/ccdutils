@@ -25,9 +25,9 @@ class ChemCompXMl(object):
     http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/chem_comp.list
     """
 
-    def __init__(self):
+    def __init__(self, override_fragment_library_file_path=None):
         self.top = etree.Element('chemCompList')
-        self.fragment_library = FragmentLibrary()
+        self.fragment_library = FragmentLibrary(override_fragment_library_file_path)
         self.chem_comp_id_list = []
 
     def store_ccd(self, pdb_ccd):
@@ -61,10 +61,10 @@ class ChemCompXMl(object):
         fragments = self.fragment_library.fragments_for_pdb_chemical_components_rdkit(pdb_ccd)
         if len(fragments.keys()) > 0:
             for fragment_name, matches in sorted(fragments.items()):
-                id = 1
+                id_numb = 1
                 for match in matches:
-                    fragment = etree.SubElement(chem_comp, 'fragment', name=fragment_name, id=str(id))
-                    id += 1
+                    fragment = etree.SubElement(chem_comp, 'fragment', name=fragment_name, id=str(id_numb))
+                    id_numb += 1
                     for atom_name in match:
                         atom_id = etree.SubElement(fragment, 'atom_id')
                         atom_id.text = atom_name
