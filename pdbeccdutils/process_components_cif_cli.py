@@ -67,56 +67,69 @@ def create_parser():
     return parser
 
 
-def process_components_cif(components_cif, output_dir, debug):
+def process_components_cif(args):
     """
     processes components.cif for PDBeChem type output
 
     Args:
-        components_cif (str): file name/path for components.cif or a test version
-        output_dir (str): path for the directory where output will be written
-        debug (bool): produce debug type logging
-
-    Returns:
-
+        args: an argparse namespace containing the required arguments
     """
+    components_cif = args.COMPONENTS_CIF
+    output_dir = args.output_dir
+    debug = args.debug
     logger = logging.getLogger(' ')
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.WARNING)
     logger.debug('components_cif={} output_dir={}'.format(components_cif, output_dir))
-    create_directory_using_mkdir_unless_it_exists(output_dir)
-    chem_comp_dot_list_file_name = os.path.join(output_dir, 'chem_comp.list')
-    chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
-    cc_xml = ChemCompXMl()
-    with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file:
+    if output_dir is None:
+        chem_comp_dot_list_file_name = None
+        chem_dot_xml_file_name = None
+        files_subdirs_path = None
+        images_subdirs_path = None
+    else:
+        create_directory_using_mkdir_unless_it_exists(output_dir)
+        chem_comp_dot_list_file_name = os.path.join(output_dir, 'chem_comp.list')
+        chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
         files_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'files', file_subdirs)
         images_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'images', images_subdirs)
+    if args.chem_comp_xml is not None:
+        chem_dot_xml_file_name = args.chem_comp_xml
+    cc_xml = ChemCompXMl()
+
+    try:
         split_cc = SplitComponentsCif(components_cif, logger=logger)
-        logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
-                     format(components_cif, len(split_cc.cif_dictionary)))
-        for individual_dict in split_cc.individual_cif_dictionary():
+    except IOError:
+        raise SystemExit(1)
+    logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
+                 format(components_cif, len(split_cc.cif_dictionary)))
+    for individual_dict in split_cc.individual_cif_dictionary():
+        if output_dir is not None:
             _write_individual_ccd_mmcif(logger, files_subdirs_path['mmcif'], individual_dict)
-            try:
-                pdb_cc_rdkit = PdbChemicalComponentsRDKit(cif_dictionary=individual_dict)
-            except Exception as ex:
-                block_id = list(individual_dict)[0]
-                logger.warning('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(block_id))
-                logger.warning('... exception type: {} message: {}'.format(type(ex).__name__, ex))
-                logger.warning(traceback.format_exc())
-                continue  # problem with this chemical component skip to next
-            chem_comp_id = pdb_cc_rdkit.chem_comp_id
-            logger.debug('chem_comp_id={}'.format(chem_comp_id))
-            chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
-            cc_xml.store_ccd(pdb_cc_rdkit)
+        try:
+            pdb_cc_rdkit = PdbChemicalComponentsRDKit(cif_dictionary=individual_dict)
+        except Exception as ex:
+            block_id = list(individual_dict)[0]
+            logger.warning('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(block_id))
+            logger.warning('... exception type: {} message: {}'.format(type(ex).__name__, ex))
+            logger.warning(traceback.format_exc())
+            continue  # problem with this chemical component skip to next
+        chem_comp_id = pdb_cc_rdkit.chem_comp_id
+        logger.debug('chem_comp_id={}'.format(chem_comp_id))
+        cc_xml.store_ccd(pdb_cc_rdkit)
+        if output_dir is not None:
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
-            _warn_if_inchikeys_connectivity_do_not_match(logger, pdb_cc_rdkit, chem_comp_id)
-            _warn_about_missing_values(logger, pdb_cc_rdkit, chem_comp_id)
-    _create_readme_dot_html(logger, output_dir)
-    _create_tar_balls(logger, files_subdirs_path)
-    _create_tar_balls(logger, images_subdirs_path)
-    cc_xml.to_file(chem_dot_xml_file_name)
+        _warn_if_inchikeys_connectivity_do_not_match(logger, pdb_cc_rdkit, chem_comp_id)
+        _warn_about_missing_values(logger, pdb_cc_rdkit, chem_comp_id)
+    if output_dir is not None:
+        _create_readme_dot_html(logger, output_dir)
+        _create_tar_balls(logger, files_subdirs_path)
+        _create_tar_balls(logger, images_subdirs_path)
+        cc_xml.chem_comp_id_list_to_file(chem_comp_dot_list_file_name)
+    if chem_dot_xml_file_name is not None:
+        cc_xml.to_file(chem_dot_xml_file_name)
 
 
 def _create_readme_dot_html(logger, output_dir):
@@ -416,4 +429,4 @@ def _create_tar_balls(logger, subdirs_path):
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    process_components_cif(args.COMPONENTS_CIF, args.output_dir, args.debug)
+    process_components_cif(args)

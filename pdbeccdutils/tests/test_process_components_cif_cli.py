@@ -16,12 +16,14 @@ def test_with_empty_args():
     User passes no args, should produce a usage statement and then raise SystemExit. Usage statement will appear
     """
     parser = create_parser()
+    parser.parse_args
     assert_raises(SystemExit, parser.parse_args, [])
 
 
 def test_input_file_that_cannot_exist_raises_system_exit():
-    assert_raises(SystemExit, process_components_cif(components_cif='/////impossible_to_open_file',
-                                                     output_dir=None, debug=False))
+    parser = create_parser()
+    args = parser.parse_args(['/////impossible_to_open_file', '--debug'])
+    assert_raises(SystemExit, process_components_cif, args)
 
 
 def test_with_problematic_cif_7om():
@@ -30,8 +32,8 @@ def test_with_problematic_cif_7om():
     if os.path.isdir(test_output_dir):
         shutil.rmtree(test_output_dir)
     parser = create_parser()
-    args = parser.parse_args([cif_file, test_output_dir, '--debug'])
-    process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
+    args = parser.parse_args([cif_file, '-o', test_output_dir, '--debug'])
+    process_components_cif(args)
     yield assert_true, os.path.isdir(test_output_dir), 'output directory  {} must be created'.format(test_output_dir)
 
 
@@ -42,8 +44,8 @@ def test_with_components_cif_first_file_comps():
     if os.path.isdir(test_output_dir):
         shutil.rmtree(test_output_dir)
     chem_comp_ids = ('000', '001', '002', '003', '004')
-    args = parser.parse_args([test_components_cif, test_output_dir, '--debug'])
-    process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
+    args = parser.parse_args([test_components_cif, '-o', test_output_dir, '--debug'])
+    process_components_cif(args)
     yield assert_true, os.path.isdir(test_output_dir), 'output directory {} must be created'.format(test_output_dir)
     files_dir = os.path.join(test_output_dir, 'files')
     yield assert_true, os.path.isdir(files_dir), 'files sub-directory {} must be created'.format(files_dir)
