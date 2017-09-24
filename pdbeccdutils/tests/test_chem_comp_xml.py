@@ -16,7 +16,7 @@
 #
 import os
 
-from nose.tools import assert_true, assert_false
+from nose.tools import assert_true, assert_false, assert_equal
 
 from pdbeccdutils.chem_comp_xml import ChemCompXMl
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
@@ -85,3 +85,21 @@ def test_fragments_in_atp():
     yield assert_true, '<fragment id="1" name="adenine">' in cc_xml_string, 'ATP fragment record for adenine'
     yield assert_true, '<fragment id="1" name="ribose">' in cc_xml_string, 'ATP fragment record for ribose'
     yield assert_true, '<atom_id>C2\'</atom_id>' in cc_xml_string, 'ATP fragment atom record'
+
+
+def test_chem_comp_id_list_to_string():
+    cc_xml = ChemCompXMl()
+    for chem_comp_id in 'EOH', 'GLU':
+        ccd = PdbChemicalComponentsRDKit(file_name=cif_filename(chem_comp_id))
+        cc_xml.store_ccd(ccd)
+    yield assert_equal, cc_xml.chem_comp_id_list_to_string(),'EOH\nGLU\n', 'test chem_comp_id_list_to_string'
+
+def test_chem_comp_id_list_to_file():
+    cc_xml = ChemCompXMl()
+    for chem_comp_id in 'EOH', 'GLU':
+        ccd = PdbChemicalComponentsRDKit(file_name=cif_filename(chem_comp_id))
+        cc_xml.store_ccd(ccd)
+    file_name = file_name_in_tsts_out('test_chem_comp.list')
+    cc_xml.chem_comp_id_list_to_file(file_name)
+    yield assert_true, os.path.isfile(file_name) and os.path.getsize(file_name) > 0, \
+        'call to cc_xml.chem_comp_id_list_to_file({}) must create a non-empty file.'.format(file_name)

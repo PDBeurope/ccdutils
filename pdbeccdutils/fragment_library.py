@@ -18,17 +18,21 @@
 import os
 from collections import OrderedDict
 from rdkit import Chem
-from pdbeccdutils.utilities import fragment_library_file_path, this_script_dir
+from pdbeccdutils.utilities import default_fragment_library_file_path, this_script_dir
 
 
 class FragmentLibrary(object):
     """
     store common fragments from
     """
-    def __init__(self):
+    def __init__(self, override_fragment_library_file_path=None):
         self.fragment_name_to_smiles = OrderedDict()
         self.fragment_name_to_rdkit_molecule = OrderedDict()
-        self._load()
+        if override_fragment_library_file_path is None:
+            fragment_file_name = default_fragment_library_file_path
+        else:
+            fragment_file_name = override_fragment_library_file_path
+        self._load(fragment_file_name)
 
     @property
     def number_of_entries(self):
@@ -61,11 +65,14 @@ class FragmentLibrary(object):
                     fragments[fragment_name].append(atom_names)
         return fragments
 
-    def _load(self):
+    def _load(self, fragment_file_name):
         """
         loads fragment library from the file in data.
+
+        Args:
+            fragment_file_name (str): the fragment file name
         """
-        self._load_fragment_name_to_smiles_from_file(fragment_library_file_path)
+        self._load_fragment_name_to_smiles_from_file(fragment_file_name)
         self._create_frag_name_to_rdkit_mol()
 
     def _load_fragment_name_to_smiles_from_file(self, fragment_file_name):

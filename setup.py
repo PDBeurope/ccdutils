@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pdbeccdutils',
-      version='0.0.2',
+      version='0.1.0',
       description='Tools to deal with wwPDB chemical components definitions for small molecules',
       url='https://gitlab.com/pdbe/ccd_utils',
       author='Protein Data Bank in Europe',

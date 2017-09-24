@@ -23,7 +23,7 @@ http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/
 
 To do this components.cif is split into individual PDB chemical component
 definitions cif files, sdf files, pdb files and image files.
-In addition creates chem.xml and chem_comp.list for all components.
+In addition creates chem_comp.xml and chem_comp.list for all components.
 """
 import argparse
 import logging
@@ -45,6 +45,7 @@ clean_existing = True  # might want an update run mode later but for now remove 
 file_subdirs = 'mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh', 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r'
 images_subdirs = 'svg_with_atom_labels', 'svg_without_atom_labels'  # , 'large', 'small', 'hydrogen',
 
+
 def create_parser():
     """
     Sets up parse the command line options.
@@ -54,71 +55,90 @@ def create_parser():
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     parser.add_argument('COMPONENTS_CIF', help='input PDB-CCD components.cif file (must be specified)')
-    parser.add_argument('OUTPUT_DIR', help='directory for output (must be specified)')
+    parser.add_argument('--output_dir', '-o',
+                        help='create an output directory with files suitable for PDBeChem ftp directory')
+    parser.add_argument('--chem_comp_xml',
+                        help='write chem_comp.xml file to this file.')
+    parser.add_argument('--test_first', type=int,
+                        help='only process the first TEST_FIRST chemical component definitions (for testing).')
+    parser.add_argument('--library',
+                        help='use this fragment library in place of the one supplied with the code.')
     parser.add_argument('--debug', action='store_true', help='turn on debug message logging output')
     return parser
 
 
-def process_components_cif(components_cif, output_dir, debug):
+def process_components_cif(args):
     """
     processes components.cif for PDBeChem type output
 
     Args:
-        components_cif (str): file name/path for components.cif or a test version
-        output_dir (str): path for the directory where output will be written
-        debug (bool): produce debug type logging
-
-    Returns:
-
+        args: an argparse namespace containing the required arguments
     """
+    components_cif = args.COMPONENTS_CIF
+    output_dir = args.output_dir
+    test_first = args.test_first
+    debug = args.debug
+    library = args.library
     logger = logging.getLogger(' ')
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.WARNING)
     logger.debug('components_cif={} output_dir={}'.format(components_cif, output_dir))
-    create_directory_using_mkdir_unless_it_exists(output_dir)
-    chem_comp_dot_list_file_name = os.path.join(output_dir, 'chem_comp.list')
-    chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
-    cc_xml = ChemCompXMl()
-    with open(chem_comp_dot_list_file_name, 'w') as chem_comp_dot_list_file:
+    if output_dir is None:
+        chem_comp_dot_list_file_name = None
+        chem_dot_xml_file_name = None
+        files_subdirs_path = None
+        images_subdirs_path = None
+    else:
+        create_directory_using_mkdir_unless_it_exists(output_dir)
+        chem_comp_dot_list_file_name = os.path.join(output_dir, 'chem_comp.list')
+        chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
         files_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'files', file_subdirs)
         images_subdirs_path = _create_files_or_images_subdirs(logger, output_dir, 'images', images_subdirs)
+    if args.chem_comp_xml is not None:
+        chem_dot_xml_file_name = args.chem_comp_xml
+    try:
+        cc_xml = ChemCompXMl(library)
+    except IOError as e_detail:
+        raise SystemExit(e_detail)
+
+    try:
         split_cc = SplitComponentsCif(components_cif, logger=logger)
-        logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
-                     format(components_cif, len(split_cc.cif_dictionary)))
-        for individual_dict in split_cc.individual_cif_dictionary():
+    except IOError:
+        raise SystemExit(1)
+    logger.debug('have opened {} and it contains {} individual CCD cif definitions '.
+                 format(components_cif, len(split_cc.cif_dictionary)))
+    for individual_dict in split_cc.individual_cif_dictionary():
+        if test_first is not None:
+            if test_first <= 0:
+                break
+            test_first -= 1
+        if output_dir is not None:
             _write_individual_ccd_mmcif(logger, files_subdirs_path['mmcif'], individual_dict)
-            try:
-                pdb_cc_rdkit = PdbChemicalComponentsRDKit(cif_dictionary=individual_dict)
-            except Exception as ex:
-                block_id = list(individual_dict)[0]
-                logger.warning('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(block_id))
-                logger.warning('... exception type: {} message: {}'.format(type(ex).__name__, ex))
-                logger.warning(traceback.format_exc())
-                continue  # problem with this chemical component skip to next
-            chem_comp_id = pdb_cc_rdkit.chem_comp_id
-            logger.debug('chem_comp_id={}'.format(chem_comp_id))
-            chem_comp_dot_list_file.write('{}\n'.format(chem_comp_id))
-            cc_xml.store_ccd(pdb_cc_rdkit)
+        try:
+            pdb_cc_rdkit = PdbChemicalComponentsRDKit(cif_dictionary=individual_dict)
+        except Exception as ex:
+            block_id = list(individual_dict)[0]
+            logger.warning('PdbChemicalComponentsRDKit exception on data_block_id={}'.format(block_id))
+            logger.warning('... exception type: {} message: {}'.format(type(ex).__name__, ex))
+            logger.warning(traceback.format_exc())
+            continue  # problem with this chemical component skip to next
+        chem_comp_id = pdb_cc_rdkit.chem_comp_id
+        logger.debug('chem_comp_id={}'.format(chem_comp_id))
+        cc_xml.store_ccd(pdb_cc_rdkit)
+        if output_dir is not None:
             _write_coordinate_files_for_ccd(logger, files_subdirs_path, pdb_cc_rdkit, chem_comp_id)
             _write_image_files_for_ccd(logger, images_subdirs_path, pdb_cc_rdkit, chem_comp_id)
-            if not pdb_cc_rdkit.inchikey_from_rdkit_matches_ccd(connectivity_only=True):
-                logger.warning(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
-                logger.warning(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
-                logger.warning(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
-                logger.warning(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
-                logger.warning(' {} InChi from RDKit  {}'.format(chem_comp_id, pdb_cc_rdkit.inchi_from_rdkit))
-            if pdb_cc_rdkit.ideal_xyz_has_missing_values:
-                logger.warning(' {} ideal coordinates have missing values'.format(chem_comp_id))
-            if pdb_cc_rdkit.model_xyz_has_missing_values:
-                logger.warning(' {} model coordinates have missing values'.format(chem_comp_id))
-            if pdb_cc_rdkit.atom_charges_missing_values:
-                logger.warning(' {} atom charges have missing values'.format(chem_comp_id))
-    _create_readme_dot_html(logger, output_dir)
-    _create_tar_balls(logger, files_subdirs_path)
-    _create_tar_balls(logger, images_subdirs_path)
-    cc_xml.to_file(chem_dot_xml_file_name)
+        _warn_if_inchikeys_connectivity_do_not_match(logger, pdb_cc_rdkit, chem_comp_id)
+        _warn_about_missing_values(logger, pdb_cc_rdkit, chem_comp_id)
+    if output_dir is not None:
+        _create_readme_dot_html(logger, output_dir)
+        _create_tar_balls(logger, files_subdirs_path)
+        _create_tar_balls(logger, images_subdirs_path)
+        cc_xml.chem_comp_id_list_to_file(chem_comp_dot_list_file_name)
+    if chem_dot_xml_file_name is not None:
+        cc_xml.to_file(chem_dot_xml_file_name)
 
 
 def _create_readme_dot_html(logger, output_dir):
@@ -356,6 +376,40 @@ def _write_image_files_for_ccd(logger, subdirs_path, pdb_cc_rdkit, chem_comp_id)
         #     logger.debug('removed file {}'.format(this_file))
 
 
+def _warn_if_inchikeys_connectivity_do_not_match(logger, pdb_cc_rdkit, chem_comp_id):
+    """
+    warns to logger if the InChiKey-connectivity from RDKit does not match that from the PDB-CCD
+
+    Args:
+        logger: logging object
+        pdb_cc_rdkit (PdbChemicalComponentsRDKit): object for ccd to be written
+        chem_comp_id (str): the chem comp id aka 3 letter code for the ccd (eg ATP)
+    """
+    if not pdb_cc_rdkit.inchikey_from_rdkit_matches_ccd(connectivity_only=True):
+        logger.warning(' {} InChiKey connectivity information mismatch (1st 14 characters).'.format(chem_comp_id))
+        logger.warning(' {} InChIKey from ccd {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey))
+        logger.warning(' {} InChIKey RDKit    {}'.format(chem_comp_id, pdb_cc_rdkit.inchikey_from_rdkit))
+        logger.warning(' {} InChi from ccd    {}'.format(chem_comp_id, pdb_cc_rdkit.inchi))
+        logger.warning(' {} InChi from RDKit  {}'.format(chem_comp_id, pdb_cc_rdkit.inchi_from_rdkit))
+
+
+def _warn_about_missing_values(logger, pdb_cc_rdkit, chem_comp_id):
+    """
+    warns to logger if there are missing coordinates or charges in the PDB-CCD
+
+    Args:
+        logger: logging object
+        pdb_cc_rdkit (PdbChemicalComponentsRDKit): object for ccd to be written
+        chem_comp_id (str): the chem comp id aka 3 letter code for the ccd (eg ATP)
+    """
+    if pdb_cc_rdkit.ideal_xyz_has_missing_values:
+        logger.warning(' {} ideal coordinates have missing values'.format(chem_comp_id))
+    if pdb_cc_rdkit.model_xyz_has_missing_values:
+        logger.warning(' {} model coordinates have missing values'.format(chem_comp_id))
+    if pdb_cc_rdkit.atom_charges_missing_values:
+        logger.warning(' {} atom charges have missing values'.format(chem_comp_id))
+
+
 def _create_tar_balls(logger, subdirs_path):
     """
     creates .tar.gz tarballs for each subdirectory in either files or images
@@ -384,4 +438,4 @@ def _create_tar_balls(logger, subdirs_path):
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    process_components_cif(args.COMPONENTS_CIF, args.OUTPUT_DIR, args.debug)
+    process_components_cif(args)
