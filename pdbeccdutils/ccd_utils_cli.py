@@ -20,6 +20,8 @@ process a PDB-CCD mmcif file.
 import argparse
 import logging
 from argparse import RawTextHelpFormatter
+
+from pdbeccdutils.fragment_library import FragmentLibrary
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 
 
@@ -37,9 +39,9 @@ def __parse_command_line_args():
     parser.add_argument('--svg', help='write an 2D image of the compound to svg file')
     atom_labels_parser = parser.add_mutually_exclusive_group(required=False)
     atom_labels_parser.add_argument('--atom_labels', dest='atom_labels', action='store_true',
-                                   help='turn on atom labels for 2D image.')
+                                    help='turn on atom labels for 2D image.')
     atom_labels_parser.add_argument('--no_atom_labels', dest='atom_labels', action='store_false',
-                                   help='turn off atom labels for 2D image (the default).')
+                                    help='turn off atom labels for 2D image (the default).')
     parser.set_defaults(atom_labels=False)
     parser.add_argument('--debug', action='store_true', help='turn on debug message logging output')
     return parser.parse_args()
@@ -50,23 +52,31 @@ def main():
     args = __parse_command_line_args()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
     cif_file = args.CIF
     svg_file = args.svg
-    atom_labels=args.atom_labels
+    atom_labels = args.atom_labels
+    library = args.library
     logger.debug('CIF is {}'.format(cif_file))
 
     try:
-        pdb_cc_rdkit = PdbChemicalComponentsRDKit( file_name=cif_file)
+        pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=cif_file)
     except IOError as e_detail:
         raise SystemExit(e_detail)
     chem_comp_id = pdb_cc_rdkit.chem_comp_id
     logger.debug('chem_comp_id={}'.format(chem_comp_id))
 
+    frag_lib = FragmentLibrary(override_fragment_library_file_path=library)
+    fragments = frag_lib.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)
+    logger.info(' fragments:')
+    for (name, list_of_atom_list) in fragments.items():
+        logger.info('    {} occurs {} times:'.format(name, len(list_of_atom_list)))
+        for atoms in list_of_atom_list:
+            logger.info('         {}'.format(' '.join(atoms)))
+
     if svg_file is not None:
         pdb_cc_rdkit.image_file_or_string(file_name=svg_file, atom_labels=atom_labels)
-
-
-
 
 
 if __name__ == "__main__":

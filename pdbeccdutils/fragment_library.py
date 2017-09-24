@@ -57,7 +57,7 @@ class FragmentLibrary(object):
             rdkit_mol = pdb_ccd_rdkit.rwmol_original_remove_h
         else:
             return {}
-        fragments = {}
+        fragments = OrderedDict()
         for fragment_name, frag_rdkit_mol in self.fragment_name_to_rdkit_molecule.items():
             if rdkit_mol.HasSubstructMatch(frag_rdkit_mol):
                 fragments[fragment_name] = []
