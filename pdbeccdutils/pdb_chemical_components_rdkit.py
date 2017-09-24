@@ -14,6 +14,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
 from pdbeccdutils.pdb_chemical_components import PdbChemicalComponents
 from rdkit import Chem
 from rdkit.Geometry import rdGeometry
@@ -28,12 +29,21 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
     def __init__(self, file_name=None, cif_dictionary=None, cif_parser='auto'):
         super(PdbChemicalComponentsRDKit, self).__init__(file_name, cif_dictionary, cif_parser)
-        self.rdkit_mol = None
-        self.rdkit_mol_conformer_id_ideal = None
+        logging.debug('RDKit setup for PDB CCD chem_comp_id {}'.format(self.chem_comp_id))
+        self.rwmol_original = None
+        """The 'original' rdkit RWMol with bonds from PDB CCD cif not sanitized"""
+        self.rwmol_original_remove_h = None
+        """rwmol_original with hydrogen atoms removed - not sanitized"""
+        self.rwmol_cleaned = None
+        """Cleaned up rdkit RWMol with problematic bonds removed then sanitized """
+        self.rwmol_cleaned_remove_h = None
+        """rwmol_cleaned with hydrogen atoms removed, sanitized"""
+        self.conformer_id_ideal = None
         """The RDKit conformer ID for the ideal cooordinate (int)."""
-        self.rdkit_mol_conformer_id_model = None
+        self.conformer_id_model = None
         """The RDKit conformer ID for the model cooordinate (int)."""
         self.__setup_rdkit_mol()
+        self.__create_rdkit_mol_cleaned()
         self._inchi_from_rdkit = None
         self._inchikey_from_rdkit = None
 
@@ -47,18 +57,15 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         """
         # use method from http://rdkit-discuss.narkive.com/RVC3HZjy/building-mol-manually
         empty_mol = Chem.Mol()
-        self.rdkit_mol = Chem.RWMol(empty_mol)
+        self.rwmol_original = Chem.RWMol(empty_mol)
+        logging.debug('_setup_atoms:')
         self.__setup_atoms()
+        logging.debug('_setup_bonds:')
         self.__setup_bonds()
+        logging.debug('_setup_conformers:')
         self.__setup_conformers()
-        Chem.SanitizeMol(self.rdkit_mol, catchErrors=True)
-        Chem.Kekulize(self.rdkit_mol)
-        AssignAtomChiralTagsFromStructure(self.rdkit_mol)
-        self.mol_remove_h = Chem.RWMol(self.rdkit_mol)
-        try:
-            self.mol_remove_h = Chem.RemoveHs(self.mol_remove_h)
-        except ValueError:
-            pass  # TODO deal with this error properly
+        logging.debug('removeH from original:')
+        self.rwmol_original_remove_h = Chem.RemoveHs(self.rwmol_original, sanitize=False)
 
     def __setup_atoms(self):
         """
@@ -85,7 +92,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             if charge is None:
                 charge = 0
             rdkit_atom.SetFormalCharge(charge)
-            self.rdkit_mol.AddAtom(rdkit_atom)
+            self.rwmol_original.AddAtom(rdkit_atom)
 
     @staticmethod
     def __sdf_alias_on_off(rwmol=None, alias=False):
@@ -127,7 +134,37 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             index_1 = self.bond_atom_index_1[bond_index]
             index_2 = self.bond_atom_index_2[bond_index]
             order = Chem.rdchem.BondType(self.bond_order[bond_index])
-            self.rdkit_mol.AddBond(index_1, index_2, order)
+            self.rwmol_original.AddBond(index_1, index_2, order)
+
+    def __create_rdkit_mol_cleaned(self):
+        rwmol = Chem.RWMol(self.rwmol_original)
+        # take metal to N bonds where N has valence 4
+        smarts_metal_n_bond = Chem.MolFromSmarts('[Fe]~[N]')
+        metal_n_bonds = rwmol.GetSubstructMatches(smarts_metal_n_bond)
+        Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
+        for (metal_index, n_index) in metal_n_bonds:
+            metal_atom = rwmol.GetAtomWithIdx(metal_index)
+            n_atom = rwmol.GetAtomWithIdx(n_index)
+            n_valence = n_atom.GetExplicitValence()
+            if n_valence == 4:
+                logging.debug('Removing bond between metal {} and nitrogen {} that has valence 4'
+                      .format(metal_atom.GetProp('name'), n_atom.GetProp('name')))
+                rwmol.RemoveBond(metal_index, n_index)
+        logging.debug('SanitizeMol rdkit_mol_cleaned')
+        success = Chem.SanitizeMol(rwmol, catchErrors=True)
+        if success != 0:
+            logging.error('Sanitization failed with code {}'.format(success))
+            return
+        logging.debug('Kekulize rdkit_mol_cleaned')
+        Chem.Kekulize(rwmol)
+        AssignAtomChiralTagsFromStructure(rwmol)
+        self.rwmol_cleaned = rwmol
+        try:
+            self.rwmol_cleaned_remove_h = Chem.RemoveHs(rwmol, sanitize=True)
+        except ValueError as e_mess:
+            logging.error('Problem in cleaned removeHs for {} with sanitize=True: {}'.
+                    format(self.chem_comp_id, e_mess))
+            self.rwmol_cleaned_remove_h = None
 
     def __setup_conformers(self):
         """
@@ -145,8 +182,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             rdkit_model_xyz = rdGeometry.Point3D(model_x, model_y, model_z)
             ideal_conformer.SetAtomPosition(atom_index, rdkit_xyz)
             model_conformer.SetAtomPosition(atom_index, rdkit_model_xyz)
-        self.rdkit_mol_conformer_id_ideal = self.rdkit_mol.AddConformer(ideal_conformer, assignId=True)
-        self.rdkit_mol_conformer_id_model = self.rdkit_mol.AddConformer(model_conformer, assignId=True)
+        self.conformer_id_ideal = self.rwmol_original.AddConformer(ideal_conformer, assignId=True)
+        self.conformer_id_model = self.rwmol_original.AddConformer(model_conformer, assignId=True)
 
     def load_xyz_into_conformer(self, their_xyz):
         """
@@ -164,7 +201,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             (x, y, z) = their_xyz[atom_index]
             rdkit_xyz = rdGeometry.Point3D(x, y, z)
             new_conformer.SetAtomPosition(atom_index, rdkit_xyz)
-        conformer_id = self.rdkit_mol.AddConformer(new_conformer, assignId=True)
+        conformer_id = self.rwmol_original.AddConformer(new_conformer, assignId=True)
         return conformer_id
 
     @property
@@ -177,7 +214,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         """
         if self._inchi_from_rdkit is None:
             try:
-                self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.rdkit_mol)
+                self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.rwmol_original)
             except ValueError:
                 self._inchi_from_rdkit = 'ERROR'
         return self._inchi_from_rdkit
@@ -240,18 +277,17 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         if xyz is not None:
             conformer_id = self.load_xyz_into_conformer(their_xyz=xyz)
         elif ideal:
-            conformer_id = self.rdkit_mol_conformer_id_ideal
+            conformer_id = self.conformer_id_ideal
         else:
-            conformer_id = self.rdkit_mol_conformer_id_model
+            conformer_id = self.conformer_id_model
         if hydrogen:
-            mol_h_select = self.rdkit_mol
+            mol_for_sdf = self.rwmol_original
         else:
-            mol_h_select = self.mol_remove_h
-
-        self.__sdf_alias_on_off(mol_h_select, alias=alias)
+            mol_for_sdf = self.rwmol_original_remove_h
+        self.__sdf_alias_on_off(mol_for_sdf, alias=alias)
 
         try:
-            sdf_string = Chem.MolToMolBlock(mol_h_select, confId=conformer_id)
+            sdf_string = Chem.MolToMolBlock(mol_for_sdf, confId=conformer_id)
         except Exception:
             if raise_exception:
                 raise # re-raise
@@ -283,7 +319,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         atom_pdb_residue_info.SetChainId('A')
         atom_pdb_residue_info.SetResidueNumber(1)
         atom_pdb_residue_info.SetIsHeteroAtom(True)
-        for atom in self.rdkit_mol.GetAtoms():
+        for atom in self.rwmol_original.GetAtoms():
             atom_index = atom.GetIdx()
             pdbx_align = self.atom_pdbx_align[atom_index]
             atom_name = self.atom_ids[atom_index]
@@ -293,14 +329,14 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             atom_pdb_residue_info.SetName(atom_name)
             atom.SetMonomerInfo(atom_pdb_residue_info)
         if ideal:
-            conformer_id = self.rdkit_mol_conformer_id_ideal
+            conformer_id = self.conformer_id_ideal
         else:
-            conformer_id = self.rdkit_mol_conformer_id_model
+            conformer_id = self.conformer_id_model
         ideal_or_model = 'ideal' if ideal else 'model'
         pdb_title = 'TITLE     {} coordinates'.format(ideal_or_model)
         pdb_title += ' for PDB Chemical Component Definition {}\n'.format(self.chem_comp_id)
         pdb_title += 'AUTHOR    ccd_utils using RDKit\n'
-        pdb_string = pdb_title + Chem.MolToPDBBlock(self.rdkit_mol, conformer_id)
+        pdb_string = pdb_title + Chem.MolToPDBBlock(self.rwmol_original, conformer_id)
         if file_name is None:
             return pdb_string
         else:
@@ -403,25 +439,34 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         Returns:
             None or a string containing the svg string of the molecule.
         """
-        if hydrogen:
-            mol_to_draw = self.rdkit_mol
+        if self.rwmol_cleaned is None:
+            logging.warning('using original rwmol for {} image generation as clean up/sanitize failed'.
+                            format(self.chem_comp_id))
+            if hydrogen:
+                mol_to_draw = self.rwmol_original
+            else:
+                mol_to_draw = self.rwmol_original_remove_h
         else:
-            mol_to_draw = self.mol_remove_h
-
+            if hydrogen:
+                mol_to_draw = self.rwmol_cleaned
+            else:
+                mol_to_draw = self.rwmol_cleaned_remove_h
         try:
             AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
             drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
             opts = drawer.drawOptions()
             if atom_labels:
-                for atom in self.rdkit_mol.GetAtoms():
+                for atom in mol_to_draw.GetAtoms():
                     atom_index = atom.GetIdx()
                     atom_name = self.atom_ids[atom_index]
                     opts.atomLabels[atom_index] = atom_name
             molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
-        except Exception:
+        except Exception as e_mess:
             if raise_exception:
                 raise # re-raise
             else:
+                logging.error('Problem for {} in generating 2D coords or PrepareMolForDrawing: {}'.
+                                format(self.chem_comp_id, e_mess))
                 return
         if highlight_bonds is None:
             drawer.DrawMolecule(molecule_to_draw)

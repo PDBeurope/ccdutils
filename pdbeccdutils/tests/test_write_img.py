@@ -50,7 +50,7 @@ def test_svg_write_for_all_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         img_no_h_no_label = file_name_in_tsts_out(pdb_cc.chem_comp_id + '.img_noH_no_label.svg')
         pdb_cc.image_file_or_string(file_name=img_no_h_no_label, hydrogen=False, atom_labels=False)
-        if pdb_cc.chem_comp_id in ('0OD', '10R'):
+        if pdb_cc.chem_comp_id in ('10R'):
             yield assert_false, os.path.isfile(img_no_h_no_label), \
                   '{} call 1 to image_file_or_string does not produce image as problematic ligand'. \
                   format(pdb_cc.chem_comp_id)
@@ -81,9 +81,9 @@ def test_svg_highlight_bonds():
 
 
 @raises(ValueError)
-def test_0od_raises_exception():
-    # 0OD has problem in image production - if raise_exception is set then must get exception
-    ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('0OD'))
+def test_10r_raises_exception():
+    # 10R has problem in image production - if raise_exception is set then must get exception
+    ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('10R'))
     ccd.image_file_or_string(hydrogen=False, atom_labels=True, wedge=True, raise_exception=True)
 
 

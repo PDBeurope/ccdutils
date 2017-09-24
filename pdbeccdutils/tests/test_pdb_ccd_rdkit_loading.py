@@ -29,7 +29,7 @@ def test_hard_code_cmo():
     yield assert_equals, 'CARBON MONOXIDE', cmo.chem_comp_name, 'chem_comp_name'
     yield assert_equals, 'UGFAIRIUMAVXCW-UHFFFAOYSA-N', cmo.inchikey, 'chem_inchikey'
     # rdkit should be able to get an inchikey that is the same that read from the CCD cif file
-    yield assert_equals, 2, cmo.rdkit_mol.GetNumAtoms(), 'rdkit_mol.GetNumAtoms() should give 2'
+    yield assert_equals, 2, cmo.rwmol_original.GetNumAtoms(), 'rdkit_mol.GetNumAtoms() should give 2'
     yield assert_equals, cmo.inchikey, cmo.inchikey_from_rdkit, 'inchikey from cif file should match the rdkit inchikey'
 
 
@@ -43,7 +43,7 @@ def test_inchikey_match_for_all_sample_cifs():
     for ciffile in supply_list_of_sample_cifs():
         pdb_cc = PdbChemicalComponentsRDKit(file_name=ciffile)
         inchikey_from_rdkit = pdb_cc.inchikey_from_rdkit
-        if pdb_cc.chem_comp_id in ('HEM', 'CDL', '08T', '0OD', 'ASX', '7OM'):
+        if pdb_cc.chem_comp_id in ('CDL', 'ASX', '7OM'):
             yield assert_not_equals, pdb_cc.inchikey, inchikey_from_rdkit, \
                 'know inchikeys do not match for ' + pdb_cc.chem_comp_id
         else:
