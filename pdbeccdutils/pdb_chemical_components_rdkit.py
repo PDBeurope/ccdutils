@@ -16,6 +16,7 @@
 #
 import logging
 from pdbeccdutils.pdb_chemical_components import PdbChemicalComponents
+from pdbeccdutils.ring2dtemplates import supply_ring_template_rdkit_mol
 # noinspection PyPackageRequirements
 from rdkit import Chem
 # noinspection PyPackageRequirements
@@ -298,12 +299,22 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 mol_to_draw = self.rwmol_cleaned_remove_h
         # make a copy as GenerateDepictionMatching3DStructure wipes existing conformations!
         mol_to_draw = Chem.RWMol(mol_to_draw)
-        try:
-            AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
-        except Exception as e_mess:
-            logging.error('Problem for {} in generating 2D coords: {}'.
-                          format(self.chem_comp_id, e_mess))
-            return
+        ring_template_rdkit_mol = supply_ring_template_rdkit_mol()
+        for template_name, template_mol in ring_template_rdkit_mol.items():
+            if mol_to_draw.HasSubstructMatch(template_mol):
+                logging.debug('match to template {}'.format(template_name))
+                AllChem.GenerateDepictionMatching2DStructure(mol_to_draw, template_mol)
+                break
+        # noinspection PyArgumentList
+        if mol_to_draw.GetNumConformers() == 1:
+            logging.debug('have generated 2D coords from template {}'.format(template_name))
+        else:
+            try:
+                AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
+            except Exception as e_mess:
+                logging.error('Problem for {} in generating 2D coords: {}'.
+                              format(self.chem_comp_id, e_mess))
+                return
         # noinspection PyArgumentList
         n_conformers = mol_to_draw.GetNumConformers()
         assert n_conformers == 1, 'should have one conformer'
