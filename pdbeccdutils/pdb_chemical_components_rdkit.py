@@ -212,6 +212,32 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         conformer_id = self.rwmol_original.AddConformer(new_conformer, assignId=True)
         return conformer_id
 
+    def __load_2d_coordinates_in_rwmol(self, rwmol):
+        """
+        loads 2D coordinates into a rwmol conformer
+
+        Args:
+            rwmol: RDKit rwmol object
+
+        Returns:
+            conformer id if successful or None on an error.
+        """
+        this_n_atoms = rwmol.GetNumAtoms()
+        new_conformer = Chem.Conformer(this_n_atoms)
+        if this_n_atoms == self.number_atoms:  # with hydrogens
+            xyz = self.xyz_2d
+        else:
+            xyz = self.xyz_2d_no_hydrogen
+        if xyz is None:
+            return None
+        else:
+            for atom_index in range(this_n_atoms):
+                (x, y, z) = xyz[atom_index]
+                rdkit_xyz = rdGeometry.Point3D(x, y, z)
+                new_conformer.SetAtomPosition(atom_index, rdkit_xyz)
+            conformer_id = rwmol.AddConformer(new_conformer, assignId=True)
+            return conformer_id
+
     @property
     def xyz_2d(self):
         """
@@ -539,26 +565,31 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 mol_to_draw = self.rwmol_cleaned
             else:
                 mol_to_draw = self.rwmol_cleaned_remove_h
-        try:
-            AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
-            drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
+
+
+        copy_to_draw = Chem.RWMol(mol_to_draw, True)  # boolean quickCopy means no conformers.
+        # load 2D coords
+        if self.__load_2d_coordinates_in_rwmol(copy_to_draw) is None:
+            logging.error('Problem for {} cannot produce 2D coords.'.format(self.chem_comp_id))
+        drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
+        # noinspection PyArgumentList
+        opts = drawer.drawOptions()
+        if atom_labels:
             # noinspection PyArgumentList
-            opts = drawer.drawOptions()
-            if atom_labels:
-                for atom in mol_to_draw.GetAtoms():
-                    atom_index = atom.GetIdx()
-                    atom_name = self.atom_ids[atom_index]
-                    opts.atomLabels[atom_index] = atom_name
-            molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
+            for atom in copy_to_draw.GetAtoms():
+                atom_index = atom.GetIdx()
+                atom_name = self.atom_ids[atom_index]
+                opts.atomLabels[atom_index] = atom_name
+        try:
+            copy_to_draw = rdMolDraw2D.PrepareMolForDrawing(copy_to_draw, wedgeBonds=wedge, addChiralHs=False)
         except Exception as e_mess:
             if raise_exception:
                 raise  # re-raise
             else:
-                logging.error('Problem for {} in generating 2D coords or PrepareMolForDrawing: {}'.
-                              format(self.chem_comp_id, e_mess))
+                logging.error('Problem for {} in PrepareMolForDrawing: {}'.format(self.chem_comp_id, e_mess))
                 return
         if highlight_bonds is None:
-            drawer.DrawMolecule(molecule_to_draw)
+            drawer.DrawMolecule(copy_to_draw)
         else:
             # highlight the atoms on each end of the bond in the colour
             highlight_atoms_colours = {}
@@ -570,14 +601,14 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             for key in highlight_bonds:
                 at_index_0 = key[0]
                 at_index_1 = key[1]
-                for bond in molecule_to_draw.GetBonds():
+                for bond in copy_to_draw.GetBonds():
                     bond_index_0 = bond.GetBeginAtomIdx()
                     bond_index_1 = bond.GetEndAtomIdx()
                     if (at_index_0 == bond_index_0 and at_index_1 == bond_index_1) or \
                        (at_index_0 == bond_index_1 and at_index_1 == bond_index_0):
                         highlight_bonds_colours[bond.GetIdx()] = highlight_bonds[key]
                         break
-            drawer.DrawMolecule(molecule_to_draw,
+            drawer.DrawMolecule(copy_to_draw,
                                 highlightAtoms=highlight_atoms_colours.keys(),
                                 highlightAtomColors=highlight_atoms_colours,
                                 highlightBonds=highlight_bonds_colours.keys(),
