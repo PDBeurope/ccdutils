@@ -16,10 +16,15 @@
 #
 import logging
 from pdbeccdutils.pdb_chemical_components import PdbChemicalComponents
+# noinspection PyPackageRequirements
 from rdkit import Chem
+# noinspection PyPackageRequirements
 from rdkit.Geometry import rdGeometry
+# noinspection PyPackageRequirements
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
+# noinspection PyPackageRequirements
 from rdkit.Chem import AllChem
+# noinspection PyPackageRequirements
 from rdkit.Chem.Draw import rdMolDraw2D
 from lxml import etree
 
@@ -44,6 +49,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         """The RDKit conformer ID for the model cooordinate (int)."""
         self.__setup_rdkit_mol()
         self.__create_rdkit_mol_cleaned()
+        self.__xyz_2d = None
+        self.__xyz_2d_no_hydrogen = None
         self._inchi_from_rdkit = None
         self._inchikey_from_rdkit = None
 
@@ -56,6 +63,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
         """
         # use method from http://rdkit-discuss.narkive.com/RVC3HZjy/building-mol-manually
+        # noinspection PyArgumentList
         empty_mol = Chem.Mol()
         self.rwmol_original = Chem.RWMol(empty_mol)
         logging.debug('_setup_atoms:')
@@ -148,7 +156,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             n_valence = n_atom.GetExplicitValence()
             if n_valence == 4:
                 logging.debug('Removing bond between metal {} and nitrogen {} that has valence 4'
-                      .format(metal_atom.GetProp('name'), n_atom.GetProp('name')))
+                              .format(metal_atom.GetProp('name'), n_atom.GetProp('name')))
                 rwmol.RemoveBond(metal_index, n_index)
         logging.debug('SanitizeMol rdkit_mol_cleaned')
         success = Chem.SanitizeMol(rwmol, catchErrors=True)
@@ -163,7 +171,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             self.rwmol_cleaned_remove_h = Chem.RemoveHs(rwmol, sanitize=True)
         except ValueError as e_mess:
             logging.error('Problem in cleaned removeHs for {} with sanitize=True: {}'.
-                    format(self.chem_comp_id, e_mess))
+                          format(self.chem_comp_id, e_mess))
             self.rwmol_cleaned_remove_h = None
 
     def __setup_conformers(self):
@@ -203,6 +211,85 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             new_conformer.SetAtomPosition(atom_index, rdkit_xyz)
         conformer_id = self.rwmol_original.AddConformer(new_conformer, assignId=True)
         return conformer_id
+
+    @property
+    def xyz_2d(self):
+        """
+        A set of 2D coordinates for pictures hydrogen atoms are included.
+
+        Returns:
+            tuple of tuple( x, y, z) for each atom. x, y, z are floats,
+            z will be zero.
+        """
+
+        if self.__xyz_2d is None:
+            self.__xyz_2d = self.__create_xyz_2d(hydrogen=True)
+        return self.__xyz_2d
+
+    @property
+    def xyz_2d_no_hydrogen(self):
+        """
+        A set of 2D coordinates for pictures hydrogen atoms are not included.
+
+        Returns:
+            tuple of tuple( x, y, z) for each atom. x, y, z are floats,
+            z will be zero.
+
+        Notes:
+            list will only be for non-hydrogen atoms.
+        """
+
+        if self.__xyz_2d_no_hydrogen is None:
+            self.__xyz_2d_no_hydrogen = self.__create_xyz_2d(hydrogen=False)
+        return self.__xyz_2d_no_hydrogen
+
+    def __create_xyz_2d(self, hydrogen=False):
+        """
+        uses rdkit to create a set of 2D coords for the molecule.
+        
+        Args:
+            hydrogen (bool):  include hydrogen atoms
+
+        Returns:
+            tuple of tuple( x, y, z) for each atom. x, y, z are floats, z will be zero.
+            
+        Notes:
+            if hydrogen is False then returned list will only have coordinates for the non-hydrogen atoms.
+        """
+        this_xyz = []
+        logging.debug('call to __create_xyz_2d with hydrogen={}'.format(hydrogen))
+        if self.rwmol_cleaned is None:
+            logging.warning('using original rwmol for {} image generation as clean up/sanitize failed'.
+                            format(self.chem_comp_id))
+            if hydrogen:
+                mol_to_draw = self.rwmol_original
+            else:
+                mol_to_draw = self.rwmol_original_remove_h
+        else:
+            if hydrogen:
+                mol_to_draw = self.rwmol_cleaned
+            else:
+                mol_to_draw = self.rwmol_cleaned_remove_h
+        # make a copy as GenerateDepictionMatching3DStructure wipes existing conformations!
+        mol_to_draw = Chem.RWMol(mol_to_draw)
+        try:
+            AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
+        except Exception as e_mess:
+            logging.error('Problem for {} in generating 2D coords: {}'.
+                          format(self.chem_comp_id, e_mess))
+            return
+        # noinspection PyArgumentList
+        n_conformers = mol_to_draw.GetNumConformers()
+        assert n_conformers == 1, 'should have one conformer'
+        conformer = mol_to_draw.GetConformer(0)
+        assert not conformer.Is3D(), 'conformer must be 2D'
+        for position in conformer.GetPositions():
+            float_x = float(position[0])
+            float_y = float(position[1])
+            float_z = float(position[2])
+            this_xyz.append((float_x, float_y, float_z))
+        this_xyz = tuple(this_xyz)
+        return this_xyz
 
     @property
     def inchi_from_rdkit(self):
@@ -290,7 +377,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             sdf_string = Chem.MolToMolBlock(mol_for_sdf, confId=conformer_id)
         except Exception:
             if raise_exception:
-                raise # re-raise
+                raise  # re-raise
             else:
                 return
         sdf_string = fname + sdf_string
@@ -312,6 +399,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         Returns:
             None or a string containing the molecule converted to pdb
         """
+        # noinspection PyArgumentList
         atom_pdb_residue_info = Chem.rdchem.AtomPDBResidueInfo()
         atom_pdb_residue_info.SetResidueName(self.chem_comp_id)
         atom_pdb_residue_info.SetTempFactor(20.0)
@@ -346,8 +434,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
     def cml_file_or_string(self, file_name=None):
         top = etree.Element('cml')
-        top.set('dictRef','ebiMolecule:ebiMoleculeDict.cml')
-        top.set('ebiMolecule','http://www.ebi.ac.uk/felics/molecule')
+        top.set('dictRef', 'ebiMolecule:ebiMoleculeDict.cml')
+        top.set('ebiMolecule', 'http://www.ebi.ac.uk/felics/molecule')
         f_charge = 0
         for atom_index in range(self.number_atoms):
             charge = self.atom_charges[atom_index]
@@ -355,9 +443,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 charge = 0
             f_charge += charge
         mol = etree.SubElement(top, 'molecule', id=self.chem_comp_id, formalCharge=str(f_charge))
-        id_inchi = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:inchi')
+        id_inchi = etree.SubElement(mol, 'identifier', dictRef='ebiMolecule:inchi')
         id_inchi.text = self.inchikey
-        id_systematic = etree.SubElement(mol,'identifier', dictRef='ebiMolecule:systematicName')
+        id_systematic = etree.SubElement(mol, 'identifier', dictRef='ebiMolecule:systematicName')
         id_systematic.text = self.chem_comp_name
         id_formula1 = etree.SubElement(mol, 'formula', dictRef="ebiMolecule:stereoSmiles")
         id_formula2 = etree.SubElement(mol, 'formula', dictRef="ebiMolecule:nonStereoSmiles")
@@ -421,7 +509,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
 
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
                              pixels_x=400, pixels_y=200, highlight_bonds=None, black=False,
-                             raise_exception= False):
+                             raise_exception=False):
         """
         produces a svg image of the molecule to a string or file using RDKit.
 
@@ -454,6 +542,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         try:
             AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
             drawer = rdMolDraw2D.MolDraw2DSVG(pixels_x, pixels_y)
+            # noinspection PyArgumentList
             opts = drawer.drawOptions()
             if atom_labels:
                 for atom in mol_to_draw.GetAtoms():
@@ -463,10 +552,10 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             molecule_to_draw = rdMolDraw2D.PrepareMolForDrawing(mol_to_draw, wedgeBonds=wedge)
         except Exception as e_mess:
             if raise_exception:
-                raise # re-raise
+                raise  # re-raise
             else:
                 logging.error('Problem for {} in generating 2D coords or PrepareMolForDrawing: {}'.
-                                format(self.chem_comp_id, e_mess))
+                              format(self.chem_comp_id, e_mess))
                 return
         if highlight_bonds is None:
             drawer.DrawMolecule(molecule_to_draw)
@@ -493,7 +582,9 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                                 highlightAtomColors=highlight_atoms_colours,
                                 highlightBonds=highlight_bonds_colours.keys(),
                                 highlightBondColors=highlight_bonds_colours)
+        # noinspection PyArgumentList
         drawer.FinishDrawing()
+        # noinspection PyArgumentList
         svg = drawer.GetDrawingText()
         # next line might be needed to get svg to display in Jupyter notebook?
         # svg = svg.replace('svg:', '')

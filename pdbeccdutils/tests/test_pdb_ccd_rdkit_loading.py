@@ -50,6 +50,10 @@ def test_inchikey_match_for_all_sample_cifs():
             yield assert_equals, pdb_cc.inchikey, inchikey_from_rdkit, \
                 'check inchikeys match for ' + pdb_cc.chem_comp_id
 
+def test_xyz_2d():
+    eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
+    yield assert_equals, 3, len(eoh.xyz_2d_no_hydrogen)
+    yield assert_equals, 9, len(eoh.xyz_2d)
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
