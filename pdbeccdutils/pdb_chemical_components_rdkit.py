@@ -148,7 +148,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     def __create_rdkit_mol_cleaned(self):
         rwmol = Chem.RWMol(self.rwmol_original)
         # take metal to N bonds where N has valence 4
-        smarts_metal_n_bond = Chem.MolFromSmarts('[Fe]~[N]')
+        smarts_metal_n_bond = Chem.MolFromSmarts('[Fe,Co,Mg]~[N]')
         metal_n_bonds = rwmol.GetSubstructMatches(smarts_metal_n_bond)
         Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
         for (metal_index, n_index) in metal_n_bonds:

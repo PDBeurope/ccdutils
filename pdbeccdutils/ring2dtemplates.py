@@ -52,3 +52,6 @@ def _load_ring_2d_templates():
         for bond in rdkit_mol.GetBonds():
             bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED)
         ring_2d_templates[name] = rdkit_mol
+        # for atom in rdkit_mol.GetAtoms():
+        #     if atom.GetSymbol() == 'Fe':
+        #         atom.SetAtomicNum(0)
