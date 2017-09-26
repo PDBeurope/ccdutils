@@ -76,7 +76,7 @@ def main():
             logger.info('         {}'.format(' '.join(atoms)))
 
     if svg_file is not None:
-        pdb_cc_rdkit.image_file_or_string(file_name=svg_file, atom_labels=atom_labels)
+        pdb_cc_rdkit.image_file_or_string(file_name=svg_file, atom_labels=atom_labels, pixels_x=400, pixels_y=400)
 
 
 if __name__ == "__main__":

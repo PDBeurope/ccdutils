@@ -156,13 +156,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             n_atom = rwmol.GetAtomWithIdx(n_index)
             n_valence = n_atom.GetExplicitValence()
             if n_valence == 4:
-                logging.debug('Remove bond between metal {} and nitrogen {} that has valence 4'
-                              .format(metal_atom.GetProp('name'), n_atom.GetProp('name')))
-                rwmol.RemoveBond(metal_index, n_index)
-                # logging.debug('Adjust charges for bond between metal {} and nitrogen {} that has valence 4'
+                # logging.debug('Remove bond between metal {} and nitrogen {} that has valence 4'
                 #               .format(metal_atom.GetProp('name'), n_atom.GetProp('name')))
-                # n_atom.SetFormalCharge(1)
-                # metal_atom.SetFormalCharge(metal_atom.GetFormalCharge()-1)
+                # rwmol.RemoveBond(metal_index, n_index)
+                logging.debug('Adjust charges for bond between metal {} and nitrogen {} that has valence 4'
+                              .format(metal_atom.GetProp('name'), n_atom.GetProp('name')))
+                n_atom.SetFormalCharge(1)
+                metal_atom.SetFormalCharge(metal_atom.GetFormalCharge()-1)
         logging.debug('SanitizeMol rdkit_mol_cleaned')
         success = Chem.SanitizeMol(rwmol, catchErrors=True)
         if success != 0:
