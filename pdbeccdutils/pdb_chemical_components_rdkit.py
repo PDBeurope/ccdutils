@@ -16,7 +16,7 @@
 #
 import logging
 from pdbeccdutils.pdb_chemical_components import PdbChemicalComponents
-from pdbeccdutils.ring2dtemplates import supply_ring_template_rdkit_mol
+from pdbeccdutils.ring2dtemplates import supply_ring_2d_templates
 # noinspection PyPackageRequirements
 from rdkit import Chem
 # noinspection PyPackageRequirements
@@ -303,16 +303,13 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 mol_to_draw = self.rwmol_cleaned_remove_h
         # make a copy as GenerateDepictionMatching3DStructure wipes existing conformations!
         mol_to_draw = Chem.RWMol(mol_to_draw)
-        ring_template_rdkit_mol = supply_ring_template_rdkit_mol()
-        for template_name, template_mol in ring_template_rdkit_mol.items():
+        for template_name, template_mol in supply_ring_2d_templates().items():
             if mol_to_draw.HasSubstructMatch(template_mol):
-                logging.debug('match to template {}'.format(template_name))
                 AllChem.GenerateDepictionMatching2DStructure(mol_to_draw, template_mol)
+                logging.debug('have generated 2D coords from template "{}"'.format(template_name))
                 break
         # noinspection PyArgumentList
-        if mol_to_draw.GetNumConformers() == 1:
-            logging.debug('have generated 2D coords from template {}'.format(template_name))
-        else:
+        if mol_to_draw.GetNumConformers() != 1:
             try:
                 AllChem.GenerateDepictionMatching3DStructure(mol_to_draw, mol_to_draw)
             except Exception as e_mess:

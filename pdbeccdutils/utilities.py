@@ -46,6 +46,7 @@ test_comparison_files_path = os.path.join(this_script_dir(), 'tests', 'compariso
 test_components_cif_first_file_comps = os.path.join(this_script_dir(),
                                                     'tests', 'components_cif', 'components.cif.first_five_comps')
 default_fragment_library_file_path = os.path.join(this_script_dir(), 'data', 'fragment_library.smi')
+ring2dtemplates_file_path = os.path.join(this_script_dir(), 'data', 'ring2dtemplates.sdf')
 
 
 def cif_filename(code):
