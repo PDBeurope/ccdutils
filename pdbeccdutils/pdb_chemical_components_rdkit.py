@@ -29,6 +29,9 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from lxml import etree
 
+# from http://molvs.readthedocs.io/en/latest/_modules/molvs/metal.html
+METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,Tc,Ru,Rh,Pd,Ag,' \
+               'Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
 
 class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     """ PdbChemicalComponents class with extension to produce RDKit Mol"""
@@ -148,7 +151,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     def __create_rdkit_mol_cleaned(self):
         rwmol = Chem.RWMol(self.rwmol_original)
         # take metal to N bonds where N has valence 4
-        smarts_metal_n_bond = Chem.MolFromSmarts('[Fe,Co,Mg]~[N]')
+        smarts_metal_n_bond = Chem.MolFromSmarts(METALS_SMART + '~[N]')
         metal_n_bonds = rwmol.GetSubstructMatches(smarts_metal_n_bond)
         Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
         for (metal_index, n_index) in metal_n_bonds:
@@ -178,6 +181,33 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             logging.error('Problem in cleaned removeHs for {} with sanitize=True: {}'.
                           format(self.chem_comp_id, e_mess))
             self.rwmol_cleaned_remove_h = None
+
+    @property
+    def rdkit_mol_with_any_metals_disconnected_from_n(self):
+        """
+        supplies a version of the cleaned up rdkit will metal nitrogen bonds broken.
+        
+        Returns:
+            rdkit rwmol with bonds broken
+        """
+        smarts_metal_n_bond = Chem.MolFromSmarts(METALS_SMART + '~[#7]')
+        metal_n_bonds = self.rwmol_cleaned_remove_h.GetSubstructMatches(smarts_metal_n_bond)
+        if not metal_n_bonds:
+            return self.rwmol_cleaned_remove_h
+        else:
+            rwmol = Chem.RWMol(self.rwmol_cleaned)
+            for (metal_index, n_index) in metal_n_bonds:
+                metal_atom = rwmol.GetAtomWithIdx(metal_index)
+                n_atom = rwmol.GetAtomWithIdx(n_index)
+                logging.debug('break bond between metal {} and nitrogen {}'.
+                              format(metal_atom.GetProp('name'), n_atom.GetProp('name')))
+                n_atom.SetFormalCharge(n_atom.GetFormalCharge()-1)
+                metal_atom.SetFormalCharge(metal_atom.GetFormalCharge()+1)
+                rwmol.RemoveBond(metal_index, n_index)
+            rwmol = Chem.RemoveHs(rwmol, sanitize=True)
+            #Chem.Kekulize(rwmol)
+            logging.debug('SMILES after breaking {}'.format(Chem.MolToSmiles(rwmol)))
+            return rwmol
 
     def __setup_conformers(self):
         """

@@ -64,8 +64,8 @@ def main():
         pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=cif_file)
     except IOError as e_detail:
         raise SystemExit(e_detail)
-    chem_comp_id = pdb_cc_rdkit.chem_comp_id
-    logger.debug('chem_comp_id={}'.format(chem_comp_id))
+    logger.info(' chem_comp_id {} '.format(pdb_cc_rdkit.chem_comp_id))
+    logger.info(' chem_comp_name: {}'.format(pdb_cc_rdkit.chem_comp_name))
 
     frag_lib = FragmentLibrary(override_fragment_library_file_path=library)
     fragments = frag_lib.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)

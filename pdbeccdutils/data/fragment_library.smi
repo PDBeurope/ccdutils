@@ -19,6 +19,7 @@ c1c([nH]c(c1)Cc1ccc([nH]1)Cc1ccc[nH]1)Cc1ccc[nH]1 bilirubin
 C1(NC2C(N1)CSC2)O biotin
 c12c(c3c([nH]1)cccc3)cccc2 carbazole
 C1C(N2C1SCCC2)O cephalosporin
+C(N1)(/C=C2N=C(C=C\2)/C=C3N/C(C=C\3)=C\4)=CC=C1/C=C5CCC4=N/5 chlorin
 c1cccc2c1C=CCO2 chromen
 c1cc2c(cc1)nncc2 cinnoline
 c1ccc2c(c1)OC(C=C2O)O coumarine
@@ -70,6 +71,9 @@ c1cc[nH]n1 pyrazole
 c1cnncc1 pyridazine
 c1ccccn1 pyridine
 c1cncnc1 pyrimidine
+C1N=CCC1 1-pyrroline
+C1CC=CN1 2-pyrroline
+C1NCC=C1 3-pyrroline
 c1ccc[nH]1 pyrrole
 c1ccc2c(c1)cncn2 quinazoline
 c1cc2c(cc1)nccc2 quinoline

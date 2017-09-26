@@ -52,7 +52,7 @@ class FragmentLibrary(object):
             ence there is a list of these separate lists.
         """
         if pdb_ccd_rdkit.rwmol_cleaned_remove_h is not None:
-            rdkit_mol = pdb_ccd_rdkit.rwmol_cleaned_remove_h
+            rdkit_mol = pdb_ccd_rdkit.rdkit_mol_with_any_metals_disconnected_from_n
         elif pdb_ccd_rdkit.rwmol_original_remove_h is not None:
             rdkit_mol = pdb_ccd_rdkit.rwmol_original_remove_h
         else:
