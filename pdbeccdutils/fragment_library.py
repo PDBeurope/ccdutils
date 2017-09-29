@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import csv
+import logging
 import os
 from collections import OrderedDict
 from rdkit import Chem
@@ -32,6 +34,7 @@ class FragmentLibrary(object):
             fragment_file_name = default_fragment_library_file_path
         else:
             fragment_file_name = override_fragment_library_file_path
+        self._load_tsv(fragment_file_name.replace('smi', 'tsv'))
         self._load(fragment_file_name)
 
     @property
@@ -100,6 +103,13 @@ class FragmentLibrary(object):
                 smile = smile.replace('\t', '')  # take out tabs
                 self.fragment_name_to_smiles[name] = smile
 
+    def _load_tsv(self, fragment_file_name):
+        logging.debug('parse {} with csv.Dictreader:'.format(fragment_file_name))
+        with open(fragment_file_name, 'r') as fragment_file:
+            reader =  csv.DictReader(fragment_file, delimiter='\t')
+            for row in reader:
+                logging.debug(row)
+
     def _create_frag_name_to_rdkit_mol(self):
         """
         creates a dictionary with an rdkit molecule for each fragment in the input list.
@@ -122,4 +132,5 @@ def produce_png_img_of_all_fragments():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s', )
     produce_png_img_of_all_fragments()
