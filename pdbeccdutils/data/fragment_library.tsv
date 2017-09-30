@@ -1,10 +1,11 @@
-name	type	query	description	comment	url
+name	kind	query	description	comment	url
 acetylurea	SMILES	C1C(=O)NC(=O)N1		unchecked	
 acridine	SMILES	c1ccc2c(c1)nc1c(c2)cccc1		unchecked	
 acridone	SMILES	c1ccc2c(c1)C(c1c(N2)cccc1)O		unchecked	
 actinophenoxazine	SMILES	c1ccc2c(c1)Nc1c(O2)cc(c(c1)N)O		unchecked	
 adenine	SMILES	n1c(c2c(nc1)nc[nH]2)N		unchecked	
-alkaloid	SMILES	c1ccc2c(c1)CC1C3C2(CCCC3)CCN1		unchecked	
+alkaloid	SMILES	c1ccc2c(c1)CC1C3C2(CCCC3)CCN1		unchecked
+amide	SMARTS	[NX3][CX3](=[OX1])[#6]	"carboxyamide"	unchecked	https://en.wikipedia.org/wiki/Amide
 barbit	SMILES	C1(=*)NC(=O)CC(=O)N1		unchecked	
 barbiturates	SMILES	C1C(=O)NC(=O)C1N		unchecked	
 barbiturgroup	SMILES	C1C(=O)NC(=O)*1		unchecked	
@@ -20,7 +21,7 @@ bilirubin	SMILES	c1c([nH]c(c1)Cc1ccc([nH]1)Cc1ccc[nH]1)Cc1ccc[nH]1		unchecked
 biotin	SMILES	C1(NC2C(N1)CSC2)O		unchecked	
 carbazole	SMILES	c12c(c3c([nH]1)cccc3)cccc2		unchecked	
 cephalosporin	SMILES	C1C(N2C1SCCC2)O		unchecked	
-chlorin	SMILES	C(N1)(/C=C2N=C(C=C\2)/C=C3N/C(C=C\3)=C\4)=CC=C1/C=C5CCC4=N/5	metal chelating ring in chlorophyll	unchecked	https://en.wikipedia.org/wiki/Chlorin
+chlorin	SMILES	C(N1)(/C=C2N=C(C=C\2)/C=C3N/C(C=C\3)=C\4)=CC=C1/C=C5CCC4=N/5	"metal chelating ring in chlorophyll"	unchecked	https://en.wikipedia.org/wiki/Chlorin
 chromen	SMILES	c1cccc2c1C=CCO2		unchecked	
 cinnoline	SMILES	c1cc2c(cc1)nncc2		unchecked	
 coumarine	SMILES	c1ccc2c(c1)OC(C=C2O)O		unchecked	
@@ -61,7 +62,8 @@ phenyl	SMILES	c1ccccc1		unchecked
 phthalazine	SMILES	c1cc2c(cc1)cnnc2		unchecked	
 piperazine	SMILES	N1CCNCC1		unchecked	
 porphin	SMILES	c1cc2=Cc3[nH]c(cc3)C=c3[nH]c(=Cc4[nH]c(C=c1[nH]2)cc4)cc3	"The central ring in a prophyrin, for example heme."	unchecked	https://en.wikipedia.org/wiki/Porphin
-prosto	SMILES	C1=CC(C(=C1O)CCCC)CCCC		unchecked	
+porphin-like	LIKE	c1cc2=Cc3[nH]c(cc3)C=c3[nH]c(=Cc4[nH]c(C=c1[nH]2)cc4)cc3	"prophyrin/heme connectivity"	unchecked	https://en.wikipedia.org/wiki/Porphin
+prosto	SMILES	C1=CC(C(=C1O)CCCC)CCCC		unchecked
 pteridine	SMILES	c1nc2c(nc1)ncnc2		unchecked	
 pteroyl	SMILES	c1(nc(c2c(n1)nccn2)O)N		unchecked	
 purine	SMILES	[nH]1cnc2c1cncn2		unchecked	
@@ -81,7 +83,7 @@ quinoline	SMILES	c1cc2c(cc1)nccc2		unchecked
 quinoxaline	SMILES	c1ccc2c(c1)nccn2		unchecked	
 rauwolfia	SMILES	c1ccc2c(c1)c1c(n2)c2n(cc1)cc1c(c2)cccc1		unchecked	
 ribose	SMILES	C1(C(C(OC1)CO)O)O		unchecked	
-steroid	SMILES	C1CCC2C(C1)C1C(CC2)C2C(CC1)CCC2		unchecked	
+steroid-like	LIKE	C1CCC2C(C1)C1C(CC2)C2C(CC1)CCC2	"steroid ring connectivity"	unchecked
 succinimide	SMILES	C1C(=O)NC(=O)C1		unchecked	
 thiadiazole	SMILES	c1nncs1		unchecked	
 thiazole	SMILES	c1cncs1		unchecked	

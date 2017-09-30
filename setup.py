@@ -12,5 +12,5 @@ setup(name='pdbeccdutils',
                'bin/ccd_utils_cli'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['yattag', 'lxml']
+      install_requires=['yattag', 'lxml', 'pandas']
       )

@@ -15,8 +15,7 @@ class TestFragmentLibrary(unittest.TestCase):
         self.assertNotEqual(0, self.frag.number_of_entries)
 
     def test_phenyl_in_fragment(self):
-        self.assertIn('phenyl', self.frag.fragment_name_to_smiles)
-        self.assertEqual('c1ccccc1', self.frag.fragment_name_to_smiles['phenyl'])
+        self.assertEqual('c1ccccc1', self.frag.smiles_for_fragment_name('phenyl'))
 
     def test_rdkit_mol_smiles_for_phenyl(self):
         frag = FragmentLibrary()

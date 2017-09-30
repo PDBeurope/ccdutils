@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import csv
 import logging
 import os
 import pandas as pd
@@ -26,23 +25,21 @@ from pdbeccdutils.utilities import default_fragment_library_file_path, this_scri
 
 class FragmentLibrary(object):
     """
-    store common fragments from
+    store common named fragments and provide substructure search for them
     """
     def __init__(self, override_fragment_library_file_path=None):
         self.fragments_pd = None
         """panda data frame containing the information"""
-        self.fragment_name_to_smiles = OrderedDict()
         self.fragment_name_to_rdkit_molecule = OrderedDict()
         if override_fragment_library_file_path is None:
             fragment_file_name = default_fragment_library_file_path
         else:
             fragment_file_name = override_fragment_library_file_path
-        self._load_tsv(fragment_file_name.replace('smi', 'tsv'))
         self._load(fragment_file_name)
 
     @property
     def number_of_entries(self):
-        return len(self.fragment_name_to_smiles)
+        return len(self.fragment_name_to_rdkit_molecule)
 
     def fragments_for_pdb_chemical_components_rdkit(self, pdb_ccd_rdkit):
         """
@@ -83,36 +80,16 @@ class FragmentLibrary(object):
         Args:
             fragment_file_name (str): the fragment file name
         """
-        self._load_fragment_name_to_smiles_from_file(fragment_file_name)
+        self._load_tsv_into_fragments_pd(fragment_file_name)
         self._create_frag_name_to_rdkit_mol()
 
-    def _load_fragment_name_to_smiles_from_file(self, fragment_file_name):
-        """
-        loads the fragment name to file dictionary from the given file.
-
-        Args:
-            fragment_file_name (str): the fragment file name 
-
-        Note:
-            fragment_file_name has SMILES format:
-            C1CC1 cyclopropane
-            c1ccccc1 phenyl
-        """
-        with open(fragment_file_name, 'r') as fragment_file:
-            self.fragment_name_to_smiles = OrderedDict()
-            lines = fragment_file.read().splitlines()
-            for line in lines:
-                smile, name = line.split(' ')
-                smile = smile.replace('\t', '')  # take out tabs
-                self.fragment_name_to_smiles[name] = smile
-
-    def _load_tsv(self, fragment_file_name):
+    def _load_tsv_into_fragments_pd(self, fragment_file_name):
         logging.debug('parse {} into panda dataframe:'.format(fragment_file_name))
         self.fragments_pd = pd.read_csv(fragment_file_name, sep='\t')
         logging.debug('dataframe:\n{}'.format(self.fragments_pd.to_string()))
         columns = self.fragments_pd.columns.values.tolist()
         logging.debug('columns: {}'.format(columns))
-        for required in 'name', 'type', 'query':
+        for required in 'name', 'kind', 'query':
             if not required in columns:
                 raise ValueError('fragment library file lacks required column "{}"'.format(required))
 
@@ -121,17 +98,40 @@ class FragmentLibrary(object):
         creates a dictionary with an rdkit molecule for each fragment in the input list.
         """
         self.fragment_name_to_rdkit_molecule = OrderedDict()
-        for fragment_name, smile in self.fragment_name_to_smiles.items():
-            rdkit_mol = Chem.MolFromSmiles(smile)
+        for row in self.fragments_pd.itertuples():
+            fragment_name = row.name
+            query = row.query
+            kind = row.kind
+            if kind == 'SMARTS':
+                rdkit_mol = Chem.MolFromSmarts(query)
+            else:
+                rdkit_mol = Chem.MolFromSmiles(query)
+                if kind == 'LIKE':
+                    for bond in rdkit_mol.GetBonds():
+                        bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED)
             self.fragment_name_to_rdkit_molecule[fragment_name] = rdkit_mol
+
+    def smiles_for_fragment_name(self, query_name):
+        """
+        provides the query SMILES or SMARTS string for a given fragment name
+         
+        Returns:
+            str: the SMILES or SMARTS string or None if fragment name not found. 
+        """
+        df = self.fragments_pd
+        select = df.loc[df['name'] == query_name]
+        if select.shape[0] == 0:
+            return None
+        else:
+            return select['query'].values[0]
+
 
 
 def produce_png_img_of_all_fragments():
     from rdkit.Chem import Draw
     frag_library = FragmentLibrary()
-    raise NotImplementedError('to be rewritten!')
     ms = list(frag_library.fragment_name_to_rdkit_molecule.values())
-    labels = list(frag_library.fragment_name_to_smiles.keys())
+    labels = list(frag_library.fragment_name_to_rdkit_molecule.keys())
     img = Draw.MolsToGridImage(ms, legends=labels, molsPerRow=10)
     img_file_name = os.path.join(this_script_dir(), 'data', 'fragment_library.png')
     img.save(img_file_name)

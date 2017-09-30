@@ -1,2 +1,2 @@
-include pdbeccdutils/data/fragment_library.smi
+include pdbeccdutils/data/fragment_library.tsv
 include pdbeccdutils/data/ring2dtemplates.sdf
