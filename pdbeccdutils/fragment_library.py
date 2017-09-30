@@ -18,6 +18,7 @@
 import csv
 import logging
 import os
+import pandas as pd
 from collections import OrderedDict
 from rdkit import Chem
 from pdbeccdutils.utilities import default_fragment_library_file_path, this_script_dir
@@ -28,6 +29,8 @@ class FragmentLibrary(object):
     store common fragments from
     """
     def __init__(self, override_fragment_library_file_path=None):
+        self.fragments_pd = None
+        """panda data frame containing the information"""
         self.fragment_name_to_smiles = OrderedDict()
         self.fragment_name_to_rdkit_molecule = OrderedDict()
         if override_fragment_library_file_path is None:
@@ -104,11 +107,14 @@ class FragmentLibrary(object):
                 self.fragment_name_to_smiles[name] = smile
 
     def _load_tsv(self, fragment_file_name):
-        logging.debug('parse {} with csv.Dictreader:'.format(fragment_file_name))
-        with open(fragment_file_name, 'r') as fragment_file:
-            reader =  csv.DictReader(fragment_file, delimiter='\t')
-            for row in reader:
-                logging.debug(row)
+        logging.debug('parse {} into panda dataframe:'.format(fragment_file_name))
+        self.fragments_pd = pd.read_csv(fragment_file_name, sep='\t')
+        logging.debug('dataframe:\n{}'.format(self.fragments_pd.to_string()))
+        columns = self.fragments_pd.columns.values.tolist()
+        logging.debug('columns: {}'.format(columns))
+        for required in 'name', 'type', 'query':
+            if not required in columns:
+                raise ValueError('fragment library file lacks required column "{}"'.format(required))
 
     def _create_frag_name_to_rdkit_mol(self):
         """
@@ -123,6 +129,7 @@ class FragmentLibrary(object):
 def produce_png_img_of_all_fragments():
     from rdkit.Chem import Draw
     frag_library = FragmentLibrary()
+    raise NotImplementedError('to be rewritten!')
     ms = list(frag_library.fragment_name_to_rdkit_molecule.values())
     labels = list(frag_library.fragment_name_to_smiles.keys())
     img = Draw.MolsToGridImage(ms, legends=labels, molsPerRow=10)
