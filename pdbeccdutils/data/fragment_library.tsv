@@ -83,7 +83,7 @@ quinoline	SMILES	c1cc2c(cc1)nccc2		unchecked
 quinoxaline	SMILES	c1ccc2c(c1)nccn2		unchecked	
 rauwolfia	SMILES	c1ccc2c(c1)c1c(n2)c2n(cc1)cc1c(c2)cccc1		unchecked	
 ribose	SMILES	C1(C(C(OC1)CO)O)O		unchecked	
-steroid-like	LIKE	C1CCC2C(C1)C1C(CC2)C2C(CC1)CCC2	"steroid ring connectivity"	unchecked
+steroid-like	LIKE	C1CCC2C(C1)C1C(CC2)C2C(CC1)CCC2	"steroid ring connectivity"	checked
 succinimide	SMILES	C1C(=O)NC(=O)C1		unchecked	
 thiadiazole	SMILES	c1nncs1		unchecked	
 thiazole	SMILES	c1cncs1		unchecked	
