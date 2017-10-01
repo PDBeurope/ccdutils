@@ -16,11 +16,13 @@
 # under the License.
 #
 import logging
-import os
-import pandas as pd
+import sys
 from collections import OrderedDict
+
+import pandas as pd
 from rdkit import Chem
-from pdbeccdutils.utilities import default_fragment_library_file_path, this_script_dir
+
+from pdbeccdutils.utilities import default_fragment_library_file_path
 
 
 class FragmentLibrary(object):
@@ -133,11 +135,15 @@ def produce_png_img_of_all_fragments():
     ms = list(frag_library.fragment_name_to_rdkit_molecule.values())
     labels = list(frag_library.fragment_name_to_rdkit_molecule.keys())
     img = Draw.MolsToGridImage(ms, legends=labels, molsPerRow=10)
-    img_file_name = os.path.join(this_script_dir(), 'data', 'fragment_library.png')
-    img.save(img_file_name)
-    print('Have written image of all the fragments to {}'.format(img_file_name))
+    img_file_name = 'fragment_library.png'
+    try:
+        img.save(img_file_name)
+        print('Have written image of all the fragments to {}'.format(img_file_name))
+    except IOError as e_mess:
+        print('Error cannot write image file to current directory - problem:\n{}'.format(e_mess))
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s', )
+    # logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s', )
     produce_png_img_of_all_fragments()
