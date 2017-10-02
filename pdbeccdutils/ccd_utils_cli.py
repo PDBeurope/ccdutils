@@ -62,7 +62,7 @@ def main():
 
     try:
         pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=cif_file)
-    except IOError as e_detail:
+    except (IOError, ValueError) as e_detail:
         raise SystemExit(e_detail)
     logger.info(' chem_comp_id {} '.format(pdb_cc_rdkit.chem_comp_id))
     logger.info(' chem_comp_name: {}'.format(pdb_cc_rdkit.chem_comp_name))
