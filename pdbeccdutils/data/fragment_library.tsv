@@ -30,7 +30,7 @@ cyclohexane	SMILES	C1CCCCC1		unchecked
 cyclopentane	SMILES	C1CCCC1		unchecked	
 cyclopropane	SMILES	C1CC1		unchecked	
 cytosine	SMILES	C1=CNC(NC1N)O		unchecked	
-deoxyribose	SMILES	C1C(C(OC1)CO)O		unchecked	
+deoxyribose	SMARTS	C1[CH2]C(O)C(O1)CO	"2-deoxyribose the monosaccharide found in DNA. Query will not match RNA ribose."	unchecked   https://en.wikipedia.org/wiki/Deoxyribose
 dibenzofuran	SMILES	c12c(c3c(o1)cccc3)cccc2		unchecked	
 dibenzothiophen	SMILES	c12c(c3c(s1)cccc3)cccc2		unchecked	
 dithiolane	SMILES	S1CCCS1		unchecked	
