@@ -75,6 +75,17 @@ class FragmentLibrary(object):
                     fragments[fragment_name].append(atom_names)
         return fragments
 
+    def html_report_of_fragments(self, pdb_ccd_rdkit, html_file_name):
+        """
+        idea produce an html report to a file of the fragments identified within a molecule
+
+        Args:
+            pdb_ccd_rdkit: A PdbChemicalComponentsRDKit molecule
+            html_file_name (str): file bane for the output html file
+        """
+        raise NotImplementedError('html_report_of_fragments to be written')
+
+
     def _load(self, fragment_file_name):
         """
         loads fragment library from the file in data.

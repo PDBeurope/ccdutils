@@ -36,16 +36,24 @@ def __parse_command_line_args():
     parser.add_argument('CIF', help='input PDB-CCD mmcif file (must be specified)')
     parser.add_argument('--library',
                         help='use this fragment library in place of the one supplied with the code.')
-    parser.add_argument('--svg', help='write an 2D image of the compound to svg file')
+    parser.add_argument('--svg', help='write a svg file with a 2D image of the compound')
     atom_labels_parser = parser.add_mutually_exclusive_group(required=False)
     atom_labels_parser.add_argument('--atom_labels', dest='atom_labels', action='store_true',
                                     help='turn on atom labels for 2D image.')
     atom_labels_parser.add_argument('--no_atom_labels', dest='atom_labels', action='store_false',
                                     help='turn off atom labels for 2D image (the default).')
     parser.set_defaults(atom_labels=False)
+    parser.add_argument('--fragment_html',
+                        help='write an html file with a report on the fragments identified within the compound')
     parser.add_argument('--debug', action='store_true', help='turn on debug message logging output')
     return parser.parse_args()
 
+def _log_fragments(logger, fragments):
+    logger.info(' fragments:')
+    for (name, list_of_atom_list) in fragments.items():
+        logger.info('    {} occurs {} times:'.format(name, len(list_of_atom_list)))
+        for atoms in list_of_atom_list:
+            logger.info('         {}'.format(' '.join(atoms)))
 
 def main():
     logger = logging.getLogger(' ')
@@ -56,6 +64,7 @@ def main():
         logging.basicConfig(level=logging.INFO)
     cif_file = args.CIF
     svg_file = args.svg
+    fragment_html_file = args.fragment_html
     atom_labels = args.atom_labels
     library = args.library
     logger.debug('CIF is {}'.format(cif_file))
@@ -67,16 +76,14 @@ def main():
     logger.info(' chem_comp_id {} '.format(pdb_cc_rdkit.chem_comp_id))
     logger.info(' chem_comp_name: {}'.format(pdb_cc_rdkit.chem_comp_name))
 
-    frag_lib = FragmentLibrary(override_fragment_library_file_path=library)
-    fragments = frag_lib.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)
-    logger.info(' fragments:')
-    for (name, list_of_atom_list) in fragments.items():
-        logger.info('    {} occurs {} times:'.format(name, len(list_of_atom_list)))
-        for atoms in list_of_atom_list:
-            logger.info('         {}'.format(' '.join(atoms)))
-
     if svg_file is not None:
         pdb_cc_rdkit.image_file_or_string(file_name=svg_file, atom_labels=atom_labels, pixels_x=400, pixels_y=400)
+
+    frag_lib = FragmentLibrary(override_fragment_library_file_path=library)
+    fragments = frag_lib.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)
+    _log_fragments(logger, fragments)
+    if fragment_html_file is not None:
+        frag_lib.html_report_of_fragments(pdb_cc_rdkit, fragment_html_file)
 
 
 if __name__ == "__main__":
