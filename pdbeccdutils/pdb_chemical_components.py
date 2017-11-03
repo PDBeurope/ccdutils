@@ -394,6 +394,16 @@ class PdbChemicalComponents(object):
             self.bond_aromatic.append(bond_aromatic)
 
     def find_atom_index(self, atom_id):
+        """
+        returns the intger index in the CCD of an atom_id (name)
+         
+        Args:
+            atom_id (str): cif item atom_id aka name  
+
+        Returns:
+            int: the index or -1 if the atom 
+
+        """
         for index in range(len(self._atoms)):
             this_atom = self._atoms[index]
             if atom_id == this_atom['atom_id']:
@@ -545,7 +555,7 @@ class PdbChemicalComponents(object):
                 elif descriptor['type'] == 'InChIKey':
                     self.inchikey = descriptor['descriptor']
                 else:
-                    logging.warn('unrecognized pdbx_chem_comp_descriptor {}'.format(descriptor))
+                    logging.warning('unrecognized pdbx_chem_comp_descriptor {}'.format(descriptor))
 
     def _pdbecif_parse_pdbx_chem_comp_identifier(self, data_block):
         """
@@ -568,7 +578,7 @@ class PdbChemicalComponents(object):
                 elif identifier['type'] == 'SYSTEMATIC NAME' and 'OpenEye' in identifier['program']:
                     self.systematic_name_openeye = identifier['identifier']
                 else:
-                    logging.warn('unrecognized chem_comp_identifier {} '.format(identifier))
+                    logging.warning('unrecognized chem_comp_identifier {} '.format(identifier))
 
     def write_ccd_cif(self, output_ccd_cif_file_name):
         """

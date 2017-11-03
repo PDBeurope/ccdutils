@@ -21,6 +21,7 @@ from collections import OrderedDict
 
 import pandas as pd
 from rdkit import Chem
+from yattag import Doc
 
 from pdbeccdutils.utilities import default_fragment_library_file_path
 
@@ -75,16 +76,67 @@ class FragmentLibrary(object):
                     fragments[fragment_name].append(atom_names)
         return fragments
 
-    def html_report_of_fragments(self, pdb_ccd_rdkit, html_file_name):
+    def html_report_of_fragments(self, pdb_ccd_rdkit, fragments, html_file_name):
         """
         idea produce an html report to a file of the fragments identified within a molecule
 
         Args:
             pdb_ccd_rdkit: A PdbChemicalComponentsRDKit molecule
-            html_file_name (str): file bane for the output html file
+            fragments: the fragments in the molecule - a dictionary fragment name: list of (list of atom ids/names)
+            html_file_name (str): file name for the output html file
         """
-        raise NotImplementedError('html_report_of_fragments to be written')
 
+        html_text = self.prepare_html(pdb_ccd_rdkit, fragments)
+        try:
+            with open(html_file_name, "w") as text_file:
+                text_file.write(html_text)
+        except IOError as e_mess:
+            print('Error cannot open or write html file - problem:\n{}'.format(e_mess))
+            sys.exit(1)
+
+    def prepare_html(self, pdb_ccd_rdkit, fragments):
+        """
+        prepares an html document of the fragments within a chem_comp
+        
+        Args:
+            pdb_ccd_rdkit: A PdbChemicalComponentsRDKit molecule
+            fragments: the fragments in the molecule - a dictionary fragment name: list of (list of atom ids/names)
+        Returns:
+            str: containing html document
+        """
+        fragments_ordered_by_number_atoms = OrderedDict(sorted(fragments.items(), key=lambda x: -len(x[1][0])))
+        doc, tag, text, line = Doc().ttl()
+        title = 'fragments for {}'.format(pdb_ccd_rdkit.chem_comp_id)
+        with tag('html'):
+            with tag('head'):
+                with tag('title'):
+                    text(title)
+            with tag('body'):
+                with tag('h1'):
+                    text(title)
+                with tag('p'):
+                    text(' chem_comp_name: {}'.format(pdb_ccd_rdkit.chem_comp_name))
+                for (name, list_of_atom_list) in fragments_ordered_by_number_atoms.items():
+                    with tag('h3'):
+                        text('{}'.format(name))
+                    with tag('p'):
+                        for atoms in list_of_atom_list:
+                            svg_diagram = pdb_ccd_rdkit.image_file_or_string(highlight_atoms=atoms,
+                                                                             atom_labels=False, black=True)
+                            svg_diagram = svg_diagram.replace('svg:', '')
+                            doc.asis(svg_diagram)
+                    with tag('p'):
+                        description = self.information_for_fragment_name(name, query_type='description')
+                        if description is not None:
+                            doc.asis(description + ' ')
+                        url = self.information_for_fragment_name(name, query_type='url')
+                        if url is not None:
+                            doc.stag('br')
+                            with tag('a', href=url):
+                                text(url)
+
+        result = doc.getvalue()
+        return result
 
     def _load(self, fragment_file_name):
         """
@@ -124,21 +176,27 @@ class FragmentLibrary(object):
                         bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED)
             self.fragment_name_to_rdkit_molecule[fragment_name] = rdkit_mol
 
-    def smiles_for_fragment_name(self, query_name):
+    def information_for_fragment_name(self, fragment_name, query_type='query'):
         """
-        provides the query SMILES or SMARTS string for a given fragment name
+        provides the information (default the query SMILES or SMARTS string) for a given fragment name
+
+        
+        Args:
+            fragment_name (str): name of fragment 
+            query_type (str): the tsv column header for example url
          
         Returns:
-            str: the SMILES or SMARTS string or None if fragment name not found. 
+            str: the required information from the tsv file or None if fragment name not found. 
         """
         df = self.fragments_pd
-        select = df.loc[df['name'] == query_name]
+        select = df.loc[df['name'] == fragment_name]
         if select.shape[0] == 0:
             return None
         else:
-            return select['query'].values[0]
-
-
+            value = select[query_type].values[0]
+            if str(value) == 'nan':
+                return None
+            return value
 
 def produce_png_img_of_all_fragments():
     from rdkit.Chem import Draw

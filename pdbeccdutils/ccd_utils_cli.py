@@ -48,12 +48,14 @@ def __parse_command_line_args():
     parser.add_argument('--debug', action='store_true', help='turn on debug message logging output')
     return parser.parse_args()
 
+
 def _log_fragments(logger, fragments):
     logger.info(' fragments:')
     for (name, list_of_atom_list) in fragments.items():
         logger.info('    {} occurs {} times:'.format(name, len(list_of_atom_list)))
         for atoms in list_of_atom_list:
             logger.info('         {}'.format(' '.join(atoms)))
+
 
 def main():
     logger = logging.getLogger(' ')
@@ -83,7 +85,7 @@ def main():
     fragments = frag_lib.fragments_for_pdb_chemical_components_rdkit(pdb_cc_rdkit)
     _log_fragments(logger, fragments)
     if fragment_html_file is not None:
-        frag_lib.html_report_of_fragments(pdb_cc_rdkit, fragment_html_file)
+        frag_lib.html_report_of_fragments(pdb_cc_rdkit, fragments, fragment_html_file)
 
 
 if __name__ == "__main__":

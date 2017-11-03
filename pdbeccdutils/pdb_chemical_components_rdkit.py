@@ -33,6 +33,7 @@ from lxml import etree
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,Tc,Ru,Rh,Pd,Ag,' \
                'Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
 
+
 class PdbChemicalComponentsRDKit(PdbChemicalComponents):
     """ PdbChemicalComponents class with extension to produce RDKit Mol"""
 
@@ -205,7 +206,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 metal_atom.SetFormalCharge(metal_atom.GetFormalCharge()+1)
                 rwmol.RemoveBond(metal_index, n_index)
             rwmol = Chem.RemoveHs(rwmol, sanitize=True)
-            #Chem.Kekulize(rwmol)
             logging.debug('SMILES after breaking {}'.format(Chem.MolToSmiles(rwmol)))
             return rwmol
 
@@ -576,8 +576,8 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             return None
 
     def image_file_or_string(self, file_name=None, wedge=True, atom_labels=True, hydrogen=False,
-                             pixels_x=400, pixels_y=200, highlight_bonds=None, black=False,
-                             raise_exception=False):
+                             pixels_x=400, pixels_y=200, highlight_bonds=None, highlight_atoms=None,
+                             black=False, raise_exception=False):
         """
         produces a svg image of the molecule to a string or file using RDKit.
 
@@ -589,6 +589,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             pixels_x (int): size of image in pixels
             pixels_y (int): size of image in pixels
             highlight_bonds: an ordered dictionary of bonds to highlight key (atom_index_0, atom_index_1) to (r,g,b)
+            highlight_atoms: a list of atom names to highlight in the diagram
             black (bool): wipe out atom colors and make the molecular diagram black (highlight_bonds are not affected).
             raise_exception (bool): raise an exception on RDKit problems. Defaults to silently returning
 
@@ -607,7 +608,6 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 mol_to_draw = self.rwmol_cleaned
             else:
                 mol_to_draw = self.rwmol_cleaned_remove_h
-
 
         copy_to_draw = Chem.RWMol(mol_to_draw, True)  # boolean quickCopy means no conformers.
         # load 2D coords
@@ -630,9 +630,14 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             else:
                 logging.error('Problem for {} in PrepareMolForDrawing: {}'.format(self.chem_comp_id, e_mess))
                 return
-        if highlight_bonds is None:
+        if highlight_bonds is None and highlight_atoms is None:
             drawer.DrawMolecule(copy_to_draw)
-        else:
+        elif highlight_atoms is not None:
+            if highlight_bonds is not None:
+                raise RuntimeError('error highlight_atoms and highlight_bonds cannot be specified together')
+            highlight_atoms_ids = self._list_atom_indexes_from_list_of_atom_ids(highlight_atoms)
+            drawer.DrawMolecule(copy_to_draw, highlightAtoms=highlight_atoms_ids)
+        else:  # highlight_bonds given
             # highlight the atoms on each end of the bond in the colour
             highlight_atoms_colours = {}
             for key in highlight_bonds:
@@ -673,6 +678,15 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 img_file.write(svg)
                 img_file.close()
         return None
+
+    def _list_atom_indexes_from_list_of_atom_ids(self, highlight_atom_ids):
+        atoms_indexes = []
+        for atom_id in highlight_atom_ids:
+            atom_index = self.find_atom_index(atom_id)
+            if atom_index == -1:
+                raise RuntimeError('atom_id (aka name) not found in CCD {}'.format(atom_id))
+            atoms_indexes.append(atom_index)
+        return atoms_indexes
 
     @staticmethod
     def replace_none_with_0_0_0(xyz_coordinates_tuple):
