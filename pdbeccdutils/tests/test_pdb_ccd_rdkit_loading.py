@@ -17,7 +17,7 @@
 #
 import unittest
 
-from nose.tools import assert_equals, assert_not_equals
+from nose.tools import assert_equals, assert_not_equals, assert_almost_equals
 
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from pdbeccdutils.utilities import cif_filename, supply_list_of_sample_cifs
@@ -52,7 +52,9 @@ def test_inchikey_match_for_all_sample_cifs():
 
 def test_xyz_2d():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
-    yield assert_equals, 3, len(eoh.xyz_2d_no_hydrogen)
+    yield assert_equals, 3, len(eoh.xyz_2d_no_hydrogen), 'EOH length eoh.xyz_2d_no_hydrogen'
+    yield assert_equals, 0., eoh.xyz_2d_no_hydrogen[0][0], 'EOH length eoh.xyz_2d_no_hydrogen first atom x'
+    yield assert_almost_equals, 0.5, eoh.xyz_2d_no_hydrogen[0][1], 7, 'EOH length eoh.xyz_2d_no_hydrogen first atom y'
     yield assert_equals, 9, len(eoh.xyz_2d)
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):

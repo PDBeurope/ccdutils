@@ -19,7 +19,7 @@ import logging
 import os
 import tempfile
 from ccdc import io, conformer
-from pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
+from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from yattag import Doc
 from collections import OrderedDict
 
@@ -312,6 +312,7 @@ class PdbCCDMogul(object):
         svg_string = self.pdb_ccd_rdkit.image_file_or_string(hydrogen=False, atom_labels=False, wedge=False,
                                                              highlight_bonds=highlight_bonds, black=True,
                                                              pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
+        svg_string = svg_string.replace('svg:', '')
         self.svg_coloured_diagram[observation_type] = svg_string
 
     def prepare_file_html(self, html_file_name):
@@ -325,6 +326,7 @@ class PdbCCDMogul(object):
         chem_comp_id = self.pdb_ccd_rdkit.chem_comp_id
         chem_comp_name = self.pdb_ccd_rdkit.chem_comp_name
         svg_diagram = self.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
+        svg_diagram = svg_diagram.replace('svg:', '')
         title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
         with tag('html'):
             with tag('head'):

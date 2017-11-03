@@ -351,10 +351,11 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         assert n_conformers == 1, 'should have one conformer'
         conformer = mol_to_draw.GetConformer(0)
         assert not conformer.Is3D(), 'conformer must be 2D'
-        for position in conformer.GetPositions():
-            float_x = float(position[0])
-            float_y = float(position[1])
-            float_z = float(position[2])
+        for atom_index in range(conformer.GetNumAtoms()):
+            position = conformer.GetAtomPosition(atom_index)
+            float_x = float(position.x)
+            float_y = float(position.y)
+            float_z = float(position.z)
             this_xyz.append((float_x, float_y, float_z))
         this_xyz = tuple(this_xyz)
         return this_xyz

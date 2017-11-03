@@ -24,7 +24,7 @@ from nose.tools import assert_equals, assert_true, assert_false
 from pdbeccdutils.utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
 
 try:
-    from pdb_ccd_mogul import PdbCCDMogul
+    from pdbeccdutils.pdb_ccd_mogul import PdbCCDMogul
 
 
     def test_eoh_mogul():
