@@ -621,8 +621,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             # noinspection PyArgumentList
             for atom in copy_to_draw.GetAtoms():
                 atom_index = atom.GetIdx()
-                atom_name = self.atom_ids[atom_index]
-                opts.atomLabels[atom_index] = atom_name
+                opts.atomLabels[atom_index] = atom.GetProp('name')
         try:
             copy_to_draw = rdMolDraw2D.PrepareMolForDrawing(copy_to_draw, wedgeBonds=wedge, addChiralHs=False)
         except Exception as e_mess:
