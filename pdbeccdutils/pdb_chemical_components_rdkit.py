@@ -589,7 +589,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             hydrogen (bool): include hydrogen atoms in the image.
             pixels_x (int): size of image in pixels
             pixels_y (int): size of image in pixels
-            highlight_bonds: an ordered dictionary of bonds to highlight key (atom_index_0, atom_index_1) to (r,g,b)
+            highlight_bonds: an ordered dictionary of bonds to highlight key (atom name (aka id), atom name) to (r,g,b)
             highlight_atoms: a list of atom names to highlight in the diagram
             black (bool): wipe out atom colors and make the molecular diagram black (highlight_bonds are not affected).
             raise_exception (bool): raise an exception on RDKit problems. Defaults to silently returning
@@ -635,26 +635,11 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         elif highlight_atoms is not None:
             if highlight_bonds is not None:
                 raise RuntimeError('error highlight_atoms and highlight_bonds cannot be specified together')
-            highlight_atoms_ids = self._list_atom_indexes_from_list_of_atom_ids(highlight_atoms)
+            highlight_atoms_ids = self._setup_highlight_atoms(copy_to_draw, highlight_atoms)
             drawer.DrawMolecule(copy_to_draw, highlightAtoms=highlight_atoms_ids)
         else:  # highlight_bonds given
-            # highlight the atoms on each end of the bond in the colour
-            highlight_atoms_colours = {}
-            for key in highlight_bonds:
-                highlight_atoms_colours[key[0]] = highlight_bonds[key]
-                highlight_atoms_colours[key[1]] = highlight_bonds[key]
-            # find the bond in the rdkit molecule
-            highlight_bonds_colours = {}
-            for key in highlight_bonds:
-                at_index_0 = key[0]
-                at_index_1 = key[1]
-                for bond in copy_to_draw.GetBonds():
-                    bond_index_0 = bond.GetBeginAtomIdx()
-                    bond_index_1 = bond.GetEndAtomIdx()
-                    if (at_index_0 == bond_index_0 and at_index_1 == bond_index_1) or \
-                       (at_index_0 == bond_index_1 and at_index_1 == bond_index_0):
-                        highlight_bonds_colours[bond.GetIdx()] = highlight_bonds[key]
-                        break
+            highlight_atoms_colours, highlight_bonds_colours = \
+                self._setup_highlight_bonds(copy_to_draw, highlight_bonds)
             drawer.DrawMolecule(copy_to_draw,
                                 highlightAtoms=highlight_atoms_colours.keys(),
                                 highlightAtomColors=highlight_atoms_colours,
@@ -679,14 +664,60 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
                 img_file.close()
         return None
 
-    def _list_atom_indexes_from_list_of_atom_ids(self, highlight_atom_ids):
+    def _setup_highlight_atoms(self, rwmol, highlight_atom_ids):
+        """
+        sets up highlighting of atoms
+        
+        Args:
+            rwmol: a rdkit RWmol that is to be draw
+            highlight_atom_ids: a list of atom id's (aka names) to be highlighted in the default way
+
+        Returns:
+            a list of atom indices for the highlighted atoms in the molecule
+        """
         atoms_indexes = []
         for atom_id in highlight_atom_ids:
-            atom_index = self.find_atom_index(atom_id)
+            atom_index = self._find_index_for_name_in_rdkit_mol(atom_id, rwmol)
             if atom_index == -1:
                 raise RuntimeError('atom_id (aka name) not found in CCD {}'.format(atom_id))
             atoms_indexes.append(atom_index)
         return atoms_indexes
+
+    def _setup_highlight_bonds(self, rwmol, highlight_bonds):
+        """
+        setups the highlighting of bonds.
+        
+        Args:
+            rwmol: a rdkit RWmol
+            highlight_bonds: an ordered dictionary of bonds to highlight key (atom name (aka id), atom name) to (r,g,b)
+
+        Returns:
+            tuple: (highlight_atoms_colours, highlight_bonds_colours) each one is a dictionary atom indices 
+            in the molecule to draw.....
+        """
+        # highlight the atoms on each end of the bond in the colour
+        highlight_atoms_colours = {}
+        highlight_bonds_colours = {}
+        for key in highlight_bonds:
+            at_index_0 = self._find_index_for_name_in_rdkit_mol(key[0], rwmol)
+            at_index_1 = self._find_index_for_name_in_rdkit_mol(key[1], rwmol)
+            highlight_atoms_colours[at_index_0] = highlight_bonds[key]
+            highlight_atoms_colours[at_index_1] = highlight_bonds[key]
+            for bond in rwmol.GetBonds():
+                bond_index_0 = bond.GetBeginAtomIdx()
+                bond_index_1 = bond.GetEndAtomIdx()
+                if (at_index_0 == bond_index_0 and at_index_1 == bond_index_1) or \
+                        (at_index_0 == bond_index_1 and at_index_1 == bond_index_0):
+                    highlight_bonds_colours[bond.GetIdx()] = highlight_bonds[key]
+                    break
+        return highlight_atoms_colours, highlight_bonds_colours
+
+    @staticmethod
+    def _find_index_for_name_in_rdkit_mol(atom_name, rwmol):
+        for atom in rwmol.GetAtoms():
+            if atom.GetProp('name') == atom_name:
+                return atom.GetIdx()
+        raise RuntimeError('atom_id (aka name) not found in CCD {}'.format(atom_name))
 
     @staticmethod
     def replace_none_with_0_0_0(xyz_coordinates_tuple):
