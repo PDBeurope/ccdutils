@@ -292,16 +292,17 @@ class PdbCCDMogul(object):
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
         highlight_bonds = OrderedDict()
         for thing in sorted(work_from, key=lambda b: b.zorder):
+            logging.debug('thing={}'.format(thing))
             classification = thing.classification
             if classification == 0:  # too few hits
                 pass
             elif observation_type == 'bond':
-                highlight_bonds[(min(thing.indices), max(thing.indices))] = CLASSIFICATION_COLOR[classification]
+                highlight_bonds[(thing.atoms_ids[0], thing.atoms_ids[1])] = CLASSIFICATION_COLOR[classification]
             elif observation_type == 'angle':
                 logging.debug('thing.indices is {} thing.atom_ids={} classification={}'.
                               format(thing.indices, thing.atoms_ids, classification))
-                first_bond_in_angle = (min(thing.indices[0:2]), max(thing.indices[0:2]))
-                second_bond_in_angle = (min(thing.indices[1:3]), max(thing.indices[1:3]))
+                first_bond_in_angle = (thing.atoms_ids[0], thing.atoms_ids[1])
+                second_bond_in_angle = (thing.atoms_ids[1], thing.atoms_ids[2])
                 logging.debug(' first_bond_in_angle is {}'.format(first_bond_in_angle))
                 logging.debug(' second_bond_in_angle is {}'.format(second_bond_in_angle))
                 for this_bond in first_bond_in_angle, second_bond_in_angle:
@@ -309,6 +310,7 @@ class PdbCCDMogul(object):
                         del highlight_bonds[this_bond]
                     highlight_bonds[this_bond] = CLASSIFICATION_COLOR[classification]
         logging.debug('hightlight_bonds={}'.format(highlight_bonds))
+        # svg_string = ''
         svg_string = self.pdb_ccd_rdkit.image_file_or_string(hydrogen=False, atom_labels=False, wedge=False,
                                                              highlight_bonds=highlight_bonds, black=True,
                                                              pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
