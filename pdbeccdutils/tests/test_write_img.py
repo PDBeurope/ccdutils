@@ -19,7 +19,7 @@ import collections
 import os
 import unittest
 
-from nose.tools import assert_in, assert_true, assert_false, raises
+from nose.tools import assert_in, assert_true, assert_false, raises, assert_not_in
 
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from pdbeccdutils.utilities import cif_filename, supply_list_of_sample_cifs, file_name_in_tsts_out
@@ -86,6 +86,11 @@ def test_10r_raises_exception():
     ccd = PdbChemicalComponentsRDKit(file_name=cif_filename('10R'))
     ccd.image_file_or_string(hydrogen=False, atom_labels=True, wedge=True, raise_exception=True)
 
+def test_00O_labels_have_OXT_not_H37():
+    pdb_cc_rdkit = PdbChemicalComponentsRDKit(file_name=cif_filename('00O'))
+    svg = pdb_cc_rdkit.image_file_or_string(hydrogen=False, atom_labels=True, wedge=True)
+    yield assert_true, 'OXT' in svg, '00O: The svg file must contain the atom name OXT'
+    yield assert_false, 'H37' in svg, '00O: The svg file must  not contain the atom name H37'
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
