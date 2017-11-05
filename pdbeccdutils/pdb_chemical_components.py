@@ -540,22 +540,29 @@ class PdbChemicalComponents(object):
             pass
         else:
             for descriptor in pdbx_chem_comp_descriptor:
-                if descriptor['type'] == 'SMILES' and descriptor['program'] == 'ACDLabs':
-                    self.smiles_acdlabs = descriptor['descriptor']
-                elif descriptor['type'] == 'SMILES_CANONICAL' and descriptor['program'] == 'CACTVS':
-                    self.smiles_canonical_cactvs = descriptor['descriptor']
-                elif descriptor['type'] == 'SMILES' and descriptor['program'] == 'CACTVS':
-                    self.smiles_cactvs = descriptor['descriptor']
-                elif descriptor['type'] == 'SMILES_CANONICAL' and 'OpenEye' in descriptor['program']:
-                    self.smiles_canonical_openeye = descriptor['descriptor']
-                elif descriptor['type'] == 'SMILES' and 'OpenEye' in descriptor['program']:
-                    self.smiles_openeye = descriptor['descriptor']
-                elif descriptor['type'] == 'InChI':
-                    self.inchi = descriptor['descriptor']
-                elif descriptor['type'] == 'InChIKey':
-                    self.inchikey = descriptor['descriptor']
-                else:
-                    logging.warning('unrecognized pdbx_chem_comp_descriptor {}'.format(descriptor))
+                this_type = descriptor['type']
+                this_program =  descriptor['program']
+                this_descriptor = descriptor['descriptor']
+                self._store_descriptor( this_type, this_program, this_descriptor)
+
+    def _store_descriptor( self, this_type, this_program, this_descriptor):
+        if this_type == 'SMILES' and this_program == 'ACDLabs':
+            self.smiles_acdlabs = this_descriptor
+        elif this_type == 'SMILES_CANONICAL' and this_program == 'CACTVS':
+            self.smiles_canonical_cactvs = this_descriptor
+        elif this_type == 'SMILES' and this_program == 'CACTVS':
+            self.smiles_cactvs = this_descriptor
+        elif this_type == 'SMILES_CANONICAL' and 'OpenEye' in this_program:
+            self.smiles_canonical_openeye = this_descriptor
+        elif this_type == 'SMILES' and 'OpenEye' in this_program:
+            self.smiles_openeye = this_descriptor
+        elif this_type == 'InChI':
+            self.inchi = this_descriptor
+        elif this_type == 'InChIKey':
+            self.inchikey = this_descriptor
+        else:
+            logging.warning('unrecognized pdbx_chem_comp_descriptor {} {} {}'. \
+                            format(this_type, this_program, this_descriptor))
 
     def _pdbecif_parse_pdbx_chem_comp_identifier(self, data_block):
         """
@@ -620,7 +627,7 @@ class PdbChemicalComponents(object):
         cif_file = CifFile(file_name, parseLogFileName=None).getCifFile()
         first_data_block = cif_file.GetBlock(cif_file.GetFirstBlockName())
         table_chem_comp = first_data_block.GetTable('chem_comp')
-        for thing in 'id', 'name', 'pdbx_release_status':
+        for thing in 'id', 'name', 'formula', 'pdbx_release_status':
             value = table_chem_comp(0, thing)
             setattr(self, "chem_comp_" + thing, value)
         self._atoms = []
@@ -653,6 +660,37 @@ class PdbChemicalComponents(object):
                 self.bonds.append(this_bond)
         except RuntimeError:
             pass # no bond table, e.g. NA.cif
+        self._ciffile_parse_pdbx_chem_comp_descriptor(first_data_block)
+        self._ciffile_parse_pdbx_chem_comp_identifier(first_data_block)
+
+    def _ciffile_parse_pdbx_chem_comp_descriptor(self, data_block):
+        try:
+            table_chem_comp_descriptor = data_block.GetTable('pdbx_chem_comp_descriptor')
+            number_descriptors = table_chem_comp_descriptor.GetNumRows()
+            for row_num in range(number_descriptors):
+                this_type = table_chem_comp_descriptor(row_num, 'type')
+                this_program = table_chem_comp_descriptor(row_num, 'program')
+                this_descriptor = table_chem_comp_descriptor(row_num, 'descriptor')
+                self._store_descriptor( this_type, this_program, this_descriptor)
+        except RuntimeError:
+            pass
+
+    def _ciffile_parse_pdbx_chem_comp_identifier(self, data_block):
+        try:
+            table_chem_comp_identifier = data_block.GetTable('pdbx_chem_comp_identifier')
+            number_identifiers = table_chem_comp_identifier.GetNumRows()
+            for row_num in range(number_identifiers):
+                this_type = table_chem_comp_identifier(row_num, 'type')
+                this_program = table_chem_comp_identifier(row_num, 'program')
+                this_identifier = table_chem_comp_identifier(row_num, 'identifier')
+                if this_type == 'SYSTEMATIC NAME' and this_program == 'ACDLabs':
+                    self.systematic_name_acdlabs = this_identifier
+                elif this_type == 'SYSTEMATIC NAME' and 'OpenEye' in this_program:
+                    self.systematic_name_openeye = this_identifier
+                else:
+                    logging.warning('unrecognized chem_comp_identifier')
+        except RuntimeError:
+            pass
 
     def __eq__(self, other):
         if type(other) is not type(self):
