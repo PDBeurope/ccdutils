@@ -624,29 +624,35 @@ class PdbChemicalComponents(object):
             value = table_chem_comp(0, thing)
             setattr(self, "chem_comp_" + thing, value)
         self._atoms = []
-        table_chem_comp_atom = first_data_block.GetTable('chem_comp_atom')
-        number_atoms = table_chem_comp_atom.GetNumRows()
-        for row_num in range(number_atoms):
-            my_chem_comp_atom = self.empty_chem_comp_atom()
-            for key in my_chem_comp_atom:
-                my_chem_comp_atom[key] = table_chem_comp_atom(row_num, key)
-            self._atoms.append(my_chem_comp_atom)
-        table_pdbx_chem_comp_descriptor = first_data_block.GetTable('pdbx_chem_comp_descriptor')
-        for row_num in range(table_pdbx_chem_comp_descriptor.GetNumRows()):
-            if table_pdbx_chem_comp_descriptor(row_num, 'type') == 'InChIKey':
-                self.inchikey = table_pdbx_chem_comp_descriptor(row_num, 'descriptor')
+        try:
+            table_chem_comp_atom = first_data_block.GetTable('chem_comp_atom')
+            number_atoms = table_chem_comp_atom.GetNumRows()
+            for row_num in range(number_atoms):
+                my_chem_comp_atom = self.empty_chem_comp_atom()
+                for key in my_chem_comp_atom:
+                    my_chem_comp_atom[key] = table_chem_comp_atom(row_num, key)
+                self._atoms.append(my_chem_comp_atom)
+            table_pdbx_chem_comp_descriptor = first_data_block.GetTable('pdbx_chem_comp_descriptor')
+            for row_num in range(table_pdbx_chem_comp_descriptor.GetNumRows()):
+                if table_pdbx_chem_comp_descriptor(row_num, 'type') == 'InChIKey':
+                    self.inchikey = table_pdbx_chem_comp_descriptor(row_num, 'descriptor')
+        except RuntimeError:
+            pass # no atom table, e.g. UNL.cif
         self.bonds = []
-        table_chem_comp_bond = first_data_block.GetTable('chem_comp_bond')
-        number_bonds = table_chem_comp_bond.GetNumRows()
-        for row_num in range(number_bonds):
-            atom_id_1 = table_chem_comp_bond(row_num, 'atom_id_1')
-            atom_id_2 = table_chem_comp_bond(row_num, 'atom_id_2')
-            value_order = table_chem_comp_bond(row_num, 'value_order')
-            pdbx_aromatic_flag = table_chem_comp_bond(row_num, 'pdbx_aromatic_flag')
-            pdbx_stereo_config = table_chem_comp_bond(row_num, 'pdbx_stereo_config')
-            this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
-                                  pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
-            self.bonds.append(this_bond)
+        try:
+            table_chem_comp_bond = first_data_block.GetTable('chem_comp_bond')
+            number_bonds = table_chem_comp_bond.GetNumRows()
+            for row_num in range(number_bonds):
+                atom_id_1 = table_chem_comp_bond(row_num, 'atom_id_1')
+                atom_id_2 = table_chem_comp_bond(row_num, 'atom_id_2')
+                value_order = table_chem_comp_bond(row_num, 'value_order')
+                pdbx_aromatic_flag = table_chem_comp_bond(row_num, 'pdbx_aromatic_flag')
+                pdbx_stereo_config = table_chem_comp_bond(row_num, 'pdbx_stereo_config')
+                this_bond = self.Bond(atom_id_1=atom_id_1, atom_id_2=atom_id_2, value_order=value_order,
+                                      pdbx_aromatic_flag=pdbx_aromatic_flag, pdbx_stereo_config=pdbx_stereo_config)
+                self.bonds.append(this_bond)
+        except RuntimeError:
+            pass # no bond table, e.g. NA.cif
 
     def __eq__(self, other):
         if type(other) is not type(self):
