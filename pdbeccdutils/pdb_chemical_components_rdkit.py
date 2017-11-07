@@ -656,6 +656,7 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             svg = svg.replace('#0000FF', '#000000')  # get rid of blue nitrogen
             svg = svg.replace('#FF7F00', '#000000')  # get rid of orange phosphorous
             svg = svg.replace('#CCCC00', '#000000')  # get rid of yellow sulphur
+            svg = svg.replace('#33CCCC', '#000000')  # get rid of cyan fluorine
         if file_name is None:
             return svg
         else:
