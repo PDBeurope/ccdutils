@@ -99,6 +99,7 @@ class PdbCCDMogul(object):
         self.detailed_html_table = {}
         """dictionary for each observation, giving detailed html table: 1st row is the header, rest the data"""
         self.svg_coloured_diagram = {}
+        self.svg_coloured_diagram_labels = {}
         """for each observation type"""
 
     def run_mogul(self):
@@ -310,12 +311,15 @@ class PdbCCDMogul(object):
                         del highlight_bonds[this_bond]
                     highlight_bonds[this_bond] = CLASSIFICATION_COLOR[classification]
         logging.debug('hightlight_bonds={}'.format(highlight_bonds))
-        # svg_string = ''
-        svg_string = self.pdb_ccd_rdkit.image_file_or_string(hydrogen=False, atom_labels=False, wedge=False,
+        for atom_labels in False, True:
+            svg_string = self.pdb_ccd_rdkit.image_file_or_string(hydrogen=False, atom_labels=atom_labels, wedge=False,
                                                              highlight_bonds=highlight_bonds, black=True,
                                                              pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
-        svg_string = svg_string.replace('svg:', '')
-        self.svg_coloured_diagram[observation_type] = svg_string
+            svg_string = svg_string.replace('svg:', '')
+            if not atom_labels:
+                self.svg_coloured_diagram[observation_type] = svg_string
+            else:
+                self.svg_coloured_diagram_labels[observation_type] = svg_string
 
     def prepare_file_html(self, html_file_name):
         html_text = self.prepare_html()
@@ -327,8 +331,6 @@ class PdbCCDMogul(object):
 
         chem_comp_id = self.pdb_ccd_rdkit.chem_comp_id
         chem_comp_name = self.pdb_ccd_rdkit.chem_comp_name
-        svg_diagram = self.pdb_ccd_rdkit.image_file_or_string(atom_labels=True, pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
-        svg_diagram = svg_diagram.replace('svg:', '')
         title = 'proof of concept - Mogul analysis of PDB-CCD coordinates for {}'.format(chem_comp_id)
         with tag('html'):
             with tag('head'):
@@ -351,9 +353,6 @@ class PdbCCDMogul(object):
                     line('li', 'chem_comp_id ' + chem_comp_id)
                     line('li', 'chem_comp_name ' + chem_comp_name)
                     line('li', "This analysis is of the wwPDB chemical component definition 'ideal' coordinates.")
-                with tag('h3'):
-                    text('atom labels: ')
-                doc.asis(svg_diagram)
                 for observation_type in MOGUL_OBSERVATION_TYPES:
                     self.prepare_html_section(observation_type, doc, tag, text, line)
                 with tag('h3'):
@@ -380,21 +379,28 @@ class PdbCCDMogul(object):
         if observation_type not in self.detailed_html_table:
             line('p', 'no ' + observation_type + 's found or NOT YET CODED!')
         else:
-            # svg and key in little table
-            with tag('table', klass='no_border'):
-                with tag('tr',  klass='no_border'):
-                    with tag('td', klass='no_border'):
-                        doc.asis(self.svg_coloured_diagram[observation_type])
-                    with tag('td', klass='no_border'):
-                        self.bond_angle_key(doc, tag, text, line)
-            with tag('i'):
-                text('TODO: add table with metrics - number and % for outliers, very-unusual, usual plus rmsZ*')
             with tag('div', id=observation_type + '_show_button'):
+                # svg and key in little table
+                with tag('table', klass='no_border'):
+                    with tag('tr', klass='no_border'):
+                        with tag('td', klass='no_border'):
+                            doc.asis(self.svg_coloured_diagram[observation_type])
+                        with tag('td', klass='no_border'):
+                            self.bond_angle_key(doc, tag, text, line)
                 with tag('button', klass='toggle', value=observation_type):
-                    text('Show detailed table showing results for each ' + observation_type)
+                    text('Show {} details'.format(observation_type))
             with tag('div', id=observation_type + "_details"):
+                with tag('table', klass='no_border'):
+                    with tag('tr', klass='no_border'):
+                        with tag('td', klass='no_border'):
+                            doc.asis(self.svg_coloured_diagram_labels[observation_type])
+                        with tag('td', klass='no_border'):
+                            self.bond_angle_key(doc, tag, text, line)
                 with tag('button', klass='toggle', value=observation_type):
-                    text('Hide detailed table')
+                    text('Hide {} details'.format(observation_type))
+                with tag('p'):
+                    with tag('i'):
+                        text('TODO: add table with metrics - number and % for outliers, very-unusual, usual plus rmsZ*')
                 with tag('table'):
                     with tag('tr'):
                         for item in self.detailed_html_table[observation_type][0][:-1]:
@@ -407,8 +413,9 @@ class PdbCCDMogul(object):
                                     text(item)
                             with tag('td', bgcolor=row[-1]):
                                 text(row[-2])
-                with tag('button', klass='toggle', value='bond'):
-                    text('Hide detailed table')
+                if len(self.detailed_html_table[observation_type]) > 10:
+                    with tag('button', klass='toggle', value=observation_type):
+                        text('Hide {} details'.format(observation_type))
 
     @staticmethod
     def bond_angle_key( doc, tag, text, line):
