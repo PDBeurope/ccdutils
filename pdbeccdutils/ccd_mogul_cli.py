@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # software from PDBe: Protein Data Bank in Europe; http://pdbe.org
 #
 # Copyright 2017 EMBL - European Bioinformatics Institute
@@ -44,7 +43,7 @@ def __parse_command_line_args():
     return parser.parse_args()
 
 
-def run():
+def main():
     logger = logging.getLogger(' ')
     args = __parse_command_line_args()
     if args.debug:
@@ -69,4 +68,4 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    main()
