@@ -36,6 +36,8 @@ def __parse_command_line_args():
     parser.add_argument('CIF', help='input PDB-CCD mmcif file (must be specified)')
     parser.add_argument('--library',
                         help='use this fragment library in place of the one supplied with the code.')
+    parser.add_argument('--sdf', help='write a sdf file with ideal coordinates')
+    parser.add_argument('--pdb', help='write a pdb file with ideal coordinates')
     parser.add_argument('--svg', help='write a svg file with a 2D image of the compound')
     atom_labels_parser = parser.add_mutually_exclusive_group(required=False)
     atom_labels_parser.add_argument('--atom_labels', dest='atom_labels', action='store_true',
@@ -65,6 +67,8 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
     cif_file = args.CIF
+    sdf_file = args.sdf
+    pdb_file = args.pdb
     svg_file = args.svg
     fragment_html_file = args.fragment_html
     atom_labels = args.atom_labels
@@ -78,6 +82,10 @@ def main():
     logger.info(' chem_comp_id {} '.format(pdb_cc_rdkit.chem_comp_id))
     logger.info(' chem_comp_name: {}'.format(pdb_cc_rdkit.chem_comp_name))
 
+    if sdf_file is not None:
+        pdb_cc_rdkit.sdf_file_or_string(file_name=sdf_file)
+    if pdb_file is not None:
+        pdb_cc_rdkit.pdb_file_or_string(file_name=pdb_file)
     if svg_file is not None:
         pdb_cc_rdkit.image_file_or_string(file_name=svg_file, atom_labels=atom_labels, pixels_x=400, pixels_y=400)
 
