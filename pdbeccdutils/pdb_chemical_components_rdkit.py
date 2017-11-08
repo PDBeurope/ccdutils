@@ -652,11 +652,15 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
         # next line might be needed to get svg to display in Jupyter notebook?
         # svg = svg.replace('svg:', '')
         if black:
-            svg = svg.replace('#FF0000', '#000000')  # get rid of red oxygen
-            svg = svg.replace('#0000FF', '#000000')  # get rid of blue nitrogen
-            svg = svg.replace('#FF7F00', '#000000')  # get rid of orange phosphorous
-            svg = svg.replace('#CCCC00', '#000000')  # get rid of yellow sulphur
-            svg = svg.replace('#33CCCC', '#000000')  # get rid of cyan fluorine
+            color_atoms = ('#FF0000',  # red oxygen
+                           '#0000FF',  # get rid of blue nitrogen
+                           '#FF7F00',  # get rid of orange phosphorous
+                           '#CCCC00',  # get rid of yellow sulphur
+                           '#33CCCC',  # get rid of cyan fluorine
+                           '#00CC00',  # get rid of green chlorine
+                           )
+            for color_atom in color_atoms:
+                svg = svg.replace(color_atom, '#000000')
         if file_name is None:
             return svg
         else:
