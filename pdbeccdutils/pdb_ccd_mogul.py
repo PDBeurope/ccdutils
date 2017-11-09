@@ -180,6 +180,17 @@ class PdbCCDMogul(object):
             store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
             logging.debug(store_nt)
             place_in.append(store_nt)
+            if observation_type == 'ring':
+                # hack can we get CSD codes?
+                # csd_identifiers = thing.hit_identifiers
+                # csd_identifiers.sort()
+                # logging.debug('{} {}'.format(atom_ids, ' '.join(csd_identifiers)))
+                for hit in thing.hits:
+                    logging.debug('RING HIT {} identifier={} value={} atom_labels={}'.
+                                  format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
+                    hit_atoms = hit.atoms
+                    for hit_atom in hit_atoms:
+                        logging.debug('RING HIT\t\tatom={} {}'.format(str(hit_atom.label), hit_atom.coordinates))
 
     def classify_observation(self, observation_type):
         """
