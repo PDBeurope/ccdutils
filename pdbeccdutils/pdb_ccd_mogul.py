@@ -19,6 +19,7 @@ import logging
 import os
 import tempfile
 from ccdc import io, conformer
+from ccdc.descriptors import MolecularDescriptors as MD
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from yattag import Doc
 from collections import OrderedDict
@@ -186,11 +187,20 @@ class PdbCCDMogul(object):
                 # csd_identifiers.sort()
                 # logging.debug('{} {}'.format(atom_ids, ' '.join(csd_identifiers)))
                 for hit in thing.hits:
-                    logging.debug('RING HIT {} identifier={} value={} atom_labels={}'.
+                    logging.debug('RING HIT {} identifier={} value={:.3f} atom_labels={}'.
                                   format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
                     hit_atoms = hit.atoms
-                    for hit_atom in hit_atoms:
-                        logging.debug('RING HIT\t\tatom={} {}'.format(str(hit_atom.label), hit_atom.coordinates))
+                    # for hit_atom in hit_atoms:
+                    #     logging.debug('RING HIT\t\tatom={} {}'.format(str(hit_atom.label), hit_atom.coordinates))
+                    number_atoms_in_ring = len(hit_atoms)
+                    for i0 in range(number_atoms_in_ring):
+                       i1 = (i0 + 1) % number_atoms_in_ring
+                       i2 = (i0 + 2) % number_atoms_in_ring
+                       i3 = (i0 + 3) % number_atoms_in_ring
+                       tors = MD.atom_torsion_angle( hit_atoms[i0], hit_atoms[i1], hit_atoms[i2], hit_atoms[i3])
+                       tors_label = '{}-{}-{}-{}'.format(hit.atom_labels[i0], hit.atom_labels[i1],
+                                                         hit.atom_labels[i2], hit.atom_labels[i3])
+                       logging.debug('{:<16} {:6.2f}'.format(tors_label, tors))
 
     def classify_observation(self, observation_type):
         """
