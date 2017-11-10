@@ -18,6 +18,7 @@ import collections
 import logging
 import os
 import tempfile
+from math import sqrt
 from ccdc import io, conformer
 from ccdc.descriptors import MolecularDescriptors as MD
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
@@ -186,21 +187,42 @@ class PdbCCDMogul(object):
                 # csd_identifiers = thing.hit_identifiers
                 # csd_identifiers.sort()
                 # logging.debug('{} {}'.format(atom_ids, ' '.join(csd_identifiers)))
+                number_atoms_in_ring = len(thing.atom_indices)
+                supplied_ring_torsions = []
+                for i0 in range(number_atoms_in_ring):
+                    i1 = (i0 + 1) % number_atoms_in_ring
+                    i2 = (i0 + 2) % number_atoms_in_ring
+                    i3 = (i0 + 3) % number_atoms_in_ring
+                    tors_label = '{}-{}-{}-{}'.format(atom_ids[i0], atom_ids[i1], atom_ids[i2], atom_ids[i3])
+                    this_atoms = geometry_analysed_molecule.atoms
+                    tors = MD.atom_torsion_angle(this_atoms[thing.atom_indices[i0]],
+                                                 this_atoms[thing.atom_indices[i1]],
+                                                 this_atoms[thing.atom_indices[i2]],
+                                                 this_atoms[thing.atom_indices[i3]])
+                    logging.debug('supplied coordinates ring torsions {:<16} {:6.2f}'.format(tors_label, tors))
+                    supplied_ring_torsions.append(tors)
                 for hit in thing.hits:
                     logging.debug('RING HIT {} identifier={} value={:.3f} atom_labels={}'.
                                   format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
-                    hit_atoms = hit.atoms
-                    # for hit_atom in hit_atoms:
-                    #     logging.debug('RING HIT\t\tatom={} {}'.format(str(hit_atom.label), hit_atom.coordinates))
-                    number_atoms_in_ring = len(hit_atoms)
+                    this_atoms = hit.atoms
+                    for hit_atom in this_atoms:
+                        logging.debug('RING HIT\t\tatom={} {}'.format(str(hit_atom.label), hit_atom.coordinates))
+                    sum_of_ring_torsions = 0.
+                    sum_delta_squared = 0.
                     for i0 in range(number_atoms_in_ring):
-                       i1 = (i0 + 1) % number_atoms_in_ring
-                       i2 = (i0 + 2) % number_atoms_in_ring
-                       i3 = (i0 + 3) % number_atoms_in_ring
-                       tors = MD.atom_torsion_angle( hit_atoms[i0], hit_atoms[i1], hit_atoms[i2], hit_atoms[i3])
-                       tors_label = '{}-{}-{}-{}'.format(hit.atom_labels[i0], hit.atom_labels[i1],
-                                                         hit.atom_labels[i2], hit.atom_labels[i3])
-                       logging.debug('{:<16} {:6.2f}'.format(tors_label, tors))
+                        i1 = (i0 + 1) % number_atoms_in_ring
+                        i2 = (i0 + 2) % number_atoms_in_ring
+                        i3 = (i0 + 3) % number_atoms_in_ring
+                        tors = MD.atom_torsion_angle(this_atoms[i0], this_atoms[i1], this_atoms[i2], this_atoms[i3])
+                        sum_of_ring_torsions += tors
+                        tors_label = '{}-{}-{}-{}'.format(hit.atom_labels[i0], hit.atom_labels[i1],
+                                                          hit.atom_labels[i2], hit.atom_labels[i3])
+                        delta = abs(tors) - abs(supplied_ring_torsions[i0])
+                        sum_delta_squared += delta*delta
+                        logging.debug('{:<16} {:6.2f} delta={:6.2f}'.format(tors_label, tors, delta))
+                    logging.debug('sum of ring torsions={:6.2f}'.format(sum_of_ring_torsions))
+                    my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
+                    logging.debug('my ring rmsd torsion from supplied={:7.3f}'.format(my_ring_rmsd))
 
     def classify_observation(self, observation_type):
         """
