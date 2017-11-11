@@ -188,13 +188,18 @@ class PdbCCDMogul(object):
                 # csd_identifiers.sort()
                 # logging.debug('{} {}'.format(atom_ids, ' '.join(csd_identifiers)))
                 number_atoms_in_ring = len(thing.atom_indices)
+                supplied_atoms = geometry_analysed_molecule.atoms
+                for ia in supplied_atoms:
+                    csd_atom = supplied_atoms[ia]
+                    logging.debug('supplied ring atom_CCD_name: {} element: {} sybyl_type: {}'.
+                                  format(atom_ids[ia], csd_atom.atomic_symbol, csd_atom.sybyl_type))
                 supplied_ring_torsions = []
                 for i0 in range(number_atoms_in_ring):
                     i1 = (i0 + 1) % number_atoms_in_ring
                     i2 = (i0 + 2) % number_atoms_in_ring
                     i3 = (i0 + 3) % number_atoms_in_ring
                     tors_label = '{}-{}-{}-{}'.format(atom_ids[i0], atom_ids[i1], atom_ids[i2], atom_ids[i3])
-                    this_atoms = geometry_analysed_molecule.atoms
+                    this_atoms = supplied_atoms
                     tors = MD.atom_torsion_angle(this_atoms[thing.atom_indices[i0]],
                                                  this_atoms[thing.atom_indices[i1]],
                                                  this_atoms[thing.atom_indices[i2]],
