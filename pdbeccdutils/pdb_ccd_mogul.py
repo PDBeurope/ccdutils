@@ -237,6 +237,7 @@ class PdbCCDMogul(object):
                             logging.debug('   {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
                         sum_delta_squared = 0.
                         sum_delta_squared_invert = 0.
+                        sum_tors_squared = 0.
                         hit_ring_torsions = []
                         for i0 in range(number_atoms_in_ring):
                             i1 = (i0 + 1) % number_atoms_in_ring
@@ -250,13 +251,17 @@ class PdbCCDMogul(object):
                             delta_invert = supplied_ring_torsions[i0] + tors
                             sum_delta_squared += delta*delta
                             sum_delta_squared_invert += delta_invert*delta_invert
+                            sum_tors_squared += tors
                             logging.debug('{:<16} {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
                                           format(supplied_ring_torsions_label[i0], supplied_ring_torsions[i0],
                                                  tors_label, tors, delta, delta_invert))
                         my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
+                        entry_rmsd_ring_torsions = sqrt(sum_tors_squared/float(number_atoms_in_ring))
                         my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
                         logging.debug('my ring rmsd torsion from supplied {:7.3f} invert {:7.3f} '.
                                       format(my_ring_rmsd, my_ring_rmsd_invert))
+                        logging.debug('Entry rms ring torsions: {:7.3f}'.
+                                      format(hit.identifier(entry_rmsd_ring_torsions))
 
     def classify_observation(self, observation_type):
         """
