@@ -261,7 +261,7 @@ class PdbCCDMogul(object):
                         logging.debug('my ring rmsd torsion from supplied {:7.3f} invert {:7.3f} '.
                                       format(my_ring_rmsd, my_ring_rmsd_invert))
                         logging.debug('Entry rms ring torsions: {:7.3f}'.
-                                      format(hit.identifier(entry_rmsd_ring_torsions))
+                                      format(hit.identifier, entry_rmsd_ring_torsions))
 
     def classify_observation(self, observation_type):
         """
