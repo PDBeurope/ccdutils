@@ -216,12 +216,8 @@ class PdbCCDMogul(object):
                     hit_ring_torsions = []
                     hit_atoms = hit.atoms
                     for reverse in False, True:
-                        if reverse:
-                            r_string = 'reverse'
-                        else:
-                            r_string = '       '
                         for offset in range(number_atoms_in_ring):
-                            logging.debug('trying reverse: {} offset: {}'.format(r_string, offset))
+                            logging.debug('trying reverse: {} offset: {}'.format(reverse, offset))
                             offset_atoms = []
                             for ia in range(number_atoms_in_ring):
                                 offset_atoms.append(hit_atoms[(ia + offset)% number_atoms_in_ring])
@@ -236,7 +232,7 @@ class PdbCCDMogul(object):
                                     elements_match = False
                             logging.debug('element_match: {}'.format(elements_match))
                             if not elements_match:
-                                break
+                                continue
 
 
                     # for i0 in range(number_atoms_in_ring):
