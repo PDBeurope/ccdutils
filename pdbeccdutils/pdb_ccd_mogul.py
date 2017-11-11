@@ -251,7 +251,7 @@ class PdbCCDMogul(object):
                             delta_invert = supplied_ring_torsions[i0] + tors
                             sum_delta_squared += delta*delta
                             sum_delta_squared_invert += delta_invert*delta_invert
-                            sum_tors_squared += tors
+                            sum_tors_squared += tors*tors
                             logging.debug('{:<16} {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
                                           format(supplied_ring_torsions_label[i0], supplied_ring_torsions[i0],
                                                  tors_label, tors, delta, delta_invert))
