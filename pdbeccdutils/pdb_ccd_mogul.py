@@ -255,7 +255,7 @@ class PdbCCDMogul(object):
                                                  tors_label, tors, delta, delta_invert))
                         my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
                         my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
-                        logging.debug('my ring rmsd torsion from supplied {:7.3f} invert '.
+                        logging.debug('my ring rmsd torsion from supplied {:7.3f} invert {:7.3f} '.
                                       format(my_ring_rmsd, my_ring_rmsd_invert))
 
     def classify_observation(self, observation_type):
