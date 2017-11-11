@@ -197,6 +197,7 @@ class PdbCCDMogul(object):
                 logging.debug('supplied ring atom_CCD_name: {} element: {} sybyl_type: {}'.
                               format(atom_ids[ia], csd_atom.atomic_symbol, csd_atom.sybyl_type))
             supplied_ring_torsions = []
+            supplied_ring_torsions_label = []
             for i0 in range(number_atoms_in_ring):
                 i1 = (i0 + 1) % number_atoms_in_ring
                 i2 = (i0 + 2) % number_atoms_in_ring
@@ -209,6 +210,7 @@ class PdbCCDMogul(object):
                                              this_atoms[this_ring.atom_indices[i3]])
                 logging.debug('supplied coordinates ring torsions {:<16} {:6.2f}'.format(tors_label, tors))
                 supplied_ring_torsions.append(tors)
+                supplied_ring_torsions_label.append(tors_label)
             for hit in this_ring.hits:
                 logging.debug('RING HIT {} identifier={} value={:.3f} atom_labels={}'.
                               format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
@@ -236,20 +238,20 @@ class PdbCCDMogul(object):
                         logging.debug('try out match:')
                         for ia in range(number_atoms_in_ring):
                             logging.debug('   {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
-                        #for ia in range(number_atoms_in_ring):
-                    #for i0 in range(number_atoms_in_ring):
-                    #     i1 = (i0 + 1) % number_atoms_in_ring
-                    #     i2 = (i0 + 2) % number_atoms_in_ring
-                    #     i3 = (i0 + 3) % number_atoms_in_ring
-                    #     this_atoms = hit_atoms
-                    #     tors = MD.atom_torsion_angle(this_atoms[i0], this_atoms[i1], this_atoms[i2], this_atoms[i3])
-                    #     hit_ring_torsions.append(tors)
-                    #     sum_of_ring_torsions += tors
-                    #     tors_label = '{}-{}-{}-{}'.format(hit.atom_labels[i0], hit.atom_labels[i1],
-                    #                                       hit.atom_labels[i2], hit.atom_labels[i3])
-                    #     delta = abs(tors) - abs(supplied_ring_torsions[i0])
-                    #     sum_delta_squared += delta*delta
-                    #     logging.debug('{:<16} {:6.2f} delta={:6.2f}'.format(tors_label, tors, delta))
+                        for i0 in range(number_atoms_in_ring):
+                            i1 = (i0 + 1) % number_atoms_in_ring
+                            i2 = (i0 + 2) % number_atoms_in_ring
+                            i3 = (i0 + 3) % number_atoms_in_ring
+                            tors = MD.atom_torsion_angle(offset_atoms[i0], offset_atoms[i1], offset_atoms[i2], offset_atoms[i3])
+                            hit_ring_torsions.append(tors)
+                            sum_of_ring_torsions += tors
+                            tors_label = '{}-{}-{}-{}'.format(offset_atoms[i0].label, offset_atoms[i1].label,
+                                                              offset_atoms[i2].label, offset_atoms[i3].label)
+                            delta = abs(tors) - abs(supplied_ring_torsions[i0])
+                            sum_delta_squared += delta*delta
+                            logging.debug('{:<16} {:6.2f} to {:<16} {:6.2f} delta={:6.2f}'.
+                                          format(supplied_ring_torsions_label[i0], supplied_ring_torsions[i0],
+                                                 tors_label, tors, delta))
                     # # logging.debug('sum of ring torsions={:6.2f}'.format(sum_of_ring_torsions))
                     # my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
                     # logging.debug('my ring rmsd torsion from supplied={:7.3f}'.format(my_ring_rmsd))
