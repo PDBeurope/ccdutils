@@ -228,14 +228,14 @@ class PdbCCDMogul(object):
                                 csd_atom = supplied_atoms[thing.atom_indices[ia]]
                                 if csd_atom.atomic_symbol != offset_atoms[ia].atomic_symbol:
                                     elements_match = False
-                            logging.debug('element_match: {}'.format(elements_match))
                             if not elements_match:
                                 continue
+                            logging.debug('try out match:')
                             for ia in range(number_atoms_in_ring):
-                                logging.debug('try out match {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
+                                logging.debug('   {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
 
 
-                                    # for i0 in range(number_atoms_in_ring):
+                    #for i0 in range(number_atoms_in_ring):
                     #     i1 = (i0 + 1) % number_atoms_in_ring
                     #     i2 = (i0 + 2) % number_atoms_in_ring
                     #     i3 = (i0 + 3) % number_atoms_in_ring
