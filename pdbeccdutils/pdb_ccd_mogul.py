@@ -227,7 +227,8 @@ class PdbCCDMogul(object):
                                 offset_atoms.append(hit_atoms[(ia + offset)% number_atoms_in_ring])
                             if reverse:
                                 offset_atoms.reverse()
-                            logging.debug('try out match to {}'.format('-'.join(offset_atoms.atom_labels)))
+                            for ia in range(number_atoms_in_ring):
+                                logging.debug('try out match {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
 
                     # for i0 in range(number_atoms_in_ring):
                     #     i1 = (i0 + 1) % number_atoms_in_ring
