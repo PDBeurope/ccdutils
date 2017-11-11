@@ -217,14 +217,12 @@ class PdbCCDMogul(object):
                     hit_atoms = hit.atoms
                     for reverse in False, True:
                         for offset in range(number_atoms_in_ring):
-                            logging.debug('trying reverse: {} offset: {}'.format(reverse, offset))
+                            # logging.debug('trying reverse: {} offset: {}'.format(reverse, offset))
                             offset_atoms = []
                             for ia in range(number_atoms_in_ring):
                                 offset_atoms.append(hit_atoms[(ia + offset)% number_atoms_in_ring])
                             if reverse:
                                 offset_atoms.reverse()
-                            for ia in range(number_atoms_in_ring):
-                                logging.debug('try out match {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
                             elements_match = True
                             for ia in range(number_atoms_in_ring):
                                 csd_atom = supplied_atoms[thing.atom_indices[ia]]
@@ -233,9 +231,11 @@ class PdbCCDMogul(object):
                             logging.debug('element_match: {}'.format(elements_match))
                             if not elements_match:
                                 continue
+                            for ia in range(number_atoms_in_ring):
+                                logging.debug('try out match {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
 
 
-                    # for i0 in range(number_atoms_in_ring):
+                                    # for i0 in range(number_atoms_in_ring):
                     #     i1 = (i0 + 1) % number_atoms_in_ring
                     #     i2 = (i0 + 2) % number_atoms_in_ring
                     #     i3 = (i0 + 3) % number_atoms_in_ring
