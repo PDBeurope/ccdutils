@@ -236,7 +236,7 @@ class PdbCCDMogul(object):
                         logging.debug('try out match:')
                         for ia in range(number_atoms_in_ring):
                             logging.debug('   {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
-                        for ia in range(number_atoms_in_ring):
+                        #for ia in range(number_atoms_in_ring):
                     #for i0 in range(number_atoms_in_ring):
                     #     i1 = (i0 + 1) % number_atoms_in_ring
                     #     i2 = (i0 + 2) % number_atoms_in_ring
