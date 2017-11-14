@@ -141,7 +141,6 @@ class PdbCCDMogul(object):
         logging.debug('number of Mogul analysed bonds={}'.format(len(geometry_analysed_molecule.analysed_bonds)))
         for observation_type in MOGUL_OBSERVATION_TYPES:
             self.store_observation(geometry_analysed_molecule, observation_type)
-        self.analyze_mogul_rings(geometry_analysed_molecule)
         os.remove(sdf_temp)
         for observation_type in MOGUL_OBSERVATION_TYPES:
             self.classify_observation(observation_type)
@@ -213,97 +212,72 @@ class PdbCCDMogul(object):
                                          this_atoms[this_ring.atom_indices[i1]],
                                          this_atoms[this_ring.atom_indices[i2]],
                                          this_atoms[this_ring.atom_indices[i3]])
-            logging.debug('supplied coordinates ring torsions {:<16} {:6.2f}'.format(tors_label, tors))
             supplied_ring_torsions[tors_label] = tors
         hit_list = []
         for hit in this_ring.hits:
             this_hit = collections.OrderedDict()
-            logging.debug('RING HIT {} csd_identifier={} value={:.3f} atom_labels={}'.
-                          format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
             this_hit['csd_identifier'] = str(hit.identifier)
             this_hit['ring_strangeness'] = hit.value
+            this_hit['inverted'], this_hit['matched atoms'], this_hit['rings_torsions'] = \
+                self.find_ring_hit(supplied_ring_elements, supplied_ring_torsions,
+                                   hit_value=hit.value, hit_atoms=hit.atoms)
             hit_list.append(this_hit)
         return supplied_ring_torsions, hit_list
-   
 
-    def analyze_mogul_rings(self, geometry_analysed_molecule):
-        for this_ring in geometry_analysed_molecule.analysed_rings:
-            atom_ids = []
-            for index in this_ring.atom_indices:
-                atom_id = self.pdb_ccd_rdkit.atom_ids[index]
-                atom_ids.append(atom_id)
-            number_atoms_in_ring = len(this_ring.atom_indices)
-            supplied_atoms = geometry_analysed_molecule.atoms
-            for ia in range(number_atoms_in_ring):
-                csd_atom = supplied_atoms[this_ring.atom_indices[ia]]
-                logging.debug('supplied ring atom_CCD_name: {} element: {} sybyl_type: {}'.
-                              format(atom_ids[ia], csd_atom.atomic_symbol, csd_atom.sybyl_type))
-            supplied_ring_torsions = []
-            supplied_ring_torsions_label = []
-            for i0 in range(number_atoms_in_ring):
-                i1 = (i0 + 1) % number_atoms_in_ring
-                i2 = (i0 + 2) % number_atoms_in_ring
-                i3 = (i0 + 3) % number_atoms_in_ring
-                tors_label = '{}-{}-{}-{}'.format(atom_ids[i0], atom_ids[i1], atom_ids[i2], atom_ids[i3])
-                this_atoms = supplied_atoms
-                tors = MD.atom_torsion_angle(this_atoms[this_ring.atom_indices[i0]],
-                                             this_atoms[this_ring.atom_indices[i1]],
-                                             this_atoms[this_ring.atom_indices[i2]],
-                                             this_atoms[this_ring.atom_indices[i3]])
-                logging.debug('supplied coordinates ring torsions {:<16} {:6.2f}'.format(tors_label, tors))
-                supplied_ring_torsions.append(tors)
-                supplied_ring_torsions_label.append(tors_label)
-            for hit in this_ring.hits:
-                logging.debug('RING HIT {} identifier={} value={:.3f} atom_labels={}'.
-                              format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
-                # for hit_atom in this_atoms:
-                #     logging.debug('RING HIT\t\tatom={} {}'.format(str(hit_atom.label), hit_atom.coordinates))
-                hit_atoms = hit.atoms
-                for reverse in False, True:
-                    for offset in range(number_atoms_in_ring):
-                        # logging.debug('trying reverse: {} offset: {}'.format(reverse, offset))
-                        offset_atoms = []
-                        for ia in range(number_atoms_in_ring):
-                            offset_atoms.append(hit_atoms[(ia + offset) % number_atoms_in_ring])
-                        if reverse:
-                            offset_atoms.reverse()
-                        elements_match = True
-                        for ia in range(number_atoms_in_ring):
-                            csd_atom = supplied_atoms[this_ring.atom_indices[ia]]
-                            if csd_atom.atomic_symbol != offset_atoms[ia].atomic_symbol:
-                                elements_match = False
-                        if not elements_match:
-                            continue
-                        logging.debug('try out match:')
-                        for ia in range(number_atoms_in_ring):
-                            logging.debug('   {} to {}'.format(atom_ids[ia], offset_atoms[ia].label))
-                        sum_delta_squared = 0.
-                        sum_delta_squared_invert = 0.
-                        sum_tors_squared = 0.
-                        hit_ring_torsions = []
-                        for i0 in range(number_atoms_in_ring):
-                            i1 = (i0 + 1) % number_atoms_in_ring
-                            i2 = (i0 + 2) % number_atoms_in_ring
-                            i3 = (i0 + 3) % number_atoms_in_ring
-                            tors = MD.atom_torsion_angle(offset_atoms[i0], offset_atoms[i1], offset_atoms[i2], offset_atoms[i3])
-                            hit_ring_torsions.append(tors)
-                            tors_label = '{}-{}-{}-{}'.format(offset_atoms[i0].label, offset_atoms[i1].label,
-                                                              offset_atoms[i2].label, offset_atoms[i3].label)
-                            delta = supplied_ring_torsions[i0] - tors
-                            delta_invert = supplied_ring_torsions[i0] + tors
-                            sum_delta_squared += delta*delta
-                            sum_delta_squared_invert += delta_invert*delta_invert
-                            sum_tors_squared += tors*tors
-                            logging.debug('{:<16} {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
-                                          format(supplied_ring_torsions_label[i0], supplied_ring_torsions[i0],
-                                                 tors_label, tors, delta, delta_invert))
-                        my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
-                        entry_rmsd_ring_torsions = sqrt(sum_tors_squared/float(number_atoms_in_ring))
-                        my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
-                        logging.debug('my ring rmsd torsion from supplied {:7.3f} invert {:7.3f} '.
-                                      format(my_ring_rmsd, my_ring_rmsd_invert))
-                        logging.debug('Entry {} rms ring torsions: {:7.3f}'.
-                                      format(hit.identifier, entry_rmsd_ring_torsions))
+    @staticmethod
+    def find_ring_hit(supplied_ring_elements, supplied_ring_torsions, hit_value, hit_atoms):
+        number_atoms_in_ring = len(supplied_ring_elements)
+        for reverse in False, True:
+            for offset in range(number_atoms_in_ring):
+                # logging.debug('trying reverse: {} offset: {}'.format(reverse, offset))
+                offset_atoms = []
+                for ia in range(number_atoms_in_ring):
+                    offset_atoms.append(hit_atoms[(ia + offset) % number_atoms_in_ring])
+                if reverse:
+                    offset_atoms.reverse()
+                elements_match = True
+                for ia in range(number_atoms_in_ring):
+                    if supplied_ring_elements[ia] != offset_atoms[ia].atomic_symbol:
+                        elements_match = False
+                if not elements_match:
+                    continue
+                logging.debug('try out match:')
+                for ia in range(number_atoms_in_ring):
+                    logging.debug('   ? to {}'.format(offset_atoms[ia].label))
+                sum_delta_squared = 0.
+                sum_delta_squared_invert = 0.
+                sum_tors_squared = 0.
+                hit_ring_torsions = []
+                hit_ring_torsions_inverted = []
+                for i0 in range(number_atoms_in_ring):
+                    i1 = (i0 + 1) % number_atoms_in_ring
+                    i2 = (i0 + 2) % number_atoms_in_ring
+                    i3 = (i0 + 3) % number_atoms_in_ring
+                    tors = MD.atom_torsion_angle(offset_atoms[i0], offset_atoms[i1], offset_atoms[i2], offset_atoms[i3])
+                    hit_ring_torsions.append(tors)
+                    hit_ring_torsions_inverted.append(-tors)
+                    tors_label = '{}-{}-{}-{}'.format(offset_atoms[i0].label, offset_atoms[i1].label,
+                                                      offset_atoms[i2].label, offset_atoms[i3].label)
+                    delta = supplied_ring_torsions[i0] - tors
+                    delta_invert = supplied_ring_torsions[i0] + tors
+                    sum_delta_squared += delta*delta
+                    sum_delta_squared_invert += delta_invert*delta_invert
+                    sum_tors_squared += tors*tors
+                    logging.debug('{??????  {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
+                                  format(supplied_ring_torsions[i0],  tors_label, tors, delta, delta_invert))
+                my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
+                entry_rmsd_ring_torsions = sqrt(sum_tors_squared/float(number_atoms_in_ring))
+                my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
+                logging.debug('my ring rmsd torsion from supplied {:7.3f} invert {:7.3f} '.
+                              format(my_ring_rmsd, my_ring_rmsd_invert))
+                logging.debug('rms ring torsions: {:7.3f}'.
+                              format(entry_rmsd_ring_torsions))
+                if abs(hit_value - my_ring_rmsd) < 0.0001:
+                    return False, offset_atoms, hit_ring_torsions
+                elif abs(hit_value - my_ring_rmsd_invert) < 0.0001:
+                    return True, offset_atoms, hit_ring_torsions_inverted
+        raise RuntimeError('cannot find match for ring')
+
 
     def classify_observation(self, observation_type):
         """
