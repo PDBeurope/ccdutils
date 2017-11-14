@@ -180,9 +180,20 @@ class PdbCCDMogul(object):
                 store[key] = getattr(thing, key)
             store['histogram'] = thing.histogram(minimum=0.0, maximum=hist_max)
             store['hist_max'] = hist_max
+            if observation_type == 'ring':
+                store['ring_additional'] = self.analyze_additional_mogul_ring(thing)
             store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
-            logging.debug(store_nt)
             place_in.append(store_nt)
+            logging.debug('store {}:'.format(observation_type))
+            for name, value in store.items():
+                logging.debug('\t\t{}\t{}'.format(name,value))
+
+    def analyze_additional_mogul_ring(self, this_ring):
+        store = collections.OrderedDict()
+        store['ring_torsions'] = ('to be written')
+        store_nt = collections.namedtuple('additional_ring', store.keys())(**store)
+        return store_nt
+   
 
     def analyze_mogul_rings(self, geometry_analysed_molecule):
         for this_ring in geometry_analysed_molecule.analysed_rings:
