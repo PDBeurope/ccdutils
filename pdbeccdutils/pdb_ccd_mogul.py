@@ -17,6 +17,7 @@
 import collections
 import logging
 import os
+import pprint
 import tempfile
 from math import sqrt
 from ccdc import io, conformer
@@ -188,7 +189,10 @@ class PdbCCDMogul(object):
             place_in.append(store_nt)
             logging.debug('store {}:'.format(observation_type))
             for name, value in store.items():
-                logging.debug('\t\t{}\t{}'.format(name,value))
+                if name == 'ring_supplied':
+                    logging.debug('\t\t{}\t{}'.format(name,  pprint.pformat(value)))
+                else:
+                    logging.debug('\t\t{}\t{}'.format(name,value))
 
     def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring, atom_ids):
         number_atoms_in_ring = len(this_ring.atom_indices)
