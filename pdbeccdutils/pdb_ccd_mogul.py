@@ -264,7 +264,7 @@ class PdbCCDMogul(object):
                     sum_delta_squared += delta*delta
                     sum_delta_squared_invert += delta_invert*delta_invert
                     sum_tors_squared += tors*tors
-                    logging.debug('{??????  {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
+                    logging.debug('??????  {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
                                   format(supplied_ring_tor,  tors_label, tors, delta, delta_invert))
                 my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
                 entry_rmsd_ring_torsions = sqrt(sum_tors_squared/float(number_atoms_in_ring))
