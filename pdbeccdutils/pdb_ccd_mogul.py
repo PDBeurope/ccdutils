@@ -189,7 +189,11 @@ class PdbCCDMogul(object):
             place_in.append(store_nt)
             logging.debug('store {}:'.format(observation_type))
             for name, value in store.items():
-                logging.debug('\t\t{}\t{}'.format(name,value))
+                if name == 'ring_additional':
+                    for k, v in value:
+                        logging.debug('\t\tring_additional {} {}'.format(k, v))
+                else:
+                    logging.debug('\t\t{}\t{}'.format(name,value))
 
     def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring, atom_ids):
         store = collections.OrderedDict()
@@ -217,10 +221,10 @@ class PdbCCDMogul(object):
             this_hit = collections.OrderedDict()
             logging.debug('RING HIT {} csd_identifier={} value={:.3f} atom_labels={}'.
                           format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
-            this_hit['csd_identifier'] = hit.identifier
+            this_hit['csd_identifier'] = str(hit.identifier)
             this_hit['ring_strangeness'] = hit.value
-            this_hit_nt = collections.namedtuple('ring_hit', this_hit.keys())(**this_hit)
-            hit_list.append(this_hit_nt)
+            #this_hit_nt = collections.namedtuple('ring_hit', this_hit.keys())(**this_hit)
+            hit_list.append(this_hit)
         store['hits'] = hit_list
         store_nt = collections.namedtuple('ring_additional', store.keys())(**store)
         return store_nt
