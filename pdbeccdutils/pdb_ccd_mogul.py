@@ -181,21 +181,16 @@ class PdbCCDMogul(object):
             store['histogram'] = thing.histogram(minimum=0.0, maximum=hist_max)
             store['hist_max'] = hist_max
             if observation_type == 'ring':
-                store['ring_additional'] = self.analyze_additional_mogul_ring(
-                    geometry_analysed_molecule=geometry_analysed_molecule,
-                    this_ring=thing,
-                    atom_ids=atom_ids)
+                store['ring_supplied'], store['ring_hits'] = \
+                    self.analyze_additional_mogul_ring(
+                        geometry_analysed_molecule=geometry_analysed_molecule, this_ring=thing, atom_ids=atom_ids)
             store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
             place_in.append(store_nt)
             logging.debug('store {}:'.format(observation_type))
             for name, value in store.items():
-                if name == 'ring_additional':
-                    logging.debug('\t\tring_additional {} '.format(value))
-                else:
-                    logging.debug('\t\t{}\t{}'.format(name,value))
+                logging.debug('\t\t{}\t{}'.format(name,value))
 
     def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring, atom_ids):
-        store = collections.OrderedDict()
         number_atoms_in_ring = len(this_ring.atom_indices)
         supplied_ring_elements = []
         supplied_atoms = geometry_analysed_molecule.atoms
@@ -214,7 +209,6 @@ class PdbCCDMogul(object):
                                          this_atoms[this_ring.atom_indices[i3]])
             logging.debug('supplied coordinates ring torsions {:<16} {:6.2f}'.format(tors_label, tors))
             supplied_ring_torsions[tors_label] = tors
-        store['supplied_ring_torsions'] = supplied_ring_torsions
         hit_list = []
         for hit in this_ring.hits:
             this_hit = collections.OrderedDict()
@@ -222,11 +216,8 @@ class PdbCCDMogul(object):
                           format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
             this_hit['csd_identifier'] = str(hit.identifier)
             this_hit['ring_strangeness'] = hit.value
-            #this_hit_nt = collections.namedtuple('ring_hit', this_hit.keys())(**this_hit)
             hit_list.append(this_hit)
-        store['hits'] = hit_list
-        store_nt = collections.namedtuple('ring_additional', store.keys())(**store)
-        return store_nt
+        return supplied_ring_torsions, hit_list
    
 
     def analyze_mogul_rings(self, geometry_analysed_molecule):
