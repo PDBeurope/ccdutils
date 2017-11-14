@@ -258,13 +258,14 @@ class PdbCCDMogul(object):
                     hit_ring_torsions_inverted.append(-tors)
                     tors_label = '{}-{}-{}-{}'.format(offset_atoms[i0].label, offset_atoms[i1].label,
                                                       offset_atoms[i2].label, offset_atoms[i3].label)
-                    delta = supplied_ring_torsions[i0] - tors
-                    delta_invert = supplied_ring_torsions[i0] + tors
+                    supplied_ring_tor = supplied_ring_torsions.values()[i0]
+                    delta = supplied_ring_tor - tors
+                    delta_invert = supplied_ring_tor + tors
                     sum_delta_squared += delta*delta
                     sum_delta_squared_invert += delta_invert*delta_invert
                     sum_tors_squared += tors*tors
                     logging.debug('{??????  {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
-                                  format(supplied_ring_torsions[i0],  tors_label, tors, delta, delta_invert))
+                                  format(supplied_ring_tor,  tors_label, tors, delta, delta_invert))
                 my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
                 entry_rmsd_ring_torsions = sqrt(sum_tors_squared/float(number_atoms_in_ring))
                 my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
