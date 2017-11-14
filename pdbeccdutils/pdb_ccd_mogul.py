@@ -190,8 +190,7 @@ class PdbCCDMogul(object):
             logging.debug('store {}:'.format(observation_type))
             for name, value in store.items():
                 if name == 'ring_additional':
-                    for k, v in value._asdict().items():
-                        logging.debug('\t\tring_additional {} {}'.format(k, v))
+                    logging.debug('\t\tring_additional {} '.format(value))
                 else:
                     logging.debug('\t\t{}\t{}'.format(name,value))
 
