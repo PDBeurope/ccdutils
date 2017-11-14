@@ -199,7 +199,7 @@ class PdbCCDMogul(object):
         supplied_ring_torsions = collections.OrderedDict()
         for i0 in range(number_atoms_in_ring):
             csd_atom = supplied_atoms[this_ring.atom_indices[i0]]
-            supplied_ring_elements.append = csd_atom.atomic_symbol
+            supplied_ring_elements.append(csd_atom.atomic_symbol)
             i1 = (i0 + 1) % number_atoms_in_ring
             i2 = (i0 + 2) % number_atoms_in_ring
             i3 = (i0 + 3) % number_atoms_in_ring
