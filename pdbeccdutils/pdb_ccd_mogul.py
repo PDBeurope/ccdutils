@@ -189,8 +189,10 @@ class PdbCCDMogul(object):
             place_in.append(store_nt)
             logging.debug('store {}:'.format(observation_type))
             for name, value in store.items():
-                if name == 'ring_supplied':
-                    logging.debug('\t\t{}\t{}'.format(name,  pprint.pformat(value)))
+                if name == 'ring_hits':
+                    logging.debug('\t\tring_hits:')
+                    for hit in value:
+                        logging.debug('\t\t\t{}'.format(hit))
                 else:
                     logging.debug('\t\t{}\t{}'.format(name,value))
 
