@@ -181,18 +181,17 @@ class PdbCCDMogul(object):
             store['histogram'] = thing.histogram(minimum=0.0, maximum=hist_max)
             store['hist_max'] = hist_max
             if observation_type == 'ring':
-                store['ring_additional'] = self.analyze_additional_mogul_ring(thing)
+                store['ring_additional'] = self.analyze_additional_mogul_ring(
+                    geometry_analysed_molecule=geometry_analysed_molecule,
+                    this_ring=thing,
+                    atom_ids=atom_ids)
             store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
             place_in.append(store_nt)
             logging.debug('store {}:'.format(observation_type))
             for name, value in store.items():
                 logging.debug('\t\t{}\t{}'.format(name,value))
 
-    def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring):
-        atom_ids = []
-        for index in this_ring.atom_indices:
-            atom_id = self.pdb_ccd_rdkit.atom_ids[index]
-            atom_ids.append(atom_id)
+    def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring, atom_ids):
         store = collections.OrderedDict()
         number_atoms_in_ring = len(this_ring.atom_indices)
         supplied_ring_elements = []
