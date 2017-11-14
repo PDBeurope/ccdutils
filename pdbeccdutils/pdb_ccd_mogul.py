@@ -212,7 +212,17 @@ class PdbCCDMogul(object):
             logging.debug('supplied coordinates ring torsions {:<16} {:6.2f}'.format(tors_label, tors))
             supplied_ring_torsions[tors_label] = tors
         store['supplied_ring_torsions'] = supplied_ring_torsions
-        store_nt = collections.namedtuple('additional_ring', store.keys())(**store)
+        hit_list = []
+        for hit in this_ring.hits:
+            this_hit = collections.OrderedDict()
+            logging.debug('RING HIT {} csd_identifier={} value={:.3f} atom_labels={}'.
+                          format(atom_ids, hit.identifier, hit.value, hit.atom_labels))
+            this_hit['csd_identifier'] = hit.identifier
+            this_hit['ring_strangeness'] = hit.value
+            this_hit_nt = collections.namedtuple('ring_hit', this_hit.keys())(**this_hit)
+            hit_list.append(this_hit_nt)
+        store['hits'] = hit_list
+        store_nt = collections.namedtuple('ring_additional', store.keys())(**store)
         return store_nt
    
 
