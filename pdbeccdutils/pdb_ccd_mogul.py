@@ -188,9 +188,31 @@ class PdbCCDMogul(object):
             for name, value in store.items():
                 logging.debug('\t\t{}\t{}'.format(name,value))
 
-    def analyze_additional_mogul_ring(self, this_ring):
+    def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring):
+        atom_ids = []
+        for index in this_ring.atom_indices:
+            atom_id = self.pdb_ccd_rdkit.atom_ids[index]
+            atom_ids.append(atom_id)
         store = collections.OrderedDict()
-        store['ring_torsions'] = ('to be written')
+        number_atoms_in_ring = len(this_ring.atom_indices)
+        supplied_ring_elements = []
+        supplied_atoms = geometry_analysed_molecule.atoms
+        supplied_ring_torsions = collections.OrderedDict()
+        for i0 in range(number_atoms_in_ring):
+            csd_atom = supplied_atoms[this_ring.atom_indices[i0]]
+            supplied_ring_elements.append = csd_atom.atomic_symbol
+            i1 = (i0 + 1) % number_atoms_in_ring
+            i2 = (i0 + 2) % number_atoms_in_ring
+            i3 = (i0 + 3) % number_atoms_in_ring
+            tors_label = '{}-{}-{}-{}'.format(atom_ids[i0], atom_ids[i1], atom_ids[i2], atom_ids[i3])
+            this_atoms = supplied_atoms
+            tors = MD.atom_torsion_angle(this_atoms[this_ring.atom_indices[i0]],
+                                         this_atoms[this_ring.atom_indices[i1]],
+                                         this_atoms[this_ring.atom_indices[i2]],
+                                         this_atoms[this_ring.atom_indices[i3]])
+            logging.debug('supplied coordinates ring torsions {:<16} {:6.2f}'.format(tors_label, tors))
+            supplied_ring_torsions[tors_label] = tors
+        store['supplied_ring_torsions'] = supplied_ring_torsions
         store_nt = collections.namedtuple('additional_ring', store.keys())(**store)
         return store_nt
    
