@@ -218,7 +218,8 @@ class PdbCCDMogul(object):
             this_hit = collections.OrderedDict()
             this_hit['csd_identifier'] = str(hit.identifier)
             this_hit['ring_strangeness'] = hit.value
-            this_hit['inverted'], this_hit['matched atoms'], this_hit['rings_torsions'] = \
+            this_hit['inverted'], this_hit['matched atoms'], \
+                this_hit['rings_torsions'], this_hit['rms_ring_torsion'] = \
                 self.find_ring_hit(supplied_ring_elements, supplied_ring_torsions,
                                    hit_value=hit.value, hit_atoms=hit.atoms)
             hit_list.append(this_hit)
@@ -229,7 +230,6 @@ class PdbCCDMogul(object):
         number_atoms_in_ring = len(supplied_ring_elements)
         for reverse in False, True:
             for offset in range(number_atoms_in_ring):
-                # logging.debug('trying reverse: {} offset: {}'.format(reverse, offset))
                 offset_atoms = []
                 for ia in range(number_atoms_in_ring):
                     offset_atoms.append(hit_atoms[(ia + offset) % number_atoms_in_ring])
@@ -241,9 +241,9 @@ class PdbCCDMogul(object):
                         elements_match = False
                 if not elements_match:
                     continue
-                logging.debug('try out match:')
+                offset_atoms_labels = []
                 for ia in range(number_atoms_in_ring):
-                    logging.debug('   ? to {}'.format(offset_atoms[ia].label))
+                    offset_atoms_labels.append(str(offset_atoms[ia].label))
                 sum_delta_squared = 0.
                 sum_delta_squared_invert = 0.
                 sum_tors_squared = 0.
@@ -256,27 +256,19 @@ class PdbCCDMogul(object):
                     tors = MD.atom_torsion_angle(offset_atoms[i0], offset_atoms[i1], offset_atoms[i2], offset_atoms[i3])
                     hit_ring_torsions.append(tors)
                     hit_ring_torsions_inverted.append(-tors)
-                    tors_label = '{}-{}-{}-{}'.format(offset_atoms[i0].label, offset_atoms[i1].label,
-                                                      offset_atoms[i2].label, offset_atoms[i3].label)
                     supplied_ring_tor = supplied_ring_torsions.values()[i0]
                     delta = supplied_ring_tor - tors
                     delta_invert = supplied_ring_tor + tors
                     sum_delta_squared += delta*delta
                     sum_delta_squared_invert += delta_invert*delta_invert
                     sum_tors_squared += tors*tors
-                    logging.debug('??????  {:6.2f} to {:<16} {:6.2f} delta={:6.2f} delta_invert={:6.2f}'.
-                                  format(supplied_ring_tor,  tors_label, tors, delta, delta_invert))
                 my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
                 entry_rmsd_ring_torsions = sqrt(sum_tors_squared/float(number_atoms_in_ring))
                 my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
-                logging.debug('my ring rmsd torsion from supplied {:7.3f} invert {:7.3f} '.
-                              format(my_ring_rmsd, my_ring_rmsd_invert))
-                logging.debug('rms ring torsions: {:7.3f}'.
-                              format(entry_rmsd_ring_torsions))
                 if abs(hit_value - my_ring_rmsd) < 0.0001:
-                    return False, offset_atoms, hit_ring_torsions
+                    return False, offset_atoms_labels, hit_ring_torsions, entry_rmsd_ring_torsions
                 elif abs(hit_value - my_ring_rmsd_invert) < 0.0001:
-                    return True, offset_atoms, hit_ring_torsions_inverted
+                    return True, offset_atoms_labels, hit_ring_torsions_inverted, entry_rmsd_ring_torsions
         raise RuntimeError('cannot find match for ring')
 
 
