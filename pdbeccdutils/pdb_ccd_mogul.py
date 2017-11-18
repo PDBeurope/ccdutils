@@ -17,10 +17,8 @@
 import collections
 import logging
 import os
-import pprint
-import tempfile
 from math import sqrt
-from ccdc import io, conformer
+from ccdc import conformer, Molecule
 from ccdc.descriptors import MolecularDescriptors as MD
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from yattag import Doc
@@ -113,8 +111,6 @@ class PdbCCDMogul(object):
             None
         """
         # write out the molecule as an sdf file to a temporary directory
-        __, sdf_temp = tempfile.mkstemp(suffix='.sdf')
-        logging.debug('load into PdbChemicalComponentsRDKit and write out temporary sdf file "{}"'.format(sdf_temp))
         override_xyz = None
         if self.pdb_ccd_rdkit.ideal_xyz[0][2] == 0.000:
             logging.debug('ideal xyz first z coordinate is 0.000')
@@ -122,11 +118,9 @@ class PdbCCDMogul(object):
             for xyz in self.pdb_ccd_rdkit.ideal_xyz:
                 override_xyz.append((xyz[0]+0.001, xyz[1]+0.001, xyz[2]+0.001))
             logging.debug(override_xyz)
-        self.pdb_ccd_rdkit.sdf_file_or_string(file_name=sdf_temp, xyz=override_xyz)
-        if not os.path.isfile(sdf_temp) or os.path.getsize(sdf_temp) == 0:
-            raise RuntimeError('cannot write out sdf file')
-        mol_reader = io.MoleculeReader(sdf_temp)
-        molecule = mol_reader[0]
+        sdf_string = self.pdb_ccd_rdkit.sdf_file_or_string(file_name=sdf_temp, xyz=override_xyz)
+        logging.debug('load ccd into PdbChemicalComponentsRDKit sdf string=\n{}'.format(sdf_string))
+        molecule = Molecule.from_string(sdf_string, format='sdf')
         molecule.standardise_aromatic_bonds()
         molecule.standardise_delocalised_bonds()
         logging.debug('CSD smiles string {}'.format(molecule.smiles))
