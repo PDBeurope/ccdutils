@@ -18,7 +18,8 @@ import collections
 import logging
 import os
 from math import sqrt
-from ccdc import conformer, Molecule
+from ccdc import conformer
+from ccdc.molecule import Molecule as ccdcMolecule
 from ccdc.descriptors import MolecularDescriptors as MD
 from pdbeccdutils.pdb_chemical_components_rdkit import PdbChemicalComponentsRDKit
 from yattag import Doc
@@ -118,9 +119,9 @@ class PdbCCDMogul(object):
             for xyz in self.pdb_ccd_rdkit.ideal_xyz:
                 override_xyz.append((xyz[0]+0.001, xyz[1]+0.001, xyz[2]+0.001))
             logging.debug(override_xyz)
-        sdf_string = self.pdb_ccd_rdkit.sdf_file_or_string(file_name=sdf_temp, xyz=override_xyz)
+        sdf_string = self.pdb_ccd_rdkit.sdf_file_or_string(xyz=override_xyz)
         logging.debug('load ccd into PdbChemicalComponentsRDKit sdf string=\n{}'.format(sdf_string))
-        molecule = Molecule.from_string(sdf_string, format='sdf')
+        molecule = ccdcMolecule.from_string(sdf_string, format='sdf')
         molecule.standardise_aromatic_bonds()
         molecule.standardise_delocalised_bonds()
         logging.debug('CSD smiles string {}'.format(molecule.smiles))
@@ -135,7 +136,6 @@ class PdbCCDMogul(object):
         logging.debug('number of Mogul analysed bonds={}'.format(len(geometry_analysed_molecule.analysed_bonds)))
         for observation_type in MOGUL_OBSERVATION_TYPES:
             self.store_observation(geometry_analysed_molecule, observation_type)
-        os.remove(sdf_temp)
         for observation_type in MOGUL_OBSERVATION_TYPES:
             self.classify_observation(observation_type)
             self.prepare_html_table(observation_type)
