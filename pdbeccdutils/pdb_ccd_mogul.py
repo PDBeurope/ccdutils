@@ -191,14 +191,14 @@ class PdbCCDMogul(object):
 
     def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring, atom_ids):
         number_atoms_in_ring = len(this_ring.atom_indices)
-        query_ring_elements = []
+        query_ring_sybyl_types = []
         query_atoms = geometry_analysed_molecule.atoms
         query_ring = collections.OrderedDict()
         query_ring_torsions = []
         query_ring_torsions_labels = []
         for i0 in range(number_atoms_in_ring):
             csd_atom = query_atoms[this_ring.atom_indices[i0]]
-            query_ring_elements.append(csd_atom.atomic_symbol)
+            query_ring_sybyl_types.append(csd_atom.sybyl_type)
             i1 = (i0 + 1) % number_atoms_in_ring
             i2 = (i0 + 2) % number_atoms_in_ring
             i3 = (i0 + 3) % number_atoms_in_ring
@@ -217,18 +217,30 @@ class PdbCCDMogul(object):
             this_hit = collections.OrderedDict()
             this_hit['csd_identifier'] = str(hit.identifier)
             this_hit['rmsd_deviation_from_query'] = hit.value
-            # logging.debug('\thit: {}'.format(this_hit))
-            this_hit['inverted'], this_hit['matched atoms'], \
-                this_hit['rings_torsions'] = \
-                self.find_ring_hit(query_ring_elements, query_ring_torsions,
-                                   hit_value=hit.value, hit_atoms=hit.atoms)
+            this_hit['my_rmsd_deviation_from_query'], this_hit['inverted'], \
+                this_hit['matched atoms'], this_hit['rings_torsions'] = \
+                self.find_ring_hit(query_ring_sybyl_types, query_ring_torsions, hit_atoms=hit.atoms)
             this_hit['rms_ring_torsion'] = self.rms(this_hit['rings_torsions'])
             hit_list.append(this_hit)
         return query_ring, hit_list
 
     @staticmethod
-    def find_ring_hit(query_ring_elements, query_ring_torsions, hit_value, hit_atoms):
-        number_atoms_in_ring = len(query_ring_elements)
+    def find_ring_hit(query_ring_sybyl_types, query_ring_torsions, hit_atoms):
+        """
+        re-evaluates the Mogul ring strangeness aka torsion rms from query 
+        Args:
+            query_ring_sybyl_types: 
+            query_ring_torsions: 
+            hit_atoms: 
+
+        Returns:
+
+        """
+        number_atoms_in_ring = len(query_ring_sybyl_types)
+        strangeness = 99999.00
+        match_invert = None
+        matched_torsions = None
+        matched_atoms_labels = None
         for reverse in False, True:
             for offset in range(number_atoms_in_ring):
                 offset_atoms = []
@@ -236,11 +248,11 @@ class PdbCCDMogul(object):
                     offset_atoms.append(hit_atoms[(ia + offset) % number_atoms_in_ring])
                 if reverse:
                     offset_atoms.reverse()
-                elements_match = True
+                sybyl_types_match = True
                 for ia in range(number_atoms_in_ring):
-                    if query_ring_elements[ia] != offset_atoms[ia].atomic_symbol:
-                        elements_match = False
-                if not elements_match:
+                    if query_ring_sybyl_types[ia] != offset_atoms[ia].sybyl_type:
+                        sybyl_types_match = False
+                if not sybyl_types_match:
                     continue
                 offset_atoms_labels = []
                 for ia in range(number_atoms_in_ring):
@@ -263,13 +275,17 @@ class PdbCCDMogul(object):
                     sum_delta_squared_invert += delta_invert*delta_invert
                 my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
                 my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
-                # logging.debug('offset_atoms_labels scores: {:.5f} {:.5f}'.format(abs(hit_value - my_ring_rmsd), abs(hit_value - my_ring_rmsd_invert)))
-                if abs(hit_value - my_ring_rmsd) < 0.0001:
-                    return False, offset_atoms_labels, hit_ring_torsions
-                elif abs(hit_value - my_ring_rmsd_invert) < 0.0001:
-                    return True, offset_atoms_labels, hit_ring_torsions_inverted
-        return 'ERROR_NO_MATCH', ['ERROR UNMATCHED ATOMS:', ] + offset_atoms_labels, hit_ring_torsions
-        # raise RuntimeError('cannot find match for ring')
+                if my_ring_rmsd < strangeness:
+                    strangeness = my_ring_rmsd
+                    match_invert = False
+                    matched_atoms_labels = offset_atoms_labels
+                    matched_torsions = hit_ring_torsions
+                if my_ring_rmsd_invert  < strangeness:
+                    strangeness = my_ring_rmsd_invert
+                    match_invert = True
+                    matched_atoms_labels = offset_atoms_labels
+                    matched_torsions = hit_ring_torsions_inverted
+        return strangeness, match_invert, matched_atoms_labels, matched_torsions
 
     @staticmethod
     def rms(float_list):
