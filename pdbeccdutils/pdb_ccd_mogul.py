@@ -217,6 +217,7 @@ class PdbCCDMogul(object):
             this_hit = collections.OrderedDict()
             this_hit['csd_identifier'] = str(hit.identifier)
             this_hit['rmsd_deviation_from_query'] = hit.value
+            # logging.debug('\thit: {}'.format(this_hit))
             this_hit['inverted'], this_hit['matched atoms'], \
                 this_hit['rings_torsions'] = \
                 self.find_ring_hit(query_ring_elements, query_ring_torsions,
@@ -262,11 +263,13 @@ class PdbCCDMogul(object):
                     sum_delta_squared_invert += delta_invert*delta_invert
                 my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
                 my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
+                # logging.debug('offset_atoms_labels scores: {:.5f} {:.5f}'.format(abs(hit_value - my_ring_rmsd), abs(hit_value - my_ring_rmsd_invert)))
                 if abs(hit_value - my_ring_rmsd) < 0.0001:
                     return False, offset_atoms_labels, hit_ring_torsions
                 elif abs(hit_value - my_ring_rmsd_invert) < 0.0001:
                     return True, offset_atoms_labels, hit_ring_torsions_inverted
-        raise RuntimeError('cannot find match for ring')
+        return 'ERROR_NO_MATCH', ['ERROR UNMATCHED ATOMS:', ] + offset_atoms_labels, hit_ring_torsions
+        # raise RuntimeError('cannot find match for ring')
 
     @staticmethod
     def rms(float_list):
