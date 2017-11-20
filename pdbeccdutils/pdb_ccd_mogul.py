@@ -326,7 +326,6 @@ class PdbCCDMogul(object):
             this_sum += element*element
         return sqrt(this_sum/float(len(float_list)))
 
-
     def classify_observation(self, observation_type):
         """
         classifies Mogul results using own analysis.
@@ -361,7 +360,8 @@ class PdbCCDMogul(object):
         elif observation_type == 'torsion':
             return  # TODO code up!
         elif observation_type == 'ring':
-            return  # TODO code up!
+            self.score_and_classify_rings()
+            return
         else:
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
 
@@ -389,6 +389,11 @@ class PdbCCDMogul(object):
             store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
             logging.debug(store_nt)
             place_in.append(store_nt)
+
+    def score_and_classify_rings(self):
+        logging.debug('call to score_and_classify_rings')
+        for ring in self.store_rings:
+            logging.debug('classify ring {}'.format(ring))
 
     def prepare_html_table(self, observation_type):
         if observation_type == 'bond':
