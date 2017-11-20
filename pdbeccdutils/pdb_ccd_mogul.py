@@ -394,6 +394,14 @@ class PdbCCDMogul(object):
         logging.debug('call to score_and_classify_rings')
         for ring in self.store_rings:
             logging.debug('classify ring {}'.format(ring))
+            # find the query ring torsion angles in degrees - using rdkit
+            # query_ring_torsions = []
+            # number_atoms_in_ring = len(ring['atoms_ids'])
+            rdkit_atom_indices = []
+            for atom_id in ring['atoms_ids']:
+                logging.debug('ring atom id {}'.format(atom_id))
+
+            # query_ring_torsions = []
 
     def prepare_html_table(self, observation_type):
         if observation_type == 'bond':
