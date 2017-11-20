@@ -396,12 +396,14 @@ class PdbCCDMogul(object):
             logging.debug('classify ring {}'.format(ring))
             # find the query ring torsion angles in degrees - using rdkit
             # query_ring_torsions = []
-            # number_atoms_in_ring = len(ring['atoms_ids'])
-            rdkit_atom_indices = []
-            for atom_id in ring['atoms_ids']:
-                logging.debug('ring atom id {}'.format(atom_id))
-
-            # query_ring_torsions = []
+            number_atoms_in_ring = len(ring['atoms_ids'])
+            atom_ids = ring.atoms_ids
+            for i0 in range(number_atoms_in_ring):
+                i1 = (i0 + 1) % number_atoms_in_ring
+                i2 = (i0 + 2) % number_atoms_in_ring
+                i3 = (i0 + 3) % number_atoms_in_ring
+                tors_label = '{}-{}-{}-{}'.format(atom_ids[i0], atom_ids[i1], atom_ids[i2], atom_ids[i3])
+                logging.debug('find dihedral {}'.format(tors_label))
 
     def prepare_html_table(self, observation_type):
         if observation_type == 'bond':
