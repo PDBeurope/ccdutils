@@ -396,8 +396,8 @@ class PdbCCDMogul(object):
             logging.debug('classify ring {}'.format(ring))
             # find the query ring torsion angles in degrees - using rdkit
             # query_ring_torsions = []
-            number_atoms_in_ring = len(ring['atoms_ids'])
             atom_ids = ring.atoms_ids
+            number_atoms_in_ring = len(atom_ids)
             for i0 in range(number_atoms_in_ring):
                 i1 = (i0 + 1) % number_atoms_in_ring
                 i2 = (i0 + 2) % number_atoms_in_ring
