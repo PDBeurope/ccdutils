@@ -168,16 +168,16 @@ class PdbCCDMogul(object):
                 atom_id = self.pdb_ccd_rdkit.atom_ids[index]
                 atom_ids.append(atom_id)
             store['atoms_ids'] = atom_ids
+            if observation_type == 'ring':
+                store['sybyl_atom_types'] = self.query_ring_sybyl_types(geometry_analysed_molecule, this_ring=thing)
+                store['ring_torsions_labels'] = self.query_ring_tors_labels(atom_ids)
+                store['ring_hits'] = self._ring_hit_list(this_ring=thing)
             for key in ['classification', 'd_min', 'local_density', 'lower_quartile', 'maximum',
                         'mean', 'median', 'minimum', 'nhits', 'standard_deviation', 'type',
                         'unusual', 'upper_quartile', 'value', 'z_score']:
                 store[key] = getattr(thing, key)
             store['histogram'] = thing.histogram(minimum=0.0, maximum=hist_max)
             store['hist_max'] = hist_max
-            if observation_type == 'ring':
-                store['ring_query'], store['ring_hits'] = \
-                    self.analyze_additional_mogul_ring(
-                        geometry_analysed_molecule=geometry_analysed_molecule, this_ring=thing, atom_ids=atom_ids)
             store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
             place_in.append(store_nt)
             logging.debug('store {}:'.format(observation_type))
@@ -189,40 +189,63 @@ class PdbCCDMogul(object):
                 else:
                     logging.debug('\t\t{}\t{}'.format(name, value))
 
-    def analyze_additional_mogul_ring(self, geometry_analysed_molecule, this_ring, atom_ids):
+    @staticmethod
+    def query_ring_sybyl_types(geometry_analysed_molecule, this_ring):
         number_atoms_in_ring = len(this_ring.atom_indices)
-        query_ring_sybyl_types = []
         query_atoms = geometry_analysed_molecule.atoms
-        query_ring = collections.OrderedDict()
-        query_ring_torsions = []
-        query_ring_torsions_labels = []
+        query_ring_sybyl_types = []
         for i0 in range(number_atoms_in_ring):
             csd_atom = query_atoms[this_ring.atom_indices[i0]]
-            query_ring_sybyl_types.append(csd_atom.sybyl_type)
+            query_ring_sybyl_types.append(str(csd_atom.sybyl_type))
+        return query_ring_sybyl_types
+
+    @staticmethod
+    def query_ring_tors_labels(atom_ids):
+        number_atoms_in_ring = len(atom_ids)
+        query_ring_torsions_labels = []
+        for i0 in range(number_atoms_in_ring):
             i1 = (i0 + 1) % number_atoms_in_ring
             i2 = (i0 + 2) % number_atoms_in_ring
             i3 = (i0 + 3) % number_atoms_in_ring
             tors_label = '{}-{}-{}-{}'.format(atom_ids[i0], atom_ids[i1], atom_ids[i2], atom_ids[i3])
             query_ring_torsions_labels.append(tors_label)
-            tors = MD.atom_torsion_angle(query_atoms[this_ring.atom_indices[i0]],
-                                         query_atoms[this_ring.atom_indices[i1]],
-                                         query_atoms[this_ring.atom_indices[i2]],
-                                         query_atoms[this_ring.atom_indices[i3]])
-            query_ring_torsions.append(tors)
-        query_ring['ring_torsions_labels'] = query_ring_torsions_labels
-        query_ring['ring_torsions'] = query_ring_torsions
-        query_ring['rms_ring_torsion'] = self.rms(query_ring_torsions)
+        return query_ring_torsions_labels
+
+    def _ring_hit_list(self, this_ring):
         hit_list = []
         for hit in this_ring.hits:
             this_hit = collections.OrderedDict()
             this_hit['csd_identifier'] = str(hit.identifier)
-            this_hit['rmsd_deviation_from_query'] = hit.value
-            this_hit['my_rmsd_deviation_from_query'], this_hit['inverted'], \
-                this_hit['matched atoms'], this_hit['rings_torsions'] = \
-                self.find_ring_hit(query_ring_sybyl_types, query_ring_torsions, hit_atoms=hit.atoms)
-            this_hit['rms_ring_torsion'] = self.rms(this_hit['rings_torsions'])
+            this_hit['csd_atom_ids'], this_hit['sybyl_types'], this_hit['ring_torsions'] = \
+                self.ring_hit_information_to_store(hit.atoms)
+            this_hit['rms_ring_torsion'] = self.rms(this_hit['ring_torsions'])
             hit_list.append(this_hit)
-        return query_ring, hit_list
+        return hit_list
+
+    @staticmethod
+    def ring_hit_information_to_store(hit_atoms):
+        """
+        process a ring hit - finding the atom_ids, sybyl_atom_types and ring torsions
+
+        Args:
+            hit_atoms: list of csd python api atoms
+
+        Returns:
+            tuple (list of atom ids, list of  sybyl_atom_types, list of ring torsions angles in degrees)
+        """
+        number_atoms_in_ring = len(hit_atoms)
+        csd_atom_ids = []
+        sybyl_types = []
+        hit_ring_torsions = []
+        for i0 in range(number_atoms_in_ring):
+            csd_atom_ids.append(str(hit_atoms[i0].label))
+            sybyl_types.append(str(hit_atoms[i0].sybyl_type))
+            i1 = (i0 + 1) % number_atoms_in_ring
+            i2 = (i0 + 2) % number_atoms_in_ring
+            i3 = (i0 + 3) % number_atoms_in_ring
+            tors = MD.atom_torsion_angle(hit_atoms[i0], hit_atoms[i1], hit_atoms[i2], hit_atoms[i3])
+            hit_ring_torsions.append(tors)
+        return csd_atom_ids, sybyl_types, hit_ring_torsions
 
     @staticmethod
     def find_ring_hit(query_ring_sybyl_types, query_ring_torsions, hit_atoms):
