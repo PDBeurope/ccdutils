@@ -16,7 +16,6 @@
 #
 import collections
 import logging
-import os
 from math import sqrt
 from ccdc import conformer
 from ccdc.molecule import Molecule as ccdcMolecule
@@ -303,7 +302,7 @@ class PdbCCDMogul(object):
                     match_invert = False
                     matched_atoms_labels = offset_atoms_labels
                     matched_torsions = hit_ring_torsions
-                if my_ring_rmsd_invert  < strangeness:
+                if my_ring_rmsd_invert < strangeness:
                     strangeness = my_ring_rmsd_invert
                     match_invert = True
                     matched_atoms_labels = offset_atoms_labels
@@ -347,6 +346,37 @@ class PdbCCDMogul(object):
             "too few hits": not enough Mogul hits to classify
             store result in self.classify_bonds.Z
         """
+        if observation_type == 'bond' or observation_type == 'angle':
+            self.classify_observation_bonds_or_angles(observation_type)
+        elif observation_type == 'torsion':
+            return  # TODO code up!
+        elif observation_type == 'ring':
+            self.score_and_classify_rings()
+            return
+        else:
+            raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
+
+    def classify_observation_bonds_or_angles(self, observation_type):
+        """
+        classifies Mogul results using own analysis.
+
+        Args:
+            observation_type (str): one of 'bond', 'angle'
+
+        Returns:
+           None
+
+        Notes:
+            initial idea take self.store_bonds
+
+            recalculate Z* using a minimum s.d. of 0.010 - store in Zstar
+            reorder according to z-score and add classification for outlier
+            "outlier": Z > 5 purple
+            "unusual":  2 >= Z < 5 violet
+            "ok" Z < 2: green
+            "too few hits": not enough Mogul hits to classify
+            store result in self.classify_bonds.Z
+        """
         if observation_type == 'bond':
             work_from = self.store_bonds
             place_in = self.classify_bonds
@@ -357,14 +387,8 @@ class PdbCCDMogul(object):
             place_in = self.classify_angles
             sd_min = 1.0
             few_hits_threshold = self.settings_angle_few_hits_threshold
-        elif observation_type == 'torsion':
-            return  # TODO code up!
-        elif observation_type == 'ring':
-            self.score_and_classify_rings()
-            return
         else:
-            raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
-
+            raise RuntimeError('call to classify_observation_bonds_or_angles with bad observation')
         for thing in work_from:
             if thing.nhits == 0:
                 zstar = None
@@ -386,25 +410,25 @@ class PdbCCDMogul(object):
             store['zstar'] = zstar
             store['zorder'] = zorder
             store['classification'] = classification
-            store_nt = collections.namedtuple('stored_mogul_' + observation_type, store.keys())(**store)
+            store_nt = collections.namedtuple('classify_mogul_' + observation_type, store.keys())(**store)
             logging.debug(store_nt)
             place_in.append(store_nt)
 
     def score_and_classify_rings(self):
         logging.debug('call to score_and_classify_rings')
-        for ring in self.store_rings:
-            logging.debug('classify ring {}'.format(ring))
+        for store_ring in self.store_rings:
+            logging.debug('classify ring {}'.format(store_ring))
             # find the query ring torsion angles in degrees - using rdkit
             query_ring_torsions = []
-            indices = ring.indices
-            number_atoms_in_ring = len(ring.indices)
+            indices = store_ring.indices
+            number_atoms_in_ring = len(store_ring.indices)
             for i0 in range(number_atoms_in_ring):
                 i1 = (i0 + 1) % number_atoms_in_ring
                 i2 = (i0 + 2) % number_atoms_in_ring
                 i3 = (i0 + 3) % number_atoms_in_ring
                 torsion_indices = (indices[i0], indices[i1], indices[i2], indices[i3])
                 torsion = self.pdb_ccd_rdkit.calculate_torsion(atom_indices=torsion_indices)
-                logging.debug('(ideal) rdkit dihedral {} is {} degrees'.format(ring.ring_torsions_labels[i0], torsion))
+                logging.debug('(ideal) rdkit dihedral {} is {} degrees'.format(store_ring.ring_torsions_labels[i0], torsion))
                 query_ring_torsions.append(torsion)
             logging.debug('(ideal) query_ring_torsions {}'.format(query_ring_torsions))
 
@@ -477,8 +501,8 @@ class PdbCCDMogul(object):
         logging.debug('hightlight_bonds={}'.format(highlight_bonds))
         for atom_labels in False, True:
             svg_string = self.pdb_ccd_rdkit.image_file_or_string(hydrogen=False, atom_labels=atom_labels, wedge=False,
-                                                             highlight_bonds=highlight_bonds, black=True,
-                                                             pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
+                                                                 highlight_bonds=highlight_bonds, black=True,
+                                                                 pixels_x=PIXELS_X, pixels_y=PIXELS_Y)
             svg_string = svg_string.replace('svg:', '')
             if not atom_labels:
                 self.svg_coloured_diagram[observation_type] = svg_string
@@ -550,7 +574,7 @@ class PdbCCDMogul(object):
                         with tag('td', klass='no_border'):
                             doc.asis(self.svg_coloured_diagram[observation_type])
                         with tag('td', klass='no_border'):
-                            self.bond_angle_key(doc, tag, text, line)
+                            self.bond_angle_key(doc, tag, text)
                 with tag('button', klass='toggle', value=observation_type):
                     text('Show {} details'.format(observation_type))
             with tag('div', id=observation_type + "_details"):
@@ -559,7 +583,7 @@ class PdbCCDMogul(object):
                         with tag('td', klass='no_border'):
                             doc.asis(self.svg_coloured_diagram_labels[observation_type])
                         with tag('td', klass='no_border'):
-                            self.bond_angle_key(doc, tag, text, line)
+                            self.bond_angle_key(doc, tag, text)
                 with tag('button', klass='toggle', value=observation_type):
                     text('Hide {} details'.format(observation_type))
                 with tag('p'):
@@ -582,7 +606,7 @@ class PdbCCDMogul(object):
                         text('Hide {} details'.format(observation_type))
 
     @staticmethod
-    def bond_angle_key( doc, tag, text, line):
+    def bond_angle_key( doc, tag, text):
         z_next = ''
         with tag('table'):
             for class_num, name in CLASSIFICATION_NAME.items():
