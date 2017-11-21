@@ -24,7 +24,7 @@ from rdkit.Geometry import rdGeometry
 # noinspection PyPackageRequirements
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
 # noinspection PyPackageRequirements
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, rdMolTransforms
 # noinspection PyPackageRequirements
 from rdkit.Chem.Draw import rdMolDraw2D
 from lxml import etree
@@ -740,3 +740,14 @@ class PdbChemicalComponentsRDKit(PdbChemicalComponents):
             return 0., 0., 0.
         else:
             return xyz_coordinates_tuple
+
+    def calculate_torsion( self, atom_indices=None, ideal=True):
+        if len(atom_indices) != 4:
+            raise RuntimeError('calculate torsion called with atom_indices={} this must be tuple of 4 integers'.
+                               format(atom_indices))
+        if ideal:
+            conformer_id = self.conformer_id_ideal
+        else:
+            raise NotImplementedError
+        conformer = self.rwmol_original.GetConformer(conformer_id)
+        return rdMolTransforms.GetDihedralDeg(conformer, *atom_indices)

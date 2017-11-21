@@ -62,8 +62,8 @@ def test_xyz_2d():
 def test_torsion_calculation():
     gol = PdbChemicalComponentsRDKit(file_name=cif_filename('GOL'))
     yield assert_equals, 'GOL', gol.chem_comp_id, 'chem_comp_id'
-    yield assert_almost_equals, 65.0067, gol.calculate_torsion( atom_indices=(0, 1, 2, 3), ideal=True), \
-          'O1-C1-C2-O2 torsion angle in degrees'
+    yield assert_almost_equals, 65.0067, gol.calculate_torsion( atom_indices=(1, 0, 2, 3), ideal=True),\
+          4, 'O1-C1-C2-O2 torsion angle in degrees (to 4 places - cf to coot)'
 
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
