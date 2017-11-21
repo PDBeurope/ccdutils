@@ -395,15 +395,18 @@ class PdbCCDMogul(object):
         for ring in self.store_rings:
             logging.debug('classify ring {}'.format(ring))
             # find the query ring torsion angles in degrees - using rdkit
-            # query_ring_torsions = []
-            atom_ids = ring.atoms_ids
-            number_atoms_in_ring = len(atom_ids)
+            query_ring_torsions = []
+            indices = ring.indices
+            number_atoms_in_ring = len(ring.indices)
             for i0 in range(number_atoms_in_ring):
                 i1 = (i0 + 1) % number_atoms_in_ring
                 i2 = (i0 + 2) % number_atoms_in_ring
                 i3 = (i0 + 3) % number_atoms_in_ring
-                tors_label = '{}-{}-{}-{}'.format(atom_ids[i0], atom_ids[i1], atom_ids[i2], atom_ids[i3])
-                logging.debug('find dihedral {}'.format(tors_label))
+                torsion_indices = (indices[i0], indices[i1], indices[i2], indices[i3])
+                torsion = self.pdb_ccd_rdkit.calculate_torsion(atom_indices=torsion_indices)
+                logging.debug('(ideal) rdkit dihedral {} is {} degrees'.format(ring.ring_torsions_labels[i0], torsion))
+                query_ring_torsions.append(torsion)
+            logging.debug('(ideal) query_ring_torsions {}'.format(query_ring_torsions))
 
     def prepare_html_table(self, observation_type):
         if observation_type == 'bond':
