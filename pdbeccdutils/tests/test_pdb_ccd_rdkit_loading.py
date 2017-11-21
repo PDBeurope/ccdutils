@@ -50,12 +50,21 @@ def test_inchikey_match_for_all_sample_cifs():
             yield assert_equals, pdb_cc.inchikey, inchikey_from_rdkit, \
                 'check inchikeys match for ' + pdb_cc.chem_comp_id
 
+
 def test_xyz_2d():
     eoh = PdbChemicalComponentsRDKit(file_name=cif_filename('EOH'))
     yield assert_equals, 3, len(eoh.xyz_2d_no_hydrogen), 'EOH length eoh.xyz_2d_no_hydrogen'
     yield assert_equals, 0., eoh.xyz_2d_no_hydrogen[0][0], 'EOH length eoh.xyz_2d_no_hydrogen first atom x'
     yield assert_almost_equals, 0.5, eoh.xyz_2d_no_hydrogen[0][1], 7, 'EOH length eoh.xyz_2d_no_hydrogen first atom y'
     yield assert_equals, 9, len(eoh.xyz_2d)
+
+
+def test_torsion_calculation():
+    gol = PdbChemicalComponentsRDKit(file_name=cif_filename('GOL'))
+    yield assert_equals, 'GOL', gol.chem_comp_id, 'chem_comp_id'
+    yield assert_almost_equals, 65.0067, gol.calculate_torsion( atom_indices=(0, 1, 2, 3), ideal=True), \
+          'O1-C1-C2-O2 torsion angle in degrees'
+
 
 class DummyTestCaseSoPycharmRecognizesNoseTestsAsTests(unittest.TestCase):
     pass
