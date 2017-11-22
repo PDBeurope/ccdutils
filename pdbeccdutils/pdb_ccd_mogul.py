@@ -247,69 +247,6 @@ class PdbCCDMogul(object):
         return csd_atom_ids, sybyl_types, hit_ring_torsions
 
     @staticmethod
-    def find_ring_hit(query_ring_sybyl_types, query_ring_torsions, hit_atoms):
-        """
-        re-evaluates the Mogul ring strangeness aka torsion rms from query 
-        Args:
-            query_ring_sybyl_types: 
-            query_ring_torsions: 
-            hit_atoms: 
-
-        Returns:
-
-        """
-        number_atoms_in_ring = len(query_ring_sybyl_types)
-        strangeness = 99999.00
-        match_invert = None
-        matched_torsions = None
-        matched_atoms_labels = None
-        for reverse in False, True:
-            for offset in range(number_atoms_in_ring):
-                offset_atoms = []
-                for ia in range(number_atoms_in_ring):
-                    offset_atoms.append(hit_atoms[(ia + offset) % number_atoms_in_ring])
-                if reverse:
-                    offset_atoms.reverse()
-                sybyl_types_match = True
-                for ia in range(number_atoms_in_ring):
-                    if query_ring_sybyl_types[ia] != offset_atoms[ia].sybyl_type:
-                        sybyl_types_match = False
-                if not sybyl_types_match:
-                    continue
-                offset_atoms_labels = []
-                for ia in range(number_atoms_in_ring):
-                    offset_atoms_labels.append(str(offset_atoms[ia].label))
-                sum_delta_squared = 0.
-                sum_delta_squared_invert = 0.
-                hit_ring_torsions = []
-                hit_ring_torsions_inverted = []
-                for i0 in range(number_atoms_in_ring):
-                    i1 = (i0 + 1) % number_atoms_in_ring
-                    i2 = (i0 + 2) % number_atoms_in_ring
-                    i3 = (i0 + 3) % number_atoms_in_ring
-                    tors = MD.atom_torsion_angle(offset_atoms[i0], offset_atoms[i1], offset_atoms[i2], offset_atoms[i3])
-                    hit_ring_torsions.append(tors)
-                    hit_ring_torsions_inverted.append(-tors)
-                    query_ring_tor = query_ring_torsions[i0]
-                    delta = query_ring_tor - tors
-                    delta_invert = query_ring_tor + tors
-                    sum_delta_squared += delta*delta
-                    sum_delta_squared_invert += delta_invert*delta_invert
-                my_ring_rmsd = sqrt(sum_delta_squared/float(number_atoms_in_ring))
-                my_ring_rmsd_invert = sqrt(sum_delta_squared_invert/float(number_atoms_in_ring))
-                if my_ring_rmsd < strangeness:
-                    strangeness = my_ring_rmsd
-                    match_invert = False
-                    matched_atoms_labels = offset_atoms_labels
-                    matched_torsions = hit_ring_torsions
-                if my_ring_rmsd_invert < strangeness:
-                    strangeness = my_ring_rmsd_invert
-                    match_invert = True
-                    matched_atoms_labels = offset_atoms_labels
-                    matched_torsions = hit_ring_torsions_inverted
-        return strangeness, match_invert, matched_atoms_labels, matched_torsions
-
-    @staticmethod
     def rms(float_list):
         """
         works out the root mean squared for a list of floats
@@ -415,9 +352,11 @@ class PdbCCDMogul(object):
             place_in.append(store_nt)
 
     def score_and_classify_rings(self):
-        logging.debug('call to score_and_classify_rings')
+        """
+        Scores ring using RDKit measurements of ring torsion angles and then classifies them into self.classify_rings
+        list.
+        """
         for store_ring in self.store_rings:
-            logging.debug('classify ring {}'.format(store_ring))
             # find the query ring torsion angles in degrees - using rdkit
             query_ring_torsions = []
             indices = store_ring.indices
@@ -428,9 +367,117 @@ class PdbCCDMogul(object):
                 i3 = (i0 + 3) % number_atoms_in_ring
                 torsion_indices = (indices[i0], indices[i1], indices[i2], indices[i3])
                 torsion = self.pdb_ccd_rdkit.calculate_torsion(atom_indices=torsion_indices)
-                logging.debug('(ideal) rdkit dihedral {} is {} degrees'.format(store_ring.ring_torsions_labels[i0], torsion))
                 query_ring_torsions.append(torsion)
-            logging.debug('(ideal) query_ring_torsions {}'.format(query_ring_torsions))
+            self.score_ring(query_ring_torsions=query_ring_torsions, store_ring=store_ring)
+            # TODO classify ring
+
+    def score_ring(self, query_ring_torsions, store_ring):
+        """
+        'Scores' a ring working out the strangeness (rmsd of query ring torsions to each of the CSD hits stored).
+
+        Args:
+            query_ring_torsions: list of ring torsion angles in degrees for the query molecule.
+            store_ring: a stored_mogul_ring named tuple object containing stored information to classify ring.
+
+        Returns:
+            not sure yet! TODO
+
+        """
+        logging.debug('call to score_ring')
+        logging.debug('(ideal) query_ring_torsions {}'.format(query_ring_torsions))
+        logging.debug('store_ring={}'.format(store_ring))
+        for hit in store_ring.ring_hits:
+            self.score_ring_hit(query_ring_torsions=query_ring_torsions,
+                                query_sybyl_atom_types=store_ring.sybyl_atom_types, hit=hit)
+
+    @staticmethod
+    def score_ring_hit(query_ring_torsions, query_sybyl_atom_types, hit):
+        """
+        Find the ring strangeness of the query molecule to a hit from the stored_mogul_ring named tuple rings_hit list
+        of information about a hit to a particular ring from a CSD enty.
+
+        Args:
+            query_ring_torsions: list of ring torsion angles in degrees for the query molecule.
+            query_sybyl_atom_types: list of the sybyl atoms types of the query ring
+            hit: an ordered dictionary created by the self._ring_hit_list method
+
+        Returns:
+            not sure yet! TODO
+
+        Notes:
+            to score the ring have to match up the query ring sybyl atom types with the hits. Have to try all
+            combinations in case the ring has identical types. Ring has to be reversed (going the other way around)
+
+            working out the ring torsions on reversal could be done in a neater way - currently a dictionary is used.
+        """
+        hit_sybyl_atom_types = hit['sybyl_types']
+        number_atoms_in_ring = len(query_ring_torsions)
+        csd_atom_ids = hit['csd_atom_ids']
+        hit_ring_tors_dict = {}
+        for i0 in range(number_atoms_in_ring):
+            i1 = (i0 + 1) % number_atoms_in_ring
+            i2 = (i0 + 2) % number_atoms_in_ring
+            i3 = (i0 + 3) % number_atoms_in_ring
+            hit_ring_tors_label = '{}-{}-{}-{}'.format(csd_atom_ids[i0], csd_atom_ids[i1],
+                                                       csd_atom_ids[i2], csd_atom_ids[i3])
+            hit_ring_tors_reversed = '{}-{}-{}-{}'.format(csd_atom_ids[i3], csd_atom_ids[i2],
+                                                          csd_atom_ids[i1], csd_atom_ids[i0])
+            hit_ring_tors_dict[hit_ring_tors_label] = hit['ring_torsions'][i0]
+            hit_ring_tors_dict[hit_ring_tors_reversed] = hit['ring_torsions'][i0]
+        strangeness = 99999.00
+        match_invert = None
+        matched_atoms_labels = None
+        matched_torsions = None
+        for reverse in False, True:
+            for offset_by in range(number_atoms_in_ring):
+                offset_indices = []
+                for ia in range(number_atoms_in_ring):
+                    offset_indices.append((ia + offset_by) % number_atoms_in_ring)
+                if reverse:
+                    offset_indices.reverse()
+                sybyl_types_match = True
+                for ia in range(number_atoms_in_ring):
+                    if query_sybyl_atom_types[ia] != hit_sybyl_atom_types[offset_indices[ia]]:
+                        sybyl_types_match = False
+                if not sybyl_types_match:
+                    continue
+                sum_delta_squared = 0.
+                sum_delta_squared_invert = 0.
+                offset_atoms_labels = []
+                hit_ring_torsions = []
+                hit_ring_torsions_invert = []
+                for ia in range(number_atoms_in_ring):
+                    query_ring_tor = query_ring_torsions[ia]
+                    i0 = offset_indices[ia]
+                    i1 = offset_indices[(ia + 1) % number_atoms_in_ring]
+                    i2 = offset_indices[(ia + 2) % number_atoms_in_ring]
+                    i3 = offset_indices[(ia + 3) % number_atoms_in_ring]
+                    hit_ring_tors_label = '{}-{}-{}-{}'.format(csd_atom_ids[i0], csd_atom_ids[i1],
+                                                               csd_atom_ids[i2], csd_atom_ids[i3])
+                    tors = hit_ring_tors_dict[hit_ring_tors_label]
+                    offset_atoms_labels.append(csd_atom_ids[i0])
+                    delta = query_ring_tor - tors
+                    delta_invert = query_ring_tor + tors
+                    sum_delta_squared += delta * delta
+                    sum_delta_squared_invert += delta_invert * delta_invert
+                    hit_ring_torsions.append(tors)
+                    hit_ring_torsions_invert.append(-tors)
+                my_ring_rmsd = sqrt(sum_delta_squared / float(number_atoms_in_ring))
+                my_ring_rmsd_invert = sqrt(sum_delta_squared_invert / float(number_atoms_in_ring))
+                if my_ring_rmsd < strangeness:
+                    strangeness = my_ring_rmsd
+                    match_invert = False
+                    matched_atoms_labels = offset_atoms_labels
+                    matched_torsions = hit_ring_torsions
+                if my_ring_rmsd_invert < strangeness:
+                    strangeness = my_ring_rmsd_invert
+                    match_invert = True
+                    matched_atoms_labels = offset_atoms_labels
+                    matched_torsions = hit_ring_torsions_invert
+        if strangeness == 99999.00:
+            raise RuntimeError('impossible error failed to find any match to hit {}'.format(hit))
+        logging.debug('{} strangeness={} {} invert={} {}'.
+                      format(hit['csd_identifier'], strangeness, matched_atoms_labels, match_invert, matched_torsions))
 
     def prepare_html_table(self, observation_type):
         if observation_type == 'bond':
