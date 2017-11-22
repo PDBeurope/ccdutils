@@ -343,11 +343,11 @@ class PdbCCDMogul(object):
                 if zorder > limit:
                     classification = class_num
                     break
-            store = thing._asdict()
-            store['zstar'] = zstar
-            store['zorder'] = zorder
-            store['classification'] = classification
-            store_nt = collections.namedtuple('classify_mogul_' + observation_type, store.keys())(**store)
+            classify = thing._asdict()
+            classify['zstar'] = zstar
+            classify['zorder'] = zorder
+            classify['classification'] = classification
+            store_nt = collections.namedtuple('classify_mogul_' + observation_type, classify.keys())(**classify)
             logging.debug(store_nt)
             place_in.append(store_nt)
 
@@ -368,7 +368,8 @@ class PdbCCDMogul(object):
                 torsion_indices = (indices[i0], indices[i1], indices[i2], indices[i3])
                 torsion = self.pdb_ccd_rdkit.calculate_torsion(atom_indices=torsion_indices)
                 query_ring_torsions.append(torsion)
-            self.score_ring(query_ring_torsions=query_ring_torsions, store_ring=store_ring)
+            scored_hits = self.score_ring(query_ring_torsions=query_ring_torsions, store_ring=store_ring)
+            logging.debug('scored_hits = {}'.format(scored_hits))
             # TODO classify ring
 
     def score_ring(self, query_ring_torsions, store_ring):
@@ -380,16 +381,18 @@ class PdbCCDMogul(object):
             store_ring: a stored_mogul_ring named tuple object containing stored information to classify ring.
 
         Returns:
-            not sure yet! TODO
+            list of scored hits
 
         """
         logging.debug('call to score_ring')
         logging.debug('(ideal) query_ring_torsions {}'.format(query_ring_torsions))
         logging.debug('store_ring={}'.format(store_ring))
+        scored_hits = []
         for hit in store_ring.ring_hits:
-            self.score_ring_hit(query_ring_torsions=query_ring_torsions,
-                                query_sybyl_atom_types=store_ring.sybyl_atom_types, hit=hit)
-
+            scored_hits.append(self.score_ring_hit(query_ring_torsions=query_ring_torsions,
+                                                   query_sybyl_atom_types=store_ring.sybyl_atom_types,
+                                                   hit=hit))
+        return scored_hits
     @staticmethod
     def score_ring_hit(query_ring_torsions, query_sybyl_atom_types, hit):
         """
@@ -402,7 +405,7 @@ class PdbCCDMogul(object):
             hit: an ordered dictionary created by the self._ring_hit_list method
 
         Returns:
-            not sure yet! TODO
+            OrderDict with results for this hit
 
         Notes:
             to score the ring have to match up the query ring sybyl atom types with the hits. Have to try all
@@ -478,6 +481,13 @@ class PdbCCDMogul(object):
             raise RuntimeError('impossible error failed to find any match to hit {}'.format(hit))
         logging.debug('{} strangeness={} {} invert={} {}'.
                       format(hit['csd_identifier'], strangeness, matched_atoms_labels, match_invert, matched_torsions))
+        hit_score = collections.OrderedDict()
+        hit_score['csd_identifier'] = hit['csd_identifier']
+        hit_score['strangeness'] = strangeness
+        hit_score['matched_atoms_labels'] = matched_atoms_labels
+        hit_score['match_invert'] = match_invert
+        hit_score['match_invert'] = matched_torsions
+        return hit_score
 
     def prepare_html_table(self, observation_type):
         if observation_type == 'bond':
@@ -545,7 +555,7 @@ class PdbCCDMogul(object):
                     if this_bond in highlight_bonds:
                         del highlight_bonds[this_bond]
                     highlight_bonds[this_bond] = CLASSIFICATION_COLOR[classification]
-        logging.debug('hightlight_bonds={}'.format(highlight_bonds))
+        logging.debug('highlight_bonds={}'.format(highlight_bonds))
         for atom_labels in False, True:
             svg_string = self.pdb_ccd_rdkit.image_file_or_string(hydrogen=False, atom_labels=atom_labels, wedge=False,
                                                                  highlight_bonds=highlight_bonds, black=True,
