@@ -16,6 +16,7 @@
 #
 import collections
 import logging
+import numpy as np
 from math import sqrt
 from ccdc import conformer
 from ccdc.molecule import Molecule as ccdcMolecule
@@ -370,6 +371,11 @@ class PdbCCDMogul(object):
                 query_ring_torsions.append(torsion)
             scored_hits = self.score_ring(query_ring_torsions=query_ring_torsions, store_ring=store_ring)
             logging.debug('scored_hits = {}'.format(scored_hits))
+            strangeness = np.array([d['strangeness'] for d in scored_hits])
+            logging.debug('minimum strangeness={}'.format(strangeness.min()))
+            logging.debug('maximum strangeness={}'.format(strangeness.max()))
+
+
             # TODO classify ring
 
     def score_ring(self, query_ring_torsions, store_ring):
