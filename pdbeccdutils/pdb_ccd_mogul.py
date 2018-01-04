@@ -39,6 +39,12 @@ CLASSIFICATION_ZLIMIT = OrderedDict([(5, 5.0),
                                      (2, 1.0),
                                      (1, 0.0),
                                      (0, -9999999.0)])
+CLASSIFICATION_RING_STRANGENESS = OrderedDict([(5, 20.0),
+                                     (4, 10.0),
+                                     (3, 5.0),
+                                     (2, 2.5),
+                                     (1, 0.0),
+                                     (0, -9999999.0)])
 CLASSIFICATION_COLOR = {5: (215. / 255., 48. / 255., 39. / 255.),  # blood orange
                         4: (252. / 255., 141. / 255., 89. / 255.),  # mid orange
                         3: (254. / 255., 224. / 255., 144. / 255.),  # yellow/orange
@@ -340,9 +346,9 @@ class PdbCCDMogul(object):
                 zorder = -101.
             logging.debug('zstar={} zorder={}'.format(zstar, zorder))
             classification = None
-            for class_num, limit in CLASSIFICATION_ZLIMIT.items():
+            for classify_num, limit in CLASSIFICATION_ZLIMIT.items():
                 if zorder > limit:
-                    classification = class_num
+                    classification = classify_num
                     break
             classify = thing._asdict()
             classify['zstar'] = zstar
@@ -372,11 +378,21 @@ class PdbCCDMogul(object):
             scored_hits = self.score_ring(query_ring_torsions=query_ring_torsions, store_ring=store_ring)
             logging.debug('scored_hits = {}'.format(scored_hits))
             strangeness = np.array([d['strangeness'] for d in scored_hits])
-            logging.debug('minimum strangeness={}'.format(strangeness.min()))
+            strangeness_min = strangeness.min()
+            logging.debug('minimum strangeness={}'.format(strangeness_min))
             logging.debug('maximum strangeness={}'.format(strangeness.max()))
-
-
-            # TODO classify ring
+            for classify_num, limit in CLASSIFICATION_RING_STRANGENESS.items():
+                if strangeness_min > limit:
+                    classification = classify_num
+                    break
+            logging.debug('classification number={} {}'.
+                          format(classification, CLASSIFICATION_NAME[classification]))
+            classify = store_ring._asdict()
+            classify['strangeness_min'] = strangeness_min
+            classify['classification'] = classification
+            store_nt = collections.namedtuple('classify_mogul_ring', classify.keys())(**classify)
+            logging.debug(store_nt)
+            self.classify_rings.append(store_nt)
 
     def score_ring(self, query_ring_torsions, store_ring):
         """
