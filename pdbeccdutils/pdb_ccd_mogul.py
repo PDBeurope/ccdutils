@@ -379,8 +379,18 @@ class PdbCCDMogul(object):
             logging.debug('scored_hits = {}'.format(scored_hits))
             strangeness = np.array([d['strangeness'] for d in scored_hits])
             strangeness_min = strangeness.min()
+            strangeness_max = strangeness.max()
             logging.debug('minimum strangeness={}'.format(strangeness_min))
-            logging.debug('maximum strangeness={}'.format(strangeness.max()))
+            logging.debug('maximum strangeness={}'.format(strangeness_max))
+            # CCDC local density definition ------------------------------
+            # Density : indicates the fraction of experimental measurements that fall within x degrees of the torsion
+            # RMSD (root mean square deviation) from the query molecule. The torsion RMSD reports the deviation of the
+            # ring conformation of each hit fragment from the query ring, in terms of the corresponding
+            # intracyclic torsion angles.
+            # normally x is 10 degrees
+            n_hits_strangeness_less_than_10 = np.sum(strangeness < 10.0)
+            local_density = float(n_hits_strangeness_less_than_10)/float(len(scored_hits))
+            logging.debug('local density={}'.format(local_density))
             for classify_num, limit in CLASSIFICATION_RING_STRANGENESS.items():
                 if strangeness_min > limit:
                     classification = classify_num
@@ -389,6 +399,8 @@ class PdbCCDMogul(object):
                           format(classification, CLASSIFICATION_NAME[classification]))
             classify = store_ring._asdict()
             classify['strangeness_min'] = strangeness_min
+            classify['strangeness_max'] = strangeness_max
+            classify['local_density'] = local_density
             classify['classification'] = classification
             store_nt = collections.namedtuple('classify_mogul_ring', classify.keys())(**classify)
             logging.debug(store_nt)
@@ -512,6 +524,28 @@ class PdbCCDMogul(object):
         return hit_score
 
     def prepare_html_table(self, observation_type):
+        """
+        prepares detailed html table for a particular observation type, storing in self.detailed_html_table dictionary 
+
+        Args:
+            observation_type (str): the observation type one of 'bond', 'angle', 'torsion' or 'ring' 
+        """
+        if observation_type == 'bond' or observation_type == 'angle':
+            self.prepare_html_table_bond_angle(observation_type)
+        elif observation_type == 'torsion':
+            return  # TODO code up!
+        elif observation_type == 'ring':
+            self.prepare_html_table_ring()
+        else:
+            raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
+
+    def prepare_html_table_bond_angle(self, observation_type):
+        """
+        prepares detailed html table for bonds or angles, storing in self.detailed_html_table dictionary 
+        
+        Args:
+            observation_type (str): the observation type one of 'bond', 'angle' 
+        """
         if observation_type == 'bond':
             work_from = self.classify_bonds
             units = ANGSTROM
@@ -520,10 +554,6 @@ class PdbCCDMogul(object):
             work_from = self.classify_angles
             units = 'degrees'
             sf_format = '{:.1f}'
-        elif observation_type == 'torsion':
-            return  # TODO code up!
-        elif observation_type == 'ring':
-            return  # TODO code up!
         else:
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
         if len(work_from) > 0:
@@ -546,7 +576,29 @@ class PdbCCDMogul(object):
                 html_color = CLASSIFICATION_HTML_COLOR[thing.classification]
                 rows.append((atoms, actual, mean, difference, sigma, nhits, z_score, classification, html_color))
             self.detailed_html_table[observation_type] = rows
- 
+
+    def prepare_html_table_ring(self):
+        """
+        prepares detailed html table for bonds or angles, storing the list in self.detailed_html_table['ring'] 
+        """
+        logging.debug('call to prepare_html_table_ring')
+        if len(self.classify_rings) > 0:
+            rows = []
+            title_row = ('atoms', 'Mogul # hits', 'dmin in degrees', 'dmax in degrees', 'local density',
+                         'classification', 'color')
+            rows.append(title_row)
+            for ring in sorted(self.classify_rings, key=lambda t: t.strangeness_min, reverse=True):
+                atoms = '-'.join(ring.atoms_ids)
+                nhits = '{}'.format(ring.nhits)
+                dmin = '{:.3f}'.format(ring.strangeness_min)
+                dmax = '{:.3f}'.format(ring.strangeness_max)
+                local_density = '{:.3f}'.format(ring.local_density)
+                classification = CLASSIFICATION_NAME[ring.classification]
+                html_color = CLASSIFICATION_HTML_COLOR[ring.classification]
+                rows.append((atoms, nhits, dmin, dmax, local_density, classification, html_color))
+            self.detailed_html_table['ring'] = rows
+            logging.debug("self.detailed_html_table['ring'] = {}".format(self.detailed_html_table['ring']))
+
     def prepare_svg_coloured_diagram(self, observation_type):
         if observation_type == 'bond':
             work_from = self.classify_bonds
@@ -651,7 +703,7 @@ class PdbCCDMogul(object):
                 with tag('table', klass='no_border'):
                     with tag('tr', klass='no_border'):
                         with tag('td', klass='no_border'):
-                            doc.asis(self.svg_coloured_diagram[observation_type])
+                            doc.asis(self.svg_coloured_diagram.get(observation_type,'svg not yet written'))
                         with tag('td', klass='no_border'):
                             self.bond_angle_key(doc, tag, text)
                 with tag('button', klass='toggle', value=observation_type):
@@ -660,7 +712,7 @@ class PdbCCDMogul(object):
                 with tag('table', klass='no_border'):
                     with tag('tr', klass='no_border'):
                         with tag('td', klass='no_border'):
-                            doc.asis(self.svg_coloured_diagram_labels[observation_type])
+                            doc.asis(self.svg_coloured_diagram_labels.get(observation_type,'svg with labels no yet'))
                         with tag('td', klass='no_border'):
                             self.bond_angle_key(doc, tag, text)
                 with tag('button', klass='toggle', value=observation_type):
