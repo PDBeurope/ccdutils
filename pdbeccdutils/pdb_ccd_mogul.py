@@ -380,8 +380,10 @@ class PdbCCDMogul(object):
             strangeness = np.array([d['strangeness'] for d in scored_hits])
             strangeness_min = strangeness.min()
             strangeness_max = strangeness.max()
+            strangeness_10_percentile = np.percentile(strangeness, 10.)
             logging.debug('minimum strangeness={}'.format(strangeness_min))
             logging.debug('maximum strangeness={}'.format(strangeness_max))
+            logging.debug('strangeness 10 percentile={}'.format(strangeness_10_percentile))
             # CCDC local density definition ------------------------------
             # Density : indicates the fraction of experimental measurements that fall within x degrees of the torsion
             # RMSD (root mean square deviation) from the query molecule. The torsion RMSD reports the deviation of the
@@ -400,6 +402,7 @@ class PdbCCDMogul(object):
             classify = store_ring._asdict()
             classify['strangeness_min'] = strangeness_min
             classify['strangeness_max'] = strangeness_max
+            classify['strangeness_10_percentile'] = strangeness_10_percentile
             classify['local_density'] = local_density
             classify['classification'] = classification
             store_nt = collections.namedtuple('classify_mogul_ring', classify.keys())(**classify)
@@ -584,18 +587,19 @@ class PdbCCDMogul(object):
         logging.debug('call to prepare_html_table_ring')
         if len(self.classify_rings) > 0:
             rows = []
-            title_row = ('atoms', 'Mogul # hits', 'dmin in degrees', 'dmax in degrees', 'local density',
-                         'classification', 'color')
+            title_row = ('atoms', 'Mogul # hits', 'dmin in degrees', 'd_10percentile in degrees',
+                         'dmax in degrees', 'local density', 'classification', 'color')
             rows.append(title_row)
             for ring in sorted(self.classify_rings, key=lambda t: t.strangeness_min, reverse=True):
                 atoms = '-'.join(ring.atoms_ids)
                 nhits = '{}'.format(ring.nhits)
                 dmin = '{:.3f}'.format(ring.strangeness_min)
+                d10percentile =  '{:.3f}'.format(ring.strangeness_10_percentile)
                 dmax = '{:.3f}'.format(ring.strangeness_max)
                 local_density = '{:.3f}'.format(ring.local_density)
                 classification = CLASSIFICATION_NAME[ring.classification]
                 html_color = CLASSIFICATION_HTML_COLOR[ring.classification]
-                rows.append((atoms, nhits, dmin, dmax, local_density, classification, html_color))
+                rows.append((atoms, nhits, dmin, d10percentile, dmax, local_density, classification, html_color))
             self.detailed_html_table['ring'] = rows
             logging.debug("self.detailed_html_table['ring'] = {}".format(self.detailed_html_table['ring']))
 
