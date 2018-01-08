@@ -611,6 +611,10 @@ class PdbCCDMogul(object):
         elif observation_type == 'torsion':
             return  # TODO code up!
         elif observation_type == 'ring':
+            self.svg_coloured_diagram[observation_type] = \
+                'A coloured 2D stick diagram with all the rings coloured as per bonds and angles'
+            self.svg_coloured_diagram_labels[observation_type] = self.svg_coloured_diagram[observation_type] + \
+                '(atom labels)'
             return  # TODO code up!
         else:
             raise RuntimeError('unrecognized observation_type={}'.format(observation_type))
@@ -707,38 +711,50 @@ class PdbCCDMogul(object):
                 with tag('table', klass='no_border'):
                     with tag('tr', klass='no_border'):
                         with tag('td', klass='no_border'):
-                            doc.asis(self.svg_coloured_diagram.get(observation_type,'svg not yet written'))
-                        with tag('td', klass='no_border'):
-                            self.bond_angle_key(doc, tag, text)
+                            doc.asis(self.svg_coloured_diagram[observation_type])
+                        if observation_type == 'bond' or observation_type == 'angle':
+                            with tag('td', klass='no_border'):
+                                self.bond_angle_key(doc, tag, text)
                 with tag('button', klass='toggle', value=observation_type):
                     text('Show {} details'.format(observation_type))
             with tag('div', id=observation_type + "_details"):
                 with tag('table', klass='no_border'):
                     with tag('tr', klass='no_border'):
                         with tag('td', klass='no_border'):
-                            doc.asis(self.svg_coloured_diagram_labels.get(observation_type,'svg with labels no yet'))
-                        with tag('td', klass='no_border'):
+                            doc.asis(self.svg_coloured_diagram_labels[observation_type])
+                        if observation_type == 'bond' or observation_type == 'angle':
+                           with tag('td', klass='no_border'):
                             self.bond_angle_key(doc, tag, text)
                 with tag('button', klass='toggle', value=observation_type):
                     text('Hide {} details'.format(observation_type))
-                with tag('p'):
-                    with tag('i'):
-                        text('TODO: add table with metrics - number and % for outliers, very-unusual, usual plus rmsZ*')
-                with tag('table'):
-                    with tag('tr'):
-                        for item in self.detailed_html_table[observation_type][0][:-1]:
-                            with tag('th'):
-                                doc.asis(item)
-                    for row in self.detailed_html_table[observation_type][1:]:
-                        with tag('tr'):
-                            for item in row[:-2]:  # all but the last two
-                                with tag('td'):
-                                    text(item)
-                            with tag('td', bgcolor=row[-1]):
-                                text(row[-2])
+                if observation_type == 'bond' or observation_type == 'angle':
+                    self.prepare_html_section_bond_angle_details(observation_type, doc, tag, text)
+                if observation_type == 'ring':
+                    self.prepare_html_section_ring_details(doc, tag, text)
                 if len(self.detailed_html_table[observation_type]) > 10:
                     with tag('button', klass='toggle', value=observation_type):
                         text('Hide {} details'.format(observation_type))
+
+    def prepare_html_section_bond_angle_details(self, observation_type, doc, tag, text):
+        with tag('p'):
+            with tag('i'):
+                text('TODO: add table with metrics - number and % for outliers, very-unusual, usual plus rmsZ*')
+        with tag('table'):
+            with tag('tr'):
+                for item in self.detailed_html_table[observation_type][0][:-1]:
+                    with tag('th'):
+                        doc.asis(item)
+            for row in self.detailed_html_table[observation_type][1:]:
+                with tag('tr'):
+                    for item in row[:-2]:  # all but the last two
+                        with tag('td'):
+                            text(item)
+                    with tag('td', bgcolor=row[-1]):
+                        text(row[-2])
+
+    def prepare_html_section_ring_details(self, doc, tag, text):
+        with tag('p'):
+            text('ring details to be written')
 
     @staticmethod
     def bond_angle_key( doc, tag, text):
