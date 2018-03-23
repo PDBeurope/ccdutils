@@ -11,5 +11,5 @@ setup(name='pdbeccdutils',
       scripts=['bin/create_2d_images.py'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['wurlitzer', 'Pillow']
+      install_requires=['wurlitzer', 'Pillow', 'scipy']
       )

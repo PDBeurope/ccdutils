@@ -142,7 +142,7 @@ def main():
             _check_structure(reader_result, log)
             _generate_depiction(component, flattening, config, log)
             _save_structures(component, config, log)
-        except:
+        except Exception:
             log.error('{} FATALITY :)'.format(ccd_id))
 
     print('We are done in here.')
