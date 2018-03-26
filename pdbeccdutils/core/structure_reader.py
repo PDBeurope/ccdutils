@@ -23,7 +23,8 @@ from rdkit.Chem import Mol
 
 from mmCif.mmcifIO import MMCIF2Dict
 from pdbeccdutils.core import Component
-from pdbeccdutils.extensions import str_conversions, collection_extensions
+from pdbeccdutils.extensions import str_conversions
+from pdbeccdutils.extensions import collection_ext
 
 Properties = namedtuple('Properties', 'id name formula modified_date released weight')
 Descriptor = namedtuple('Descriptor', 'type program value')
@@ -31,17 +32,18 @@ StructureReaderResult = namedtuple('StructureReaderResult', 'warnings errors com
 
 
 def read_pdb_cif_file(path_to_cif):
-    """Read in single wwpdb cif component and create its internal representation.
+    """Read in single wwpdb cif component and create its internal
+    representation.
 
-    Arguments:
-        path_to_cif {str} -- Path to the cif file
+    Args:
+        path_to_cif (str): Path to the cif file
 
     Raises:
-        ValueError -- if file does not exist
+        ValueError: if file does not exist
 
     Returns:
-        StructureReaderResult -- Results of the parsing altogether with the internal
-        representation of the component.
+        StructureReaderResult: Results of the parsing altogether with
+        the internal representation of the component.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
@@ -52,16 +54,19 @@ def read_pdb_cif_file(path_to_cif):
 
 
 def read_pdb_components_file(path_to_cif):
-    """Process multiple compounds stored in the wwpdb CCD `components.cif` file.
+    """Process multiple compounds stored in the wwpdb CCD
+    `components.cif` file.
 
-    Arguments:
-        path_to_cif {str} -- Path to the `components.cif` file with multiple ligands in it.
+    Args:
+        path_to_cif (str): Path to the `components.cif` file with
+        multiple ligands in it.
 
     Raises:
-        ValueError -- if the file does not exist.
+        ValueError: if the file does not exist.
 
     Returns:
-        dict(str,StructureReaderResult) -- Key value structure with all processed components
+        {str, StructureReaderResult}: Key value structure with
+        all processed components.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
@@ -74,13 +79,13 @@ def read_pdb_components_file(path_to_cif):
 def _parse_pdb_mmcif(cif_dict):
     """Create internal representation of the molecule in mmcif format.
 
-    Arguments:
-        cif_dict {dict} -- mmcif dictionary with data to parse.
+    Args:
+        cif_dict (dict): mmcif category
 
     Returns:
-        StructureReaderResult -- internal representation with the results of parsing and Mol object.
+        StructureReaderResult: internal representation with the
+        results of parsing and Mol object.
     """
-
     warnings = list()
     errors = list()
     mol = Chem.RWMol()
@@ -106,9 +111,11 @@ def _parse_pdb_mmcif(cif_dict):
 def _parse_pdb_atoms(mol, atoms):
     """Setup atoms in the component
 
-    Arguments:
-        mol {rdkit.Chem.rdchem.Mol} -- Rdkit Mol object with the compound representation
-        atoms {dict} -- MMCIF dictionary with parsed _chem_comp_atom category
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the compound
+        representation
+        atoms (dict): MMCIF dictionary with parsed _chem_comp_atom
+        category
     """
     if len(atoms) == 0:
         return
@@ -138,9 +145,11 @@ def _parse_pdb_atoms(mol, atoms):
 def _parse_pdb_conformers(mol, atoms):
     """Setup model and ideal cooordinates in the rdkit Mol object.
 
-    Arguments:
-        mol {rdkit.Chem.rdchem.Mol} -- RDKit Mol object with the compound representation.
-        atoms {dict} -- mmCIF dictionary with parsed _chem_comp_atom category.
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the
+        compound representation.
+        atoms (dict): mmcif category with atom info
+        category.
     """
     if len(atoms) == 0:
         return
@@ -155,14 +164,13 @@ def _parse_pdb_conformers(mol, atoms):
 def _setup_pdb_conformer(atoms, label):
     """Setup a conformer
 
-    Arguments:
-        atoms {dict} -- mmcif dictionary with parsed _chem_comp_atom category
-        label {str} -- namespace with the [x,y,z] coordinates.
+    Args:
+        atoms (dict): mmcif category with the atom info.
+        label (str): namespace with the [x,y,z] coordinates.
 
     Returns:
-        [rdkit.Chem.rdchem.Conformer] -- Conformer of the component
+        rdkit.Chem.rdchem.Conformer: Conformer of the component
     """
-
     if len(atoms) == 0:
         return
 
@@ -182,18 +190,18 @@ def _setup_pdb_conformer(atoms, label):
 def _parse_pdb_bonds(mol, bonds, atoms, errors):
     """Setup bonds in the compound
 
-    Arguments:
-        mol {[rdkit.Chem.rdchem.Mol]} -- Molecule which receives bonds.
-        bonds {dict} -- mmcif category with bond information.
-        atoms {dict} -- mmcif category with atom information.
-        errors {list} -- Issues encountered while parsing.
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): Molecule which receives bonds.
+        bonds (dict): mmcif category with the bonds info.
+        atoms (dict): mmcif category with the atom info.
+        errors (list): Issues encountered while parsing.
     """
     if len(bonds) == 0:
         return
 
     for i in range(len(bonds['atom_id_1'])):
-        atom_1 = collection_extensions.find_element_in_list(atoms['atom_id'], bonds['atom_id_1'][i])
-        atom_2 = collection_extensions.find_element_in_list(atoms['atom_id'], bonds['atom_id_2'][i])
+        atom_1 = collection_ext.find_element_in_list(atoms['atom_id'], bonds['atom_id_1'][i])
+        atom_2 = collection_ext.find_element_in_list(atoms['atom_id'], bonds['atom_id_2'][i])
         bond_order = _bond_pdb_order(bonds['value_order'][i])
 
         if any(a is None for a in [atom_1, atom_2, bond_order]):
@@ -203,13 +211,15 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
 
 
 def _parse_pdb_descriptors(pdbx_chem_comp_descriptors):
-    """Parse useful informations from _pdbx_chem_comp_descriptor category
+    """Parse useful informations from _pdbx_chem_comp_descriptor
+    category
 
-    Arguments:
-        _pdbx_chem_comp_descriptor {dict} -- the category
+    Args:
+        pdbx_chem_comp_descriptors (dict): mmcif category with the
+        descriptors info.
 
     Returns:
-        Descriptor -- namedtuple with the property info
+        Descriptor: namedtuple with the property info
     """
     descriptors = list()
 
@@ -228,11 +238,11 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors):
 def _parse_pdb_properties(chem_comp):
     """Parse useful informations from _chem_comp category
 
-    Arguments:
-        chem_comp {dict} -- the category
+    Args:
+        chem_comp (dict): the mmcif category with chem_comp info.
 
     Returns:
-        Properties -- namedtuple with the property info
+        Properties: namedtuple with the property info
     """
     properties = None
     if len(chem_comp) > 0:
@@ -250,13 +260,13 @@ def _preprocess_pdb_parser_output(dictionary, label, warnings):
     This method makes list() of all of them in order to parse
     all of the in the same way.
 
-    Arguments:
-        dictionary {dict} -- mmcif dictionary
-        label {str} -- name of the category
-        warnings {list} -- possible issues encountered when parsing
+    Args:
+        dictionary (dict): mmcif category with the parser output.
+        label (str): name of the category
+        warnings (list): possible issues encountered when parsing
 
     Returns:
-        dict -- unified dictionar for structure parsing.
+        dict: unified dictionary for structure parsing.
     """
     if label not in dictionary:
         warnings.append('Namespace {} does not exist.'.format(label))
@@ -272,11 +282,11 @@ def _preprocess_pdb_parser_output(dictionary, label, warnings):
 def _bond_pdb_order(value_order):
     """Transpil mmcif bond order into rdkit language
 
-    Arguments:
-        value_order {[str]} -- bond type
+    Args:
+        value_order (str): bond type as a str
 
     Returns:
-        rdkit.Chem.rdchem.BondType -- bond type
+        rdkit.Chem.rdchem.BondType: -- bond type
     """
     if value_order == 'SING':
         return Chem.rdchem.BondType(1)

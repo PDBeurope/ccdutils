@@ -25,7 +25,7 @@ def supply_font():
     """Platform non-specific tries to locate
 
     Returns:
-        [type] -- [description]
+        str: path to the font
     """
     font = ''
     if platform == "linux" or platform == "linux2":
@@ -42,11 +42,12 @@ def supply_font():
 
 
 def save_no_image(path_to_image, width=200):
-    """Generated pretty image with 'No image available' msg in case the
-    2D depiction cannot be created.
+    """Generate pretty image with 'No image available' message in case
+    the 2D depiction cannot be created.
 
-    Keyword Arguments:
-        width {int} -- width of the figure (default: {200})
+    Args:
+        path_to_image (str): path to the image
+        width (int, optional): Defaults to 200. width of the image
     """
     if path_to_image.split('.')[-1] == "svg":
         svg = _svg_no_image(width)
@@ -57,6 +58,13 @@ def save_no_image(path_to_image, width=200):
 
 
 def _png_no_image(path_to_image, width):
+    """Save image with the text ' No image available' as a png.
+
+    Args:
+        path_to_image (str): path to save the image
+        width (int): Width of an image
+    """
+
     font = None
     font_path = supply_font()
 
@@ -69,12 +77,20 @@ def _png_no_image(path_to_image, width):
     black = (0, 0, 0)
     img = Image.new("RGBA", (width, width), white)
     draw = ImageDraw.Draw(img)
-    draw.multiline_text((width / 4, width / 3), "No image\n available", font=font, align='center', fill=black)
+    draw.multiline_text((width / 4, width / 3), "No image\n available",
+                        font=font, align='center', fill=black)
     draw = ImageDraw.Draw(img)
     img.save(path_to_image)
 
 
 def _svg_no_image(width=200):
+    """[summary]
+        width (int, optional): Defaults to 200. width of the image
+
+    Returns:
+        str: string representation of an svg image.
+    """
+
     svg = """<?xml version='1.0' encoding='iso-8859-1'?>
               <svg:svg version='1.1' baseProfile='full'
               xmlns:svg='http://www.w3.org/2000/svg'

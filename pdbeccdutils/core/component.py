@@ -31,13 +31,13 @@ from wurlitzer import pipes
 from pdbeccdutils.extensions import drawing
 from pdbeccdutils.core.enums import ConformerType
 
-METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,Tc,Ru,Rh,Pd,Ag,' \
-               'Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
+METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
+               'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
 
 
 class Component:
-    """Wrapper for the rdkit.Chem.rdchem.Mol object enabling some of its functionality and
-    handling possible erroneous situations.
+    """Wrapper for the rdkit.Chem.rdchem.Mol object enabling some of its
+    functionality and handling possible erroneous situations.
 
         Presently implemented:
             * sanitization
@@ -45,10 +45,12 @@ class Component:
             * 3D conformation calculation
         TODO:
             *cml generation
-            *
+            *xml generation
+            *proper pdb export with names (soon to follow)
+            *mmcif export
 
     Returns:
-        pdbeccdutils.utils.Component -- instance object
+        pdbeccdutils.utils.Component: instance object
     """
 
     def __init__(self, mol, properties=None, descriptors=None):
@@ -62,9 +64,10 @@ class Component:
         self._released = False
         self._descriptors = []
 
-        self._conformers_mapping = {ConformerType.Ideal: 0,
-                                    ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
-                                    ConformerType.Computed: 2000}
+        self._conformers_mapping = \
+            {ConformerType.Ideal: 0,
+             ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
+             ConformerType.Computed: 2000}
 
         if properties is not None:
             mod_date = properties.modified_date.split('-')
@@ -108,27 +111,30 @@ class Component:
         self._released
     # endregion properties
 
-    def export_mol_representation(self, remove_hs=True, str_format='sdf', conf_type=None):
-        """Export a component representation in given format. If conf_type is None, all
-        the conformers are exported
+    def export_mol_representation(self, remove_hs=True, str_format='sdf',
+                                  conf_type=ConformerType.AllConformers):
+        """Export a component representation in given format. If
+        conf_type is None, all the conformers are exported
 
-        Keyword Arguments:
-            remove_hs {bool} -- [] (default: {True})
-            str_format {str} -- [description] (default: {'sdf'})
-            conf_type {pdbeccdutils.utils.ConformerType} -- Which conformer to retrieve. Options:
-            Model|Ideal|Computed (default: {ConformerType.Model}). If None is pased all the
-            conformers are exported.
+        Args:
+            remove_hs (bool, optional): Defaults to True. include
+            hydrogens.
+            str_format (str, optional): Defaults to 'sdf'. Data format
+            conf_type (ConformerType, optional): Defaults to None.
 
         Raises:
-            NotImplementedError -- for mmcif option. This will soon to follow.
-            ValueError -- for invalid or no exiting conformer and unknown format.
+            NotImplementedError: currently for mmcif option
+            ValueError: For unknown format or conformer
+
+        Returns:
+            str: string representation of the compound
         """
         try:
             conf_id = -1
             mol_to_save = self._2dmol if conf_type == ConformerType.Depiction else self.mol
             mol_to_save = Chem.RemoveHs(mol_to_save) if remove_hs else mol_to_save
 
-            if conf_type is not None:
+            if conf_type is not ConformerType.AllConformers:
                 conf_id = int(conf_type)
 
             if str_format == 'sdf':
@@ -142,16 +148,20 @@ class Component:
         except KeyError:
             raise ValueError('Option {} is not valid for a conformer type.'.format(conf_type))
         except ValueError:
-            raise ValueError('Conformer {} does not exist, perhaps it never did.'.format(conf_type))
+            raise ValueError('Conformer {} does\'t exist, perhaps it never did.'.format(conf_type))
 
     def compute_2d(self, manager, remove_hs=True):
-        """Compute 2d depiction of the component using Flattening manager instance
+        """Compute 2d depiction of the component using flattening
+        manager instance
 
-        Arguments:
-            manager {pdbeccdutils.utils.FlatteningManager} -- instance of the flattening class.
+        Args:
+            manager (pdbeccdutils.utils.FlatteningManager):
+            Instance of the flattening class.
+            remove_hs (bool, optional): Defaults to True. Remove
+            hydrogens prior depiction.
 
-        Keyword Arguments:
-            remove_hs {bool} -- Remove hydrogens prior depiction. (default: {True})
+        Returns:
+            rdkit.Chem.rdchem.Mol: 2D depiction of the ligand.
         """
         mol_copy = Chem.RWMol(self.mol)
         if remove_hs:
@@ -168,13 +178,13 @@ class Component:
     def export_2d_svg(self, file_name, width=500, names=False):
         """Save 2d depiction of the component as an SVG file.
 
-        Arguments:
-            file_name {str} -- path to store 2d depiction.
-
-        Keyword Arguments:
-            width {int} -- Width of a frame in pixels. (default: {500})
-            names {bool} -- Whether or not to include atom names in depiction.
-            if atom name is not set. element symbol is used instead. (default: {False})
+        Args:
+            file_name (str): path to store 2d depiction.
+            width (int, optional): Defaults to 500. Width of a frame
+            in pixels.
+            names (bool, optional): Defaults to False. Whether or not
+            to include atom names in depiction. If atom name is not set,
+            element symbol is used instead.
         """
         drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
 
@@ -197,8 +207,9 @@ class Component:
     def compute_3d(self):
         """Generate 3D coordinates using ETKDG method from RdKit
 
-           Returns:
-            bool -- Whether or not the structure generation was succesfull
+        Returns:
+            bool: Whether or not the structure generation was
+            succesfull
         """
         options = AllChem.ETKDG()
         options.clearConfs = False
@@ -214,15 +225,18 @@ class Component:
             return False  # sanitization issue here
 
     def sanitize(self, fast=True):
-        """Attempts to sanitize mol in place. RDKit's standard error can be processed in order to
-        find out what went wrong with sanitization to fix the molecule. Presently, that function is
-        slow (perhaps due to the stream?) and needs more debuging to find out what's happening there.
+        """Attempts to sanitize mol in place. RDKit's standard error
+        can be processed in order to find out what went wrong with
+        sanitization to fix the molecule. Presently, that function is
+        slow (perhaps due to the stream?) and needs more debuging to
+        find out what's happening there.
 
-        Keyword Arguments:
-            fast {bool} -- TEMPORARY until the speed issue is fixed. (default: {true})
+        Args:
+            fast (bool, optional): Defaults to True.
+            TEMPORARY until the speed issue is fixed.
 
         Returns:
-            bool -- Whether the sanitization procedure has been succesfull.
+            bool: Whether the sanitization procedure has been succesfull.
         """
         rwmol = Chem.RWMol(self.mol)
         try:
@@ -241,16 +255,19 @@ class Component:
         return success
 
     def is_degenerated_conformer(self, type):
-        """Determine if given conformer has missing coordinates. This can be used to
-        determine, whether or not the coordinates should be regenerated.
+        """Determine if given conformer has missing coordinates.
+        This can be used to determine, whether or not the coordinates
+        should be regenerated.
 
-        Arguments:
-            type {ConformerType} -- type of coformer to be inspected
+        Args:
+            type (pdbeccdutils.core.ConformerType): type of coformer
+            to be inspected
 
         Raises:
-            {ValueError} -- If given conformer does not exist.
+            ValueError: If given conformer does not exist.
+
         Returns:
-            [bool] -- true if more 1 atom has coordinates [0, 0, 0]
+            bool: true if more 1 atom has coordinates [0, 0, 0]
         """
         conformer = self.mol.GetConformer(self._conformers_mapping[type])
         empty_coords = Chem.rdGeometry.Point3D(0, 0, 0)
@@ -268,12 +285,12 @@ class Component:
     def locate_fragment(self, mol):
         """Identify substructure match in the component.
 
-        Arguments:
-            mol {rdkit.Chem.rdchem.Mol} -- Molecule to be matched with structure
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): Fragment to be matched with structure
 
         Returns:
-            [list(list(rdkit.Chem.rdchem.Atoms))] -- list of fragments identifiedd in the
-            component as a list of rdkit.Chem.rdchem.Atoms.
+            list(list(rdkit.Chem.rdchem.Atoms)): list of fragments
+            identifiedd in the component as a list of Atoms.
         """
         result = []
         if mol is None:
@@ -287,14 +304,16 @@ class Component:
         return result
 
     def _fix_molecule(self, rwmol):
-        """Single molecule sanitization process. Presently only valence errors are taken care are of.
-        Capture the C level stream has presently HUGE tradeoff ~ 200ms so should be used with care.
+        """Single molecule sanitization process. Presently, only
+        valence errors are taken care are of. Capture the C level
+        stream has presently HUGE tradeoff ~ 200ms so should be used
+        with care.
 
-        Arguments:
-            rwmol {rdkit.Chem.rdchem.Mol} -- rdkit molecule to be sanitized
+        Args:
+            rwmol (rdkit.Chem.rdchem.Mol): rdkit molecule to be sanitized
 
         Returns:
-            [bool] -- Whether or not sanitization succeeded
+            bool: Whether or not sanitization succeeded
         """
         attempts = 10
         success = False
@@ -349,11 +368,11 @@ class Component:
     def _fix_molecule_fast(self, rwmol):
         """Fast sanitization process. Fixes just metal-N valence issues
 
-        Arguments:
-            rwmol {rdkit.Chem.rdchem.Mol} -- rdkit molecule to be sanitized
+        Args:
+            rwmol (rdkit.Chem.rdchem.Mol): rdkit mol to be sanitized
 
         Returns:
-            [bool] -- Whether or not sanitization succeeded
+            bool: Whether or not sanitization succeeded
         """
         smarts_metal_check = Chem.MolFromSmarts(METALS_SMART + '~[N]')
         metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)

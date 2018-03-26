@@ -29,3 +29,4 @@ class ConformerType(IntEnum):
     Model = 2
     Depiction = 3
     Computed = 4
+    AllConformers = 5
