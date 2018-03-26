@@ -1,1 +1,2 @@
 from pdbeccdutils.utils.flattening import FlatteningManager, FlatteningValidator
+from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader

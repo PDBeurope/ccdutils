@@ -74,16 +74,3 @@ class PubChemDownloader:
             except urllib.error.URLError:
                 pass
         return i
-
-
-if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser(description='PDBe downloader of pubchem depictions')
-    parser.add_argument('-components', type=str, help='Path to the component library',
-                        required=True)
-    parser.add_argument('-pubchem_templates', type=str, help='Path to the pubchem templates.',
-                        required=True)
-
-    config = parser.parse_args()
-    PubChemDownloader(config.components, config.pubchem_templates).run()
