@@ -31,23 +31,25 @@ FlatteningResult = namedtuple('FlatteningResult', 'source template_name mol scor
 
 
 class FlatteningManager:
-    """Toolkit for flattening ligand's 3D structure using rdkit.
+    """
+    Toolkit for flattening ligand's 3D structure using RDKit.
     One can supply either templates or 2D depictions by pubchem.
     Pubchem templates can be downloaded using PubChemDownloader class.
     """
 
     def __init__(self, generic_templates_path, pubchem_templates_path):
-        """Initialize component which does the ligand flattening.
-        If Nones is provided as parameters just the defalt RDkit
+        """
+        Initialize component which does the ligand flattening.
+        If Nones is provided as parameters just the defalt RDKit
         functionality is going to be used.
 
         Args:
             generic_templates_path (str): Path to the library with
-            generic templates to be used for flattening
-            e.g. porphyring rings etc.
-            pubchem_templates_path (str): Path to the library with
-            2D structures downloaded from the Pubchem.
-            Use pubchem_downloader.py for this task.
+                generic templates to be used for flatteninge.
+                e.g. porphyring rings.
+            pubchem_templates_path (str): Path to the library with 2D
+                structures downloaded from the Pubchem.
+                Use `pubchem_downloader.py` for this task.
         """
         generic_templates_path = generic_templates_path or ''
         pubchem_templates_path = pubchem_templates_path or ''
@@ -63,16 +65,18 @@ class FlatteningManager:
                                       for k in os.listdir(pubchem_templates_path)}
 
     def _load_template(self, path):
-        """Loads a template molecule with 2D coordinates
+        """
+        Loads a template molecule with 2D coordinates
 
         Args:
-            path (str): path to the model molecule in *.sdf or *.pdf format
+            path (str): path to the model molecule in *.sdf,
+                or *.pdf format
 
         Raises:
             ValueError: if unsuported format is used: sdf|pdb
 
         Returns:
-            rdkit.Chem.rdchem.Mol: rdkit representation of the template
+            rdkit.Chem.rdchem.Mol: RDKit representation of the template
         """
         mol = Chem.RWMol()
         extension = os.path.basename(path).split('.')[1]
@@ -90,9 +94,10 @@ class FlatteningManager:
         return mol
 
     def _anonymization(self, mol):
-        """Converts all molecule atoms into carbons and all bonds
-        into single ones. This is used for the substructure matching
-        step. Original mapping of both is returned.
+        """
+        Converts all molecule atoms into carbons and all bonds into
+        single ones. This is used for the substructure matching step.
+        Original mapping of both is returned.
 
         Args:
             mol (rdkit.Chem.rdchem.Mol): molecule to be anonymized
@@ -110,8 +115,9 @@ class FlatteningManager:
         return Mapping(atom_mapping=molAtomMapping, bond_mapping=molBondMapping)
 
     def _deanonymization(self, mol, mappings):
-        """Based on the original mapping restores atom elements
-        and bond types.
+        """
+        Based on the original mapping restores atom elements and
+        bond types.
 
         Args:
             mol (rdkit.Chem.rdchem.Mol): molecule to be restored
@@ -122,7 +128,8 @@ class FlatteningManager:
         [x.SetBondType(mappings.bond_mapping[x.GetIdx()]) for x in mol.GetBonds()]
 
     def _rescale_molecule(self, mol, factor):
-        """Rescale molecule coords to a given factor
+        """
+        Rescale molecule coords to a given factor
 
         Args:
             mol (rdkit.Chem.rdchem.Mol) molecule to be rescaled
@@ -137,19 +144,21 @@ class FlatteningManager:
         AllChem.TransformMol(mol, matrix)
 
     def flaten_molecule(self, id, mol):
-        """Given input molecule tries to generate its depictions.
+        """
+        Given input molecule tries to generate its depictions.
+
         Presently 3 methods are used:
                 Pubchem template - find 2d depiction in pubchem db
                 User-provided templates - try to use generic templates
-                From 3D conformer - just apply default rdkit functionality
+                From 3D conformer - just apply default RDKit functionality
 
         Arguments:
             id (str): id of the ligand
             mol (Chem.rdchem.Mol): molecule to be flattened
 
         Returns:
-            FlatteningResult: Information about flattened ligand
-            or None if the flattening failed badly.
+            FlatteningResult: Information about flattened ligand or
+            None if the flattening failed.
         """
         temp_mol = Chem.RWMol(mol)
         mappings = self._anonymization(temp_mol)
@@ -178,7 +187,8 @@ class FlatteningManager:
             return None
 
     def _get_2D_by_rdkit(self, mol):
-        """Get the flattening done using solely the default rdkit
+        """
+        Get the flattening done using solely the default RDKit
         functionality
 
         Args:
@@ -195,7 +205,8 @@ class FlatteningManager:
             return None
 
     def _get_2D_by_pubchem(self, id, mol):
-        """Flatten the ligand using Pubchem templates
+        """
+        Flatten the ligand using Pubchem templates
 
         Args:
             id (str): of molecule to be processed
@@ -219,7 +230,8 @@ class FlatteningManager:
         return None
 
     def _get_2D_by_template(self, mol):
-        """Flatten the ligand using user-provided templates
+        """
+        Flatten the ligand using user-provided templates
 
         Args:
             mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
@@ -235,7 +247,8 @@ class FlatteningManager:
                 if temp_mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
                     flaws = FlatteningValidator(temp_mol).flattening_score()
-                    results.append(FlatteningResult(source=DepictionSource.Template, template_name=key, mol=temp_mol, score=flaws))
+                    results.append(FlatteningResult(source=DepictionSource.Template,
+                                                    template_name=key, mol=temp_mol, score=flaws))
         except Exception:
             pass  # if it fails it fails, but genuinelly it wont
 
@@ -243,7 +256,8 @@ class FlatteningManager:
 
 
 class FlatteningValidator:
-    """Toolkit for estimation of flattening quality
+    """
+    Toolkit for estimation of flattening quality
     """
 
     def __init__(self, mol):
@@ -257,10 +271,11 @@ class FlatteningValidator:
         self.kd_tree = KDTree(atom_centers)
 
     def _intersection(self, bondA, bondB):
-        """True if two bonds collide, false otherwise. Note that
-        false is retrieved even in case the bonds share common atom,
-        as this is not a problem case.
-        Cramer's rule is used for the liner equations system.
+        """
+        True if two bonds collide, false otherwise. Note that false is
+        retrieved even in case the bonds share common atom, as this is
+        not a problem case. Cramer's rule is used for the linear
+        equations system.
 
         Args:
             bondA (rdkit.Chem.rdchem.Bond): this bond
@@ -301,9 +316,10 @@ class FlatteningValidator:
         return False
 
     def has_degenerated_atom_positions(self, threshold):
-        """Detects whether the structure has a pair or atoms closer
-        to each other than threshold. This can detect structures which
-        may need a template as they can be handled by rdkit correctly.
+        """
+        Detects whether the structure has a pair or atoms closer to each
+        other than threshold. This can detect structures which may need
+        a template as they can be handled by RDKit correctly.
 
         Arguments:
             threshold (float): Bottom line to use for spatial search.
@@ -323,17 +339,18 @@ class FlatteningValidator:
         return False
 
     def count_suboptimal_atom_positions(self, lowerBound, upperBound):
-        """Detects whether the structure has a pair or atoms in
-        the range <lowerBound, upperBound> meaning that the flattening
-        could be improved.
+        """
+        Detects whether the structure has a pair or atoms in the range
+        <lowerBound, upperBound> meaning that the flattening could
+        be improved.
 
         Arguments:
             lowerBound (float): lower bound
             upperBound (float): upper bound
 
         Returns:
-            bool: indication whether or not the atoms are not
-            in optimal coordinates
+            bool: indication whether or not the atoms are not in
+            optimal coordinates
         """
         counter = 0
         for i in range(self.conformer.GetNumAtoms()):
@@ -348,8 +365,9 @@ class FlatteningValidator:
         return counter / 2
 
     def count_bond_collisions(self):
-        """Counts number of collisions among all bonds. Can be used for
-        estimations of how 'wrong' the depiction is.
+        """
+        Counts number of collisions among all bonds. Can be used for estimations of how 'wrong'
+        the depiction is.
 
         Returns:
             int: numer of bond collisions per molecule
@@ -366,7 +384,8 @@ class FlatteningValidator:
         return errors
 
     def has_bond_crossing(self):
-        """Tells if the structure contains collisions
+        """
+        Tells if the structure contains collisions
 
         Returns:
             bool: Indication about bond collisions
@@ -374,7 +393,8 @@ class FlatteningValidator:
         return self.count_bond_collisions() > 0
 
     def flattening_score(self):
-        """Calculate quality of the flattening. The higher the worse.
+        """
+        Calculate quality of the flattening. The higher the worse.
         Ideally that should be 0.
 
         Returns:

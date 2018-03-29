@@ -21,11 +21,12 @@ import json
 import urllib.request
 from rdkit import Chem
 
-from pdbeccdutils.core import structure_reader
+from pdbeccdutils.core import structure_reader as sr
 
 
 class PubChemDownloader:
-    """Toolkit to retrieve pubchem 2D depictions from the database
+    """
+    Toolkit to retrieve pubchem 2D depictions from the database
     """
 
     def __init__(self, components, pubchem_templates):
@@ -34,8 +35,8 @@ class PubChemDownloader:
         self.blacklist = list()
 
     def run(self):
-        """Update 2d images of pdbechem components which are available
-        in the pubchem database
+        """
+        Update 2d images of pdbechem components which are available in the pubchem database
         """
 
         print('Querying pubchem database...')
@@ -44,8 +45,7 @@ class PubChemDownloader:
 
     def _download(self):
         """
-        Downloads 2D structures of the components and returns a number
-        of new structures
+        Downloads 2D structures of the components and returns a number of new structures
         """
         counter = 0
         pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
@@ -58,7 +58,8 @@ class PubChemDownloader:
 
             if os.path.isfile(destination):
                 continue
-            inchikey = structure_reader.read_pdb_cif_file(os.path.join(self.components, file)).component.inchikey
+
+            inchikey = sr.read_pdb_cif_file(os.path.join(self.components, file)).component.inchikey
 
             try:
                 inchi_url = '{}/inchikey/{}/cids/json'.format(pubchem_api, inchikey)

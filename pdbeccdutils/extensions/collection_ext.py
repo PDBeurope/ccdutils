@@ -17,7 +17,8 @@
 
 
 def find_element_in_list(array, element):
-    """Finds an element in an array. Does not crash if not found
+    """
+    Finds an element in an array. Does not crash if not found
 
     Args:
         array (list): list to be searched

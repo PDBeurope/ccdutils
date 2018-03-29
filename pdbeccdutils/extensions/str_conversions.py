@@ -17,7 +17,8 @@
 
 
 def str_is_int(i):
-    """Check if str can be converted to int
+    """
+    Check if str can be converted to int
 
     Args:
         i (str): string representation of an integer
@@ -34,7 +35,8 @@ def str_is_int(i):
 
 
 def str_to_int(i):
-    """Converts the string into integer
+    """
+    Converts the string into integer
 
     Args:
         i (str): string representation of an integer
@@ -49,7 +51,8 @@ def str_to_int(i):
 
 
 def str_to_float(f):
-    """Converts the string into float
+    """
+    Converts the string into float
 
     Args:
         i (str): string representation of a float

@@ -36,18 +36,19 @@ METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,
 
 
 class Component:
-    """Wrapper for the rdkit.Chem.rdchem.Mol object enabling some of its
-    functionality and handling possible erroneous situations.
+    """
+    Wrapper for the rdkit.Chem.rdchem.Mol object enabling some of its
+    functionality and handlingpossible erroneous situations.
 
         Presently implemented:
             * sanitization
             * 2D depiction
             * 3D conformation calculation
         TODO:
-            *cml generation
-            *xml generation
-            *proper pdb export with names (soon to follow)
-            *mmcif export
+            * cml generation
+            * xml generation
+            * proper pdb export with names (soon to follow)
+            * mmcif export
 
     Returns:
         pdbeccdutils.utils.Component: instance object
@@ -113,12 +114,13 @@ class Component:
 
     def export_mol_representation(self, remove_hs=True, str_format='sdf',
                                   conf_type=ConformerType.AllConformers):
-        """Export a component representation in given format. If
-        conf_type is None, all the conformers are exported
+        """
+        Export a component representation in given format. If conf_type
+        is None, all the conformers are exported
 
         Args:
             remove_hs (bool, optional): Defaults to True. include
-            hydrogens.
+                hydrogens.
             str_format (str, optional): Defaults to 'sdf'. Data format
             conf_type (ConformerType, optional): Defaults to None.
 
@@ -151,14 +153,15 @@ class Component:
             raise ValueError('Conformer {} does\'t exist, perhaps it never did.'.format(conf_type))
 
     def compute_2d(self, manager, remove_hs=True):
-        """Compute 2d depiction of the component using flattening
-        manager instance
+        """
+        Compute 2d depiction of the component using flattening manager
+        instance
 
         Args:
             manager (pdbeccdutils.utils.FlatteningManager):
-            Instance of the flattening class.
+                Instance of the flattening class.
             remove_hs (bool, optional): Defaults to True. Remove
-            hydrogens prior depiction.
+                hydrogens prior to depiction.
 
         Returns:
             rdkit.Chem.rdchem.Mol: 2D depiction of the ligand.
@@ -176,15 +179,16 @@ class Component:
             return None
 
     def export_2d_svg(self, file_name, width=500, names=False):
-        """Save 2d depiction of the component as an SVG file.
+        """
+        Save 2d depiction of the component as an SVG file.
 
         Args:
             file_name (str): path to store 2d depiction.
-            width (int, optional): Defaults to 500. Width of a frame
-            in pixels.
+                width (int, optional): Defaults to 500.
+                Width of a frame in pixels.
             names (bool, optional): Defaults to False. Whether or not
-            to include atom names in depiction. If atom name is not set,
-            element symbol is used instead.
+                to include atom names in depiction. If atom name is
+                not set, element symbol is used instead.
         """
         drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
 
@@ -198,18 +202,19 @@ class Component:
         if self._2dmol is None:
             drawing.save_no_image(file_name, width=width)
         else:
-            copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True, kekulize=True, addChiralHs=True)
+            copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True, kekulize=True,
+                                                    addChiralHs=True)
             drawer.DrawMolecule(copy)
             drawer.FinishDrawing()
             with open(file_name, 'w') as f:
                 f.write(drawer.GetDrawingText())
 
     def compute_3d(self):
-        """Generate 3D coordinates using ETKDG method from RdKit
+        """
+        Generate 3D coordinates using ETKDG method from RdKit.
 
         Returns:
-            bool: Whether or not the structure generation was
-            succesfull
+            bool: Result of the structure generation process.
         """
         options = AllChem.ETKDG()
         options.clearConfs = False
@@ -225,18 +230,19 @@ class Component:
             return False  # sanitization issue here
 
     def sanitize(self, fast=True):
-        """Attempts to sanitize mol in place. RDKit's standard error
-        can be processed in order to find out what went wrong with
-        sanitization to fix the molecule. Presently, that function is
-        slow (perhaps due to the stream?) and needs more debuging to
-        find out what's happening there.
+        """
+        Attempts to sanitize mol in place. RDKit's standard error can be
+        processed in order to find out what went wrong with sanitization
+        to fix the molecule. Presently, that function is slow (perhaps
+        due to the stream?) and needs more debuging to find out what
+        is happening there.
 
         Args:
             fast (bool, optional): Defaults to True.
-            TEMPORARY until the speed issue is fixed.
+                TODO until the speed issue is fixed.
 
         Returns:
-            bool: Whether the sanitization procedure has been succesfull.
+            bool: Result of the sanitization process.
         """
         rwmol = Chem.RWMol(self.mol)
         try:
@@ -255,13 +261,14 @@ class Component:
         return success
 
     def is_degenerated_conformer(self, type):
-        """Determine if given conformer has missing coordinates.
-        This can be used to determine, whether or not the coordinates
-        should be regenerated.
+        """
+        Determine if given conformer has missing coordinates. This can
+        be used to determine, whether or not the coordinates should be
+        regenerated.
 
         Args:
             type (pdbeccdutils.core.ConformerType): type of coformer
-            to be inspected
+                to be inspected.
 
         Raises:
             ValueError: If given conformer does not exist.
@@ -283,14 +290,15 @@ class Component:
         return False
 
     def locate_fragment(self, mol):
-        """Identify substructure match in the component.
+        """
+        Identify substructure match in the component.
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): Fragment to be matched with structure
+            mol (rdkit.Chem.rdchem.Mol): Fragment to be matched with
+                structure
 
         Returns:
-            list(list(rdkit.Chem.rdchem.Atoms)): list of fragments
-            identifiedd in the component as a list of Atoms.
+            list(list(rdkit.Chem.rdchem.Atoms)): list of fragments identified in the component as a list of Atoms.
         """
         result = []
         if mol is None:
@@ -304,13 +312,14 @@ class Component:
         return result
 
     def _fix_molecule(self, rwmol):
-        """Single molecule sanitization process. Presently, only
-        valence errors are taken care are of. Capture the C level
-        stream has presently HUGE tradeoff ~ 200ms so should be used
-        with care.
+        """
+        Single molecule sanitization process. Presently, only valence
+        errors are taken care are of. Capture the C level stream has
+        presently HUGE tradeoff ~ 200ms so should be used with care.
 
         Args:
-            rwmol (rdkit.Chem.rdchem.Mol): rdkit molecule to be sanitized
+            rwmol (rdkit.Chem.rdchem.Mol): rdkit molecule to be
+                sanitized
 
         Returns:
             bool: Whether or not sanitization succeeded
@@ -366,7 +375,8 @@ class Component:
         return False
 
     def _fix_molecule_fast(self, rwmol):
-        """Fast sanitization process. Fixes just metal-N valence issues
+        """
+        Fast sanitization process. Fixes just metal-N valence issues
 
         Args:
             rwmol (rdkit.Chem.rdchem.Mol): rdkit mol to be sanitized

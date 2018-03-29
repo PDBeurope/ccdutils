@@ -22,7 +22,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 def supply_font():
-    """Platform non-specific tries to locate
+    """
+    Platform non-specific function to locate sans-serif font in the environment.
 
     Returns:
         str: path to the font
@@ -42,7 +43,8 @@ def supply_font():
 
 
 def save_no_image(path_to_image, width=200):
-    """Generate pretty image with 'No image available' message in case
+    """
+    Generate pretty image with 'No image available' message in case
     the 2D depiction cannot be created.
 
     Args:
@@ -58,7 +60,8 @@ def save_no_image(path_to_image, width=200):
 
 
 def _png_no_image(path_to_image, width):
-    """Save image with the text ' No image available' as a png.
+    """
+    Save image with the text 'No image available' as a png.
 
     Args:
         path_to_image (str): path to save the image

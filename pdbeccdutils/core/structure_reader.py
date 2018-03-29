@@ -32,7 +32,8 @@ StructureReaderResult = namedtuple('StructureReaderResult', 'warnings errors com
 
 
 def read_pdb_cif_file(path_to_cif):
-    """Read in single wwpdb cif component and create its internal
+    """
+    Read in single wwpdb cif component and create its internal
     representation.
 
     Args:
@@ -54,19 +55,20 @@ def read_pdb_cif_file(path_to_cif):
 
 
 def read_pdb_components_file(path_to_cif):
-    """Process multiple compounds stored in the wwpdb CCD
+    """
+    Process multiple compounds stored in the wwpdb CCD
     `components.cif` file.
 
     Args:
         path_to_cif (str): Path to the `components.cif` file with
-        multiple ligands in it.
+            multiple ligands in it.
 
     Raises:
         ValueError: if the file does not exist.
 
     Returns:
-        {str, StructureReaderResult}: Key value structure with
-        all processed components.
+        {str, StructureReaderResult}: Internal representation of all
+        the compponents in the `components.cif` file.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
@@ -77,14 +79,15 @@ def read_pdb_components_file(path_to_cif):
 
 # region parse mmcif
 def _parse_pdb_mmcif(cif_dict):
-    """Create internal representation of the molecule in mmcif format.
+    """
+    Create internal representation of the molecule in mmcif format.
 
     Args:
         cif_dict (dict): mmcif category
 
     Returns:
         StructureReaderResult: internal representation with the
-        results of parsing and Mol object.
+            results of parsing and Mol object.
     """
     warnings = list()
     errors = list()
@@ -109,13 +112,14 @@ def _parse_pdb_mmcif(cif_dict):
 
 
 def _parse_pdb_atoms(mol, atoms):
-    """Setup atoms in the component
+    """
+    Setup atoms in the component
 
     Args:
-        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the compound
-        representation
+        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
+            compound representation.
         atoms (dict): MMCIF dictionary with parsed _chem_comp_atom
-        category
+            category.
     """
     if len(atoms) == 0:
         return
@@ -143,13 +147,13 @@ def _parse_pdb_atoms(mol, atoms):
 
 
 def _parse_pdb_conformers(mol, atoms):
-    """Setup model and ideal cooordinates in the rdkit Mol object.
+    """
+    Setup model and ideal cooordinates in the rdkit Mol object.
 
     Args:
-        mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the
-        compound representation.
-        atoms (dict): mmcif category with atom info
-        category.
+        mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the compound
+            representation.
+        atoms (dict): mmcif category with atom info category.
     """
     if len(atoms) == 0:
         return
@@ -162,14 +166,15 @@ def _parse_pdb_conformers(mol, atoms):
 
 
 def _setup_pdb_conformer(atoms, label):
-    """Setup a conformer
+    """
+    Setup a conformer
 
     Args:
         atoms (dict): mmcif category with the atom info.
-        label (str): namespace with the [x,y,z] coordinates.
+        label (str): Namespace with the [x,y,z] coordinates.
 
     Returns:
-        rdkit.Chem.rdchem.Conformer: Conformer of the component
+        rdkit.Chem.rdchem.Conformer: Conformer of the component.
     """
     if len(atoms) == 0:
         return
@@ -188,7 +193,8 @@ def _setup_pdb_conformer(atoms, label):
 
 
 def _parse_pdb_bonds(mol, bonds, atoms, errors):
-    """Setup bonds in the compound
+    """
+    Setup bonds in the compound
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule which receives bonds.
@@ -211,12 +217,12 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
 
 
 def _parse_pdb_descriptors(pdbx_chem_comp_descriptors):
-    """Parse useful informations from _pdbx_chem_comp_descriptor
-    category
+    """
+    Parse useful informations from _pdbx_chem_comp_descriptor category
 
     Args:
         pdbx_chem_comp_descriptors (dict): mmcif category with the
-        descriptors info.
+            descriptors info.
 
     Returns:
         Descriptor: namedtuple with the property info
@@ -236,7 +242,8 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors):
 
 
 def _parse_pdb_properties(chem_comp):
-    """Parse useful informations from _chem_comp category
+    """
+    Parse useful informations from _chem_comp category
 
     Args:
         chem_comp (dict): the mmcif category with chem_comp info.
@@ -256,9 +263,10 @@ def _parse_pdb_properties(chem_comp):
 
 
 def _preprocess_pdb_parser_output(dictionary, label, warnings):
-    """The mmcif dictionary values are either str or list().
-    This method makes list() of all of them in order to parse
-    all of the in the same way.
+    """
+    The mmcif dictionary values are either str or list(), which is a bit
+    tricky to work with. This method makes list() of all of them in
+    order to parse all of the in the same way.
 
     Args:
         dictionary (dict): mmcif category with the parser output.
@@ -280,7 +288,8 @@ def _preprocess_pdb_parser_output(dictionary, label, warnings):
 
 
 def _bond_pdb_order(value_order):
-    """Transpil mmcif bond order into rdkit language
+    """
+    Transpil mmcif bond order into rdkit language
 
     Args:
         value_order (str): bond type as a str
