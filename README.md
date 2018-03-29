@@ -38,13 +38,38 @@
   pip install https://github.com/glenveegee/PDBeCIF/zipball/master
   pip install -e . 
   ```
+
+## Documentation
+ First, install necessary packages. Note that `sphinx` needs to be a part of the virtual
+ environmnent, outherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing
+ nice `ReadtheDocs` mobile friendly style.
   
-  ## Features
+  ```
+  pip install sphinx
+  pip install sphinx_rtd_theme
+  ```
+  * Generate *.rst files to be included as a part of the documentation. Inside the directory
+  `pdbeccdutils/doc` run the following commands to generate documentation.
+  
+  Use the following to generate initial markup files to be used by sphinx.
+  This needs to be used when other package but `core`, `utils` and `extensions` is implemented
+  
+  ```
+  sphinx-apidoc -f -o /path/to/output/dir ../pdbeccdutils/
+  ```
+
+  Use this to re-generate the documentation from the doc/ directory:
+  ```
+  make html
+  ```
+
+
+## Features
   * Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
   * Generation of 3D conformations.
   * Fragment search
 
-  ## TODO list
+ ## TODO list
   * Port rest of the important functionality implemented by Oliver
   * write mmcif Compound exporter (Lukas)
   * Once pip 9.1 is released change the way how pdbecif parser is installed (https://stackoverflow.com/questions/15221473/how-do-i-update-pip-itself-from-inside-my-virtual-environment)
