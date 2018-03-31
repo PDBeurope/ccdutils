@@ -10,7 +10,7 @@ import os
 import pytest
 import shutil
 
-from pdbeccdutils.process_components_cif_cli import create_parser, process_components_cif
+from pdbeccdutils.scripts.process_components_cif_cli import create_parser, process_components_cif
 from pdbeccdutils.tests.tst_utilities import test_cut_down_components_cif, \
     file_name_in_tsts_out, cif_filename
 

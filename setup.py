@@ -8,8 +8,9 @@ setup(name='pdbeccdutils',
       author_email='pdbehelp@ebi.ac.uk',
       license='Apache License 2.0.',
       packages=['pdbeccdutils'],
-      scripts=['bin/create_2d_images.py'],
+      scripts=['bin/create_2d_images.py',
+               'bin/process_components_cif'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['wurlitzer', 'Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme']
+      install_requires=['wurlitzer', 'Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme', 'pytest']
       )
