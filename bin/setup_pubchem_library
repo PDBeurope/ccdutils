@@ -15,17 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import argparse
-from pdbeccdutils.core import structure_reader
-from pdbeccdutils.utils import PubChemDownloader
+from pdbeccdutils.scripts.setup_pubchem_library_cli import main
 
-"""Modul to create and maintain up-to-date pubchem library
-"""
-
-parser = argparse.ArgumentParser(description='PDBe downloader of pubchem depictions')
-parser.add_argument('-components', type=str, help='Path to the component library', required=True)
-parser.add_argument('-pubchem_templates', type=str, help='Path to the pubchem templates.',
-                    required=True)
-
-config = parser.parse_args()
-PubChemDownloader(config.components, config.pubchem_templates).run()
+if __name__ == "__main__":
+    main()
