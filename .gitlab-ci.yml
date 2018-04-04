@@ -1,4 +1,4 @@
-image: alpine
+image: alpine:3.5
 
 pages:
   script:
