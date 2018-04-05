@@ -1,5 +1,0 @@
-.. _pipelines:
-
-PDBeChem
-============
-TODO
