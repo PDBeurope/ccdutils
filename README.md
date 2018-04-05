@@ -1,3 +1,6 @@
+[![pipeline status](https://gitlab.com/pdbe/ccdutils.gitlab.io/badges/refactoring/pipeline.svg)](https://gitlab.com/pdbe/ccdutils.gitlab.io/commits/refactoring)
+[![coverage report](https://gitlab.com/pdbe/ccdutils.gitlab.io/badges/refactoring/coverage.svg)](https://gitlab.com/pdbe/ccdutils.gitlab.io/commits/refactoring)
+
 # pdbeccdutils
 
 * A set of python tools to deal with PDB chemical components definitions
@@ -69,7 +72,7 @@
   * Generation of 3D conformations.
   * Fragment search
 
- ## TODO list
+## TODO list
   * Port rest of the important functionality implemented by Oliver
   * write mmcif Compound exporter (Lukas)
   * Once pip 9.1 is released change the way how pdbecif parser is installed (https://stackoverflow.com/questions/15221473/how-do-i-update-pip-itself-from-inside-my-virtual-environment)
