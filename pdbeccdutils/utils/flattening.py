@@ -89,7 +89,7 @@ class FlatteningManager:
             raise ValueError('Unsupported molecule type \'{}\''.format(extension))
 
         [x.SetAtomicNum(6) for x in mol.GetAtoms()]
-        [x.SetBondType(Chem.BondType.SINGLE) for x in mol.GetBonds()]
+        [x.SetBondType(Chem.BondType.UNSPECIFIED) for x in mol.GetBonds()]
 
         return mol
 

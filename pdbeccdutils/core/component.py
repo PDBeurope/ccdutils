@@ -168,7 +168,7 @@ class Component:
         """
         mol_copy = Chem.RWMol(self.mol)
         if remove_hs:
-            mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
+            mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=True)
         result_log = manager.flaten_molecule(self._id, mol_copy)
 
         if result_log is not None:
@@ -196,7 +196,7 @@ class Component:
             options = drawer.drawOptions()
             for atom in self._2dmol.GetAtoms():
                 atom_name = atom.GetProp('name') if atom.HasProp('name') == 1 else atom.GetSymbol()
-                options.atomLabels[atom.GetIdx()] = atom.GetProp('name')
+                options.atomLabels[atom.GetIdx()] = atom_name
                 atom.SetProp('molFileAlias', atom_name)
 
         if self._2dmol is None:
@@ -330,11 +330,10 @@ class Component:
         with io.BytesIO() as stream:
             with pipes(stderr=stream):
                 while ((not success) and attempts >= 0):
-                    sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
 
+                    sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
                     if sanitization_result == 0:
                         return True
-
                     raw_error = stream.getvalue().decode('utf-8')
                     stream.seek(0)
                     stream.truncate(0)
@@ -350,6 +349,7 @@ class Component:
                     smarts_metal_check = Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
                     metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
                     Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
+
                     for (metal_index, atom_index) in metal_atom_bonds:
                         metal_atom = rwmol.GetAtomWithIdx(metal_index)
                         erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
@@ -358,20 +358,11 @@ class Component:
                         bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
                         bond.SetBondType(BondType.DATIVE)
 
-                        # change the valency
-                        name = erroneous_atom.GetProp('name')
-                        vale = erroneous_atom.GetExplicitValence()
-                        total_valence = erroneous_atom.GetTotalValence()
-                        explicit = erroneous_atom.GetExplicitValence()
-                        degree = erroneous_atom.GetTotalDegree()
-
-                        metal_charge = metal_atom.GetFormalCharge()
-
                         if erroneous_atom.GetExplicitValence() == valency:
                             erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
                             metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
 
-                    attempts -= 1
+                attempts -= 1
         return False
 
     def _fix_molecule_fast(self, rwmol):
