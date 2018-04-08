@@ -12,5 +12,5 @@ setup(name='pdbeccdutils',
                'bin/process_components_cif'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['wurlitzer', 'Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme', 'pytest']
+      install_requires=['Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme', 'pytest']
       )

@@ -16,5 +16,5 @@ The pdbeccdutils package is made up of the following modules:
 .. toctree::
     
     pdbeccdutils.core
-    pdbeccdutils.extensions
+    pdbeccdutils.helpers
     pdbeccdutils.utils

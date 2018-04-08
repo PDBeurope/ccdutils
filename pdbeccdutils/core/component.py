@@ -26,10 +26,10 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem.rdchem import BondType
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
-from wurlitzer import pipes
 
-from pdbeccdutils.extensions import drawing
-from pdbeccdutils.core.enums import ConformerType
+from pdbeccdutils.helpers import IOGrabber
+from pdbeccdutils.helpers import drawing
+from pdbeccdutils.core import ConformerType
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -229,17 +229,16 @@ class Component:
         except ValueError:
             return False  # sanitization issue here
 
-    def sanitize(self, fast=True):
+    def sanitize(self, fast=False):
         """
         Attempts to sanitize mol in place. RDKit's standard error can be
         processed in order to find out what went wrong with sanitization
-        to fix the molecule. Presently, that function is slow (perhaps
-        due to the stream?) and needs more debuging to find out what
-        is happening there.
+        to fix the molecule.
 
         Args:
-            fast (bool, optional): Defaults to True.
-                TODO until the speed issue is fixed.
+            fast (bool, optional): Defaults to False. If fast option is
+                triggered original Oliver's sanitization process is run.
+
 
         Returns:
             bool: Result of the sanitization process.
@@ -274,7 +273,7 @@ class Component:
             ValueError: If given conformer does not exist.
 
         Returns:
-            bool: true if more 1 atom has coordinates [0, 0, 0]
+            bool: true if more then 1 atom has coordinates [0, 0, 0]
         """
         conformer = self.mol.GetConformer(self._conformers_mapping[type])
         empty_coords = Chem.rdGeometry.Point3D(0, 0, 0)
@@ -314,8 +313,7 @@ class Component:
     def _fix_molecule(self, rwmol):
         """
         Single molecule sanitization process. Presently, only valence
-        errors are taken care are of. Capture the C level stream has
-        presently HUGE tradeoff ~ 200ms so should be used with care.
+        errors are taken care are of.
 
         Args:
             rwmol (rdkit.Chem.rdchem.Mol): rdkit molecule to be
@@ -327,42 +325,40 @@ class Component:
         attempts = 10
         success = False
 
-        with io.BytesIO() as stream:
-            with pipes(stderr=stream):
-                while ((not success) and attempts >= 0):
+        while ((not success) and attempts >= 0):
+            out = IOGrabber(sys.stderr)
+            out.start()
+            sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
+            if sanitization_result == 0:
+                return True
+            out.stop()
+            raw_error = out.capturedtext
 
-                    sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
-                    if sanitization_result == 0:
-                        return True
-                    raw_error = stream.getvalue().decode('utf-8')
-                    stream.seek(0)
-                    stream.truncate(0)
+            sanitization_failure = re.findall('[a-zA-Z]{1,2}, \d+', raw_error)
+            if len(sanitization_failure) == 0:
+                return False
 
-                    sanitization_failure = re.findall('[a-zA-Z]{1,2}, \d+', raw_error)
-                    if len(sanitization_failure) == 0:
-                        return False
+            split_object = sanitization_failure[0].split(',')  # [0] element [1] valency
+            element = split_object[0]
+            valency = int(split_object[1].strip())
 
-                    split_object = sanitization_failure[0].split(',')  # [0] element [1] valency
-                    element = split_object[0]
-                    valency = int(split_object[1].strip())
+            smarts_metal_check = Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
+            metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
+            Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
 
-                    smarts_metal_check = Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
-                    metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-                    Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
+            for (metal_index, atom_index) in metal_atom_bonds:
+                metal_atom = rwmol.GetAtomWithIdx(metal_index)
+                erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
 
-                    for (metal_index, atom_index) in metal_atom_bonds:
-                        metal_atom = rwmol.GetAtomWithIdx(metal_index)
-                        erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
+                # change the bond type to dative
+                bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
+                bond.SetBondType(BondType.DATIVE)
 
-                        # change the bond type to dative
-                        bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-                        bond.SetBondType(BondType.DATIVE)
+                if erroneous_atom.GetExplicitValence() == valency:
+                    erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
+                    metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
 
-                        if erroneous_atom.GetExplicitValence() == valency:
-                            erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
-                            metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
-
-                attempts -= 1
+            attempts -= 1
         return False
 
     def _fix_molecule_fast(self, rwmol):

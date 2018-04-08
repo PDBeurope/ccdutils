@@ -23,8 +23,8 @@ from rdkit.Chem import Mol
 
 from mmCif.mmcifIO import MMCIF2Dict
 from pdbeccdutils.core import Component
-from pdbeccdutils.extensions import str_conversions
-from pdbeccdutils.extensions import collection_ext
+from pdbeccdutils.helpers import str_conversions
+from pdbeccdutils.helpers import collection_ext
 
 Properties = namedtuple('Properties', 'id name formula modified_date released weight')
 Descriptor = namedtuple('Descriptor', 'type program value')
