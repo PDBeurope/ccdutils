@@ -1,5 +1,5 @@
-[![pipeline status](https://gitlab.com/pdbe/ccdutils.gitlab.io/badges/refactoring/pipeline.svg)](https://gitlab.com/pdbe/ccdutils.gitlab.io/commits/refactoring)
-[![coverage report](https://gitlab.com/pdbe/ccdutils.gitlab.io/badges/refactoring/coverage.svg)](https://gitlab.com/pdbe/ccdutils.gitlab.io/commits/refactoring)
+[![pipeline status](https://gitlab.com/pdbe/ccdutils/badges/refactoring/pipeline.svg)](https://gitlab.com/pdbe/ccdutils/commits/refactoring)
+[![coverage report](https://gitlab.com/pdbe/ccdutils/badges/refactoring/coverage.svg)](https://gitlab.com/pdbe/ccdutils/commits/refactoring)
 
 # pdbeccdutils
 
@@ -55,7 +55,7 @@
   `pdbeccdutils/doc` run the following commands to generate documentation.
   
   Use the following to generate initial markup files to be used by sphinx.
-  This needs to be used when other package but `core`, `utils` and `extensions` is implemented
+  This needs to be used when other package but `core`, `utils` and `helpers` is implemented
   
   ```
   sphinx-apidoc -f -o /path/to/output/dir ../pdbeccdutils/

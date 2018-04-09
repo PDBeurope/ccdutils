@@ -1,7 +1,6 @@
 image: continuumio/miniconda
 
-pages:
-  before_script:
+before_script:
   - apt-get update && apt-get install make
   - conda create -c rdkit -n rdkit-doc rdkit python=3.6.1
   - source activate rdkit-doc
@@ -9,12 +8,22 @@ pages:
   - pip install Pillow scipy sphinx sphinx_rtd_theme pytest
   - pip install -e .
 
+test:
+  script:
+  - pytest
+
+  only:
+  - refactoring
+
+pages:
   script:
   - cd doc
   - make html
   - mv _build/html/ ../public/
+  
   artifacts:
     paths:
     - public
   only:
   - refactoring
+
