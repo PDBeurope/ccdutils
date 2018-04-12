@@ -109,7 +109,7 @@ class Component:
 
     @property
     def released(self):
-        self._released
+        return self._released
     # endregion properties
 
     def export_mol_representation(self, remove_hs=True, str_format='sdf',
@@ -168,7 +168,8 @@ class Component:
         """
         mol_copy = Chem.RWMol(self.mol)
         if remove_hs:
-            mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=True)
+            mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True)
+            Chem.SanitizeMol(mol_copy, catchErrors=True)
         result_log = manager.flaten_molecule(self._id, mol_copy)
 
         if result_log is not None:
