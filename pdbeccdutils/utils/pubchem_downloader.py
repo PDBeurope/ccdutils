@@ -29,49 +29,98 @@ class PubChemDownloader:
     Toolkit to retrieve pubchem 2D depictions from the database
     """
 
-    def __init__(self, components, pubchem_templates):
-        self.components = components
-        self.pubchem_templates = pubchem_templates
-        self.blacklist = list()
+    def __init__(self, pubchem_templates):
+        if not os.path.isdir(pubchem_templates):
+            raise ValueError(pubchem_templates + ' is not a valid path')
 
-    def run(self):
-        """
-        Update 2d images of pdbechem components which are available in the pubchem database
+        self.pubchem_templates = pubchem_templates
+
+    def update_ccd_dir(self, components):
+        """Update 2d images of pdbechem components which are available
+        in the pubchem database
+
+        Args:
+            components (str): Path to the directory with components in
+                *.cif format
         """
 
         print('Querying pubchem database...')
-        downloaded = self._download()
+        counter = 0
+        downloaded = 0
+
+        for f in os.listdir(components):
+            id = f.split('.')[0]
+            c = sr.read_pdb_cif_file(os.path.join(components, f)).component
+            destination = os.path.join(self.pubchem_templates, id + '.sdf')
+            success = self._download(c, destination)
+
+            if success:
+                downloaded += 1
+            counter += 1
+
+            print('{} | new {}'.format(counter, downloaded), end='\r')
+
         print('Downloaded {} new structures.'.format(downloaded))
 
-    def _download(self):
-        """
-        Downloads 2D structures of the components and returns a number of new structures
-        """
-        counter = 0
-        pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
-        i = 0
-        for file in os.listdir(self.components):
-            id = os.path.basename(file).split('.')[0]
-            destination = os.path.join(self.pubchem_templates, id + '.sdf')
-            counter += 1
-            print('{} | new {}'.format(counter, i), end='\r')
+    def update_ccd_file(self, ccd):
+        """Update 2d images of pdbechem components which are available
+        in the pubchem database from CCD files. Only released components
+        are downloaded
 
-            if os.path.isfile(destination):
+        Args:
+            ccd (str): Path to the the *.cif CCD file
+        """
+
+        print('Querying pubchem database...')
+        counter = 0
+        downloaded = 0
+        components = sr.read_pdb_components_file(ccd)
+
+        for k, v in components.items():
+            destination = os.path.join(self.pubchem_templates, k + '.sdf')
+            if not v.component.released:
                 continue
 
-            inchikey = sr.read_pdb_cif_file(os.path.join(self.components, file)).component.inchikey
+            success = self._download(v.component, destination)
 
-            try:
-                inchi_url = '{}/inchikey/{}/cids/json'.format(pubchem_api, inchikey)
-                response = urllib.request.urlopen(inchi_url).read().decode('utf-8')
-                jsonFile = json.loads(response)
-                cid = jsonFile['IdentifierList']['CID'][0]
+            if success:
+                downloaded += 1
+            counter += 1
 
-                structure_url = '{}/cid/{}/record/SDF/?record_type=2d&response_type=save&response_basename={}'.format(pubchem_api, cid, id + '.sdf')
-                urllib.request.urlretrieve(structure_url, destination)
-                i += 1
-            except urllib.request.HTTPError:
-                pass
-            except urllib.error.URLError:
-                pass
-        return i
+            print('{} | new {}'.format(counter, downloaded), end='\r')
+
+        print('Downloaded {} new structures.'.format(downloaded))
+
+    def _download(self, component, destination):
+        """Downloads 2D structures of the components and returns a number of new structures
+
+        Args:
+            component (pdbeccdutils.core.Component): Component
+            destination (str): Path to the pubchem 2D template
+
+        Returns:
+            bool: whether or not the new template has been downloaded
+        """
+
+        pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
+
+        if os.path.isfile(destination):
+            return False
+
+        inchikey = component.inchikey
+
+        try:
+            inchi_url = '{}/inchikey/{}/cids/json'.format(pubchem_api, inchikey)
+            response = urllib.request.urlopen(inchi_url).read().decode('utf-8')
+            jsonFile = json.loads(response)
+            cid = jsonFile['IdentifierList']['CID'][0]
+            id = os.path.basename(destination).split('.')[0]
+
+            structure_url = '{}/cid/{}/record/SDF/?record_type=2d&response_type=save&response_basename={}'.format(pubchem_api, cid, id + '.sdf')
+            urllib.request.urlretrieve(structure_url, destination)
+            return True
+
+        except urllib.request.HTTPError:
+            return False
+        except urllib.error.URLError:
+            return False
