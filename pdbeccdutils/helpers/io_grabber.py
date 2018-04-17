@@ -63,8 +63,11 @@ class IOGrabber:
             self.readOutput()
         # Close the pipe:
         os.close(self.pipe_out)
+        os.close(self.pipe_in)
         # Restore the original stream:
         os.dup2(self.streamfd, self.origstreamfd)
+
+        os.close(self.streamfd)
 
     def readOutput(self):
         """

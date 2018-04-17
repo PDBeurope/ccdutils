@@ -168,7 +168,7 @@ class Component:
         """
         mol_copy = Chem.RWMol(self.mol)
         if remove_hs:
-            mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True)
+            mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
             Chem.SanitizeMol(mol_copy, catchErrors=True)
         result_log = manager.flaten_molecule(self._id, mol_copy)
 
@@ -200,15 +200,7 @@ class Component:
                 options.atomLabels[atom.GetIdx()] = atom_name
                 atom.SetProp('molFileAlias', atom_name)
 
-        if self._2dmol is None:
-            drawing.save_no_image(file_name, width=width)
-        else:
-            copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True, kekulize=True,
-                                                    addChiralHs=True)
-            drawer.DrawMolecule(copy)
-            drawer.FinishDrawing()
-            with open(file_name, 'w') as f:
-                f.write(drawer.GetDrawingText())
+        self._draw_molecule(drawer, file_name, width)
 
     def compute_3d(self):
         """
@@ -325,12 +317,12 @@ class Component:
         """
         attempts = 10
         success = False
-
         while ((not success) and attempts >= 0):
             out = IOGrabber(sys.stderr)
             out.start()
             sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
             if sanitization_result == 0:
+                out.stop()
                 return True
             out.stop()
             raw_error = out.capturedtext
@@ -391,3 +383,18 @@ class Component:
         sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
 
         return sanitization_result == 0
+
+    def _draw_molecule(self, drawer, file_name, width):
+        if self._2dmol is None:
+            drawing.save_no_image(file_name, width=width)
+            return
+        try:
+            copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True, kekulize=True,
+                                                    addChiralHs=True)
+        except RuntimeError:
+            copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=False, kekulize=True,
+                                                    addChiralHs=True)
+        drawer.DrawMolecule(copy)
+        drawer.FinishDrawing()
+        with open(file_name, 'w') as f:
+            f.write(drawer.GetDrawingText())
