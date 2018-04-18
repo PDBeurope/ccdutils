@@ -52,7 +52,7 @@ class PubChemDownloader:
             id = f.split('.')[0]
             c = sr.read_pdb_cif_file(os.path.join(components, f)).component
             destination = os.path.join(self.pubchem_templates, id + '.sdf')
-            success = self._download(c, destination)
+            success = self.download_template(c)
 
             if success:
                 downloaded += 1
@@ -81,7 +81,7 @@ class PubChemDownloader:
             if not v.component.released:
                 continue
 
-            success = self._download(v.component, destination)
+            success = self.download_template(v.component)
 
             if success:
                 downloaded += 1
@@ -91,20 +91,20 @@ class PubChemDownloader:
 
         print('Downloaded {} new structures.'.format(downloaded))
 
-    def _download(self, component, destination):
-        """Downloads 2D structures of the components and returns a number of new structures
+    def download_template(self, component):
+        """Downloads 2D structure of a given component
 
         Args:
             component (pdbeccdutils.core.Component): Component
-            destination (str): Path to the pubchem 2D template
+            destination (str): Path to the pubchem 2D template dir
 
         Returns:
             bool: whether or not the new template has been downloaded
         """
-
         pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
 
-        if os.path.isfile(destination):
+        template = os.path.join(self.pubchem_templates, component.id)
+        if os.path.isfile(template):
             return False
 
         inchikey = component.inchikey
@@ -114,10 +114,9 @@ class PubChemDownloader:
             response = urllib.request.urlopen(inchi_url).read().decode('utf-8')
             jsonFile = json.loads(response)
             cid = jsonFile['IdentifierList']['CID'][0]
-            id = os.path.basename(destination).split('.')[0]
 
-            structure_url = '{}/cid/{}/record/SDF/?record_type=2d&response_type=save&response_basename={}'.format(pubchem_api, cid, id + '.sdf')
-            urllib.request.urlretrieve(structure_url, destination)
+            structure_url = '{}/cid/{}/record/SDF/?record_type=2d&response_type=save&response_basename={}'.format(pubchem_api, cid, component.id + '.sdf')
+            urllib.request.urlretrieve(structure_url, template)
             return True
 
         except urllib.request.HTTPError:
