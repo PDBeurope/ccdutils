@@ -7,3 +7,5 @@ pdbeccdutils.core
     :members:
 .. automodule:: pdbeccdutils.core.structure_reader
     :members:
+.. automodule:: pdbeccdutils.core.structure_writer
+    :members:
