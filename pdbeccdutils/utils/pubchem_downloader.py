@@ -41,7 +41,7 @@ class PubChemDownloader:
 
         Args:
             components (str): Path to the directory with components in
-                *.cif format
+                .cif format
         """
 
         print('Querying pubchem database...')
@@ -68,7 +68,7 @@ class PubChemDownloader:
         are downloaded
 
         Args:
-            ccd (str): Path to the the *.cif CCD file
+            ccd (str): Path to the the z`.cif CCD file
         """
 
         print('Querying pubchem database...')

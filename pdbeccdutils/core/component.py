@@ -65,7 +65,7 @@ class Component:
         self._released = False
         self._descriptors = []
 
-        self._conformers_mapping = \
+        self.conformers_mapping = \
             {ConformerType.Ideal: 0,
              ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
              ConformerType.Computed: 2000}
@@ -105,52 +105,16 @@ class Component:
 
     @property
     def inchikey(self):
-        return next((x.value for x in self._descriptors if x.type == 'InChIKey'), None)
+        return next((x.value for x in self._descriptors if x.type == 'InChIKey'), '')
+
+    @property
+    def inchi(self):
+        return next((x.value for x in self._descriptors if x.type == 'InChI'), '')
 
     @property
     def released(self):
         return self._released
     # endregion properties
-
-    def export_mol_representation(self, remove_hs=True, str_format='sdf',
-                                  conf_type=ConformerType.AllConformers):
-        """
-        Export a component representation in given format. If conf_type
-        is None, all the conformers are exported
-
-        Args:
-            remove_hs (bool, optional): Defaults to True. include
-                hydrogens.
-            str_format (str, optional): Defaults to 'sdf'. Data format
-            conf_type (ConformerType, optional): Defaults to None.
-
-        Raises:
-            NotImplementedError: currently for mmcif option
-            ValueError: For unknown format or conformer
-
-        Returns:
-            str: string representation of the compound
-        """
-        try:
-            conf_id = -1
-            mol_to_save = self._2dmol if conf_type == ConformerType.Depiction else self.mol
-            mol_to_save = Chem.RemoveHs(mol_to_save) if remove_hs else mol_to_save
-
-            if conf_type is not ConformerType.AllConformers:
-                conf_id = int(conf_type)
-
-            if str_format == 'sdf':
-                return Chem.MolToMolBlock(mol_to_save, confId=conf_id)
-            elif str_format == 'pdb':
-                return Chem.MolToPDBBlock(mol_to_save, confId=conf_id)
-            elif str_format == 'mmcif':
-                raise NotImplementedError('Not yet implementd')
-            else:
-                raise ValueError('Unknown file format: {}'.format(str_format))
-        except KeyError:
-            raise ValueError('Option {} is not valid for a conformer type.'.format(conf_type))
-        except ValueError:
-            raise ValueError('Conformer {} does\'t exist, perhaps it never did.'.format(conf_type))
 
     def compute_2d(self, manager, remove_hs=True):
         """
@@ -215,7 +179,7 @@ class Component:
         try:
             conf_id = AllChem.EmbedMolecule(self.mol, options)
             result = AllChem.UFFOptimizeMolecule(self.mol, confId=conf_id, maxIters=1000)
-            self._conformers_mapping[ConformerType.Computed] = conf_id
+            self.conformers_mapping[ConformerType.Computed] = conf_id
             return True
         except RuntimeError:
             return False  # Force field issue here
@@ -252,7 +216,7 @@ class Component:
 
         return success
 
-    def is_degenerated_conformer(self, type):
+    def has_degenerated_conformer(self, type):
         """
         Determine if given conformer has missing coordinates. This can
         be used to determine, whether or not the coordinates should be
@@ -268,7 +232,7 @@ class Component:
         Returns:
             bool: true if more then 1 atom has coordinates [0, 0, 0]
         """
-        conformer = self.mol.GetConformer(self._conformers_mapping[type])
+        conformer = self.mol.GetConformer(self.conformers_mapping[type])
         empty_coords = Chem.rdGeometry.Point3D(0, 0, 0)
         counter = 0
 
@@ -327,7 +291,7 @@ class Component:
             out.stop()
             raw_error = out.capturedtext
 
-            sanitization_failure = re.findall('[a-zA-Z]{1,2}, \d+', raw_error)
+            sanitization_failure = re.findall('[a-zA-Z]{1,2}, \\d+', raw_error)
             if len(sanitization_failure) == 0:
                 return False
 
