@@ -114,6 +114,13 @@ class Component:
     @property
     def released(self):
         return self._released
+
+    @property
+    def mol_no_h(self):
+        no_h = Chem.RemoveHs(self.mol, sanitize=False)
+        Chem.SanitizeMol(no_h, catchErrors=True)
+        return no_h
+
     # endregion properties
 
     def compute_2d(self, manager, remove_hs=True):
