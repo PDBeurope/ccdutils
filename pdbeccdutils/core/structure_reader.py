@@ -80,14 +80,14 @@ def read_pdb_components_file(path_to_cif):
 # region parse mmcif
 def _parse_pdb_mmcif(cif_dict):
     """
-    Create internal representation of the molecule in mmcif format.
+    Create internal representation of the molecule from mmcif format.
 
     Args:
         cif_dict (dict): mmcif category
 
     Returns:
-        StructureReaderResult: internal representation with the
-            results of parsing and Mol object.
+        StructureReaderResult: internal representation with the results
+            of parsing and Mol object.
     """
     warnings = list()
     errors = list()
@@ -95,6 +95,7 @@ def _parse_pdb_mmcif(cif_dict):
 
     atoms_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp_atom', warnings)
     bonds_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp_bond', warnings)
+    identifiers_dict = _preprocess_pdb_parser_output(cif_dict, '_pdbx_chem_comp_identifier', warnings)
     descriptors_dict = _preprocess_pdb_parser_output(cif_dict, '_pdbx_chem_comp_descriptor', warnings)
     properties_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp', warnings)
 
@@ -102,7 +103,8 @@ def _parse_pdb_mmcif(cif_dict):
     _parse_pdb_conformers(mol, atoms_dict)
     _parse_pdb_bonds(mol, bonds_dict, atoms_dict, errors)
 
-    descriptors = _parse_pdb_descriptors(descriptors_dict)
+    descriptors = _parse_pdb_descriptors(descriptors_dict, 'descriptor')
+    descriptors += _parse_pdb_descriptors(identifiers_dict, 'identifier')
     properties = _parse_pdb_properties(properties_dict)
 
     comp = Component(mol.GetMol(), properties, descriptors)
@@ -216,13 +218,15 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
         mol.AddBond(atom_1, atom_2, bond_order)
 
 
-def _parse_pdb_descriptors(pdbx_chem_comp_descriptors):
+def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
     """
-    Parse useful informations from _pdbx_chem_comp_descriptor category
+    Parse useful informations from _pdbx_chem_comp_* category
 
     Args:
         pdbx_chem_comp_descriptors (dict): mmcif category with the
             descriptors info.
+        label (str, optional): Defaults to 'descriptor'. Name of the
+            category to be parsed.
 
     Returns:
         Descriptor: namedtuple with the property info
@@ -232,10 +236,10 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors):
     if len(pdbx_chem_comp_descriptors) == 0:
         return descriptors
 
-    for i in range(len(pdbx_chem_comp_descriptors['descriptor'])):
+    for i in range(len(pdbx_chem_comp_descriptors[label])):
         d = Descriptor(type=pdbx_chem_comp_descriptors['type'][i],
                        program=pdbx_chem_comp_descriptors['program'][i],
-                       value=pdbx_chem_comp_descriptors['descriptor'][i])
+                       value=pdbx_chem_comp_descriptors[label][i])
         descriptors.append(d)
 
     return descriptors
