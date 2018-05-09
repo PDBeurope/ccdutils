@@ -91,7 +91,7 @@ class TestCutDownComponentsCif(object):
 
     @staticmethod
     @pytest.mark.parametrize('subdir', FILES_SUBDIRS)
-    def test_subdir_in_files_created(output_dir, subdir):
+    def test_subdirs_in_files_are_created(output_dir, subdir):
         subdir_path = os.path.join(output_dir, 'files', subdir)
         assert os.path.isdir(subdir_path)
 
@@ -112,7 +112,7 @@ class TestCutDownComponentsCif(object):
 
     @staticmethod
     @pytest.mark.parametrize('subdir', IMAGES_SUBDIRS)
-    def test_subdir_in_files_created(output_dir, subdir):
+    def test_subdirs_in_images_are_created(output_dir, subdir):
         subdir_path = os.path.join(output_dir, 'images', subdir)
         assert os.path.isdir(subdir_path)
 
