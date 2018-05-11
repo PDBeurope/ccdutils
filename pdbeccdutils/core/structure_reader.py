@@ -28,9 +28,9 @@ from pdbeccdutils.helpers import collection_ext
 
 Properties = namedtuple('Properties', 'id name formula modified_date released weight')
 Descriptor = namedtuple('Descriptor', 'type program value')
-StructureReaderResult =  namedtuple('StructureReaderResult', 'warnings errors component')
+CCDReaderResult =  namedtuple('CCDReaderResult', 'warnings errors component')
 try:
-    StructureReaderResult.__doc__ = """
+    CCDReaderResult.__doc__ = """
     Namedtuple for the result of reading an individual PDB chemical 
     component definition (CCD).
 
@@ -60,7 +60,7 @@ def read_pdb_cif_file(path_to_cif):
         ValueError: if file does not exist
 
     Returns:
-        StructureReaderResult: Results of the parsing altogether with
+        CCDReaderResult: Results of the parsing altogether with
         the internal representation of the component.
     """
     if not os.path.isfile(path_to_cif):
@@ -84,7 +84,7 @@ def read_pdb_components_file(path_to_cif):
         ValueError: if the file does not exist.
 
     Returns:
-        {str, StructureReaderResult}: Internal representation of all
+        {str, CCDReaderResult}: Internal representation of all
         the compponents in the `components.cif` file.
     """
     if not os.path.isfile(path_to_cif):
@@ -103,7 +103,7 @@ def _parse_pdb_mmcif(cif_dict):
         cif_dict (dict): mmcif category
 
     Returns:
-        StructureReaderResult: internal representation with the results
+        CCDReaderResult: internal representation with the results
             of parsing and Mol object.
     """
     warnings = list()
@@ -125,7 +125,7 @@ def _parse_pdb_mmcif(cif_dict):
     properties = _parse_pdb_properties(properties_dict)
 
     comp = Component(mol.GetMol(), properties, descriptors)
-    reader_result = StructureReaderResult(warnings=warnings, errors=errors, component=comp)
+    reader_result = CCDReaderResult(warnings=warnings, errors=errors, component=comp)
 
     return reader_result
 
