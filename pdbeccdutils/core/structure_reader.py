@@ -28,7 +28,24 @@ from pdbeccdutils.helpers import collection_ext
 
 Properties = namedtuple('Properties', 'id name formula modified_date released weight')
 Descriptor = namedtuple('Descriptor', 'type program value')
-StructureReaderResult = namedtuple('StructureReaderResult', 'warnings errors component')
+StructureReaderResult =  namedtuple('StructureReaderResult', 'warnings errors component')
+try:
+    StructureReaderResult.__doc__ = """
+    Namedtuple for the result of reading an individual PDB chemical 
+    component definition (CCD).
+
+    Args:
+        warnings (:obj:`list` of :obj:`str`): A list of any warnings
+            found while reading the CCD. If no warnings found `warnings`
+            will be empty.
+        errors: (:obj:`list` of :obj:`str`): A list of any errors
+            found while reading the CCD. If no warnings found `errors`
+            will be empty.
+        component (pdbeccdutils.core.component.Component): internal
+            representation of the CCD read-in.
+    """
+except AttributeError:  # for python 2
+    pass
 
 
 def read_pdb_cif_file(path_to_cif):
