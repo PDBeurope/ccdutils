@@ -30,6 +30,7 @@ from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
 from pdbeccdutils.helpers import IOGrabber
 from pdbeccdutils.helpers import drawing
 from pdbeccdutils.core import ConformerType
+from pdbeccdutils.core import ReleaseStatus
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -76,7 +77,7 @@ class Component:
             self._id = properties.id
             self._name = properties.name
             self._formula = properties.formula
-            self._released = properties.released == 'REL'
+            self._released = ReleaseStatus[properties.released]
             self._modified_date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
 
         if descriptors is not None:

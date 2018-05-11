@@ -30,3 +30,12 @@ class ConformerType(IntEnum):
     Depiction = 3
     Computed = 4
     AllConformers = 5
+
+
+class ReleaseStatus(IntEnum):
+    REL = 1
+    OBS = 2
+    HOLD = 3
+    HPUB = 4
+    REFI = 5
+    WDRN = 6

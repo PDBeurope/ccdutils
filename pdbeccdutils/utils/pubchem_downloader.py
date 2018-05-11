@@ -15,13 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import json
 import os
 import sys
-import json
 import urllib.request
+
 from rdkit import Chem
 
-from pdbeccdutils.core import ccd_reader as sr
+from pdbeccdutils.core import structure_reader as sr
+from pdbeccdutils.core import ReleaseStatus
 
 
 class PubChemDownloader:
@@ -78,7 +80,7 @@ class PubChemDownloader:
 
         for k, v in components.items():
             destination = os.path.join(self.pubchem_templates, k + '.sdf')
-            if not v.component.released:
+            if v.component.released != ReleaseStatus.OBS:
                 continue
 
             success = self.download_template(v.component)
@@ -103,7 +105,7 @@ class PubChemDownloader:
         """
         pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
 
-        template = os.path.join(self.pubchem_templates, component.id)
+        template = os.path.join(self.pubchem_templates, component.id + '.sdf')
         if os.path.isfile(template):
             return False
 
