@@ -19,7 +19,6 @@ import os
 from collections import namedtuple
 
 from rdkit import Chem
-from rdkit.Chem import Mol
 
 from mmCif.mmcifIO import MMCIF2Dict
 from pdbeccdutils.core import Component
