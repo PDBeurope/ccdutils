@@ -20,7 +20,7 @@ import logging
 import os
 import sys
 
-from pdbeccdutils.core import ConformerType, structure_reader
+from pdbeccdutils.core import ConformerType, ccd_reader
 from pdbeccdutils.utils import FlatteningManager
 
 
@@ -149,7 +149,7 @@ def main():
     log = setup_debug('2d_depiction', log_file)
 
     print('Reading in components.cif file...')
-    mmcifs = structure_reader.read_pdb_components_file(config.component_file)
+    mmcifs = ccd_reader.read_pdb_components_file(config.component_file)
     flattening = FlatteningManager(config.generic_templates, config.pubchem_templates)
 
     for ccd_id, reader_result in mmcifs.items():

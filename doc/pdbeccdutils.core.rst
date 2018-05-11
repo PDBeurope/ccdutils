@@ -5,7 +5,7 @@ pdbeccdutils.core
     :members:
 .. automodule:: pdbeccdutils.core.enums
     :members:
-.. automodule:: pdbeccdutils.core.structure_reader
+.. automodule:: pdbeccdutils.core.ccd_reader
     :members:
 .. automodule:: pdbeccdutils.core.structure_writer
     :members:

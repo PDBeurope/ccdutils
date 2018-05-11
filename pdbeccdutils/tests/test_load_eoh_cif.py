@@ -2,14 +2,14 @@
 load EOH.cif from file and test important cif item.
 """
 from pdbeccdutils.tests.tst_utilities import cif_filename
-from pdbeccdutils.core import structure_reader as sr
+from pdbeccdutils.core import ccd_reader
 
 class TestLoadEOH:
     @staticmethod
     def test_load_eoh():
         """ test eoh?? """
         cif_file = cif_filename('EOH')
-        reader = sr.read_pdb_cif_file(cif_file)
+        reader = ccd_reader.read_pdb_cif_file(cif_file)
         assert reader.warnings == []
         assert reader.errors == []
         component = reader.component

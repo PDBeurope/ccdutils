@@ -21,7 +21,7 @@ import json
 import urllib.request
 from rdkit import Chem
 
-from pdbeccdutils.core import structure_reader as sr
+from pdbeccdutils.core import ccd_reader as sr
 
 
 class PubChemDownloader:
