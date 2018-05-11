@@ -38,7 +38,7 @@ METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,
 class Component:
     """
     Wrapper for the rdkit.Chem.rdchem.Mol object enabling some of its
-    functionality and handlingpossible erroneous situations.
+    functionality and handling possible erroneous situations.
 
         Presently implemented:
             * sanitization
@@ -85,14 +85,49 @@ class Component:
     # region properties
     @property
     def id(self):
+        """
+        Supply the unique identifier for the chemical component,
+        for example 'ATP'.
+        Obtained from CCD's _chem_comp.id:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.id.html
+
+        If not defined then the empty string '' will be returned.
+
+        Returns:
+            str: the _chem_comp.id or ''.
+        """
         return self._id
 
     @property
     def name(self):
+        """
+        Supply the 'full name' of the component, for example 'ETHANOL'.
+        Obtained from CCD's _chem_comp.name:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.name.html
+
+        If not defined then the empty string '' will be returned.
+
+        Returns:
+            str: the _chem_comp.name or ''.
+        """
         return self._name
 
     @property
     def formula(self):
+        """
+        Supply the chemical formula for the chemical component,
+        for example 'C2 H6 O'.
+        Obtained from CCD's _chem_comp.formula:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.formula.html
+
+        If not defined then the empty string '' will be returned.
+
+        Returns:
+            str: the _chem_comp.formula or ''.
+        """
         return self._formula
 
     @property
