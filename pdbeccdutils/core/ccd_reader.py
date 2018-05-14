@@ -25,7 +25,7 @@ from pdbeccdutils.core import Component
 from pdbeccdutils.helpers import str_conversions
 from pdbeccdutils.helpers import collection_ext
 
-Properties = namedtuple('Properties', 'id name formula modified_date released weight')
+Properties = namedtuple('Properties', 'id name formula modified_date pdbx_release_status weight')
 Descriptor = namedtuple('Descriptor', 'type program value')
 CCDReaderResult =  namedtuple('CCDReaderResult', 'warnings errors component')
 try:
@@ -277,7 +277,7 @@ def _parse_pdb_properties(chem_comp):
                                 name=chem_comp['name'][0],
                                 formula=chem_comp['formula'][0],
                                 modified_date=chem_comp['pdbx_modified_date'][0],
-                                released=chem_comp['pdbx_release_status'][0],
+                                pdbx_release_status=chem_comp['pdbx_release_status'][0],
                                 weight=chem_comp['formula_weight'][0])
     return properties
 

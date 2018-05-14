@@ -63,7 +63,7 @@ class Component:
         self._name = ''
         self._formula = ''
         self._modified_date = ''
-        self._released = False
+        self._pdbx_release_status = ReleaseStatus.NOT_SET
         self._descriptors = []
 
         self.conformers_mapping = \
@@ -73,11 +73,10 @@ class Component:
 
         if properties is not None:
             mod_date = properties.modified_date.split('-')
-
             self._id = properties.id
             self._name = properties.name
             self._formula = properties.formula
-            self._released = ReleaseStatus[properties.released]
+            self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
             self._modified_date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
 
         if descriptors is not None:
@@ -104,7 +103,7 @@ class Component:
     def name(self):
         """
         Supply the 'full name' of the component, for example 'ETHANOL'.
-        Obtained from CCD's _chem_comp.name:
+        Obtained from PDB-CCD's _chem_comp.name:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.name.html
 
@@ -120,7 +119,7 @@ class Component:
         """
         Supply the chemical formula for the chemical component,
         for example 'C2 H6 O'.
-        Obtained from CCD's _chem_comp.formula:
+        Obtained from PDB-CCD's _chem_comp.formula:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.formula.html
 
@@ -130,6 +129,21 @@ class Component:
             str: the _chem_comp.formula or ''.
         """
         return self._formula
+
+    @property
+    def pdbx_release_status(self):
+        """
+        Supply the pdbx_release_status for the chemical component.
+        Obtained from CCD's _chem_comp.pdbx_rel_status:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_chem_comp.pdbx_release_status.html
+
+        If not defined then the empty string '' will be returned.
+
+        Returns:
+            pdbeccdutils.core.enums.ReleaseStatus: enum of the release status
+        """
+        return self._pdbx_release_status
 
     @property
     def modified_date(self):
@@ -149,7 +163,9 @@ class Component:
 
     @property
     def released(self):
-        return self._released
+        """ returns True if PDB-CCD has been released.
+        Tests pdbx_release_status is REL"""
+        return self._pdbx_release_status == ReleaseStatus.REL
 
     @property
     def mol_no_h(self):

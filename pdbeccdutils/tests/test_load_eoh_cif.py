@@ -4,12 +4,14 @@ load EOH.cif from file and test important cif item.
 import pytest
 from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.core import ReleaseStatus
+
 
 class TestLoadEOH:
     chem_comp_items = [('id', 'EOH'),
                        ('name', 'ETHANOL' ),
                        ('formula', 'C2 H6 O'),
-                       # ('pdbx_release_status', 'REL'), TODO
+                       ('pdbx_release_status', ReleaseStatus.REL),
                        ('released', True)
                        ]
     @staticmethod

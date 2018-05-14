@@ -33,9 +33,18 @@ class ConformerType(IntEnum):
 
 
 class ReleaseStatus(IntEnum):
-    REL = 1
-    OBS = 2
-    HOLD = 3
-    HPUB = 4
-    REFI = 5
-    WDRN = 6
+    """ an enumeration for pdbx_release_status
+    allowed values include REL and HOLD, see:
+    http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_chem_comp.pdbx_release_status.html
+
+    Notes
+        An additional value 'NOT_SET' has been added for case where
+        pdbx_release_status has not been set.
+    """
+    NOT_SET = 0
+    DEL = 1
+    HOLD = 2
+    HPUB = 3
+    OBS = 4
+    REF_ONLY = 5
+    REL = 6
