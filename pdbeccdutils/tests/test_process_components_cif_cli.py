@@ -19,6 +19,7 @@ FILES_SUBDIRS = ('mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh',
 IMAGES_SUBDIRS = 'svg_with_atom_labels', 'svg_without_atom_labels'
 
 
+@pytest.mark.skip(reason='Not yet implemented in this branch')  # TODO implement osmart 14 May 2018
 class TestCommandLineArgs(object):
     @staticmethod
     def test_with_empty_args():
@@ -38,6 +39,7 @@ class TestCommandLineArgs(object):
             process_components_cif(args)
 
 
+@pytest.mark.skip(reason='Not yet implemented in this branch')  # TODO implement osmart 14 May 2018
 class TestRegressionTest(object):
     @staticmethod
     def test_with_problematic_cif_7om():
@@ -54,6 +56,7 @@ class TestRegressionTest(object):
             'output directory  {} must be created'.format(test_output_dir)
 
 
+@pytest.mark.skip(reason='Not yet implemented in this branch')  # TODO implement osmart 14 May 2018
 class TestCutDownComponentsCif(object):
     """
     run process_components_cif_cli on test file:
