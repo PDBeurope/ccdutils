@@ -86,7 +86,7 @@ class Component:
     @property
     def id(self):
         """
-        Supply the unique identifier for the chemical component,
+        Supply the unique identifier for the PDB-CCD,
         for example 'ATP'.
         Obtained from CCD's _chem_comp.id:
 
@@ -102,7 +102,7 @@ class Component:
     @property
     def name(self):
         """
-        Supply the 'full name' of the component, for example 'ETHANOL'.
+        Supply the 'full name' of the PDB-CCD, for example 'ETHANOL'.
         Obtained from PDB-CCD's _chem_comp.name:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.name.html
@@ -117,7 +117,7 @@ class Component:
     @property
     def formula(self):
         """
-        Supply the chemical formula for the chemical component,
+        Supply the chemical formula for the PDB-CCD,
         for example 'C2 H6 O'.
         Obtained from PDB-CCD's _chem_comp.formula:
 
@@ -133,15 +133,14 @@ class Component:
     @property
     def pdbx_release_status(self):
         """
-        Supply the pdbx_release_status for the chemical component.
-        Obtained from CCD's _chem_comp.pdbx_rel_status:
+        Supply the pdbx_release_status for the PDB-CCD.
+        Obtained from PDB-CCD's _chem_comp.pdbx_rel_status:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_chem_comp.pdbx_release_status.html
 
-        If not defined then the empty string '' will be returned.
-
         Returns:
-            pdbeccdutils.core.enums.ReleaseStatus: enum of the release status
+            pdbeccdutils.core.enums.ReleaseStatus: enum of the release
+            status (this includes NOT_SET if no value is defined).
         """
         return self._pdbx_release_status
 
@@ -155,6 +154,18 @@ class Component:
 
     @property
     def inchikey(self):
+        """
+        Supply the InChIKey for the PDB-CCD.
+        Obtained from `PDB-CCD's _pdbx_chem_comp_descriptor` table line
+        with `_pdbx_chem_comp_descriptor.type=InChIKey`, see:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.type.html
+
+        If not defined then the empty string '' will be returned.
+
+        Returns:
+            str: the InChIKey or ''.
+        """
         return next((x.value for x in self._descriptors if x.type == 'InChIKey'), '')
 
     @property

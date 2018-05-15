@@ -12,7 +12,9 @@ class TestLoadEOH:
                        ('name', 'ETHANOL' ),
                        ('formula', 'C2 H6 O'),
                        ('pdbx_release_status', ReleaseStatus.REL),
-                       ('released', True)
+                       ('released', True),
+                       ('inchikey', 'LFQSCWFLJHTTHZ-UHFFFAOYSA-N'),
+
                        ]
     @staticmethod
     @pytest.mark.parametrize('attribute, expected', chem_comp_items)
