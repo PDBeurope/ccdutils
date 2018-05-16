@@ -41,23 +41,14 @@ class Component:
     Wrapper for the rdkit.Chem.rdchem.Mol object enabling some of its
     functionality and handling possible erroneous situations.
 
-        Presently implemented:
-            * sanitization
-            * 2D depiction
-            * 3D conformation calculation
-        TODO:
-            * cml generation
-            * xml generation
-            * proper pdb export with names (soon to follow)
-            * mmcif export
-
     Returns:
         pdbeccdutils.utils.Component: instance object
     """
 
-    def __init__(self, mol, properties=None, descriptors=None):
+    def __init__(self, mol, ccd_cif_dict=None, properties=None, descriptors=None):
 
         self.mol = mol
+        self.ccd_cif_dict = ccd_cif_dict
         self._2dmol = None
         self._id = ''
         self._name = ''
