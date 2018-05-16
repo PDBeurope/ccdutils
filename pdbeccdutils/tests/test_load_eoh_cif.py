@@ -64,4 +64,11 @@ class TestLoadEOH:
 
     @staticmethod
     def test_eoh_has_nine_atoms(component_eoh):
-        assert component_eoh.mol.GetNumAtoms() == 9
+        """ test number of atoms in the _chem_comp_atom table"""
+        assert component_eoh.number_atoms == 9
+
+    @staticmethod
+    def test_eoh_atom_ids(component_eoh):
+        assert component_eoh.atoms_ids == ('C1', 'C2',  'O', 'H11',
+                                           'H12', 'H21', 'H22', 'H23',
+                                           'HO')
