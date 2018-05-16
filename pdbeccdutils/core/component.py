@@ -56,6 +56,8 @@ class Component:
         self._modified_date = ''
         self._pdbx_release_status = ReleaseStatus.NOT_SET
         self._descriptors = []
+        self._inchi_from_rdkit = None
+        self._inchikey_from_rdkit = None
 
         self.conformers_mapping = \
             {ConformerType.Ideal: 0,
@@ -159,9 +161,43 @@ class Component:
         """
         return next((x.value for x in self._descriptors if x.type == 'InChIKey'), '')
 
+
+
     @property
     def inchi(self):
         return next((x.value for x in self._descriptors if x.type == 'InChI'), '')
+
+    @property
+    def inchi_from_rdkit(self):
+        """
+        provides the InChI worked out by rkdit
+
+        Returns:
+            str: the InChI or 'ERROR' if there was an error finding it.
+        """
+        if self._inchi_from_rdkit is None:
+            try:
+                self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.mol)
+            except ValueError:
+                self._inchi_from_rdkit = 'ERROR'
+        return self._inchi_from_rdkit
+
+    @property
+    def inchikey_from_rdkit(self):
+        """
+        provides the InChIKey worked out by rdkit
+
+        Returns:
+            str: the InChIKey or 'ERROR' if there was an error finding it.
+        """
+        if self._inchikey_from_rdkit is None:
+            inchi = self.inchi_from_rdkit
+            if inchi != 'ERROR':
+                self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
+            else:
+                self._inchikey_from_rdkit = 'ERROR'
+        return self._inchikey_from_rdkit
+
 
     @property
     def released(self):
@@ -204,6 +240,28 @@ class Component:
         return tuple(atom.GetProp('name') for
                      atom in self.mol.GetAtoms())
     # endregion properties
+
+    def inchikey_from_rdkit_matches_ccd(self, connectivity_only=False):
+        """
+        checks whether inchikey matches between ccd and rdkit
+
+        Args:
+            connectivity_only (bool): restrict to the first 14 character - the connectivity information.
+
+        Returns:
+            bool: True for match
+        """
+        if self.inchikey is None or self.inchikey_from_rdkit == 'ERROR':
+            return False
+        if connectivity_only:
+            if len(self.inchikey) < 14 or len(self.inchikey_from_rdkit) < 14:
+                return False
+            elif self.inchikey[:14] != self.inchikey_from_rdkit[:14]:
+                return False
+        elif self.inchikey != self.inchikey_from_rdkit:
+            return False
+        return True
+
 
     def compute_2d(self, manager, remove_hs=True):
         """
