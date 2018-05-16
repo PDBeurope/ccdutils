@@ -197,17 +197,18 @@ class Component:
     @property
     def atoms_ids(self):
         """
-        Supplies a list of the atom_ids from _chem_comp_atom.atom_id:
+        Supplies a list of the atom_ids obtained from
+        `_chem_comp_atom.atom_id`, see:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Categories/chem_comp_atom.html
 
         The order will reflect the order in the input PDB-CCD.
 
         The atom_id is also also know as 'atom_name', standard amino
-        acids have main chain atom names `N CA C O`
+        acids have main chain atom names 'N CA C O'
 
         Returns:
-            (:obj:`tuple` of :obj:`str`): atom_id's for the PDB-CCD
+            (:obj:`tuple` of :obj:`str`): `atom_id's` for the PDB-CCD
         """
         return tuple(atom.GetProp('name') for
                      atom in self.mol.GetAtoms())
