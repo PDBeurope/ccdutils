@@ -10,7 +10,7 @@ before_script:
 
 test:
   script:
-  - pytest -cov=pdbeccdutils
+  - pytest --cov=pdbeccdutils
 
   only:
   - refactoring
