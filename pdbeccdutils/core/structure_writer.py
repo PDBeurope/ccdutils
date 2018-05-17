@@ -29,7 +29,9 @@ import pdbeccdutils
 
 
 def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Ideal):
-    """Export molecule in a specified format.
+    """Export molecule in a specified format. Presently supported formats
+    are: PDB CCD CIF (*.cif); Mol file (*.sdf); Chemical Markup language
+    (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml). 
 
     Args:
         path (str): Path to the file. Extension determines format to be
@@ -50,7 +52,7 @@ def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Idea
     elif extension == 'pdb':
         str_representation = to_pdb_str(component, remove_hs, conf_type)
     elif extension in ('mmcif', 'cif'):
-        to_pdb_ccd_cif_file(path, component)
+        to_pdb_ccd_cif_file(path, component, remove_hs)
         return
     elif extension == 'cml':
         str_representation = to_cml_str(component, remove_hs, conf_type)
@@ -210,17 +212,19 @@ def to_xml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
 
 def to_pdb_ccd_cif_file(path, component, remove_hs=True):
-    """Converts structure to the PDB CIF format.
+    """Converts structure to the PDB CIF format. Both model and ideal
+    coordinates are stored. In case ideal coordinates are missing, rdkit
+    attempts to generate 3D coordinates of the conformer.
 
     Args:
+        path (str): Path to save cif file.
         component (pdbeccdutils.core.Component): Component to be
             exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
-            Defaults to ConformerType.Ideal.
     """
     if type(component.ccd_cif_dict) is not dict:
         component.ccd_cif_dict = _to_pdb_ccd_cif_dict(component)
+
     cif_copy = copy.deepcopy(component.ccd_cif_dict)
 
     if remove_hs:
