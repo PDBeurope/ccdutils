@@ -22,6 +22,7 @@ class DepictionSource(IntEnum):
     Pubchem = 1
     Template = 2
     RdKit = 3
+    Failed = 4
 
 
 class ConformerType(IntEnum):
