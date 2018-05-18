@@ -161,8 +161,6 @@ class Component:
         """
         return next((x.value for x in self._descriptors if x.type == 'InChIKey'), '')
 
-
-
     @property
     def inchi(self):
         return next((x.value for x in self._descriptors if x.type == 'InChI'), '')
@@ -197,7 +195,6 @@ class Component:
             else:
                 self._inchikey_from_rdkit = 'ERROR'
         return self._inchikey_from_rdkit
-
 
     @property
     def released(self):
@@ -261,7 +258,6 @@ class Component:
         elif self.inchikey != self.inchikey_from_rdkit:
             return False
         return True
-
 
     def compute_2d(self, manager, remove_hs=True):
         """

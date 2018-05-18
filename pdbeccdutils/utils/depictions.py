@@ -27,29 +27,29 @@ from scipy.spatial import KDTree
 from pdbeccdutils.core import DepictionSource
 
 Mapping = namedtuple('Mapping', 'atom_mapping bond_mapping')
-FlatteningResult = namedtuple('FlatteningResult', 'source template_name mol score')
+DepictionResult = namedtuple('DepictionResult', 'source template_name mol score')
 
 
-class FlatteningManager:
+class DepictionManager:
     """
-    Toolkit for flattening ligand's 3D structure using RDKit.
+    Toolkit for depicting ligand's structure using RDKit.
     One can supply either templates or 2D depictions by pubchem.
     Pubchem templates can be downloaded using PubChemDownloader class.
     """
 
     def __init__(self, generic_templates_path, pubchem_templates_path):
         """
-        Initialize component which does the ligand flattening.
+        Initialize component which does the ligand depiction.
         If Nones is provided as parameters just the defalt RDKit
         functionality is going to be used.
 
         Args:
             generic_templates_path (str): Path to the library with
-                generic templates to be used for flatteninge.
+                generic templates to be used for depicting ligand.
                 e.g. porphyring rings.
             pubchem_templates_path (str): Path to the library with 2D
                 structures downloaded from the Pubchem.
-                Use `pubchem_downloader.py` for this task.
+                Use `setup_pubchem_library_cli.py` for this task.
         """
         generic_templates_path = generic_templates_path or ''
         pubchem_templates_path = pubchem_templates_path or ''
@@ -70,7 +70,7 @@ class FlatteningManager:
 
         Args:
             path (str): path to the model molecule in *.sdf,
-                or *.pdf format
+                or *.pdb format
 
         Raises:
             ValueError: if unsuported format is used: sdf|pdb
@@ -184,36 +184,35 @@ class FlatteningManager:
             self._deanonymization(results[0].mol, mappings)
             return results[0]
         else:
-            return None
+            return DepictionResult(source=DepictionSource.Failed, template_name='', mol=None, score=1000)
 
     def _get_2D_by_rdkit(self, mol):
         """
-        Get the flattening done using solely the default RDKit
-        functionality
+        Get depiction done using solely the default RDKit functionality.
 
         Args:
             mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
 
         Returns:
-            FlatteningResult: Depiction with some usefull metadata
+            DepictionResult: Depiction with some usefull metadata
         """
         try:
             AllChem.GenerateDepictionMatching3DStructure(mol, mol)
-            flaws = FlatteningValidator(mol).flattening_score()
-            return FlatteningResult(source=DepictionSource.RdKit, template_name=None, mol=mol, score=flaws)
+            flaws = DepictionValidator(mol).flattening_score()
+            return DepictionResult(source=DepictionSource.RdKit, template_name=None, mol=mol, score=flaws)
         except Exception:
             return None
 
     def _get_2D_by_pubchem(self, id, mol):
         """
-        Flatten the ligand using Pubchem templates
+        Depict ligand using Pubchem templates.
 
         Args:
             id (str): of molecule to be processed
             mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
 
         Returns:
-            FlatteningResult: Depiction with some usefull metadata
+            DepictionResult: Depiction with some usefull metadata
         """
         try:
             if id in self.pubchem_templates:
@@ -222,8 +221,8 @@ class FlatteningManager:
 
                 if mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(mol, template)
-                    flaws = FlatteningValidator(mol).flattening_score()
-                    return FlatteningResult(source=DepictionSource.Pubchem, template_name=id, mol=mol, score=flaws)
+                    flaws = DepictionValidator(mol).flattening_score()
+                    return DepictionResult(source=DepictionSource.Pubchem, template_name=id, mol=mol, score=flaws)
         except Exception:
             pass
 
@@ -246,16 +245,16 @@ class FlatteningManager:
                 temp_mol = Chem.RWMol(mol)
                 if temp_mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
-                    flaws = FlatteningValidator(temp_mol).flattening_score()
-                    results.append(FlatteningResult(source=DepictionSource.Template,
-                                                    template_name=key, mol=temp_mol, score=flaws))
+                    flaws = DepictionValidator(temp_mol).flattening_score()
+                    results.append(DepictionResult(source=DepictionSource.Template,
+                                                   template_name=key, mol=temp_mol, score=flaws))
         except Exception:
             pass  # if it fails it fails, but genuinelly it wont
 
         return results
 
 
-class FlatteningValidator:
+class DepictionValidator:
     """
     Toolkit for estimation of flattening quality
     """
