@@ -31,7 +31,7 @@ import pdbeccdutils
 def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Ideal):
     """Export molecule in a specified format. Presently supported formats
     are: PDB CCD CIF (*.cif); Mol file (*.sdf); Chemical Markup language
-    (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml). 
+    (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml).
 
     Args:
         path (str): Path to the file. Extension determines format to be
@@ -99,7 +99,8 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
     pdb_title = 'TITLE     {} coordinates'.format(conf_type.name)
     pdb_title += ' for PDB CCD {}\n'.format(component.id)
-    pdb_title += 'AUTHOR    pdbccdutils using RDKit {}\n'.format(rdkit.__version__)
+    pdb_title += 'AUTHOR    pdbccdutils {}\n'.format(pdbeccdutils.__version__)
+    pdb_title += 'AUTHOR    RDKit {}\n'.format(rdkit.__version__)
     pdb_string = pdb_title + Chem.MolToPDBBlock(mol_to_save, conf_id)
 
     return pdb_string
@@ -344,8 +345,7 @@ def _prepate_structure(component, remove_hs, conf_type):
     mol_to_save = component._2dmol if conf_type == ConformerType.Depiction else component.mol
 
     if remove_hs:
-        mol_to_save = Chem.RemoveHs(mol_to_save, sanitize=False)
-        Chem.SanitizeMol(mol_to_save, catchErrors=True)
+        mol_to_save = component.mol_no_h
 
     return (mol_to_save, conf_id, conf_type)
 
