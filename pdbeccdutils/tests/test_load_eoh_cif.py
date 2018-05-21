@@ -5,6 +5,8 @@ import pytest
 from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core import ReleaseStatus
+from pdbeccdutils.core import structure_writer
+from pdbeccdutils.core import ConformerType
 
 
 class TestLoadEOH:
@@ -75,3 +77,33 @@ class TestLoadEOH:
     @staticmethod
     def test_inchikeys_from_rdkit_and_ccd_match(component_eoh):
         assert component_eoh.inchikey == component_eoh.inchikey_from_rdkit
+
+    @staticmethod
+    def test_to_sdf_string_ideal_no_h(component_eoh):
+        sdf_string = structure_writer.to_sdf_str(component_eoh)
+        # there should be two carbons and no hydrogen atoms:
+        assert sdf_string.count(' C ') == 2
+        assert sdf_string.count(' O ') == 1
+        assert sdf_string.count(' H ') == 0
+        # check x and y coordinates of the Oxygen
+        assert '1.130' in sdf_string
+        assert '0.315' in sdf_string
+
+    @staticmethod
+    def test_to_sdf_string_ideal_with_h(component_eoh):
+        sdf_string = structure_writer.to_sdf_str(component_eoh, remove_hs=False)
+        # six hydrogen atoms:
+        assert sdf_string.count(' H ') == 6
+        # check z coordinate of the first hydrogen atom
+        assert '0.890' in sdf_string
+
+    @staticmethod
+    def test_to_sdf_string_model_no_h(component_eoh):
+        sdf_string = structure_writer.to_sdf_str(component_eoh, conf_type=ConformerType.Model)
+        # there should be two carbons and no hydrogen atoms:
+        assert sdf_string.count(' C ') == 2
+        assert sdf_string.count(' O ') == 1
+        assert sdf_string.count(' H ') == 0
+        # check x and y coordinates of the Oxygen
+        assert '15.861' in sdf_string
+        assert '8.256' in sdf_string
