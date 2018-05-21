@@ -97,8 +97,9 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
             info.SetName(atom_name)
         atom.SetMonomerInfo(info)
 
-    pdb_title = 'TITLE     {} coordinates'.format(conf_type.name)
-    pdb_title += ' for PDB CCD {}\n'.format(component.id)
+    pdb_title = 'HEADER    {} coordinates'.format(conf_type.name)
+    pdb_title += ' for PDB-CCD {}\n'.format(component.id)
+    pdb_title += 'COMPND    {}\n'.format(component.id)
     pdb_title += 'AUTHOR    pdbccdutils {}\n'.format(pdbeccdutils.__version__)
     pdb_title += 'AUTHOR    RDKit {}\n'.format(rdkit.__version__)
     pdb_string = pdb_title + Chem.MolToPDBBlock(mol_to_save, conf_id)
@@ -337,10 +338,9 @@ def _prepate_structure(component, remove_hs, conf_type):
     conf_id = -1
     if component.has_degenerated_conformer(conf_type):
         if component.compute_3d():
-            conf_id = component.conformers_mapping[ConformerType.Computed]
             conf_type = ConformerType.Computed
-    else:
-        conf_id = component.conformers_mapping[conf_type]
+
+    conf_id = component.conformers_mapping[conf_type]
 
     mol_to_save = component._2dmol if conf_type == ConformerType.Depiction else component.mol
 
