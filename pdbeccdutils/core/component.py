@@ -302,6 +302,11 @@ class Component:
         """
         drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
 
+        if self._2dmol is None:
+            self._draw_molecule(drawer, file_name, width)
+
+            return
+
         if names:
             options = drawer.drawOptions()
             for atom in self._2dmol.GetAtoms():
