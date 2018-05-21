@@ -10,7 +10,7 @@ import os
 import pytest
 import shutil
 
-from pdbeccdutils.scripts.process_components_cif_cli import create_parser, process_components_cif
+from pdbeccdutils.scripts.process_components_cif_cli import create_parser, pdbechem_pipeline
 from pdbeccdutils.tests.tst_utilities import test_cut_down_components_cif, \
     file_name_in_tsts_out, cif_filename
 
@@ -36,7 +36,7 @@ class TestCommandLineArgs(object):
         parser = create_parser()
         args = parser.parse_args(['/////impossible_to_open_file', '--debug'])
         with pytest.raises(SystemExit):
-            process_components_cif(args)
+            pdbechem_pipeline(args)
 
 
 @pytest.mark.skip(reason='Not yet implemented in this branch')  # TODO implement osmart 14 May 2018
@@ -51,7 +51,7 @@ class TestRegressionTest(object):
             shutil.rmtree(test_output_dir)
         parser = create_parser()
         args = parser.parse_args([cif_file, '-o', test_output_dir])
-        process_components_cif(args)
+        pdbechem_pipeline(args)
         assert os.path.isdir(test_output_dir), \
             'output directory  {} must be created'.format(test_output_dir)
 
@@ -80,7 +80,7 @@ class TestCutDownComponentsCif(object):
         if os.path.isdir(output_dir):
             shutil.rmtree(output_dir)
         args = parser.parse_args([test_components_cif, '-o', output_dir])
-        process_components_cif(args)
+        pdbechem_pipeline(args)
         return output_dir
 
     @staticmethod
