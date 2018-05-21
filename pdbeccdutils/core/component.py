@@ -261,12 +261,12 @@ class Component:
 
     def compute_2d(self, manager, remove_hs=True):
         """
-        Compute 2d depiction of the component using flattening manager
+        Compute 2d depiction of the component using DepictionManager
         instance
 
         Args:
-            manager (pdbeccdutils.utils.FlatteningManager):
-                Instance of the flattening class.
+            manager (pdbeccdutils.utils.DepictionManager):
+                Instance of the ligand depiction class.
             remove_hs (bool, optional): Defaults to True. Remove
                 hydrogens prior to depiction.
 
@@ -277,7 +277,7 @@ class Component:
         if remove_hs:
             mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
             Chem.SanitizeMol(mol_copy, catchErrors=True)
-        result_log = manager.flaten_molecule(self._id, mol_copy)
+        result_log = manager.depict_molecule(self._id, mol_copy)
 
         if result_log is not None:
             # add conformer

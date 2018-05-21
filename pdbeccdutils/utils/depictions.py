@@ -143,7 +143,7 @@ class DepictionManager:
 
         AllChem.TransformMol(mol, matrix)
 
-    def flaten_molecule(self, id, mol):
+    def depict_molecule(self, id, mol):
         """
         Given input molecule tries to generate its depictions.
 
@@ -154,11 +154,11 @@ class DepictionManager:
 
         Arguments:
             id (str): id of the ligand
-            mol (Chem.rdchem.Mol): molecule to be flattened
+            mol (Chem.rdchem.Mol): molecule to be depicted
 
         Returns:
-            FlatteningResult: Information about flattened ligand or
-            None if the flattening failed.
+            pdbeccdutils.utils.DepictionResult: Summary of the ligand
+                depiction process.
         """
         temp_mol = Chem.RWMol(mol)
         mappings = self._anonymization(temp_mol)
@@ -198,7 +198,7 @@ class DepictionManager:
         """
         try:
             AllChem.GenerateDepictionMatching3DStructure(mol, mol)
-            flaws = DepictionValidator(mol).flattening_score()
+            flaws = DepictionValidator(mol).depiction_score()
             return DepictionResult(source=DepictionSource.RdKit, template_name=None, mol=mol, score=flaws)
         except Exception:
             return None
@@ -221,7 +221,7 @@ class DepictionManager:
 
                 if mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(mol, template)
-                    flaws = DepictionValidator(mol).flattening_score()
+                    flaws = DepictionValidator(mol).depiction_score()
                     return DepictionResult(source=DepictionSource.Pubchem, template_name=id, mol=mol, score=flaws)
         except Exception:
             pass
@@ -230,14 +230,14 @@ class DepictionManager:
 
     def _get_2D_by_template(self, mol):
         """
-        Flatten the ligand using user-provided templates
+        Depict ligand using user-provided templates
 
         Args:
             mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
 
         Returns:
-            list(FlatteningResult): Depictions along with their
-            quality and metadata
+            list of pdbecccdutils.DepictionResult: Depictions with their
+            quality and metadata.
         """
         results = list()
         try:
@@ -245,7 +245,7 @@ class DepictionManager:
                 temp_mol = Chem.RWMol(mol)
                 if temp_mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
-                    flaws = DepictionValidator(temp_mol).flattening_score()
+                    flaws = DepictionValidator(temp_mol).depiction_score()
                     results.append(DepictionResult(source=DepictionSource.Template,
                                                    template_name=key, mol=temp_mol, score=flaws))
         except Exception:
@@ -256,7 +256,7 @@ class DepictionManager:
 
 class DepictionValidator:
     """
-    Toolkit for estimation of flattening quality
+    Toolkit for estimation of depiction quality
     """
 
     def __init__(self, mol):
@@ -340,7 +340,7 @@ class DepictionValidator:
     def count_suboptimal_atom_positions(self, lowerBound, upperBound):
         """
         Detects whether the structure has a pair or atoms in the range
-        <lowerBound, upperBound> meaning that the flattening could
+        <lowerBound, upperBound> meaning that the depiction could
         be improved.
 
         Arguments:
@@ -391,9 +391,9 @@ class DepictionValidator:
         """
         return self.count_bond_collisions() > 0
 
-    def flattening_score(self):
+    def depiction_score(self):
         """
-        Calculate quality of the flattening. The higher the worse.
+        Calculate quality of the ligand depiction. The higher the worse.
         Ideally that should be 0.
 
         Returns:
