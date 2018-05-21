@@ -171,13 +171,13 @@ class Component:
         provides the InChI worked out by rkdit
 
         Returns:
-            str: the InChI or 'ERROR' if there was an error finding it.
+            str: the InChI or emptry '' if there was an error finding it.
         """
         if self._inchi_from_rdkit is None:
             try:
                 self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.mol)
             except ValueError:
-                self._inchi_from_rdkit = 'ERROR'
+                self._inchi_from_rdkit = ''
         return self._inchi_from_rdkit
 
     @property
@@ -186,14 +186,16 @@ class Component:
         provides the InChIKey worked out by rdkit
 
         Returns:
-            str: the InChIKey or 'ERROR' if there was an error finding it.
+            str: the InChIKey or '' if there was an error finding it.
         """
         if self._inchikey_from_rdkit is None:
             inchi = self.inchi_from_rdkit
             if inchi != 'ERROR':
                 self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
             else:
-                self._inchikey_from_rdkit = 'ERROR'
+                self._inchikey_from_rdkit = ''
+            if self._inchikey_from_rdkit is None:
+                self._inchikey_from_rdkit = ''
         return self._inchikey_from_rdkit
 
     @property
