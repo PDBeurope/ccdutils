@@ -16,16 +16,17 @@
 # under the License.
 
 import copy
+import math
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
 from collections import OrderedDict
+from xml.dom import minidom
 
 import mmCif.mmcifIO as mmcif
-from rdkit import Chem, rdBase
 import rdkit
+from rdkit import Chem, rdBase
 
-from pdbeccdutils.core import Component, ConformerType, ReleaseStatus
 import pdbeccdutils
+from pdbeccdutils.core import Component, ConformerType, ReleaseStatus
 
 
 def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Ideal):
@@ -103,7 +104,14 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     pdb_title += 'COMPND    {}\n'.format(component.id)
     pdb_title += 'AUTHOR    pdbccdutils {}\n'.format(pdbeccdutils.__version__)
     pdb_title += 'AUTHOR    RDKit {}\n'.format(rdkit.__version__)
-    pdb_string = pdb_title + Chem.MolToPDBBlock(mol_to_save, conf_id)
+    pdb_body = ''
+
+    try:
+        pdb_body = Chem.MolToPDBBlock(mol_to_save, conf_id)
+    except Exception:
+        pdb_body = _to_pdb_str_fallback(mol_to_save, conf_id, info)
+
+    pdb_string = pdb_title + pdb_body
 
     return pdb_string
 
@@ -124,7 +132,13 @@ def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     """
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
 
-    return Chem.MolToMolBlock(mol_to_save, confId=conf_id)
+    mol_block = ''
+    try:
+        mol_block = Chem.MolToMolBlock(mol_to_save, confId=conf_id)
+    except Exception:
+        mol_block = _to_sdf_str_fallback(mol_to_save, conf_id)
+
+    return mol_block
 
 
 def to_xyz_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
@@ -661,3 +675,76 @@ def _get_atom_coord(component, at_id, conformer_type):
     conf_id = component.conformers_mapping[conformer_type]
 
     return component.mol.GetConformer(conf_id).GetAtomPosition(at_id)
+
+# region fallbacks
+
+
+def _to_sdf_str_fallback(component, conf_id):
+    rdkit_conformer = component.mol.GetConformer(conf_id)
+
+    return ''
+
+
+def _to_pdb_str_fallback(mol, conf_id, info):
+    """Fallback method to generate PDB file in case the default one in 
+    RDKit fails
+
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): Molecule to be writter.
+        conf_id (int): conformer id to be writen. 
+        info (rdkit.Chem.rdchem.AtomPDBResidueInfo): atom metadata.
+
+    Returns:
+        str: String representation the component in the PDB format.
+    """
+    conformer_ids = []
+    content = []
+
+    if conf_id == -1:
+        conformer_ids = [c.GetId() for c in mol.GetConformers()]
+    else:
+        conformer_ids = [conf_id]
+
+    for m in conformer_ids:
+        rdkit_conformer = mol.GetConformer(m)
+        content.append('MODEL {:>4}'.format(m))
+
+        for i in range(0, mol.GetNumAtoms()):
+            atom = mol.GetAtomWithIdx(i)
+            s = '{:<6}{:>5} {:<4} {:<3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}'\
+                .format('HETATM' if info.GetIsHeteroAtom() else 'ATOM',
+                        i + 1,
+                        _get_atom_name(atom),
+                        info.GetResidueName(),
+                        info.GetChainId(),
+                        info.GetResidueNumber(),
+                        ' ',
+                        rdkit_conformer.GetAtomPosition(i).x,
+                        rdkit_conformer.GetAtomPosition(i).y,
+                        rdkit_conformer.GetAtomPosition(i).z,
+                        info.GetOccupancy(),
+                        info.GetTempFactor(),
+                        atom.GetSymbol(),
+                        atom.GetFormalCharge())
+            content.append(s)
+
+        for i in range(0, mol.GetNumAtoms()):
+            pivot = mol.GetAtomWithIdx(i)
+            s = 'CONECT{:>5}'.format(i + 1)
+
+            for b in pivot.GetBonds():
+                end_atom = b.GetOtherAtomIdx(i)
+
+                if end_atom < i:
+                    continue
+
+                for t in range(0, math.floor(b.GetBondTypeAsDouble())):
+                    s += '{:>5}'.format(end_atom + 1)
+
+            if len(s) > 11:
+                content.append(s)
+
+        content.append('ENDMDL')
+
+    return "\n".join(content)
+# endregion fallbacks
