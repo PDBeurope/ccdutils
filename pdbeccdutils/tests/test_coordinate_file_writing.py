@@ -39,8 +39,10 @@ class TestSDF:
                                                         conf_type=conf_type,
                                                         remove_hs=remove_hs)
                 else:
-                    structure_writer.write_molecule(path=sdf_file, component=component,
-                                                remove_hs=False)
+                    structure_writer.write_molecule(path=sdf_file,
+                                                    component=component,
+                                                    conf_type=conf_type,
+                                                    remove_hs=remove_hs)
                     assert os.path.isfile(sdf_file)
                     assert os.path.getsize(sdf_file) > 0
 
