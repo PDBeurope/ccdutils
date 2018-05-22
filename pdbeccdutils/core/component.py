@@ -60,7 +60,8 @@ class Component:
         self._inchikey_from_rdkit = None
 
         self.conformers_mapping = \
-            {ConformerType.Ideal: 0,
+            {ConformerType.AllConformers: - 1,
+             ConformerType.Ideal: 0,
              ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
              ConformerType.Computed: 2000}
 
@@ -301,6 +302,11 @@ class Component:
                 not set, element symbol is used instead.
         """
         drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
+
+        if self._2dmol is None:
+            self._draw_molecule(drawer, file_name, width)
+
+            return
 
         if names:
             options = drawer.drawOptions()
