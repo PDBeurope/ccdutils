@@ -33,7 +33,7 @@ class TestSDF:
                 if os.path.isfile(sdf_file):
                     os.remove(sdf_file)
                 if component.id in ('10R', 'UNL'): # known problem codes.
-                    with pytest.raises(ValueError):
+                    with pytest.raises(Exception):
                         structure_writer.write_molecule(path=sdf_file,
                                                         component=component,
                                                         conf_type=conf_type,
