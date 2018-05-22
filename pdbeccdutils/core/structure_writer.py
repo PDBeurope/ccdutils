@@ -32,6 +32,7 @@ def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Idea
     """Export molecule in a specified format. Presently supported formats
     are: PDB CCD CIF (*.cif); Mol file (*.sdf); Chemical Markup language
     (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml).
+    ConformerType.AllConformers is presently supported only for PDB.
 
     Args:
         path (str): Path to the file. Extension determines format to be
@@ -68,7 +69,7 @@ def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Idea
 
 
 def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
-    """Converts structure to the SDF format.
+    """Converts structure to the PDB format.
 
     Args:
         component (pdbeccdutils.core.Component): Component to be
@@ -108,7 +109,8 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
 
 def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
-    """Converts structure to the SDF format.
+    """Converts structure to the SDF format. Does not yet support
+    ConformerType.AllConformers.
 
     Args:
         component (pdbeccdutils.core.Component): Component to be
@@ -126,7 +128,8 @@ def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
 
 def to_xyz_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
-    """Converts structure to the XYZ format.
+    """Converts structure to the XYZ format. Does not yet support
+    ConformerType.AllConformers.
 
     Args:
         component (pdbeccdutils.core.Component): Component to be
@@ -321,8 +324,8 @@ def to_cml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
 def _prepate_structure(component, remove_hs, conf_type):
     """Prepare structure for export based on parameters. If deemed
-    conformation is missing, it is computed.
-    TODO: handling AllConformers, 2D depiction
+    conformation is missing, an exception is thrown.
+    TODO: handling AllConformers for other than PDB formats.
 
     Args:
         component (pdbeccdutils.core.Component): Component to be
@@ -335,13 +338,7 @@ def _prepate_structure(component, remove_hs, conf_type):
         tuple(rdkit.Mol,int,ConformerType): mol along with properties
         to be exported.
     """
-    conf_id = -1
-    if component.has_degenerated_conformer(conf_type):
-        if component.compute_3d():
-            conf_type = ConformerType.Computed
-
     conf_id = component.conformers_mapping[conf_type]
-
     mol_to_save = component._2dmol if conf_type == ConformerType.Depiction else component.mol
 
     if remove_hs:
