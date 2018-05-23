@@ -1,0 +1,2 @@
+include pdbeccdutils/data/generic_templates/*
+include pdbeccdutils/fragment_library.tsv
