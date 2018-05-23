@@ -25,6 +25,7 @@ from rdkit.Geometry import Point2D
 from scipy.spatial import KDTree
 
 from pdbeccdutils.core import DepictionSource
+from pdbeccdutils.utils import config
 
 Mapping = namedtuple('Mapping', 'atom_mapping bond_mapping')
 DepictionResult = namedtuple('DepictionResult', 'source template_name mol score')
@@ -34,25 +35,28 @@ class DepictionManager:
     """
     Toolkit for depicting ligand's structure using RDKit.
     One can supply either templates or 2D depictions by pubchem.
-    Pubchem templates can be downloaded using PubChemDownloader class.
+    PubCshem templates can be downloaded using PubChemDownloader class.
     """
 
-    def __init__(self, general_templates_path, pubchem_templates_path):
+    def __init__(self, pubchem_templates_path='', general_templates_path=config.general_templates):
         """
         Initialize component which does the ligand depiction.
         If Nones is provided as parameters just the defalt RDKit
         functionality is going to be used.
 
         Args:
-            general_templates_path (str): Path to the library with
-                general templates to be used for depicting ligand.
-                e.g. porphyring rings.
-            pubchem_templates_path (str): Path to the library with 2D
-                structures downloaded from the Pubchem.
-                Use `setup_pubchem_library_cli.py` for this task.
+            pubchem_templates_path (str, optional): Defaults to ''. 
+                Path to the library with 2D structures downloaded from 
+                PubChem. Use `setup_pubchem_library` for this task.                
+            general_templates_path (str, optional): Defaults to 
+                config.general_templates (supplied with the pdbeccdutils).
+                Path to the library with general templates to be used
+                for depicting ligand e.g. porphyring rings.
+
         """
-        general_templates_path = general_templates_path or ''
-        pubchem_templates_path = pubchem_templates_path or ''
+
+        self.pubchem_templates = []
+        self.substructures = []
 
         if os.path.isdir(general_templates_path):
             self.substructures = {k.split('.')[0]:
@@ -167,8 +171,8 @@ class DepictionManager:
         rdkitMol = Chem.RWMol(temp_mol).GetMol()
         results = []
 
-        pubchem_res = self._get_2D_by_pubchem(id, pubchemMol)
-        template_res = self._get_2D_by_template(templateMol)
+        pubchem_res = self._get_2D_by_pubchem(id, pubchemMol) if not self.pubchem_templates else None
+        template_res = self._get_2D_by_template(templateMol) if not self.substructures else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
         if pubchem_res is not None:
