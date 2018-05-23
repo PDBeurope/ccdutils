@@ -42,13 +42,14 @@ class Component:
     functionality and handling possible erroneous situations.
 
     Returns:
-        pdbeccdutils.utils.Component: instance object
+        pdbeccdutils.core.Component: instance object
     """
 
     def __init__(self, mol, ccd_cif_dict=None, properties=None, descriptors=None):
 
         self.mol = mol
         self.ccd_cif_dict = ccd_cif_dict
+        self.fragments = {}
         self._2dmol = None
         self._id = ''
         self._name = ''
@@ -417,6 +418,30 @@ class Component:
             result.append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx), m)))
 
         return result
+
+    def library_search(self, fragment_library):
+        """Identify fragments from the fragment library in this component
+
+        Args:
+            fragment_library (pdbeccdutils.core.FragmentLibrary):
+                Fragment library.
+
+        Returns:
+            int: number of matches found
+        """
+
+        matches_found = 0
+        for k, v in fragment_library.library.items():
+            try:
+                matches = self.mol.GetSubstructMatches(v)
+                matches_found += len(matches)
+
+                if len(matches) > 0:
+                    self.fragments[k] = matches
+            except Exception:
+                pass
+
+        return matches
 
     def _fix_molecule(self, rwmol):
         """
