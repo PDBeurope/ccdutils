@@ -19,6 +19,7 @@ import csv
 import os
 
 from rdkit import Chem
+from rdkit import rdBase
 from rdkit.Chem import AllChem
 
 from pdbeccdutils.utils import config
@@ -34,7 +35,7 @@ class FragmentLibrary:
     """
 
     def __init__(self, path=config.fragment_library, header=True, delimiter='\t', quotechar='"'):
-        self.name = os.path.splitext(path)[0]
+        self.name = os.path.basename(path).split('.')[0]
         self.library = self._read_in_library(path, header, delimiter, quotechar)
 
     def _read_in_library(self, path, header, delimiter, quotechar):
@@ -46,6 +47,7 @@ class FragmentLibrary:
             delimiter (str): Delimiter symbol.
             quotechar (str): Quotechar symbol.
         """
+        rdBase.DisableLog('rdApp.*')
         library = {}
         depiction_manager = DepictionManager()
 
@@ -67,6 +69,7 @@ class FragmentLibrary:
                 mol = _depict_fragment(row[0], mol, depiction_manager)
 
                 library[row[0]] = mol
+        rdBase.EnableLog('rdApp.*')
         return library
 
     def to_image(self, path):

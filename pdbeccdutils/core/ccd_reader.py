@@ -123,7 +123,7 @@ def _parse_pdb_mmcif(cif_dict):
     descriptors += _parse_pdb_descriptors(identifiers_dict, 'identifier')
     properties = _parse_pdb_properties(properties_dict)
 
-    comp = Component(mol.GetMol(),  cif_dict, properties, descriptors)
+    comp = Component(mol.GetMol(), cif_dict, properties, descriptors)
     reader_result = CCDReaderResult(warnings=warnings, errors=errors, component=comp)
 
     return reader_result

@@ -441,7 +441,7 @@ class Component:
             except Exception:
                 pass
 
-        return matches
+        return matches_found
 
     def _fix_molecule(self, rwmol):
         """
