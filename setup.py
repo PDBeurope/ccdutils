@@ -8,9 +8,10 @@ setup(name='pdbeccdutils',
       author_email='pdbehelp@ebi.ac.uk',
       license='Apache License 2.0.',
       packages=['pdbeccdutils'],
-      scripts=['bin/create_2d_images.py',
+      scripts=['bin/setup_pubchem_library_cli',
                'bin/process_components_cif'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme', 'pytest']
+      install_requires=['Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme'],
+      tests_require=['pytest']
       )
