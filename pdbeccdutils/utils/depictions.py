@@ -172,7 +172,7 @@ class DepictionManager:
         results = []
 
         pubchem_res = self._get_2D_by_pubchem(id, pubchemMol) if not self.pubchem_templates else None
-        template_res = self._get_2D_by_template(templateMol) if not self.substructures else []
+        template_res = self._get_2D_by_template(templateMol) if self.substructures else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
         if pubchem_res is not None:
