@@ -37,27 +37,27 @@ class DepictionManager:
     Pubchem templates can be downloaded using PubChemDownloader class.
     """
 
-    def __init__(self, generic_templates_path, pubchem_templates_path):
+    def __init__(self, general_templates_path, pubchem_templates_path):
         """
         Initialize component which does the ligand depiction.
         If Nones is provided as parameters just the defalt RDKit
         functionality is going to be used.
 
         Args:
-            generic_templates_path (str): Path to the library with
-                generic templates to be used for depicting ligand.
+            general_templates_path (str): Path to the library with
+                general templates to be used for depicting ligand.
                 e.g. porphyring rings.
             pubchem_templates_path (str): Path to the library with 2D
                 structures downloaded from the Pubchem.
                 Use `setup_pubchem_library_cli.py` for this task.
         """
-        generic_templates_path = generic_templates_path or ''
+        general_templates_path = general_templates_path or ''
         pubchem_templates_path = pubchem_templates_path or ''
 
-        if os.path.isdir(generic_templates_path):
+        if os.path.isdir(general_templates_path):
             self.substructures = {k.split('.')[0]:
-                                  self._load_template(os.path.join(generic_templates_path, k))
-                                  for k in os.listdir(generic_templates_path)}
+                                  self._load_template(os.path.join(general_templates_path, k))
+                                  for k in os.listdir(general_templates_path)}
 
         if os.path.isdir(pubchem_templates_path):
             self.pubchem_templates = {k.split('.')[0]:
@@ -149,7 +149,7 @@ class DepictionManager:
 
         Presently 3 methods are used:
                 Pubchem template - find 2d depiction in pubchem db
-                User-provided templates - try to use generic templates
+                User-provided templates - try to use general templates
                 From 3D conformer - just apply default RDKit functionality
 
         Arguments:
