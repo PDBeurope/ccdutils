@@ -117,8 +117,7 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
 
 def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
-    """Converts structure to the SDF format. Does not yet support
-    ConformerType.AllConformers.
+    """Converts structure to the SDF format.
 
     Args:
         component (pdbeccdutils.core.Component): Component to be
@@ -132,13 +131,27 @@ def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     """
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
 
-    mol_block = ''
-    try:
-        mol_block = Chem.MolToMolBlock(mol_to_save, confId=conf_id)
-    except Exception:
-        mol_block = _to_sdf_str_fallback(mol_to_save, conf_id)
+    mol_block = []
+    mappings = []
+    if conf_type == ConformerType.AllConformers:
+        mappings = [ConformerType.Model, ConformerType.Ideal, ConformerType.Computed]
+    else:
+        mappings = [conf_type]
 
-    return mol_block
+    try:
+        for conf in mappings:
+            try:
+                s = '{} - {} conformer'.format(component.id, conf.name)
+                s += Chem.MolToMolBlock(mol_to_save, confId=component.conformers_mapping[conf])
+                s += '$$$$'
+                mol_block.append(s)
+            except ValueError:
+                pass
+    except Exception:
+        mappings = {m.name: component.conformers_mapping[m] for m in mappings}
+        mol_block = _to_sdf_str_fallback(mol_to_save, component.id, mappings)
+
+    return "\n".join(mol_block)
 
 
 def to_xyz_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
@@ -339,7 +352,7 @@ def to_cml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 def _prepate_structure(component, remove_hs, conf_type):
     """Prepare structure for export based on parameters. If deemed
     conformation is missing, an exception is thrown.
-    TODO: handling AllConformers for other than PDB formats.
+    TODO: handling AllConformers for other than PDB, SDF formats.
 
     Args:
         component (pdbeccdutils.core.Component): Component to be
@@ -601,9 +614,9 @@ def _get_ccd_cif_bond_stereo(bond):
 
     stereo = bond.GetStereo()
 
-    if bond.GetStereo() == Chem.rdchem.BondStereo.STEREOE:
+    if bond.GetStereo() in (Chem.rdchem.BondStereo.STEREOE, Chem.rdchem.BondStereo.STEREOCIS):
         return 'E'
-    elif bond.GetStereo() == Chem.rdchem.BondStereo.STEREOZ:
+    elif bond.GetStereo() in (Chem.rdchem.BondStereo.STEREOZ, Chem.rdchem.BondStereo.STEREOTRANS):
         return 'Z'
     else:
         return 'N'
@@ -679,19 +692,61 @@ def _get_atom_coord(component, at_id, conformer_type):
 # region fallbacks
 
 
-def _to_sdf_str_fallback(component, conf_id):
-    rdkit_conformer = component.mol.GetConformer(conf_id)
+def _to_sdf_str_fallback(mol, id, mappings):
+    """Fallback method to generate SDF file in case the default one in
+    RDKit fails.
 
-    return ''
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): rdkit mol to be exported
+        id (str): component id.
+        mappings (dict of str): Deemed mappings to be exported
+
+    Returns:
+        list of str: SDF representation of the component
+    """
+    content = []
+
+    for k, v in mappings.items():
+        try:
+            rdkit_conformer = mol.GetConformer(v)
+        except ValueError:
+            continue
+
+        atom_count = mol.GetNumAtoms()
+        bond_count = mol.GetNumBonds()
+
+        content.append('{} - {} conformer\n    RDKit   3D\n'.format(id, k))
+        content.append('{:>3}{:3}  0  0  0  0  0  0  0  0999 V2000'.format(atom_count, bond_count))
+
+        for i in range(0, atom_count):
+            content.append('{:>10.4f}{:>10.4f}{:>10.4f} {:<3} 0{:>3}'.format(
+                rdkit_conformer.GetAtomPosition(i).x,
+                rdkit_conformer.GetAtomPosition(i).y,
+                rdkit_conformer.GetAtomPosition(i).z,
+                mol.GetAtomWithIdx(i).GetSymbol(),
+                _charge_to_sdf(mol.GetAtomWithIdx(i).GetFormalCharge()),
+            ))
+
+        for i in range(0, bond_count):
+            bond = mol.GetBondWithIdx(i)
+            content.append('{:>3}{:>3}{:>3}{:>3}  0  0  0'.format(
+                bond.GetBeginAtom().GetIdx() + 1,
+                bond.GetEndAtom().GetIdx() + 1,
+                _bond_type_to_sdf(bond),
+                _bond_stereo_to_sdf(bond)
+            ))
+        content.append('M  END')
+        content.append('$$$$')
+    return content
 
 
 def _to_pdb_str_fallback(mol, conf_id, info):
-    """Fallback method to generate PDB file in case the default one in 
-    RDKit fails
+    """Fallback method to generate PDB file in case the default one in
+    RDKit fails.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule to be writter.
-        conf_id (int): conformer id to be writen. 
+        conf_id (int): conformer id to be writen.
         info (rdkit.Chem.rdchem.AtomPDBResidueInfo): atom metadata.
 
     Returns:
@@ -747,4 +802,79 @@ def _to_pdb_str_fallback(mol, conf_id, info):
         content.append('ENDMDL')
 
     return "\n".join(content)
+
+
+def _charge_to_sdf(charge):
+    """Translate RDkit charge to the SDF language.
+
+    Args:
+        charge (int): Numerical atom charge.
+
+    Returns:
+        str: Str representation of a charge in the sdf language
+    """
+    if charge == -3:
+        return "7"
+    elif charge == -2:
+        return "6"
+    elif charge == -1:
+        return "5"
+    elif charge == 0:
+        return "0"
+    elif charge == 1:
+        return "+1"
+    elif charge == 2:
+        return "+2"
+    elif charge == 3:
+        return "+4"
+    else:
+        return "0"
+
+
+def _bond_stereo_to_sdf(bond):
+    """Translate bond stereo information to the sdf language. Needs to
+    be checked.
+
+    Args:
+        bond (rdkit.Chem.rdchem.Bond): bond to be processed.
+
+    Returns:
+        str: bond type in sdf language.
+    """
+    stereo = bond.GetStereo()
+
+    if stereo == Chem.rdchem.BondStereo.STEREONONE:
+        return '0'
+    elif stereo == Chem.rdchem.BondStereo.STEREOANY:
+        return '4'
+    elif stereo in (Chem.rdchem.BondStereo.STEREOCIS, Chem.rdchem.BondStereo.STEREOTRANS):
+        return '3'
+    else:
+        return '0'
+
+
+def _bond_type_to_sdf(bond):
+    """Get bond type in sdf language. Based on:
+    http://www.nonlinear.com/progenesis/sdf-studio/v0.9/faq/sdf-file-format-guidance.aspx
+
+    Args:
+        bond_type (rdkit.Chem.rdchem.Bond): Bond to be processed
+
+    Returns:
+        str: String representation of the bond type.
+    """
+    bond_order = bond.GetBondType()
+
+    if bond_order == Chem.rdchem.BondType.SINGLE:
+        return '1'
+    elif bond_order == Chem.rdchem.BondType.DOUBLE:
+        return '2'
+    elif bond_order == Chem.rdchem.BondType.TRIPLE:
+        return '3'
+    elif bond_order == Chem.rdchem.BondType.AROMATIC:
+        return 'A'
+    else:
+        return '0'
+
+
 # endregion fallbacks
