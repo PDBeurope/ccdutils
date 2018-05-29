@@ -45,10 +45,10 @@ class DepictionManager:
         functionality is going to be used.
 
         Args:
-            pubchem_templates_path (str, optional): Defaults to ''. 
-                Path to the library with 2D structures downloaded from 
-                PubChem. Use `setup_pubchem_library` for this task.                
-            general_templates_path (str, optional): Defaults to 
+            pubchem_templates_path (str, optional): Defaults to ''.
+                Path to the library with 2D structures downloaded from
+                PubChem. Use `setup_pubchem_library` for this task.
+            general_templates_path (str, optional): Defaults to
                 config.general_templates (supplied with the pdbeccdutils).
                 Path to the library with general templates to be used
                 for depicting ligand e.g. porphyring rings.
@@ -171,7 +171,7 @@ class DepictionManager:
         rdkitMol = Chem.RWMol(temp_mol).GetMol()
         results = []
 
-        pubchem_res = self._get_2D_by_pubchem(id, pubchemMol) if not self.pubchem_templates else None
+        pubchem_res = self._get_2D_by_pubchem(id, pubchemMol) if self.pubchem_templates else None
         template_res = self._get_2D_by_template(templateMol) if self.substructures else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
