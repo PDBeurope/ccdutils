@@ -24,8 +24,8 @@
   commands similar to:
 
   ```
-  conda create -c rdkit -n my-rdkit-env rdkit python=3
-  source activate my-rdkit-env
+  conda create -c rdkit -n rdkit-env rdkit python=3
+  source activate rdkit-env
   ```
 * `pdbeccdutils` also requires the [PDBeCIF](https://github.com/glenveegee/PDBeCIF.git) cif parser.
   Once you have installed RDKit, as described above then install PDBeCIF and pdbeccdutils using pip:
@@ -38,19 +38,14 @@
   it. Then after getting rdkit setup, in the top `pdbeccdutils` directory:
   
   ```
-  pip install https://github.com/glenveegee/PDBeCIF/zipball/master
-  pip install -e . 
+  pip install -e ccdutils
   ```
 
 ## Documentation
- First, install necessary packages. Note that `sphinx` needs to be a part of the virtual
- environmnent, outherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing
+ Note that `sphinx` needs to be a part of the virtual environmnent, 
+ otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing
  nice `ReadtheDocs` mobile friendly style.
   
-  ```
-  pip install sphinx
-  pip install sphinx_rtd_theme
-  ```
   * Generate *.rst files to be included as a part of the documentation. Inside the directory
   `pdbeccdutils/doc` run the following commands to generate documentation.
   
@@ -70,12 +65,13 @@
 ## Features
   * Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
   * Generation of 3D conformations.
-  * Fragment search
+  * Fragment library search.
 
 ## TODO list
   * Port rest of the important functionality implemented by Oliver
-  * write mmcif Compound exporter (Lukas)
-  * Once pip 9.1 is released change the way how pdbecif parser is installed (https://stackoverflow.com/questions/15221473/how-do-i-update-pip-itself-from-inside-my-virtual-environment)
+  * Port cofactors to this solution
+  * Improve documentation
+
 
 
 
