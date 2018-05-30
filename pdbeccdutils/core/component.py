@@ -18,6 +18,7 @@
 import io
 import re
 import sys
+from collections import OrderedDict
 from datetime import date
 
 import rdkit
@@ -27,10 +28,8 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem.rdchem import BondType
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
 
-from pdbeccdutils.helpers import IOGrabber
-from pdbeccdutils.helpers import drawing
-from pdbeccdutils.core import ConformerType
-from pdbeccdutils.core import ReleaseStatus
+from pdbeccdutils.core import ConformerType, ReleaseStatus
+from pdbeccdutils.helpers import IOGrabber, drawing
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -305,8 +304,7 @@ class Component:
         drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
 
         if self._2dmol is None:
-            self._draw_molecule(drawer, file_name, width)
-
+            drawing.save_no_image(file_name, width=width)
             return
 
         if names:
@@ -525,9 +523,6 @@ class Component:
         return sanitization_result == 0
 
     def _draw_molecule(self, drawer, file_name, width):
-        if self._2dmol is None:
-            drawing.save_no_image(file_name, width=width)
-            return
         try:
             copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True, kekulize=True,
                                                     addChiralHs=True)
@@ -536,5 +531,6 @@ class Component:
                                                     addChiralHs=True)
         drawer.DrawMolecule(copy)
         drawer.FinishDrawing()
+
         with open(file_name, 'w') as f:
             f.write(drawer.GetDrawingText())
