@@ -289,7 +289,7 @@ class Component:
         else:
             return None
 
-    def export_2d_svg(self, file_name, width=500, names=False):
+    def export_2d_svg(self, file_name, width=500, names=False, atom_highlight={}, bond_highlight=None):
         """
         Save 2d depiction of the component as an SVG file.
 
@@ -300,21 +300,46 @@ class Component:
             names (bool, optional): Defaults to False. Whether or not
                 to include atom names in depiction. If atom name is
                 not set, element symbol is used instead.
-        """
-        drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
+            atomHighlight (dict, optional): Defaults to {}. Atoms names
+                to be highlighted along with colors in RGB.
+                eg. {'CA': (0.5, 0.5, 0.5)} or {0: (0.5, 0.5, 0.5)}
+            bondHighlight (dict, optional): Defaults to None. Bonds to be
+                highlighted along with colors in RGB.
+                eg. {('CA', 'CB'): (0.5, 0.5, 0.5)} or
+                {(0, 1): (0.5, 0.5, 0.5)}
+        Raises:
+            ValueError: If bond does not exist.
+            KeyError: If atom does not exist.
 
+        """
         if self._2dmol is None:
             drawing.save_no_image(file_name, width=width)
             return
 
+        drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
+        atom_mapping = {self._get_atom_name(self._2dmol, i): i for i in range(0, self._2dmol.GetNumAtoms())}
+
+        if all(isinstance(i, str) for i in atom_highlight.keys()):
+            atom_highlight = {atom_mapping[k]: v for k, v in atom_highlight.items()}
+
+        if bond_highlight is not None:
+            if all(isinstance(i[0], str) and isinstance(i[1], str) for i in bond_highlight.keys()):
+                temp_highlight = {}
+                for k, v in bond_highlight.items():
+                    bond = self._2dmol.GetBondBetweenAtoms(atom_mapping[k[0]], atom_mapping[k[1]])
+                    if bond is None:
+                        raise ValueError('Bond between {} and {} does not exist'.format(k[0], k[1]))
+                    temp_highlight[bond.GetIdx()] = v
+                bond_highlight = temp_highlight
+
         if names:
             options = drawer.drawOptions()
             for atom in self._2dmol.GetAtoms():
-                atom_name = atom.GetProp('name') if atom.HasProp('name') == 1 else atom.GetSymbol()
+                atom_name = self._get_atom_name(self._2dmol, atom)
                 options.atomLabels[atom.GetIdx()] = atom_name
                 atom.SetProp('molFileAlias', atom_name)
 
-        self._draw_molecule(drawer, file_name, width)
+        self._draw_molecule(drawer, file_name, width, atom_highlight, bond_highlight)
 
     def compute_3d(self):
         """
@@ -522,15 +547,26 @@ class Component:
 
         return sanitization_result == 0
 
-    def _draw_molecule(self, drawer, file_name, width):
+    def _draw_molecule(self, drawer, file_name, width, atom_highlight, bond_highlight):
         try:
             copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True, kekulize=True,
                                                     addChiralHs=True)
         except RuntimeError:
             copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=False, kekulize=True,
                                                     addChiralHs=True)
-        drawer.DrawMolecule(copy)
+
+        if bond_highlight is None:
+            drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
+                                highlightAtomColors=atom_highlight)
+        else:
+            drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
+                                highlightAtomColors=atom_highlight,
+                                highlightBonds=bond_highlight.keys(), highlightBondColors=bond_highlight)
         drawer.FinishDrawing()
 
         with open(file_name, 'w') as f:
             f.write(drawer.GetDrawingText())
+
+    def _get_atom_name(self, mol, i):
+        atom = mol.GetAtomWithIdx(i)
+        return atom.GetProp('name') if atom.HasProp('name') else atom.GetSymbol() + str(atom.GetIdx())
