@@ -71,7 +71,7 @@ class TestLoadEOH:
 
     @staticmethod
     def test_eoh_atom_ids(component_eoh):
-        assert component_eoh.atoms_ids == ('C1', 'C2',  'O', 'H11', 'H12',
+        assert component_eoh.atoms_ids == ('C1', 'C2', 'O', 'H11', 'H12',
                                            'H21', 'H22', 'H23', 'HO')
 
     @staticmethod

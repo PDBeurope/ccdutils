@@ -8,6 +8,7 @@ from pdbeccdutils.core import ConformerType
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
 
+
 class TestSDF:
     @staticmethod
     @pytest.mark.parametrize('test_ccd_cif', sample_ccd_cifs)
@@ -32,7 +33,7 @@ class TestSDF:
                 sdf_file += '.sdf'
                 if os.path.isfile(sdf_file):
                     os.remove(sdf_file)
-                if component.id in ('10R', 'UNL'): # known problem codes.
+                if component.id in ('10R', 'UNL'):  # known problem codes.
                     with pytest.raises(Exception):
                         structure_writer.write_molecule(path=sdf_file,
                                                         component=component,
@@ -45,4 +46,3 @@ class TestSDF:
                                                     remove_hs=remove_hs)
                     assert os.path.isfile(sdf_file)
                     assert os.path.getsize(sdf_file) > 0
-

@@ -31,7 +31,7 @@ def tests_dir():
 test_cif_path_name = os.path.join(tests_dir(), 'ccd_mmcif_test_files')
 test_comparison_files_path = os.path.join(tests_dir(), 'comparison_files')
 test_cut_down_components_cif = os.path.join(tests_dir(), 'components_cif',
-                                                    'cut_down_components.cif')
+                                            'cut_down_components.cif')
 
 
 def cif_filename(code):
