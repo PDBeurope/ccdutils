@@ -317,7 +317,7 @@ class Component:
             return
 
         drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
-        atom_mapping = {self._get_atom_name(self._2dmol, i): i for i in range(0, self._2dmol.GetNumAtoms())}
+        atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self._2dmol.GetAtoms())}
 
         if all(isinstance(i, str) for i in atom_highlight.keys()):
             atom_highlight = {atom_mapping[k]: v for k, v in atom_highlight.items()}
@@ -334,10 +334,10 @@ class Component:
 
         if names:
             options = drawer.drawOptions()
-            for atom in self._2dmol.GetAtoms():
-                atom_name = self._get_atom_name(self._2dmol, atom)
-                options.atomLabels[atom.GetIdx()] = atom_name
-                atom.SetProp('molFileAlias', atom_name)
+            for i, a in enumerate(self._2dmol.GetAtoms()):
+                atom_name = self._get_atom_name(a)
+                options.atomLabels[i] = atom_name
+                a.SetProp('molFileAlias', atom_name)
 
         self._draw_molecule(drawer, file_name, width, atom_highlight, bond_highlight)
 
@@ -567,6 +567,5 @@ class Component:
         with open(file_name, 'w') as f:
             f.write(drawer.GetDrawingText())
 
-    def _get_atom_name(self, mol, i):
-        atom = mol.GetAtomWithIdx(i)
+    def _get_atom_name(self, atom):
         return atom.GetProp('name') if atom.HasProp('name') else atom.GetSymbol() + str(atom.GetIdx())
