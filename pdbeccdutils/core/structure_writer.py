@@ -93,10 +93,9 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     info.SetIsHeteroAtom(True)
 
     for atom in mol_to_save.GetAtoms():
-        if atom.HasProp('name'):
-            flag = atom.GetProp('name')
-            atom_name = '{:<4}'.format(flag)  # make sure it is 4 characters
-            info.SetName(atom_name)
+        flag = _get_atom_name(atom)
+        atom_name = '{:<4}'.format(flag)  # make sure it is 4 characters
+        info.SetName(atom_name)
         atom.SetMonomerInfo(info)
 
     pdb_title = 'HEADER    {} coordinates'.format(conf_type.name)
