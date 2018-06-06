@@ -150,8 +150,11 @@ def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
                 s += Chem.MolToMolBlock(mol_to_save, confId=component.conformers_mapping[conf])
                 s += '$$$$'
                 mol_block.append(s)
-            except ValueError:
-                pass
+            except ValueError as e:
+                if str(e) == 'Bad Conformer Id':
+                    pass
+                else:
+                    raise Exception('error writing SDF file.')
     except Exception:
         mappings = {m.name: component.conformers_mapping[m] for m in mappings}
         mol_block = _to_sdf_str_fallback(mol_to_save, component.id, mappings)
