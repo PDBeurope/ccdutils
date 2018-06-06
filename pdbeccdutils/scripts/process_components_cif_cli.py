@@ -197,7 +197,7 @@ def process_single_component(args, ccd_reader_result, library,
     # check parsing and conformer degeneration
     issues = check_component_parsing(ccd_reader_result)
     structure_check = check_component_structure(ccd_reader_result.component)
-    if len(structure_check) > 1:
+    if len(structure_check) == 1:
         ideal_conformer = ConformerType.Computed
     issues += structure_check
 
@@ -221,6 +221,18 @@ def process_single_component(args, ccd_reader_result, library,
 
 
 def check_component_parsing(ccd_reader_result):
+    """Checks components parsing and highlights issues encountered with
+    the molecule: errors/warnings during the parsing process,
+    unrecoverable sanitization issues, inchikey mismatch between what
+    was in the source file and is reproduced by rdkit.
+
+    Args:
+        ccd_reader_result (pdbeccdutils.core.ccd_reader.CCDReaderResult):
+            Output of the parsing process.
+
+    Returns:
+        (list of str): possible issues encountered.
+    """
     issues = []
 
     if len(ccd_reader_result.warnings) > 0:
@@ -239,17 +251,38 @@ def check_component_parsing(ccd_reader_result):
 
 
 def check_component_structure(component):
+    """Checks whether or not the component has degenerated ideal
+    coordinates. If so, new conformer is attempted to be generated.
+
+    Args:
+        component (pdbeccdutils.core.Component): Component to be
+            processed.
+
+    Returns:
+        list of str: possible issues encountered.
+    """
     issues = []
     if component.has_degenerated_conformer(ConformerType.Ideal):
         issues.append('has degenerated ideal coordinates.')
         result = component.compute_3d()
         if not result:
-            issues.append('3D conformation could not be generated.')
+            issues.append('error in generating 3D conformation.')
 
     return issues
 
 
 def download_template(pubchem_templates, component):
+    """Attempts to download a pubchem template for the given component
+
+    Args:
+        pubchem_templates (pdbeccdutils.utils.PubChemDownloader):
+            Pubchem downloader instance.
+        component (pdbeccdutils.core.Component): Component to be used.
+
+    Returns:
+        (list of str): information whether or not the new template has
+            been downloaded.
+    """
     component_downloaded = pubchem_templates.download_template(component)
     if component_downloaded:
         return ['downloaded new pubchem template.']
@@ -258,6 +291,19 @@ def download_template(pubchem_templates, component):
 
 
 def generate_depictions(component, depictions, parent_dir):
+    """Generate nice 2D depictions for the component. Presently depictions
+    are generated in the following resolutions (100,200,300,400,500) with
+    and without atom names.
+
+    Args:
+        component (pdbeccdutils.core.Component): Component to be depicted.
+        depictions (pdbeccdutils.utils.DepictionManager): Helper class
+            to carry out depiction process.
+        parent_dir (str): Where the depiction should be stored
+
+    Returns:
+        list of str: Possible issues encountered.
+    """
     issues = []
     depiction_result = component.compute_2d(depictions)
     ccd_id = component.id
@@ -268,15 +314,24 @@ def generate_depictions(component, depictions, parent_dir):
         if depiction_result.score > 0.99:
             issues.append('collision free image could not be generated.')
 
-    component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_small.svg'), width=100)
-    component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_medium.svg'), width=300)
-    component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_large.svg'), width=450)
-    component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_large_names.svg'), width=450, names=True)
+    for i in range(100, 600, 100):
+        component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_{i}.svg'), width=i)
+        component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_{i}_names.svg'), width=i, names=True)
 
     return issues
 
 
 def search_fragment_library(component, library):
+    """Search
+
+    Args:
+        component (pdbeccdutils.core.Component): Component to be processed
+        library (pdbeccdutils.core.FragmentLibrary): Fragment library
+            to be used.
+
+    Returns:
+        list of str: info msg.
+    """
     matches = component.library_search(library)
 
     if matches > 0:
@@ -287,7 +342,7 @@ def search_fragment_library(component, library):
 
 def export_structure_formats(component, parent_dir, ideal_conformer):
     """Writes out component in a different formats as required for the
-    PDBeChem FTP area
+    PDBeChem FTP area.
 
     Args:
         component (pdbeccdutils.core.Component): Component being processed.
@@ -296,42 +351,45 @@ def export_structure_formats(component, parent_dir, ideal_conformer):
             to be used for ideal coordinates.
 
     Returns:
-        (list of str): Encountered issues.
+        list of str: Encountered issues.
     """
     issues = []
 
     issues += write_molecule(os.path.join(parent_dir, f'{component.id}_model.sdf'), component, False, ConformerType.Model)
     issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.sdf'), component, False, ideal_conformer)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_no_h_model.sdf'), component, True, ConformerType.Model)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_no_h_ideal.sdf'), component, True, ideal_conformer)
+    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal_alt.pdb'), component, True, ideal_conformer)
+    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_model_alt.pdb'), component, True, ConformerType.Model)
+    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ideal_conformer)
     issues += write_molecule(os.path.join(parent_dir, f'{component.id}_model.pdb'), component, False, ConformerType.Model)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ideal_conformer)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ideal_conformer)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}.cml'), component, True, ConformerType.Model)
+    issues += write_molecule(os.path.join(parent_dir, f'{component.id}.cml'), component, False, ConformerType.Model)
     issues += write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.Model)
 
     return issues
 
 
-def write_molecule(path, component, remove_hydrogens, conformer_type):
+def write_molecule(path, component, alt_names, conformer_type):
     """Write out deemed structure.
 
     Args:
-        path (): [description]
+        path str: Path where the molecule will be stored.
         component (pdbeccdutils.core.Component): Component to be written.
-        remove_hydrogens (bool): Whether or not Hs will be removed.
+        alt_names (bool): Whether or not molecule will be written with
+            alternate names.
         conformer_type (pdbeccdutils.core.Component): Conformer to be written.
 
     Returns:
-        (list of str): encountered issues
+        list of str: encountered issues
     """
     try:
-        writer.write_molecule(path, component, remove_hydrogens, conformer_type)
+        writer.write_molecule(path, component,
+                              remove_hs=False,
+                              alt_names=alt_names,
+                              conf_type=conformer_type)
         return []
     except Exception:
         with open(path, 'w') as f:
             f.write('')
-        return [f'{path} could not be writter.']
+        return [f'error writing {path}.']
 
 
 def write_components_xml(args, chem_comp_xml):
