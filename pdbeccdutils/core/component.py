@@ -348,7 +348,7 @@ class Component:
         Returns:
             bool: Result of the structure generation process.
         """
-        options = AllChem.ETKDG()
+        options = AllChem.ETKDGv2()
         options.clearConfs = False
 
         try:
