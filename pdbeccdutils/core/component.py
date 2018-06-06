@@ -568,4 +568,17 @@ class Component:
             f.write(drawer.GetDrawingText())
 
     def _get_atom_name(self, atom):
+        """Supplies atom_id obrained from `_chem_comp_atom.atom_id`, see:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Categories/chem_comp_atom.html
+
+        If there is no such atom name, it is created from the element
+        symbol and atom index.
+
+        Args:
+            atom (rdkit.Chem.rdChem.Atom): rdkit atom
+
+        Returns:
+            str: atom name
+        """
         return atom.GetProp('name') if atom.HasProp('name') else atom.GetSymbol() + str(atom.GetIdx())

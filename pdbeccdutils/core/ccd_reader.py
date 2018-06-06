@@ -156,6 +156,7 @@ def _parse_pdb_atoms(mol, atoms):
 
         atom = Chem.Atom(element)
         atom.SetProp('name', atoms['atom_id'][i])
+        atom.SetProp('alt_name', atoms['alt_atom_id'][i])
         atom.SetFormalCharge(str_conversions.str_to_int(atoms['charge'][i]))
 
         if isotope is not None:

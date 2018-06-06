@@ -29,7 +29,7 @@ import pdbeccdutils
 from pdbeccdutils.core import Component, ConformerType, ReleaseStatus
 
 
-def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Ideal):
+def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=ConformerType.Ideal):
     """Export molecule in a specified format. Presently supported formats
     are: PDB CCD CIF (*.cif); Mol file (*.sdf); Chemical Markup language
     (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml).
@@ -39,9 +39,13 @@ def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Idea
         path (str): Path to the file. Extension determines format to be
             used.
         component (pdbeccdutils.core.Component): Component to be exported
-        remove_hs (bool, optional): Defaults to True.
+        remove_hs (bool, optional): Defaults to True. Whether or not
+            hydrogens should be removed.
+        alt_names (bool, optional): Defaults to False. Whether or not
+            alternate names should be exported.
         conf_type (pdbeccdutils.core.ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+            Defaults to ConformerType.Ideal. Conformer type to be
+            exported.
 
     Raises:
         ValueError: For unsupported format
@@ -52,7 +56,7 @@ def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Idea
     if extension == 'sdf':
         str_representation = to_sdf_str(component, remove_hs, conf_type)
     elif extension == 'pdb':
-        str_representation = to_pdb_str(component, remove_hs, conf_type)
+        str_representation = to_pdb_str(component, remove_hs, alt_names, conf_type)
     elif extension in ('mmcif', 'cif'):
         to_pdb_ccd_cif_file(path, component, remove_hs)
         return
@@ -69,13 +73,15 @@ def write_molecule(path, component, remove_hs=True, conf_type=ConformerType.Idea
         f.write(str_representation)
 
 
-def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
+def to_pdb_str(component, remove_hs=True, alt_names=False, conf_type=ConformerType.Ideal):
     """Converts structure to the PDB format.
 
     Args:
         component (pdbeccdutils.core.Component): Component to be
             exported.
         remove_hs (bool, optional): Defaults to True.
+        alt_names (bool, optional): Defaults to False. Whether or not
+            alternate atom names should be exported.
         conf_type (pdbeccdutils.core.ConformerType, optional):
             Defaults to ConformerType.Ideal.
 
@@ -93,7 +99,7 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     info.SetIsHeteroAtom(True)
 
     for atom in mol_to_save.GetAtoms():
-        flag = _get_atom_name(atom)
+        flag = _get_alt_atom_name(atom) if alt_names else _get_atom_name(atom)
         atom_name = '{:<4}'.format(flag)  # make sure it is 4 characters
         info.SetName(atom_name)
         atom.SetMonomerInfo(info)
@@ -108,7 +114,7 @@ def to_pdb_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     try:
         pdb_body = Chem.MolToPDBBlock(mol_to_save, conf_id)
     except Exception:
-        pdb_body = _to_pdb_str_fallback(mol_to_save, conf_id, info)
+        pdb_body = _to_pdb_str_fallback(mol_to_save, conf_id)
 
     pdb_string = pdb_title + pdb_body
 
@@ -481,7 +487,7 @@ def _write_pdb_ccd_cif_atoms(cif_dict, component):
 
         cif_dict[label]['comp_id'].append(component.id)
         cif_dict[label]['atom_id'].append(_get_atom_name(atom))
-        cif_dict[label]['alt_atom_id'].append(_get_atom_name(atom))
+        cif_dict[label]['alt_atom_id'].append(_get_alt_atom_name(atom))
         cif_dict[label]['type_symbol'].append(atom.GetSymbol())
         cif_dict[label]['charge'].append(str(atom.GetFormalCharge()))
         cif_dict[label]['pdbx_align'].append('?')
@@ -576,6 +582,19 @@ def _get_atom_name(atom):
         str: Name of the atom.
     """
     return atom.GetProp('name') if atom.HasProp('name') else atom.GetSymbol() + str(atom.GetIdx())
+
+
+def _get_alt_atom_name(atom):
+    """Gets alternate atom name. If not set _get_atom_name method is
+    used.
+
+    Args:
+        atom (rdkit.Chem.rdchem.Atom): rdkit atom.
+
+    Returns:
+        str: Name of the atom.
+    """
+    return atom.GetProp('alt_name') if atom.HasProp('alt_name') else _get_atom_name(atom)
 
 
 def _get_cml_bond_type(bond_order):
@@ -739,14 +758,13 @@ def _to_sdf_str_fallback(mol, id, mappings):
     return content
 
 
-def _to_pdb_str_fallback(mol, conf_id, info):
+def _to_pdb_str_fallback(mol, conf_id):
     """Fallback method to generate PDB file in case the default one in
     RDKit fails.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule to be writter.
         conf_id (int): conformer id to be writen.
-        info (rdkit.Chem.rdchem.AtomPDBResidueInfo): atom metadata.
 
     Returns:
         str: String representation the component in the PDB format.
@@ -765,10 +783,12 @@ def _to_pdb_str_fallback(mol, conf_id, info):
 
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
+            info = atom.GetMonomerInfo()
+
             s = '{:<6}{:>5} {:<4} {:<3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}'\
                 .format('HETATM' if info.GetIsHeteroAtom() else 'ATOM',
-                        i + 1,
-                        _get_atom_name(atom),
+                        info.GetResidueNumber(),
+                        info.GetName(),
                         info.GetResidueName(),
                         info.GetChainId(),
                         info.GetResidueNumber(),
