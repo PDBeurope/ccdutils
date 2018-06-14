@@ -29,7 +29,7 @@
 
   ```
   pip install git+https://github.com/glenveegee/PDBeCIF.git 
-  pip install https://gitlab.com/pdbe/ccd_utils/repository/latest_release/archive.zip
+  pip install git+https://gitlabci.ebi.ac.uk/pdbe/ccdutils.git
   ```
 * Alternatively if you want to contribute to the project fork the repository and clone
   it. Then after getting rdkit setup, in the top `pdbeccdutils` directory:
@@ -63,10 +63,11 @@
   * Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
   * Generation of 3D conformations.
   * Fragment library search.
+  * Lightweight implementation of parity method by Jon Tyczak.
 
 ## TODO list
   * Port rest of the important functionality implemented by Oliver
-  * Port cofactors to this solution
+  * Add protein-ligand environment generation  
   * Improve documentation
 
 
