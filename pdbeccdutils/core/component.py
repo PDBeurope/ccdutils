@@ -28,7 +28,7 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem.rdchem import BondType
 from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
 
-from pdbeccdutils.core import ConformerType, ReleaseStatus
+from pdbeccdutils.core import ConformerType, ReleaseStatus, CCDUtilsError
 from pdbeccdutils.helpers import IOGrabber, drawing
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
@@ -308,8 +308,7 @@ class Component:
                 eg. {('CA', 'CB'): (0.5, 0.5, 0.5)} or
                 {(0, 1): (0.5, 0.5, 0.5)}
         Raises:
-            ValueError: If bond does not exist.
-            KeyError: If atom does not exist.
+            CCDUtilsError: If bond or atom does not exist.            
 
         """
         if self._2dmol is None:
@@ -328,7 +327,7 @@ class Component:
                 for k, v in bond_highlight.items():
                     bond = self._2dmol.GetBondBetweenAtoms(atom_mapping[k[0]], atom_mapping[k[1]])
                     if bond is None:
-                        raise ValueError('Bond between {} and {} does not exist'.format(k[0], k[1]))
+                        raise CCDUtilsError('Bond between {} and {} does not exist'.format(k[0], k[1]))
                     temp_highlight[bond.GetIdx()] = v
                 bond_highlight = temp_highlight
 

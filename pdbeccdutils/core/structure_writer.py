@@ -15,6 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""Structure writing module. Presently the following formats are supported:
+    SDF, CIF, PDB, , XYZ, XML, CML
+
+Raises:
+    CCDUtilsError: If deemed format is not supported
+    CCDUtilsError: If an error unrecoverable error occured.
+"""
+
 import copy
 import math
 import xml.etree.ElementTree as ET
@@ -26,7 +34,7 @@ import rdkit
 from rdkit import Chem, rdBase
 
 import pdbeccdutils
-from pdbeccdutils.core import Component, ConformerType, ReleaseStatus
+from pdbeccdutils.core import Component, ConformerType, ReleaseStatus, CCDUtilsError
 
 
 def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=ConformerType.Ideal):
@@ -48,7 +56,7 @@ def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=C
             exported.
 
     Raises:
-        ValueError: For unsupported format
+        CCDUtilsError: For unsupported format
     """
     extension = path.split('.')[-1].lower()
     str_representation = ''
@@ -67,7 +75,7 @@ def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=C
     elif extension == 'xyz':
         str_representation = to_xyz_str(component, remove_hs, conf_type)
     else:
-        raise ValueError('Unsupported file format: {}'.format(extension))
+        raise CCDUtilsError('Unsupported file format: {}'.format(extension))
 
     with open(path, 'w') as f:
         f.write(str_representation)
@@ -131,6 +139,9 @@ def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
         conf_type (pdbeccdutils.core.ConformerType, optional):
             Defaults to ConformerType.Ideal.
 
+    Raises:
+        CCDUtilsError: In case the structure could not be exported.
+
     Returns:
         str: String representation of the component in the SDF format
     """
@@ -154,7 +165,7 @@ def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
                 if str(e) == 'Bad Conformer Id':
                     pass
                 else:
-                    raise Exception('error writing SDF file.')
+                    raise CCDUtilsError('Error writing SDF file - {}'.format(e))
     except Exception:
         mappings = {m.name: component.conformers_mapping[m] for m in mappings}
         mol_block = _to_sdf_str_fallback(mol_to_save, component.id, mappings)
