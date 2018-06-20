@@ -18,3 +18,4 @@ The pdbeccdutils package is made up of the following modules:
     pdbeccdutils.core
     pdbeccdutils.helpers
     pdbeccdutils.utils
+    pdbeccdutils.scripts
