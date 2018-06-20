@@ -7,20 +7,21 @@ adapted to use nose then converted to pytest
 """
 import glob
 import os
-import pytest
+import re
 import shutil
+import xml.etree.ElementTree as ET
 
-from pdbeccdutils.scripts.process_components_cif_cli import create_parser, pdbechem_pipeline
-from pdbeccdutils.tests.tst_utilities import test_cut_down_components_cif, \
-    file_name_in_tsts_out, cif_filename
+import pytest
 
-FILES_SUBDIRS = ('mmcif', 'sdf', 'sdf_nh', 'sdf_r', 'sdf_r_nh',
-                 'pdb', 'pdb_r', 'cml', 'xyz', 'xyz_r')
-IMAGES_SUBDIRS = 'svg_with_atom_labels', 'svg_without_atom_labels'
+from pdbeccdutils.scripts.process_components_cif_cli import (check_args,
+                                                             create_parser,
+                                                             pdbechem_pipeline)
+from pdbeccdutils.tests.tst_utilities import (cif_filename,
+                                              file_name_in_tsts_out,
+                                              test_cut_down_components_cif)
 
 
-@pytest.mark.skip(reason='Not yet implemented in this branch')  # TODO implement osmart 14 May 2018
-class TestCommandLineArgs(object):
+class TestCommandLineArgs:
     @staticmethod
     def test_with_empty_args():
         """
@@ -29,18 +30,17 @@ class TestCommandLineArgs(object):
         """
         parser = create_parser()
         with pytest.raises(SystemExit):
-            parser.parse_args([])
+            parser.parse_args()
 
     @staticmethod
     def test_input_file_that_cannot_exist_raises_system_exit():
         parser = create_parser()
-        args = parser.parse_args(['/////impossible_to_open_file', '--debug'])
+        args = parser.parse_args(['-o foo', '/////impossible_to_open_file', '--debug'])
         with pytest.raises(SystemExit):
-            pdbechem_pipeline(args)
+            check_args(args)
 
 
-@pytest.mark.skip(reason='Not yet implemented in this branch')  # TODO implement osmart 14 May 2018
-class TestRegressionTest(object):
+class TestRegressionTest:
     @staticmethod
     def test_with_problematic_cif_7om():
         """ 7OM caused problems because it lacks an inchikey
@@ -56,8 +56,7 @@ class TestRegressionTest(object):
             'output directory  {} must be created'.format(test_output_dir)
 
 
-@pytest.mark.skip(reason='Not yet implemented in this branch')  # TODO implement osmart 14 May 2018
-class TestCutDownComponentsCif(object):
+class TestCutDownComponentsCif:
     """
     run process_components_cif_cli on test file:
 
@@ -70,104 +69,119 @@ class TestCutDownComponentsCif(object):
     for the creation of each directory file that is required in the
     ftp area.
     """
-    CHEM_COMP_IDS = ('000', '001', '002', '003', '004')
+    CHEM_COMP_IDS = ['000', '001', '002', '003', '004']
 
     @pytest.fixture(scope='class')
-    def output_dir(self):
+    def pipeline_wd(self, tmpdir_factory):
+        wd = tmpdir_factory.mktemp('pdbechem_test')
+        print('PdbeChem working directory is {}'.format(wd))
+
         parser = create_parser()
-        test_components_cif = test_cut_down_components_cif
-        output_dir = file_name_in_tsts_out('test_process_components_cif')
-        if os.path.isdir(output_dir):
-            shutil.rmtree(output_dir)
-        args = parser.parse_args([test_components_cif, '-o', output_dir])
+        args = parser.parse_args(['-o', str(wd), test_cut_down_components_cif])
+
+        check_args(args)
         pdbechem_pipeline(args)
-        return output_dir
+
+        return str(wd)
 
     @staticmethod
-    def test_output_dir_created(output_dir):
-        assert os.path.isdir(output_dir)
+    def test_output_dir_created(pipeline_wd):
+        assert os.path.isdir(pipeline_wd)
 
     @staticmethod
-    def test_subdir_files_created(output_dir):
-        files_path = os.path.join(output_dir, 'files')
-        assert os.path.isdir(files_path)
-
-    @staticmethod
-    @pytest.mark.parametrize('subdir', FILES_SUBDIRS)
-    def test_subdirs_in_files_are_created(output_dir, subdir):
-        subdir_path = os.path.join(output_dir, 'files', subdir)
-        assert os.path.isdir(subdir_path)
-
-    @staticmethod
-    @pytest.mark.parametrize('subdir', FILES_SUBDIRS)
     @pytest.mark.parametrize('chem_comp_id', CHEM_COMP_IDS)
-    def test_there_is_a_file_for_chem_comp_id(output_dir, subdir, chem_comp_id):
-        subdir_path = os.path.join(output_dir, 'files', subdir)
-        assert os.path.isdir(subdir_path)
-        # simple check that there is a single file starting with the chem_comp_id
-        files_for_chem_comp_id = glob.glob1(subdir_path, chem_comp_id + '*')
-        assert len(files_for_chem_comp_id) == 1
+    def test_subdir_tree_created(pipeline_wd, chem_comp_id):
+        path = os.path.join(pipeline_wd, chem_comp_id[0], chem_comp_id)
+        assert os.path.isdir(path)
 
     @staticmethod
-    def test_subdir_images_created(output_dir):
-        files_path = os.path.join(output_dir, 'images')
-        assert os.path.isdir(files_path)
-
-    @staticmethod
-    @pytest.mark.parametrize('subdir', IMAGES_SUBDIRS)
-    def test_subdirs_in_images_are_created(output_dir, subdir):
-        subdir_path = os.path.join(output_dir, 'images', subdir)
-        assert os.path.isdir(subdir_path)
-
-    @staticmethod
-    @pytest.mark.parametrize('subdir', IMAGES_SUBDIRS)
     @pytest.mark.parametrize('chem_comp_id', CHEM_COMP_IDS)
-    def test_there_is_a_svg_for_chem_comp_id(output_dir, subdir, chem_comp_id):
-        subdir_path = os.path.join(output_dir, 'images', subdir, chem_comp_id[:1])
-        assert os.path.isdir(subdir_path)
-        this_svg = os.path.join(subdir_path, chem_comp_id + '.svg')
-        assert os.path.isfile(this_svg) and os.path.getsize(this_svg) > 0
+    def test_all_files_created(pipeline_wd, chem_comp_id):
+        path = os.path.join(pipeline_wd, chem_comp_id[0], chem_comp_id)
+        files = os.listdir(path)
+        assert len(files) == 18
 
-    def test_file_chem_comp_dot_list(self, output_dir):
-        chem_comp_dot_list_file = os.path.join(output_dir, 'chem_comp.list')
-        try:
-            with open(chem_comp_dot_list_file, 'r') as chem_comp_file:
-                lines = chem_comp_file.read().splitlines()
-                assert lines == list(self.CHEM_COMP_IDS), \
-                    'chem_comp.list file should contain list of ccd''s one per line'
-        except IOError as message:
-            assert False, 'problem opening chem_comp.list file "{}"'.format(message)
+        for f in files:
+            assert os.path.getsize(os.path.join(path, f)) > 0
 
     @staticmethod
-    def test_file_chem_dot_xml(output_dir):
-        chem_dot_xml_file_name = os.path.join(output_dir, 'chem.xml')
-        try:
-            with open(chem_dot_xml_file_name, 'r') as chem_dot_xml_file:
-                lines = chem_dot_xml_file.read().splitlines()
-                strip_lines = [item.strip() for item in lines]
-                for test_str in ('</chemCompList>', '<id>000</id>', '<id>004</id>',
-                                 '<name>(2S)-amino(phenyl)ethanoic acid</name>',
-                                 '<fragment id="2" name="phenyl">'):
-                    assert test_str in strip_lines, 'chem.xml should contain {}'.format(test_str)
-        except IOError as message:
-            assert False, 'problem opening chem.xml file "{}"'.format(message)
+    @pytest.mark.parametrize('id,name', [
+        ("000", 'OA'),
+        ("001", 'F11'),
+        ("002", 'N3'),
+        ("003", 'C17'),
+        ("004", 'OXT')
+    ])
+    def test_images_with_names_created(pipeline_wd, id, name):
+        """Test if the depictions with names contain certain atom labels
+        as expected.
+        """
+        path = os.path.join(pipeline_wd, id[0], id, '{}_100_names.svg'.format(id))
+        pattern = '<svg:tspan>{}</svg:tspan>'.format(name)
+
+        with open(path) as f:
+            str_repr = f.read()
+
+            assert pattern in str_repr
 
     @staticmethod
-    def test_file_readme_dot_html_file(output_dir):
-        this_file = os.path.join(output_dir, 'readme.htm')
-        assert os.path.isfile(this_file) and os.path.getsize(this_file) > 0, \
-            'readme_dot_html_file {} must be a non-empty file.'.format(this_file)
+    def test_list_file(pipeline_wd):
+        """Test if all the processed ids are a part of the chem_comp.list
+        file.
+        """
+        path = os.path.join(pipeline_wd, 'chem_comp.list')
+        with open(path) as f:
+            lines = f.read().splitlines()
+
+            assert lines == TestCutDownComponentsCif.CHEM_COMP_IDS
 
     @staticmethod
-    @pytest.mark.parametrize('subdir', FILES_SUBDIRS)
-    def test_tarball_in_files(output_dir, subdir):
-        this_file = os.path.join(output_dir, 'files', subdir + '.tar.gz')
-        assert os.path.isfile(this_file) and os.path.getsize(this_file) > 0, \
-            'tarball {} must be a non-empty file.'.format(this_file)
+    @pytest.mark.parametrize('chem_comp_id', CHEM_COMP_IDS)
+    def test_xml_file(pipeline_wd, chem_comp_id):
+        """Test if the xml file is parseable and contains all the ids
+        """
+        path = os.path.join(pipeline_wd, 'chem_comp_list.xml')
+        xml_root = ET.parse(path).getroot()
+        chem_comps = xml_root.findall('chemComp')
+
+        assert any(l.find('id').text == chem_comp_id for l in chem_comps)
 
     @staticmethod
-    @pytest.mark.parametrize('subdir', IMAGES_SUBDIRS)
-    def test_tarball_in_images(output_dir, subdir):
-        this_file = os.path.join(output_dir, 'images', subdir + '.tar.gz')
-        assert os.path.isfile(this_file) and os.path.getsize(this_file) > 0, \
-            'tarball {} must be a non-empty file.'.format(this_file)
+    @pytest.mark.parametrize('id,name,alt_name', [
+        ('001', 'H021', '1H02'),
+        ('002', 'H121', '1H12'),
+        ('003', 'H121', '1H12')
+    ])
+    def test_correct_atom_naming_in_files(pipeline_wd, id, name, alt_name):
+        """Test if alternate names are used for exported model/ideal
+        pdb files.
+        """
+        alts = [os.path.join(pipeline_wd, id[0], id, '{}_ideal_alt.pdb'.format(id)),
+                os.path.join(pipeline_wd, id[0], id, '{}_model_alt.pdb'.format(id))]
+        regular = [
+            os.path.join(pipeline_wd, id[0], id, '{}_ideal.pdb'.format(id)),
+            os.path.join(pipeline_wd, id[0], id, '{}_model.pdb'.format(id))
+        ]
+
+        for i in alts:
+            with open(i) as f:
+                str_repr = f.read()
+                assert alt_name in str_repr and name not in str_repr
+
+        for i in regular:
+            with open(i) as f:
+                str_repr = f.read()
+                assert name in str_repr and alt_name not in str_repr
+
+    @staticmethod
+    @pytest.mark.parametrize('chem_comp_id', CHEM_COMP_IDS)
+    def test_cml_files(pipeline_wd, chem_comp_id):
+        """Test if the CML file is parsable. Each of the tested compounds
+        should contain element with type C.
+        """
+        path = os.path.join(pipeline_wd, chem_comp_id[0], chem_comp_id, '{}.cml'.format(chem_comp_id))
+
+        xml_root = ET.parse(path).getroot()
+        atoms = xml_root.find('molecule').find('atomArray').findall('atom')
+
+        assert any(a.attrib['elementType'] == 'C' for a in atoms)
