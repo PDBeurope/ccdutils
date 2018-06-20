@@ -1,3 +1,6 @@
+[![pipeline status](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/badges/refactoring/pipeline.svg)](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/commits/refactoring)
+[![coverage report](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/badges/refactoring/coverage.svg)](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/commits/refactoring)
+
 # pdbeccdutils
 
 * A set of python tools to deal with PDB chemical components definitions
