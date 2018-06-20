@@ -33,16 +33,13 @@ class TestSDF:
                 sdf_file += '.sdf'
                 if os.path.isfile(sdf_file):
                     os.remove(sdf_file)
-                if component.id in ('10R', 'UNL'):  # known problem codes.
-                    with pytest.raises(Exception):
-                        structure_writer.write_molecule(path=sdf_file,
-                                                        component=component,
-                                                        conf_type=conf_type,
-                                                        remove_hs=remove_hs)
-                else:
-                    structure_writer.write_molecule(path=sdf_file,
-                                                    component=component,
-                                                    conf_type=conf_type,
-                                                    remove_hs=remove_hs)
-                    assert os.path.isfile(sdf_file)
+
+                structure_writer.write_molecule(path=sdf_file,
+                                                component=component,
+                                                conf_type=conf_type,
+                                                remove_hs=remove_hs)
+                assert os.path.isfile(sdf_file)
+
+                # UNL component does not have coordinates. Only the default ideal coords are created.
+                if component.id != 'UNL':
                     assert os.path.getsize(sdf_file) > 0
