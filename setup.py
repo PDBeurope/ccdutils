@@ -16,6 +16,6 @@ setup(name='pdbeccdutils',
                'bin/process_components_cif'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme'],
+      install_requires=['Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme', 'pdbecif'],
       tests_require=['pytest']
       )
