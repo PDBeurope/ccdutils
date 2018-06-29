@@ -4,9 +4,8 @@ before_script:
   - apt-get update && apt-get install make
   - conda create -c rdkit -n rdkit-doc rdkit python=3.6.5
   - source activate rdkit-doc
-  - pip install git+https://github.com/glenveegee/PDBeCIF.git  
-  - pip install Pillow scipy sphinx sphinx_rtd_theme pytest pytest-cov
   - pip install -e .
+  - pip install pytest-cov
 
 test:
   script:
