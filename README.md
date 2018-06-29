@@ -11,7 +11,7 @@
   * the [wwPDB validation pipeline](https://www.wwpdb.org/validation/validation-reports)
 * The tools use:
   * [RDKit](http://www.rdkit.org/) for chemistry
-  * [PDBeCIF](https://github.com/glenveegee/PDBeCIF.git) cif parser.
+  * [PDBeCIF](https://gitlab.com/glenveegee/PDBeCIF.git) cif parser.
 * Please note that the project is under active development includes some rough 
   preliminary scripts and is and not yet ready for wider use!
 
@@ -27,15 +27,12 @@
   conda create -c rdkit -n rdkit-env rdkit python=3
   source activate rdkit-env
   ```
-* `pdbeccdutils` also requires the [PDBeCIF](https://github.com/glenveegee/PDBeCIF.git) cif parser.
-  Once you have installed RDKit, as described above then install PDBeCIF and pdbeccdutils using pip:
+* Once you have installed RDKit, as described above then install pdbeccdutils using pip:
 
   ```
-  pip install git+https://github.com/glenveegee/PDBeCIF.git 
   pip install git+https://gitlabci.ebi.ac.uk/pdbe/ccdutils.git
   ```
-* Alternatively if you want to contribute to the project fork the repository and clone
-  it. Then after getting rdkit setup, in the top `pdbeccdutils` directory:
+* Alternatively if you want to contribute to the project fork the repository and clone it. Then after getting rdkit setup, in the top `pdbeccdutils` directory:
   
   ```
   pip install -e ccdutils
@@ -43,14 +40,12 @@
 
 ## Documentation
  Note that `sphinx` needs to be a part of the virtual environmnent, 
- otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing
- nice `ReadtheDocs` mobile friendly style.
+ otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
   
-  * Generate *.rst files to be included as a part of the documentation. Inside the directory
-  `pdbeccdutils/doc` run the following commands to generate documentation.
+  * Generate *.rst files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
   
   Use the following to generate initial markup files to be used by sphinx.
-  This needs to be used when other package but `core`, `utils` and `helpers` is implemented
+  This needs to be used when other package but `core`, `utils` and `helpers` is implemented.
   
   ```
   sphinx-apidoc -f -o /path/to/output/dir ../pdbeccdutils/
