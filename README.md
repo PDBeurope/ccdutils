@@ -30,12 +30,8 @@
 * Once you have installed RDKit, as described above then install pdbeccdutils using pip:
 
   ```
-  pip install git+https://gitlabci.ebi.ac.uk/pdbe/ccdutils.git
-  ```
-* Alternatively if you want to contribute to the project fork the repository and clone it. Then after getting rdkit setup, in the top `pdbeccdutils` directory:
-  
-  ```
-  pip install -e ccdutils
+  git clone -b refactoring https://gitlabci.ebi.ac.uk/pdbe/ccdutils.git
+  pip install -e pip install -e ccdutils
   ```
 
 ## Documentation
@@ -66,7 +62,8 @@
 ## TODO list
   * Port rest of the important functionality implemented by Oliver
   * Add protein-ligand environment generation  
-  * Improve documentation
+  * Further improvement of the documentation
+  * Scafolding (Abhik)
 
 
 
