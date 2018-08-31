@@ -26,7 +26,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem.rdchem import BondType
-from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure
+from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure, AssignStereochemistry
 
 from pdbeccdutils.core import ConformerType, ReleaseStatus, CCDUtilsError
 from pdbeccdutils.helpers import IOGrabber, drawing
@@ -383,6 +383,7 @@ class Component:
 
             Chem.Kekulize(rwmol)
             AssignAtomChiralTagsFromStructure(rwmol)
+            AssignStereochemistry(rwmol)
             self.mol = rwmol.GetMol()
         except Exception as e:
             print(e, file=sys.stderr)
