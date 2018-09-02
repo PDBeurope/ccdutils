@@ -22,8 +22,8 @@ Raises:
     CCDUtilsError: If deemed format is not supported
     CCDUtilsError: If an error unrecoverable error occured.
 """
-
 import copy
+import json
 import math
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
@@ -34,7 +34,8 @@ import rdkit
 from rdkit import Chem, rdBase
 
 import pdbeccdutils
-from pdbeccdutils.core import Component, ConformerType, ReleaseStatus, CCDUtilsError
+from pdbeccdutils.core import (CCDUtilsError, Component, ConformerType,
+                               ReleaseStatus)
 
 
 def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=ConformerType.Ideal):
@@ -74,6 +75,8 @@ def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=C
         str_representation = to_xml_str(component, remove_hs, conf_type)
     elif extension == 'xyz':
         str_representation = to_xyz_str(component, remove_hs, conf_type)
+    elif extension == 'json':
+        str_representation = to_json_dict(component, remove_hs, conf_type)
     else:
         raise CCDUtilsError('Unsupported file format: {}'.format(extension))
 
@@ -368,6 +371,79 @@ def to_cml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     return pretty.toprettyxml(indent="  ")
 
 
+def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
+    """Returns component information in dictionary suitable for json 
+    formating
+
+    Args:
+        component (pdbeccdutils.core.Component): Component to be
+            exported.
+        remove_hs (bool, optional): Defaults to True.
+        conf_type (pdbeccdutils.core.ConformerType, optional):
+            Defaults to ConformerType.Ideal.
+
+    Raises:
+        AttributeError: If all conformers are requested. This feature is
+        not supported not is planned.
+
+    Returns:
+        [dict of str]: dictionary representation of the component
+    """
+    if conf_type == ConformerType.AllConformers:
+        raise AttributeError('All conformer export is not suppoted for json export')
+
+    (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
+    result = {'atoms': [], 'bonds': []}
+
+    for atom in mol_to_save.GetAtoms():
+        atom_dict = {}
+        conformer = mol_to_save.GetConformer(conf_id)
+        coords = conformer.GetAtomPosition(atom.GetIdx())
+
+        atom_dict['id'] = atom.GetProp('name')
+        atom_dict['element'] = atom.GetSymbol()
+        atom_dict['charge'] = atom.GetFormalCharge()
+
+        if conformer.Is3D():
+            atom_dict['coords'] = {'X': coords.x, 'Y': coords.y, 'Z': coords.z}
+        else:
+            atom_dict['coords'] = {'X': coords.x, 'Y': coords.y}
+
+        result['atoms'].append(atom_dict)
+
+    for bond in mol_to_save.GetBonds():
+        bond_dict = {}
+        bond_dict['from'] = bond.GetBeginAtomIdx()
+        bond_dict['to'] = bond.GetEndAtomIdx()
+        bond_dict['type'] = bond.GetBondType().name
+
+        result['bonds'].append(bond_dict)
+
+    return {component.id: result}
+
+
+def to_json_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
+    """Converts structure into JSON representation. https://www.json.org/
+
+    Args:
+        component (pdbeccdutils.core.Component): Component to be
+            exported.
+        remove_hs (bool, optional): Defaults to True.
+        conf_type (pdbeccdutils.core.ConformerType, optional):
+            Defaults to ConformerType.Ideal.
+
+    Returns:
+        [str]: json representation of the component as a string.
+
+    """
+
+    temp = to_json_dict(component, remove_hs, conf_type)
+    temp['rdkit_version'] = rdkit.__version__
+    temp['pdbeccdutils_version'] = pdbeccdutils.__version__
+
+    return json.dumps(temp)
+
+
 def _prepate_structure(component, remove_hs, conf_type):
     """Prepare structure for export based on parameters. If deemed
     conformation is missing, an exception is thrown.
@@ -384,11 +460,11 @@ def _prepate_structure(component, remove_hs, conf_type):
         tuple(rdkit.Mol,int,ConformerType): mol along with properties
         to be exported.
     """
-    conf_id = component.conformers_mapping[conf_type]
+    conf_id = 0 if conf_type == ConformerType.Depiction else component.conformers_mapping[conf_type]
     mol_to_save = component._2dmol if conf_type == ConformerType.Depiction else component.mol
 
     if remove_hs:
-        mol_to_save = component.mol_no_h
+        mol_to_save = Chem.RemoveHs(mol_to_save)
 
     return (mol_to_save, conf_id, conf_type)
 
