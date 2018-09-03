@@ -394,10 +394,13 @@ def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
     result = {'atoms': [], 'bonds': []}
+    conformer = mol_to_save.GetConformer(conf_id)
+    Chem.Kekulize(mol_to_save)
+    Chem.WedgeMolBonds(mol_to_save, conformer)
 
     for atom in mol_to_save.GetAtoms():
         atom_dict = {}
-        conformer = mol_to_save.GetConformer(conf_id)
+
         coords = conformer.GetAtomPosition(atom.GetIdx())
 
         atom_dict['id'] = atom.GetProp('name')
@@ -405,9 +408,9 @@ def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
         atom_dict['charge'] = atom.GetFormalCharge()
 
         if conformer.Is3D():
-            atom_dict['coords'] = {'X': coords.x, 'Y': coords.y, 'Z': coords.z}
+            atom_dict['coords'] = {'X': round(coords.x, 4), 'Y': round(coords.y, 4), 'Z': round(coords.z, 4)}
         else:
-            atom_dict['coords'] = {'X': coords.x, 'Y': coords.y}
+            atom_dict['coords'] = {'X': round(coords.x, 4), 'Y': round(coords.y, 4)}
 
         result['atoms'].append(atom_dict)
 
@@ -416,6 +419,7 @@ def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
         bond_dict['from'] = bond.GetBeginAtomIdx()
         bond_dict['to'] = bond.GetEndAtomIdx()
         bond_dict['type'] = bond.GetBondType().name
+        bond_dict['wedge'] = bond.GetBondDir().name
 
         result['bonds'].append(bond_dict)
 
@@ -464,7 +468,7 @@ def _prepate_structure(component, remove_hs, conf_type):
     mol_to_save = component._2dmol if conf_type == ConformerType.Depiction else component.mol
 
     if remove_hs:
-        mol_to_save = Chem.RemoveHs(mol_to_save)
+        mol_to_save = Chem.RemoveHs(mol_to_save, sanitize=False)
 
     return (mol_to_save, conf_id, conf_type)
 
