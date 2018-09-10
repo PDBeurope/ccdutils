@@ -1,3 +1,35 @@
+#!/usr/bin/env python
+# software from PDBe: Protein Data Bank in Europe; https://pdbe.org
+#
+# Copyright 2018 EMBL - European Bioinformatics Institute
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+"""This script is used to generate protein-ligand interactions information
+for bound molecules from mmcif files
+
+During this process `_nonpoly_seq` table is used to to identify ligands
+and `_struct_conn` table to come up with connectivity among them. In the
+next step ChimeraX is used to protonate structures and refactored
+version of Arpeggio software [1] is used to come up with protein-ligand
+interactions.
+
+[1] Jubb, H. C., Higueruelo, A. P., Ochoa-Montaño, B., Pitt, W. R.,
+Ascher, D. B., & Blundell, T. L. (2017). Arpeggio: A Web Server for
+Calculating and Visualising Interatomic Interactions in Protein Structures.
+Journal of Molecular Biology, 429(3), 365–371.
+"""
+
 import argparse
 import json
 import logging
@@ -264,7 +296,7 @@ def _log_settings(args):
     settings += '{:29s}{:25s}{}\n'.format('', 'output_dir', args.config.output_dir)
     settings += '{:29s}{:25s}{}\n'.format('', 'assembly_composition', args.config.assembly_composition)
     settings += '{:29s}{:25s}{}\n'.format('', 'coordinates_server', args.config.coordinates_server)
-    settings += '{:29s}{:25s}{}\n'.format('', 'ChimeraX binary location', args.config.chimera)
+    settings += '{:29s}{:25s}{}\n'.format('', 'ChimeraX binary location', args.config.chimerax)
     settings += '{:29s}{:25s}{}\n'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
     settings += '{:29s}{:25s}{}'.format('', 'running on ' + str(len(args.pdbs)) + ' structures.', '')
 
@@ -281,7 +313,19 @@ def create_parser():
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('--config', required=True, help='Configuration file.')
+    temp_config = {
+        "pubchem_templates": "path to the pubchem templates",
+        "generic_templates": "path to the generic templates",
+        "components": "Path to the components in the mmcif file (expected structure: mmcif/ATP.cif)",
+        "coordinates_server": "URL with the instance of CoordinateServer",
+        "assembly_composition": "path to the assembly composition files (expected structure: assembly/tq/1tqn/assembly_generation/1tqn-assembly.xml)",
+        "chimerax": "location of the ChimeraX binary",
+        "output_dir": "path to the output directory"
+    }
+
+    parser.add_argument('--config', required=True,
+                        help=f'Configuration file in the following JSON format:\n {json.dumps(temp_config, sort_keys=True, indent=4)}')
+
     selection_group = parser.add_mutually_exclusive_group(required=True)
     selection_group.add_argument('-p', '--pdbs', type=str, nargs='+', help='List of pdb ids to be processed.')
     selection_group.add_argument('-sf', '--selection-file', type=str, help='Selections as above, but listed in a file.')
@@ -451,7 +495,7 @@ def __add_hydrogens(config, wd, structure, protonated):
             'exit'
         ]))
     try:
-        subprocess.call([config.chimera, '--nogui', '--cmd', f'open {cmd_file}', '--silent'])
+        subprocess.call([config.chimerax, '--nogui', '--cmd', f'open {cmd_file}', '--silent'])
         logging.debug('Protonation finished.')
     except Exception:
         raise CCDUtilsError('Error while protonating file.')
@@ -530,6 +574,3 @@ def main():
 
     check_args(args)
     interactions_pipeline(args)
-
-
-main()
