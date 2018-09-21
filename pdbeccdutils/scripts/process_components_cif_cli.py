@@ -117,7 +117,7 @@ def pdbechem_pipeline(args):
             process_single_component(args, ccd_reader_result, fragment_library, chem_comp_xml,
                                      depictions, pubchem_templates, logger)
         except Exception as e:
-            logger.debug(f'{key} | FAILURE.')
+            logger.debug(f'{key} | FAILURE {str(e)}.')
         counter -= 1
 
         if counter == 0:
@@ -190,7 +190,7 @@ def process_single_component(args, ccd_reader_result, library,
     """
     ccd_id = ccd_reader_result.component.id
     parent_dir = os.path.join(args.output_dir, ccd_id[0], ccd_id)
-    os.makedirs(parent_dir)
+    os.makedirs(parent_dir, exist_ok=True)
     ideal_conformer = ConformerType.Ideal
     component = ccd_reader_result.component
 
