@@ -294,9 +294,10 @@ def _log_settings(args):
     settings += '{:29s}{:25s}{}\n'.format('', 'pubchem_templates', args.config.pubchem_templates)
     settings += '{:29s}{:25s}{}\n'.format('', 'components', args.config.components)
     settings += '{:29s}{:25s}{}\n'.format('', 'output_dir', args.config.output_dir)
-    settings += '{:29s}{:25s}{}\n'.format('', 'assembly_composition', args.config.assembly_composition)
-    settings += '{:29s}{:25s}{}\n'.format('', 'coordinates_server', args.config.coordinates_server)
-    settings += '{:29s}{:25s}{}\n'.format('', 'ChimeraX binary location', args.config.chimerax)
+    settings += '{:29s}{:25s}{}\n'.format('', 'input_dir', args.config.input_dir)
+    settings += '{:29s}{:25s}{}\n'.format('', 'node', args.config.node)
+    settings += '{:29s}{:25s}{}\n'.format('', 'coordinate_server', args.config.coordinate_server)
+    settings += '{:29s}{:25s}{}\n'.format('', 'ChimeraX', args.config.chimerax)
     settings += '{:29s}{:25s}{}\n'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
     settings += '{:29s}{:25s}{}'.format('', 'running on ' + str(len(args.pdbs)) + ' structures.', '')
 
@@ -316,11 +317,13 @@ def create_parser():
     temp_config = {
         "pubchem_templates": "path to the pubchem templates",
         "generic_templates": "path to the generic templates",
-        "components": "Path to the components in the mmcif file (expected structure: mmcif/ATP.cif)",
-        "coordinates_server": "URL with the instance of CoordinateServer",
-        "assembly_composition": "path to the assembly composition files (expected structure: assembly/tq/1tqn/assembly_generation/1tqn-assembly.xml)",
+        "output_dir": "path to the output directory",
+        "components": "Path to the components in the mmcif file (expected structure: mmcif/A/ATP/ATP.cif)",
+        "node": "Path to the node.js binary",
+        "coordinate_server": "Path to the coordinate server local.js binary",
+        "input_dir": "path to the input data location (expected structure: ./tq/1tqn/assembly_generation/1tqn-assembly.xml and ./tq/1tqn/clean_mmcif/1tqn_updated.cif.gz)",
         "chimerax": "location of the ChimeraX binary",
-        "output_dir": "path to the output directory"
+
     }
 
     parser.add_argument('--config', required=True,
@@ -375,7 +378,7 @@ def _process_single_structure(config, depictor, pdb):
     ligands present in the bound molecules.
 
     Args:
-        config (): Application configuration from the json file.
+        config (Namedtuple): Application configuration from the json file.
         depictor (DepictionManager): Helper class to get nice 2D images.
         pdb (str): Pdb id.
     """
@@ -383,34 +386,34 @@ def _process_single_structure(config, depictor, pdb):
     wd = os.path.join(config.output_dir, pdb[1:3], pdb)
     os.makedirs(wd, exist_ok=True)
 
-    structure = os.path.join(wd, f'{pdb}.cif')
-    protonated = os.path.join(wd, f'{pdb}_h.cif')
+    source_path = os.path.join(config.input_dir, pdb[1:3], pdb, "clean_mmcif", f'{pdb}_updated.cif.gz')
+    assembly_path = __get_cs_structure(config, wd, pdb)
+    protonated_cif_path = os.path.join(wd, f'{pdb}_h.cif')
+    protonated_pdb_path = os.path.join(wd, f'{pdb}_h.pdb')
 
-    __download_structure(config, structure, pdb)
+    bound_molecules = __infer_bound_molecules(config, assembly_path)
 
-    bms = __infer_bound_molecules(config, structure)
-
-    if len(bms) == 0:
+    if len(bound_molecules) == 0:
         logging.debug('No bound molecules found. Skipping entry.')
         return
     else:
-        logging.debug(f'{len(bms)} bound molecules found.')
+        logging.debug(f'{len(bound_molecules)} bound molecules found.')
 
-    __add_hydrogens(config, wd, structure, protonated)
+    __add_hydrogens(config, wd, assembly_path, protonated_cif_path, protonated_pdb_path)
     # bound_molecules = __infer_bound_molecules(config, protonated) hopefully chimerax dont shuffle residue identifiers with the
 
     i = 0
-    for bm in bms:
+    for bm in bound_molecules:
         i += 1
         logging.debug(f'Bound molecule composition: {str(bm)}')
 
         for ligand in map(lambda l: l.name, bm.nodes):
             if ligand not in result_bag['depictions']:
-                ligand_path = os.path.join(config.components, f'{ligand}.cif')
+                ligand_path = os.path.join(config.components, ligand[0], ligand, f'{ligand}.cif')
                 ligand_layout = __create_ligand_layout(depictor, ligand_path)
                 result_bag['depictions'][ligand] = ligand_layout[ligand]
 
-        contacts = __run_arpeggio(config, protonated, bm)
+        contacts = __run_arpeggio(config, protonated_cif_path, bm)
         result_bag[f'bm{i}'] = {'contacts': contacts}
         result_bag[f'bm{i}']['composition'] = bm.to_dict()
 
@@ -440,45 +443,61 @@ def __get_assembly_id(path):
     raise AttributeError(f'Preferred id not found for the file {path}.')
 
 
-def __download_structure(config, structure, pdb):
+def __get_cs_structure(config, wd, pdb):
     """Use instance of coordinate server to obtain biologicall assembly
     of the given protein.
 
     Args:
         config (ArgumentParser): Application configuration.
-        structure (str): Path to the location where the structure will
-            be downloaded.
+        wd (str): working directory
         pdb (str): 4-letter PDB id.
 
-    Raises:
-        CCDUtilsError: In case the structure cannot be obtained.
+    Returns:
+        str: Path to the stored assembly structure
     """
-    xml_path = os.path.join(config.assembly_composition,
+    input_str_path = os.path.join(config.input_dir, pdb[1:3], pdb, "clean_mmcif", f'{pdb}_updated.cif.gz')
+    assembly_str_path = os.path.join(wd, f'{pdb}_assembly.cif')
+    cs_config_path = os.path.join(wd, 'cs_config.json')
+    xml_path = os.path.join(config.input_dir,
                             pdb[1:3], pdb,
                             'assembly_generation',
                             f'{pdb}-assembly.xml')
     assembly_id = __get_assembly_id(xml_path)
 
-    url = f'{config.coordinates_server}/{pdb}/assembly?id={assembly_id}'
+    cs_config_data = [
+        {
+            "inputFilename": input_str_path,
+            "outputFilename": assembly_str_path,
+            "query": "assembly",
+            "params": {
+                "id": assembly_id
+            }
+        }
+    ]
+
+    with open(cs_config_path, 'w') as f:
+        json.dump(cs_config_data, f)
+
     try:
-        urllib.request.urlretrieve(url, structure)
-    except urllib.request.HTTPError:
-        raise CCDUtilsError(f'Structure could not be downloaded from {url}')
-    except urllib.error.URLError:
-        raise CCDUtilsError(f'Structure could not be downloaded from {url}')
+        subprocess.call([config.node, config.coordinate_server, cs_config_path])
+    except Exception as e:
+        raise CCDUtilsError('Error while generating assembly file.')
 
-    logging.debug(f'Downloaded {pdb} with the assembly id {assembly_id}')
+    logging.debug(f'Generated {pdb} with the assembly id {assembly_id}.')
+
+    return assembly_str_path
 
 
-def __add_hydrogens(config, wd, structure, protonated):
+def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
     """Use ChimeraX to add hydrogens to the potein structure.
-    The command being used is `addh hbons true`.
+    The command being used is `addh hbonds true`.
 
     Args:
         config (ArgumentParser): Application configuration.
         wd (str): Working directory
         structure (str): Path to the original struture
-        protonated (str): Path to the protonated structure.
+        protonated_cif (str): Path to the CIF protonated structure.
+        protonated_pdb (str): Path to the PDB protonated structure.
 
     Raises:
         CCDUtilsError: If the ChimeraX fails or the protein structure
@@ -491,7 +510,8 @@ def __add_hydrogens(config, wd, structure, protonated):
         f.write("\n".join([
             f'open {structure}',
             'addh hbond true',
-            f'save {protonated} format mmcif',
+            f'save {protonated_cif} format mmcif',
+            f'save {protonated_pdb} format pdb',
             'exit'
         ]))
     try:
@@ -500,8 +520,11 @@ def __add_hydrogens(config, wd, structure, protonated):
     except Exception:
         raise CCDUtilsError('Error while protonating file.')
 
-    if not os.path.isfile(protonated):
-        raise CCDUtilsError('Protonated file was not created.')
+    if not os.path.isfile(protonated_cif):
+        raise CCDUtilsError('CIF protonated file was not created.')
+
+    if not os.path.isfile(protonated_pdb):
+        raise CCDUtilsError('CIF protonated file was not created.')
 
 
 def __infer_bound_molecules(config, structure):
