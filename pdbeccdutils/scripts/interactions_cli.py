@@ -365,7 +365,7 @@ def interactions_pipeline(args):
     logger = _set_up_logger(args)
     settings = _log_settings(args)
     logger.debug(settings)
-    depictor = DepictionManager(args.config.pubchem_templates)
+    depictor = DepictionManager(pubchem_templates_path=args.config.pubchem_templates)
 
     for pdb in args.pdbs:
         logging.debug(f'Processing... {pdb}.')
@@ -457,7 +457,6 @@ def __get_cs_structure(config, wd, pdb):
     """
     input_str_path = os.path.join(config.input_dir, pdb[1:3], pdb, "clean_mmcif", f'{pdb}_updated.cif.gz')
     assembly_str_path = os.path.join(wd, f'{pdb}_assembly.cif')
-    cs_config_path = os.path.join(wd, 'cs_config.json')
     xml_path = os.path.join(config.input_dir,
                             pdb[1:3], pdb,
                             'assembly_generation',
@@ -475,17 +474,53 @@ def __get_cs_structure(config, wd, pdb):
         }
     ]
 
+    cs_structure_generation_success = __run_cs(config, wd, cs_config_data)
+
+    if not cs_structure_generation_success:
+        cs_config_data[0]['params'] = {}
+        cs_config_data[0]['query'] = 'full'
+
+        cs_structure_generation_success = __run_cs(config, wd, cs_config_data)
+
+        if not cs_structure_generation_success:
+            raise CCDUtilsError('Structure generation using CoordinateServer failed.')
+        else:
+            logging.debug(f'{pdb} is likely to be NMR structure, generating /full structue.')
+    else:
+        logging.debug(f'Generated {pdb} with the assembly id {assembly_id}.')
+
+    return assembly_str_path
+
+
+def __run_cs(config, wd, cs_config_data):
+    """Runs the coordinate server given the configuration file.
+
+    Args:
+        config (ArgumentParser): Application configuration.
+        wd (str): working directory.
+        cs_config_data (dict of str): CoordinateServer config.
+
+    Raises:
+        CCDUtilsError: If the CoordinateServer run failed badly.
+
+    Returns:
+        bool: Whether or not the generation of the structure was succesfull.
+    """
+    cs_config_path = os.path.join(wd, 'cs_config.json')
     with open(cs_config_path, 'w') as f:
         json.dump(cs_config_data, f)
 
+    print(cs_config_data)
     try:
-        subprocess.call([config.node, config.coordinate_server, cs_config_path])
-    except Exception as e:
+        out = subprocess.check_output([config.node, config.coordinate_server, cs_config_path],
+                                      stderr=subprocess.STDOUT)
+        out = out.decode('utf-8')
+        print('foo')
+        print(out)
+
+        return 'Failed' not in out
+    except Exception:
         raise CCDUtilsError('Error while generating assembly file.')
-
-    logging.debug(f'Generated {pdb} with the assembly id {assembly_id}.')
-
-    return assembly_str_path
 
 
 def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
