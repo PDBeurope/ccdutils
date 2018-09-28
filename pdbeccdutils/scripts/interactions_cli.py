@@ -192,6 +192,27 @@ class Edge:
         return self.nodes[i]
 
 
+def __infer_bound_molecules(config, structure):
+    """Identify bound molecules in the input protein structure.
+
+    Args:
+        config (ArgumentParser): Application configuration.
+        structure (str): Path to the structure.
+
+    Returns:
+        [list of Graph]: Bound molecules found in the pdb entry.
+    """
+    bms = []
+    temp = _parse_bound_molecules(structure)
+
+    while True:
+        component = temp.pop_component()
+        if component is None:
+            return bms
+        else:
+            bms.append(component)
+
+
 def _parse_bound_molecules(path):
     """Parse information from the information about HETATMS from the
     `_pdbx_nonpoly_scheme` (or `_atom_sites` if the former one is not
@@ -254,6 +275,8 @@ def _parse_bound_molecules(path):
         __add_connections(graph, parsed_str['_struct_conn'])
 
     return graph
+
+
 # endregion
 
 # region logging
@@ -307,7 +330,7 @@ def _log_settings(args):
 
 def create_parser():
     """
-    Sets up parse the command line options.
+    Sets up a parser to get command line options.
 
     Returns:
          ArgumentParser parser
@@ -337,15 +360,26 @@ def create_parser():
     return parser
 
 
+def __validate_file_exists(name, p):
+    """Check if the file exists
+
+    Args:
+        name (str): Name of the parameter
+        p (str): Value of the parameter
+    """
+    if not os.path.isfile(p):
+        print(f'Supplied parameter {name} is an invalid path {p}.', file=sys.stderr)
+        sys.exit(os.EX_NOINPUT)
+
+
 def check_args(args):
     """Validate suplied arguments.
 
     Args:
         args (ArgumentParser): an argparse namespace containing the required arguments
     """
-    if not os.path.isfile(args.config):
-        print(f'{args.config} does not exist', file=sys.stderr)
-        sys.exit(os.EX_NOINPUT)
+
+    __validate_file_exists('Config', args.config)
 
     with open(args.config, 'r') as f:
         js = json.load(f)
@@ -354,6 +388,9 @@ def check_args(args):
     if args.selection_file is not None:
         with open(args.selection_file, 'r') as f:
             args.pdbs = list(map(lambda l: l.strip(), f.readlines()))
+
+    __validate_file_exists('ChimeraX', args.config.chimerax)
+    __validate_file_exists('coordinate_server', args.config.coordinate_server)
 
 
 def interactions_pipeline(args):
@@ -369,7 +406,10 @@ def interactions_pipeline(args):
 
     for pdb in args.pdbs:
         logging.debug(f'Processing... {pdb}.')
-        _process_single_structure(args.config, depictor, pdb)
+        try:
+            _process_single_structure(args.config, depictor, pdb)
+        except Exception as e:
+            logging.error(f'FAILED {pdb} | {str(e)}', file=sys.stderr)
 
 
 def _process_single_structure(config, depictor, pdb):
@@ -400,7 +440,6 @@ def _process_single_structure(config, depictor, pdb):
         logging.debug(f'{len(bound_molecules)} bound molecules found.')
 
     __add_hydrogens(config, wd, assembly_path, protonated_cif_path, protonated_pdb_path)
-    # bound_molecules = __infer_bound_molecules(config, protonated) hopefully chimerax dont shuffle residue identifiers with the
 
     i = 0
     for bm in bound_molecules:
@@ -418,7 +457,7 @@ def _process_single_structure(config, depictor, pdb):
         result_bag[f'bm{i}']['composition'] = bm.to_dict()
 
     with open(os.path.join(wd, 'contacts.json'), 'w') as f:
-        json.dump(result_bag, f, sort_keys=True, indent=4,)
+        json.dump(result_bag, f, sort_keys=True, indent=4)
 
 
 def __get_assembly_id(path):
@@ -476,6 +515,9 @@ def __get_cs_structure(config, wd, pdb):
 
     cs_structure_generation_success = __run_cs(config, wd, cs_config_data)
 
+    # If the structure generation fails it is likely because of the fact
+    # that the structure is NMR and assembly cannot be generated
+    # using /full instead.
     if not cs_structure_generation_success:
         cs_config_data[0]['params'] = {}
         cs_config_data[0]['query'] = 'full'
@@ -510,15 +552,13 @@ def __run_cs(config, wd, cs_config_data):
     with open(cs_config_path, 'w') as f:
         json.dump(cs_config_data, f)
 
-    print(cs_config_data)
     try:
         out = subprocess.check_output([config.node, config.coordinate_server, cs_config_path],
                                       stderr=subprocess.STDOUT)
         out = out.decode('utf-8')
-        print('foo')
-        print(out)
 
         return 'Failed' not in out
+
     except Exception:
         raise CCDUtilsError('Error while generating assembly file.')
 
@@ -559,28 +599,7 @@ def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
         raise CCDUtilsError('CIF protonated file was not created.')
 
     if not os.path.isfile(protonated_pdb):
-        raise CCDUtilsError('CIF protonated file was not created.')
-
-
-def __infer_bound_molecules(config, structure):
-    """Identify bound molecules in the input protein structure.
-
-    Args:
-        config (ArgumentParser): Application configuration.
-        structure (str): Path to the structure.
-
-    Returns:
-        [list of Graph]: Bound molecules found in the pdb entry.
-    """
-    bms = []
-    temp = _parse_bound_molecules(structure)
-
-    while True:
-        component = temp.pop_component()
-        if component is None:
-            return bms
-        else:
-            bms.append(component)
+        raise CCDUtilsError('PDB protonated file was not created.')
 
 
 def __run_arpeggio(config, structure_path, bm):
