@@ -16,7 +16,7 @@
 # under the License.
 
 """Structure writing module. Presently the following formats are supported:
-    SDF, CIF, PDB, , XYZ, XML, CML
+    SDF, CIF, PDB, JSON, XYZ, XML, CML
 
 Raises:
     CCDUtilsError: If deemed format is not supported

@@ -15,6 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""A set of methods for reading in data and creating internal representation
+of molecules. The basic use can be as easy as this::
+
+    from pdbeccdutils.core import ccd_reader
+
+    ccdutils_component = ccd_reader.read_pdb_cif_file('/path/to/cif/ATP.cif').component
+    rdkit_mol = ccdutils_component.mol
+"""
+
 import os
 from collections import namedtuple
 
