@@ -213,7 +213,7 @@ def _parse_bound_molecules(path):
         g = Graph()
         for i in range(len(schema['asym_id'])):
             n = Node(
-                schema['auth_mon_id'][i],  # aka label_comp_id
+                schema['mon_id'][i],  # aka label_comp_id
                 schema['pdb_strand_id'][i],  # aka auth_asym_id
                 schema['pdb_seq_num'][i])  # aka auth_seq_id
 
@@ -254,8 +254,8 @@ def _parse_bound_molecules(path):
 
     parsed_str = list(MMCIF2Dict().parse(path).values())[0]
 
-    graph = __parse_ligands_from_atom_sites(parsed_str['_atom_site'])
-    # graph = __parse_ligands_from_nonpoly_schema(parsed_str['_pdbx_nonpoly_scheme'])
+    #graph = __parse_ligands_from_atom_sites(parsed_str['_atom_site'])
+    graph = __parse_ligands_from_nonpoly_schema(parsed_str['_pdbx_nonpoly_scheme'])
     if '_struct_conn' in parsed_str:
         __add_connections(graph, parsed_str['_struct_conn'])
 
