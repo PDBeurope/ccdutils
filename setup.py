@@ -17,6 +17,6 @@ setup(name='pdbeccdutils',
                'bin/protein_interactions'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['Pillow', 'scipy', 'sphinx', 'sphinx_rtd_theme', 'pdbecif'],
+      install_requires=['Pillow', 'scipy', 'pdbecif'],
       tests_require=['pytest']
       )

@@ -16,19 +16,20 @@
 # under the License.
 
 import json
+import logging
 import os
 import sys
 import urllib.request
 
 from rdkit import Chem
 
-from pdbeccdutils.core import ccd_reader as sr
 from pdbeccdutils.core import ReleaseStatus
+from pdbeccdutils.core import ccd_reader as sr
 
 
 class PubChemDownloader:
     """
-    Toolkit to retrieve pubchem 2D depictions from the database
+    Toolkit to retrieve 2D layouts from the PubChem database.
     """
 
     def __init__(self, pubchem_templates):
@@ -38,7 +39,7 @@ class PubChemDownloader:
         self.pubchem_templates = pubchem_templates
 
     def update_ccd_dir(self, components):
-        """Update 2d images of pdbechem components which are available
+        """Update 2D images of pdbechem components which are available
         in the pubchem database
 
         Args:
@@ -46,58 +47,27 @@ class PubChemDownloader:
                 .cif format
         """
 
-        print('Querying pubchem database...')
-        counter = 0
-        downloaded = 0
-
         for f in os.listdir(components):
-            id = f.split('.')[0]
             c = sr.read_pdb_cif_file(os.path.join(components, f)).component
-            destination = os.path.join(self.pubchem_templates, id + '.sdf')
-            success = self.download_template(c)
-
-            if success:
-                downloaded += 1
-            counter += 1
-
-            print('{} | new {}'.format(counter, downloaded), end='\r')
-
-        print('Downloaded {} new structures.'.format(downloaded))
+            self.download_template(c)
 
     def update_ccd_file(self, ccd):
         """Update 2d images of pdbechem components which are available
-        in the pubchem database from CCD files. Only released components
-        are downloaded
+        in the pubchem database from CCD files.
 
         Args:
-            ccd (str): Path to the the z`.cif CCD file
+            ccd (str): Path to the the `.cif` CCD file
         """
-
-        print('Querying pubchem database...')
-        counter = 0
-        downloaded = 0
         components = sr.read_pdb_components_file(ccd)
 
         for k, v in components.items():
-            destination = os.path.join(self.pubchem_templates, k + '.sdf')
-            if v.component.released != ReleaseStatus.OBS:
-                continue
-
-            success = self.download_template(v.component)
-
-            if success:
-                downloaded += 1
-            counter += 1
-
-            print('{} | new {}'.format(counter, downloaded), end='\r')
-
-        print('Downloaded {} new structures.'.format(downloaded))
+            self.download_template(v.component)
 
     def download_template(self, component):
-        """Downloads 2D structure of a given component
+        """Downloads 2D layout of a given component
 
         Args:
-            component (pdbeccdutils.core.Component): Component
+            component (pdbeccdutils.core.component.Component): Component
             destination (str): Path to the pubchem 2D template dir
 
         Returns:

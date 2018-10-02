@@ -14,7 +14,7 @@ def _get_matches(mol, smarts):
         smarts (str): Molecule representation in SMARTS.
 
     Returns:
-        ((int)): Molecular subgraph matches.
+        int: Molecular subgraph matches.
     """
 
     patt = Chem.MolFromSmarts(smarts)
@@ -33,7 +33,7 @@ def generate_sim_score(template, query, smarts):
 
     Returns:
         (int, int): tuple of size of the common subgraph and the
-            similarity score.
+        similarity score.
     """
 
     if template.GetNumAtoms() == 1:
@@ -79,10 +79,10 @@ def compare_molecules(template, query, thresh):
 
     Returns:
         (int, int, int, float):
-            int - template atom count
-            int - query atom count
-            int - size of common subgraph
-            float - similarity score
+        int - template atom count
+        int - query atom count
+        int - size of common subgraph
+        float - similarity score
     """
     ms = [template, query]
     sim_arr = ['', '', 0, 0]

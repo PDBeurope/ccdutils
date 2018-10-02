@@ -372,7 +372,7 @@ def to_cml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
 
 
 def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
-    """Returns component information in dictionary suitable for json 
+    """Returns component information in dictionary suitable for json
     formating
 
     Args:

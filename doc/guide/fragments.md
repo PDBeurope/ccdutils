@@ -1,4 +1,6 @@
+```eval_rst
 .. _fragments:
+```
 
 Fragments
 =========

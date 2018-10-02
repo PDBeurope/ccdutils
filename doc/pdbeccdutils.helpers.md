@@ -1,6 +1,7 @@
 pdbeccdutils.helpers
-=======================
+====================
 
+```eval_rst
 .. automodule:: pdbeccdutils.helpers.io_grabber
     :members:    
 .. automodule:: pdbeccdutils.helpers.collection_ext
@@ -9,3 +10,4 @@ pdbeccdutils.helpers
     :members:
 .. automodule:: pdbeccdutils.helpers.str_conversions
     :members:    
+```

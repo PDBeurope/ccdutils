@@ -15,21 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""This script is used to generate protein-ligand interactions information
-for bound molecules from mmcif files
-
-During this process `_nonpoly_seq` table is used to to identify ligands
-and `_struct_conn` table to come up with connectivity among them. In the
-next step ChimeraX is used to protonate structures and refactored
-version of Arpeggio software [1] is used to come up with protein-ligand
-interactions.
-
-[1] Jubb, H. C., Higueruelo, A. P., Ochoa-Montaño, B., Pitt, W. R.,
-Ascher, D. B., & Blundell, T. L. (2017). Arpeggio: A Web Server for
-Calculating and Visualising Interatomic Interactions in Protein Structures.
-Journal of Molecular Biology, 429(3), 365–371.
-"""
-
 import argparse
 import json
 import logging

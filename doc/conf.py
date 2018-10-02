@@ -14,8 +14,10 @@
 #
 import os
 import sys
+from recommonmark.parser import CommonMarkParser
+from recommonmark.transform import AutoStructify
 
-# -- Project information -----------------------------------------------------
+# region Project information
 
 project = 'pdbeccdutils'
 copyright = '2018, Protein Data Bank in Europe'
@@ -26,8 +28,9 @@ version = '0.2'
 # The full version, including alpha/beta/rc tags
 release = '0.2.1'
 
+# endregion
 
-# -- General configuration ---------------------------------------------------
+# region General configuration
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
@@ -51,8 +54,11 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_parsers = {
+    '.md': CommonMarkParser
+}
+source_suffix = ['.rst', '.md']
+# source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
@@ -72,8 +78,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# endregion
 
-# -- Options for HTML output -------------------------------------------------
+# region Options for HTML output
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -85,7 +92,6 @@ html_theme = 'sphinx_rtd_theme'
 # documentation.
 #
 html_theme_options = {
-    'typekit_id': 'hiw1hhg',
     'collapse_navigation': False,
     'sticky_navigation': True,
     'navigation_depth': 4,
@@ -108,15 +114,16 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
+# end region
 
-
-# -- Options for HTMLHelp output ---------------------------------------------
+# region Options for HTMLHelp output
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'pdbeccdutilsdoc'
 
+# endregion
 
-# -- Options for LaTeX output ------------------------------------------------
+# region Options for LaTeX output
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
@@ -143,9 +150,9 @@ latex_documents = [
     (master_doc, 'pdbeccdutils.tex', 'pdbeccdutils Documentation',
      'Protein Data Bank in Europe', 'manual'),
 ]
+# endregion
 
-
-# -- Options for manual page output ------------------------------------------
+# region Options for manual page output
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
@@ -153,9 +160,9 @@ man_pages = [
     (master_doc, 'pdbeccdutils', 'pdbeccdutils Documentation',
      [author], 1)
 ]
+# endregion
 
-
-# -- Options for Texinfo output ----------------------------------------------
+# region Options for Texinfo output
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
@@ -166,5 +173,17 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+# endregion
 
-# -- Extension configuration -------------------------------------------------
+# region Extension configuration
+github_doc_root = 'https://github.com/rtfd/recommonmark/tree/master/doc/'
+
+
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+        'url_resolver': lambda url: github_doc_root + url,
+        'auto_toc_tree_section': 'Contents',
+    }, True)
+    app.add_transform(AutoStructify)
+
+# endregion

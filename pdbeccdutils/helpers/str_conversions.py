@@ -16,24 +16,6 @@
 # under the License.
 
 
-def str_is_int(i):
-    """
-    Check if str can be converted to int
-
-    Args:
-        i (str): string representation of an integer
-
-    Returns:
-        bool: [description]
-    """
-
-    try:
-        int(i)
-        return True
-    except ValueError:
-        return False
-
-
 def str_to_int(i):
     """
     Converts the string into integer

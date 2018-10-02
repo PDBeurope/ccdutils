@@ -162,7 +162,7 @@ class DepictionManager:
 
         Returns:
             pdbeccdutils.utils.DepictionResult: Summary of the ligand
-                depiction process.
+            depiction process.
         """
         temp_mol = Chem.RWMol(mol)
         mappings = self._anonymization(temp_mol)
