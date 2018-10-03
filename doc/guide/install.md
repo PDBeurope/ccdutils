@@ -2,14 +2,11 @@
 .. _install:
 ```
 
-Installation
-============
+# Installation
+The `pdbeccdutils` can be presently obtained from the [EBI Gitlab](https://gitlab.ebi.ac.uk/pdbe/ccdutils.git) using the following command:
 
-The `pdbeccdutils` can be presently obtained from the [EBI Gitlab](https://gitlabci.ebi.ac.uk/pdbe/ccdutils.git) using the following command:
-
-```bash
-pip install git+https://gitlabci.ebi.ac.uk/pdbe/ccdutils.git
+```console
+pip install git+https://gitlab.ebi.ac.uk/pdbe/ccdutils.git
 ```
-
 
 If you want to contribute to the project please fork it first and then do a pull request.

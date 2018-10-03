@@ -1,8 +1,8 @@
-[![pipeline status](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/badges/refactoring/pipeline.svg)](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/commits/refactoring)
-[![coverage report](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/badges/refactoring/coverage.svg)](https://gitlabci.ebi.ac.uk/pdbe/ccdutils/commits/refactoring)
+[![pipeline status](https://gitlab.ebi.ac.uk/pdbe/ccdutils/badges/master/pipeline.svg)](https://gitlab.ebi.ac.uk/pdbe/ccdutils/commits/master)
+[![coverage report](https://gitlab.ebi.ac.uk/pdbe/ccdutils/badges/master/coverage.svg)](https://gitlab.ebi.ac.uk/pdbe/ccdutils/commits/master)
+
 
 # pdbeccdutils
-
 * A set of python tools to deal with PDB chemical components definitions
   for small molecules, taken from the 
   [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd)
@@ -15,8 +15,8 @@
 * Please note that the project is under active development includes some rough 
   preliminary scripts and is and not yet ready for wider use!
 
-## Installation instructions.
 
+## Installation instructions.
 * `pdbeccdutils` requires RDKit to be installed.
   The official RDKit documentation has
   [installation instructions for a variety of platforms](http://www.rdkit.org/docs/Install.html).

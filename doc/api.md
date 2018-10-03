@@ -2,8 +2,7 @@
 .. _api:
 ```
 
-API documentation
-=================
+# API documentation
 ```eval_rst
 .. module:: pdbeccdutils
 ```

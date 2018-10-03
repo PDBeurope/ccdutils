@@ -2,6 +2,5 @@
 .. _fragments:
 ```
 
-Fragments
-=========
+# Fragments
 TODO

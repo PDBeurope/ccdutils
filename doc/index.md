@@ -4,12 +4,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 ```
-pdbeccdutils: Small molecules chemistry toolkit
-===============================================
+# pdbeccdutils: Small molecules chemistry toolkit
 
-User guide
-----------
 
+## User guide
 Getting started with pdbeccdutils
 
 ```eval_rst
@@ -22,8 +20,8 @@ Getting started with pdbeccdutils
    guide/fragments
    guide/pipelines
 ```
-API documentation
------------------
+
+## API documentation
 
 Comprehensive API documentation with information on every function, class and method. This is automatically generated
 from the pdbeccdutils source code and comments.

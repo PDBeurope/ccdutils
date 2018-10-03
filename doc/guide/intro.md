@@ -2,6 +2,5 @@
 .. _intro:
 ```
 
-Introduction    
-============
+# Introduction    
 TODO
