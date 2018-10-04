@@ -94,3 +94,6 @@ tests_out/
 
 # vscode files
 .vscode/*
+
+# pytest files
+pdbeccdutils/tests/out
