@@ -23,22 +23,22 @@
   For linux/mac OS this is most easily done using the anaconda python with
   commands similar to:
 
-  ```
+  ```console
   conda create -c rdkit -n rdkit-env rdkit python=3
   source activate rdkit-env
   ```
 * Once you have installed RDKit, as described above then install pdbeccdutils using pip:
 
-  ```
-  git clone -b refactoring https://gitlabci.ebi.ac.uk/pdbe/ccdutils.git
-  pip install -e pip install -e ccdutils
+  ```console
+  pip install git+https://gitlab.ebi.ac.uk/pdbe/ccdutils.git
   ```
 
 ## Documentation
- Note that `sphinx` needs to be a part of the virtual environmnent, 
- otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
-  
+ Note that `sphinx` needs to be a part of the virtual environmnent, if you want to generate documentation by yourself. 
+ Otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
+
   * Generate *.rst files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
+  * Alternativelly, use the `recommonmark` package along with the proper configuration to get the 
   
   Use the following to generate initial markup files to be used by sphinx.
   This needs to be used when other package but `core`, `utils` and `helpers` is implemented.
@@ -61,6 +61,7 @@
 
 ## TODO list
   * Port rest of the important functionality implemented by Oliver
+  * Add more unit/regression tests to get at least 100% code coverage.
   * Add protein-ligand environment generation  
   * Further improvement of the documentation
   * Scafolding (Abhik)
