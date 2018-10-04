@@ -22,13 +22,8 @@ from collections import OrderedDict
 from datetime import date
 
 import rdkit
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import rdMolDraw2D
-from rdkit.Chem.rdchem import BondType
-from rdkit.Chem.rdmolops import AssignAtomChiralTagsFromStructure, AssignStereochemistry
-
-from pdbeccdutils.core import ConformerType, ReleaseStatus, CCDUtilsError
+import rdkit.Chem.Draw as Draw
+from pdbeccdutils.core import CCDUtilsError, ConformerType, ReleaseStatus
 from pdbeccdutils.helpers import IOGrabber, drawing
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
@@ -176,7 +171,7 @@ class Component:
         """
         if self._inchi_from_rdkit is None:
             try:
-                self._inchi_from_rdkit = Chem.inchi.MolToInchi(self.mol)
+                self._inchi_from_rdkit = rdkit.Chem.inchi.MolToInchi(self.mol)
             except ValueError:
                 self._inchi_from_rdkit = ''
         return self._inchi_from_rdkit
@@ -192,7 +187,7 @@ class Component:
         if self._inchikey_from_rdkit is None:
             inchi = self.inchi_from_rdkit
             if inchi != 'ERROR':
-                self._inchikey_from_rdkit = Chem.inchi.InchiToInchiKey(inchi)
+                self._inchikey_from_rdkit = rdkit.Chem.inchi.InchiToInchiKey(inchi)
             else:
                 self._inchikey_from_rdkit = ''
             if self._inchikey_from_rdkit is None:
@@ -207,8 +202,8 @@ class Component:
 
     @property
     def mol_no_h(self):
-        no_h = Chem.RemoveHs(self.mol, sanitize=False)
-        Chem.SanitizeMol(no_h, catchErrors=True)
+        no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
+        rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
         return no_h
 
     @property
@@ -276,10 +271,10 @@ class Component:
         Returns:
             rdkit.Chem.rdchem.Mol: 2D depiction of the ligand.
         """
-        mol_copy = Chem.RWMol(self.mol)
+        mol_copy = rdkit.Chem.RWMol(self.mol)
         if remove_hs:
-            mol_copy = Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
-            Chem.SanitizeMol(mol_copy, catchErrors=True)
+            mol_copy = rdkit.Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
+            rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
         result_log = manager.depict_molecule(self._id, mol_copy)
 
         if result_log is not None:
@@ -315,7 +310,7 @@ class Component:
             drawing.save_no_image(file_name, width=width)
             return
 
-        drawer = rdMolDraw2D.MolDraw2DSVG(width, width)
+        drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
         atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self._2dmol.GetAtoms())}
 
         if all(isinstance(i, str) for i in atom_highlight.keys()):
@@ -347,12 +342,12 @@ class Component:
         Returns:
             bool: Result of the structure generation process.
         """
-        options = AllChem.ETKDGv2()
+        options = rdkit.Chem.AllChem.ETKDGv2()
         options.clearConfs = False
 
         try:
-            conf_id = AllChem.EmbedMolecule(self.mol, options)
-            result = AllChem.UFFOptimizeMolecule(self.mol, confId=conf_id, maxIters=1000)
+            conf_id = rdkit.Chem.AllChem.EmbedMolecule(self.mol, options)
+            result = rdkit.Chem.AllChem.UFFOptimizeMolecule(self.mol, confId=conf_id, maxIters=1000)
             self.conformers_mapping[ConformerType.Computed] = conf_id
             return True
         except RuntimeError:
@@ -374,16 +369,16 @@ class Component:
         Returns:
             bool: Result of the sanitization process.
         """
-        rwmol = Chem.RWMol(self.mol)
+        rwmol = rdkit.Chem.RWMol(self.mol)
         try:
             success = self._fix_molecule_fast(rwmol) if fast else self._fix_molecule(rwmol)
 
             if not success:
                 return False
 
-            Chem.Kekulize(rwmol)
-            AssignAtomChiralTagsFromStructure(rwmol)
-            AssignStereochemistry(rwmol)
+            rdkit.Chem.Kekulize(rwmol)
+            rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol)
+            rdkit.Chem.rdmolops.AssignStereochemistry(rwmol)
             self.mol = rwmol.GetMol()
         except Exception as e:
             print(e, file=sys.stderr)
@@ -408,7 +403,7 @@ class Component:
             bool: true if more then 1 atom has coordinates [0, 0, 0]
         """
         conformer = self.mol.GetConformer(self.conformers_mapping[type])
-        empty_coords = Chem.rdGeometry.Point3D(0, 0, 0)
+        empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
         counter = 0
 
         for i in range(conformer.GetNumAtoms()):
@@ -483,7 +478,7 @@ class Component:
         while ((not success) and attempts >= 0):
             out = IOGrabber(sys.stderr)
             out.start()
-            sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
+            sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
             if sanitization_result == 0:
                 out.stop()
                 return True
@@ -498,9 +493,9 @@ class Component:
             element = split_object[0]
             valency = int(split_object[1].strip())
 
-            smarts_metal_check = Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
+            smarts_metal_check = rdkit.Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
             metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-            Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
+            rdkit.Chem.SanitizeMol(rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP)
 
             for (metal_index, atom_index) in metal_atom_bonds:
                 metal_atom = rwmol.GetAtomWithIdx(metal_index)
@@ -508,7 +503,7 @@ class Component:
 
                 # change the bond type to dative
                 bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-                bond.SetBondType(BondType.DATIVE)
+                bond.SetBondType(rdkit.Chem.rdchem.BondType.DATIVE)
 
                 if erroneous_atom.GetExplicitValence() == valency:
                     erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
@@ -527,33 +522,33 @@ class Component:
         Returns:
             bool: Whether or not sanitization succeeded
         """
-        smarts_metal_check = Chem.MolFromSmarts(METALS_SMART + '~[N]')
+        smarts_metal_check = rdkit.Chem.MolFromSmarts(METALS_SMART + '~[N]')
         metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-        Chem.SanitizeMol(rwmol, sanitizeOps=Chem.SanitizeFlags.SANITIZE_CLEANUP)
+        rdkit.Chem.SanitizeMol(rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP)
         for (metal_index, atom_index) in metal_atom_bonds:
             metal_atom = rwmol.GetAtomWithIdx(metal_index)
             erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
 
             # change the bond type to dative
             bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-            bond.SetBondType(BondType.DATIVE)
+            bond.SetBondType(rdkit.Chem.rdchem.BondType.DATIVE)
 
             # change the valency
             if erroneous_atom.GetExplicitValence() == 4:
                 erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
                 metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
 
-        sanitization_result = Chem.SanitizeMol(rwmol, catchErrors=True)
+        sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
 
         return sanitization_result == 0
 
     def _draw_molecule(self, drawer, file_name, width, atom_highlight, bond_highlight):
         try:
-            copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True, kekulize=True,
-                                                    addChiralHs=True)
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True,
+                                                                    kekulize=True, addChiralHs=True)
         except RuntimeError:
-            copy = rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=False, kekulize=True,
-                                                    addChiralHs=True)
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=False,
+                                                                    kekulize=True, addChiralHs=True)
 
         if bond_highlight is None:
             drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),

@@ -28,7 +28,7 @@ of molecules. The basic use can be as easy as this::
 import os
 from collections import namedtuple
 
-from rdkit import Chem
+import rdkit
 
 from mmCif.mmcifIO import MMCIF2Dict
 from pdbeccdutils.core import Component
@@ -117,7 +117,7 @@ def _parse_pdb_mmcif(cif_dict):
     """
     warnings = list()
     errors = list()
-    mol = Chem.RWMol()
+    mol = rdkit.Chem.RWMol()
 
     atoms_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp_atom', warnings)
     bonds_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp_bond', warnings)
@@ -164,7 +164,7 @@ def _parse_pdb_atoms(mol, atoms):
             element = 'O'
             isotope = 14
 
-        atom = Chem.Atom(element)
+        atom = rdkit.Chem.Atom(element)
         atom.SetProp('name', atoms['atom_id'][i])
         atom.SetProp('alt_name', atoms['alt_atom_id'][i])
         atom.SetFormalCharge(str_conversions.str_to_int(atoms['charge'][i]))
@@ -208,14 +208,14 @@ def _setup_pdb_conformer(atoms, label):
     if len(atoms) == 0:
         return
 
-    conformer = Chem.Conformer(len(atoms['atom_id']))
+    conformer = rdkit.Chem.Conformer(len(atoms['atom_id']))
 
     for i in range(len(atoms['atom_id'])):
         x = str_conversions.str_to_float(atoms[label.format(('x'))][i])
         y = str_conversions.str_to_float(atoms[label.format(('y'))][i])
         z = str_conversions.str_to_float(atoms[label.format(('z'))][i])
 
-        atom_position = Chem.rdGeometry.Point3D(x, y, z)
+        atom_position = rdkit.Chem.rdGeometry.Point3D(x, y, z)
         conformer.SetAtomPosition(i, atom_position)
 
     return conformer
@@ -277,7 +277,7 @@ def _parse_pdb_properties(chem_comp):
     Parse useful informations from _chem_comp category
 
     Args:
-        chem_comp (dict): the mmcif category with chem_comp info.
+        rdkit.Chem_comp (dict): the mmcif category with rdkit.Chem_comp info.
 
     Returns:
         Properties: namedtuple with the property info
@@ -329,11 +329,11 @@ def _bond_pdb_order(value_order):
         rdkit.Chem.rdchem.BondType: -- bond type
     """
     if value_order == 'SING':
-        return Chem.rdchem.BondType(1)
+        return rdkit.Chem.rdchem.BondType(1)
     elif value_order == 'DOUB':
-        return Chem.rdchem.BondType(2)
+        return rdkit.Chem.rdchem.BondType(2)
     elif value_order == 'TRIP':
-        return Chem.rdchem.BondType(3)
+        return rdkit.Chem.rdchem.BondType(3)
     else:
         return None
 # endregion parse mmcif

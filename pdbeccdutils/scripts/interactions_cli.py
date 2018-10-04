@@ -28,10 +28,11 @@ from collections import namedtuple
 import rdkit
 from mmCif.mmcifIO import MMCIF2Dict
 
-import pdbeccdutils
 import arpeggio
-from arpeggio.core import InteractionComplex
-from pdbeccdutils.core import CCDUtilsError, ccd_reader, structure_writer, ConformerType
+import arpeggio.core.interactions as arp
+import pdbeccdutils
+from pdbeccdutils.core import (CCDUtilsError, ConformerType, ccd_reader,
+                               structure_writer)
 from pdbeccdutils.utils import DepictionManager
 
 IGNORED_LIGANDS = ('HOH', 'SO4')
@@ -602,7 +603,7 @@ def __run_arpeggio(config, structure_path, bm):
     """
     selection = bm.to_arpeggio_format()
 
-    i_complex = InteractionComplex(structure_path)
+    i_complex = arp.InteractionComplex(structure_path)
     i_complex.structure_checks()
     i_complex.address_ambiguities()
     i_complex.run_arpeggio(selection, 5.0, 0.1, False)

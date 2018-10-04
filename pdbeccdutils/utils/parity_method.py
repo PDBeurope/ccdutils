@@ -2,8 +2,7 @@
 Jon Tyczak to Abhik to be used by the cofactors pipeline.
 """
 
-from rdkit import Chem
-from rdkit.Chem import rdFMCS
+import rdkit
 
 
 def _get_matches(mol, smarts):
@@ -17,7 +16,7 @@ def _get_matches(mol, smarts):
         int: Molecular subgraph matches.
     """
 
-    patt = Chem.MolFromSmarts(smarts)
+    patt = rdkit.Chem.MolFromSmarts(smarts)
     matches = mol.GetSubstructMatches(patt, uniquify=False)
     return matches
 
@@ -37,9 +36,9 @@ def generate_sim_score(template, query, smarts):
     """
 
     if template.GetNumAtoms() == 1:
-        smarts = Chem.MolToSmarts(template)
+        smarts = rdkit.Chem.MolToSmarts(template)
     elif query.GetNumAtoms() == 1:
-        smarts = Chem.MolToSmarts(query)
+        smarts = rdkit.Chem.MolToSmarts(query)
     if smarts is None:
         best_matches = 0
         best_sim_score = 0.0
@@ -96,11 +95,11 @@ def compare_molecules(template, query, thresh):
     if max_sim_score < thresh:
         return sim_arr
 
-    mcs_graph = rdFMCS.FindMCS([template, query],
-                               bondCompare=rdFMCS.BondCompare.CompareAny,
-                               atomCompare=rdFMCS.AtomCompare.CompareAny,
-                               timeout=40,
-                               completeRingsOnly=True)
+    mcs_graph = rdkit.Chem.rdFMCS.FindMCS([template, query],
+                                          bondCompare=rdkit.Chem.rdFMCS.BondCompare.CompareAny,
+                                          atomCompare=rdkit.Chem.rdFMCS.AtomCompare.CompareAny,
+                                          timeout=40,
+                                          completeRingsOnly=True)
 
     matches, sim_score = generate_sim_score(template, query, mcs_graph.smartsString)
 

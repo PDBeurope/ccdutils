@@ -19,9 +19,8 @@ import os
 from collections import namedtuple
 
 import numpy
-from rdkit import Chem
-from rdkit.Chem import AllChem, rdMolTransforms
-from rdkit.Geometry import Point2D
+import rdkit
+from rdkit.Chem import AllChem
 from scipy.spatial import KDTree
 
 from pdbeccdutils.core import DepictionSource
@@ -82,18 +81,18 @@ class DepictionManager:
         Returns:
             rdkit.Chem.rdchem.Mol: RDKit representation of the template
         """
-        mol = Chem.RWMol()
+        mol = rdkit.Chem.RWMol()
         extension = os.path.basename(path).split('.')[1]
 
         if extension == 'sdf':
-            mol = Chem.MolFromMolFile(path, removeHs=True)
+            mol = rdkit.Chem.MolFromMolFile(path, removeHs=True)
         elif extension == 'pdb':
-            mol = Chem.MolFromPDBFile(path, removeHs=True)
+            mol = rdkit.Chem.MolFromPDBFile(path, removeHs=True)
         else:
             raise ValueError('Unsupported molecule type \'{}\''.format(extension))
 
         [x.SetAtomicNum(6) for x in mol.GetAtoms()]
-        [x.SetBondType(Chem.BondType.UNSPECIFIED) for x in mol.GetBonds()]
+        [x.SetBondType(rdkit.Chem.BondType.UNSPECIFIED) for x in mol.GetBonds()]
 
         return mol
 
@@ -114,7 +113,7 @@ class DepictionManager:
         molBondMapping = {bond.GetIdx(): bond.GetBondType() for bond in mol.GetBonds()}
 
         [x.SetAtomicNum(6) for x in mol.GetAtoms()]
-        [x.SetBondType(Chem.BondType.SINGLE) for x in mol.GetBonds()]
+        [x.SetBondType(rdkit.Chem.BondType.SINGLE) for x in mol.GetBonds()]
 
         return Mapping(atom_mapping=molAtomMapping, bond_mapping=molBondMapping)
 
@@ -145,7 +144,14 @@ class DepictionManager:
             matrix[i, i] = factor
         matrix[3, 3] = 1
 
-        AllChem.TransformMol(mol, matrix)
+        rdkit
+        import rdkit
+        # those two lines are here because of very weird underetministic
+        # import issue on Linux.
+        # essentially if they are removed, protein-interactions pipeline
+        # fails with segmentation fault.
+        # Will be removed in future when stable data structure is present
+        rdkit.Chem.AllChem.TransformMol(mol, matrix)
 
     def depict_molecule(self, id, mol):
         """
@@ -164,11 +170,11 @@ class DepictionManager:
             pdbeccdutils.utils.DepictionResult: Summary of the ligand
             depiction process.
         """
-        temp_mol = Chem.RWMol(mol)
+        temp_mol = rdkit.Chem.RWMol(mol)
         mappings = self._anonymization(temp_mol)
-        templateMol = Chem.RWMol(temp_mol).GetMol()
-        pubchemMol = Chem.RWMol(temp_mol).GetMol()
-        rdkitMol = Chem.RWMol(temp_mol).GetMol()
+        templateMol = rdkit.Chem.RWMol(temp_mol).GetMol()
+        pubchemMol = rdkit.Chem.RWMol(temp_mol).GetMol()
+        rdkitMol = rdkit.Chem.RWMol(temp_mol).GetMol()
         results = []
 
         pubchem_res = self._get_2D_by_pubchem(id, pubchemMol) if self.pubchem_templates else None
@@ -201,7 +207,7 @@ class DepictionManager:
             DepictionResult: Depiction with some usefull metadata
         """
         try:
-            AllChem.GenerateDepictionMatching3DStructure(mol, mol)
+            rdkit.Chem.AllChem.GenerateDepictionMatching3DStructure(mol, mol)
             flaws = DepictionValidator(mol).depiction_score()
             return DepictionResult(source=DepictionSource.RdKit, template_name=None, mol=mol, score=flaws)
         except Exception:
@@ -224,7 +230,7 @@ class DepictionManager:
                 self._rescale_molecule(template, 1.5)
 
                 if mol.HasSubstructMatch(template):
-                    AllChem.GenerateDepictionMatching2DStructure(mol, template)
+                    rdkit.Chem.AllChem.GenerateDepictionMatching2DStructure(mol, template)
                     flaws = DepictionValidator(mol).depiction_score()
                     return DepictionResult(source=DepictionSource.Pubchem, template_name=id, mol=mol, score=flaws)
         except Exception:
@@ -246,9 +252,9 @@ class DepictionManager:
         results = list()
         try:
             for key, template in self.substructures.items():
-                temp_mol = Chem.RWMol(mol)
+                temp_mol = rdkit.Chem.RWMol(mol)
                 if temp_mol.HasSubstructMatch(template):
-                    AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
+                    rdkit.Chem.AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
                     flaws = DepictionValidator(temp_mol).depiction_score()
                     results.append(DepictionResult(source=DepictionSource.Template,
                                                    template_name=key, mol=temp_mol, score=flaws))
@@ -292,8 +298,8 @@ class DepictionValidator:
         atomC = self.conformer.GetAtomPosition(bondB.GetBeginAtomIdx())
         atomD = self.conformer.GetAtomPosition(bondB.GetEndAtomIdx())
 
-        vecA = Point2D(atomB.x - atomA.x, atomB.y - atomA.y)
-        vecB = Point2D(atomD.x - atomC.x, atomD.y - atomC.y)
+        vecA = rdkit.Geometry.Point2D(atomB.x - atomA.x, atomB.y - atomA.y)
+        vecB = rdkit.Geometry.Point2D(atomD.x - atomC.x, atomD.y - atomC.y)
 
         # Cramer rule to identify intersection
         det = vecA.x * -vecB.y + vecA.y * vecB.x
