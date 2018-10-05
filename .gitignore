@@ -97,3 +97,6 @@ tests_out/
 
 # pytest files
 pdbeccdutils/tests/out
+
+# mypy cache
+.mypy_cache

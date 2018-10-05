@@ -8,7 +8,7 @@ import pytest
 
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.tests.tst_utilities import cif_filename
-from pdbeccdutils.utils import DepictionManager
+from pdbeccdutils.computations import DepictionManager
 
 
 def load_molecule(id):

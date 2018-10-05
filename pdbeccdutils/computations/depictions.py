@@ -20,10 +20,9 @@ from collections import namedtuple
 
 import numpy
 import rdkit
-from rdkit.Chem import AllChem
 from scipy.spatial import KDTree
 
-from pdbeccdutils.core import DepictionSource
+from pdbeccdutils.core.enums import DepictionSource
 from pdbeccdutils.utils import config
 
 Mapping = namedtuple('Mapping', 'atom_mapping bond_mapping')
@@ -311,7 +310,6 @@ class DepictionValidator:
 
         detP = (a * -vecB.y) - (b * -vecB.x)
         p = round(detP / det, 3)
-        aa = detP / det
 
         if (p <= 0 or p >= 1):
             return False

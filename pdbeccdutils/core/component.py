@@ -15,10 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import io
 import re
 import sys
-from collections import OrderedDict
 from datetime import date
 
 import rdkit

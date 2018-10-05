@@ -23,7 +23,7 @@ from rdkit import rdBase
 from rdkit.Chem import AllChem
 
 from pdbeccdutils.utils import config
-from pdbeccdutils.utils import DepictionManager
+from pdbeccdutils.computations import DepictionManager
 from pdbeccdutils.core import DepictionSource
 
 
@@ -89,8 +89,8 @@ def _depict_fragment(name, mol, depiction_manager):
     Args:
         name (str): Molecule name.
         mol (rdkit.Chem.rdchem.Mol): Molecule to be processed.
-        depiction_manager (pdbeccdutils.utils.DepictionManager):
-            DepictionManager
+        depiction_manager (pdbeccdutils.computations.DepictionManager):
+            DepictionManager instance to create nice 2D layout
 
     Returns:
         rdkit.Chem.rdChem.Mol: Mol with 2D coords.
@@ -106,11 +106,11 @@ def _generate_fragment_conformer(mol):
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule to be processed.
     """
-    options = AllChem.ETKDG()
+    options = AllChem.ETKDGv2()
     options.clearConfs = False
 
     try:
-        conf_id = AllChem.EmbedMolecule(mol, options)
+        AllChem.EmbedMolecule(mol, options)
         AllChem.UFFOptimizeMolecule(mol)
     except Exception:
         pass  # don't care if it fails

@@ -38,7 +38,8 @@ import pdbeccdutils
 from pdbeccdutils.core import structure_writer as writer
 from pdbeccdutils.core import ConformerType, DepictionSource
 from pdbeccdutils.core import ccd_reader, FragmentLibrary
-from pdbeccdutils.utils import DepictionManager, PubChemDownloader, config
+from pdbeccdutils.computations import DepictionManager
+from pdbeccdutils.utils import PubChemDownloader, config
 
 
 def create_parser():
