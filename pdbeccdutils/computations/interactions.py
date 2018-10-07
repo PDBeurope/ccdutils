@@ -20,8 +20,10 @@ from mmCif.mmcifIO import MMCIF2Dict
 from arpeggio.core import InteractionComplex
 
 
-class BoundMolecule:
-    """Data structure to house bound molecules stored in the mmCIF file.
+class BoundMoleculeContainer:
+    """Class to house bound molecules stored in the mmCIF file.
+    Essentially it represents a graph, which can contain a multiple
+    of disconnected components.
     """
 
     def __init__(self, residues=set(), connections=set()):
@@ -53,7 +55,8 @@ class BoundMolecule:
         """Get bound molecule.
 
         Returns:
-            BoundMolecule: connected component representing a bound molecule.
+            BoundMoleculeContainer: connected component representing a
+            single bound molecule.
         """
         if len(self.residues) == 0:
             return None
@@ -72,7 +75,7 @@ class BoundMolecule:
                 self.connections.remove(e)
                 stack.add(e.get_other(processed_node))
 
-        return BoundMolecule(visited_residues, visited_connections)
+        return BoundMoleculeContainer(visited_residues, visited_connections)
 
 
 class Residue:
@@ -98,8 +101,8 @@ class Residue:
         """Returns a dictionary representation of a given residue.
 
         Returns:
-            dict of str: Dictionary representation along with the mmCIF
-            keys.
+            (:obj:`dict` of :obj:`str`): Dictionary representation along
+            with the mmCIF keys.
         """
         return {
             'label_comp_id': self.name,
@@ -139,7 +142,7 @@ class Connection:
         """Get the other residue from the bond.
 
         Args:
-            a Residue: A residue whose partner we are looking for
+            a (Residue): A residue whose partner we are looking for
 
         Returns:
             Residue: The other residue which is a part of the connection.
@@ -244,7 +247,7 @@ class ProtLigInteractions:
             to_discard (list of str): List of residue names to be discarded
 
         Returns:
-            [list of BoundMolecule]: Bound molecules found in the pdb entry.
+            [list of BoundMoleculeContainer]: Bound molecules found in the pdb entry.
         """
         bms = []
         temp = self.__parse_bound_molecules(structure, to_discard)
@@ -271,7 +274,7 @@ class ProtLigInteractions:
             BoundMolecule: All the bound molecules in a given entry.
         """
         def __parse_ligands_from_nonpoly_schema(schema):
-            g = BoundMolecule()
+            g = BoundMoleculeContainer()
             for i in range(len(schema['asym_id'])):
                 n = Residue(
                     schema['mon_id'][i],  # aka label_comp_id
@@ -284,7 +287,7 @@ class ProtLigInteractions:
             return g
 
         def __parse_ligands_from_atom_sites(atom_sites):
-            g = BoundMolecule()
+            g = BoundMoleculeContainer()
             for i in range(len(atom_sites['id'])):
                 if atom_sites['group_PDB'][i] == 'HETATM':
                     n = Residue(
@@ -316,7 +319,7 @@ class ProtLigInteractions:
         parsed_str = list(MMCIF2Dict().parse(path).values())[0]
 
         if '_pdbx_nonpoly_scheme' not in parsed_str:
-            return BoundMolecule()
+            return BoundMoleculeContainer()
 
         bms = __parse_ligands_from_nonpoly_schema(parsed_str['_pdbx_nonpoly_scheme'])
 

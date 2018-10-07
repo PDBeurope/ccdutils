@@ -31,14 +31,14 @@ from xml.dom import minidom
 
 import mmCif.mmcifIO as mmcif
 import rdkit
-from rdkit import Chem, rdBase
 
 import pdbeccdutils
-from pdbeccdutils.core import (CCDUtilsError, Component, ConformerType,
-                               ReleaseStatus)
+from pdbeccdutils.core.component import Component
+from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.core.models import ConformerType
 
 
-def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=ConformerType.Ideal):
+def write_molecule(path, component: Component, remove_hs: bool=True, alt_names: bool=False, conf_type: ConformerType=ConformerType.Ideal):
     """Export molecule in a specified format. Presently supported formats
     are: PDB CCD CIF (*.cif); Mol file (*.sdf); Chemical Markup language
     (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml).
@@ -84,16 +84,17 @@ def write_molecule(path, component, remove_hs=True, alt_names=False, conf_type=C
         f.write(str_representation)
 
 
-def to_pdb_str(component, remove_hs=True, alt_names=False, conf_type=ConformerType.Ideal):
+def to_pdb_str(component: Component, remove_hs: bool=True, alt_names: bool=False,
+               conf_type: ConformerType=ConformerType.Ideal):
     """Converts structure to the PDB format.
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             exported.
         remove_hs (bool, optional): Defaults to True.
         alt_names (bool, optional): Defaults to False. Whether or not
             alternate atom names should be exported.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
+        conf_type (ConformerType, optional):
             Defaults to ConformerType.Ideal.
 
     Returns:
@@ -101,7 +102,7 @@ def to_pdb_str(component, remove_hs=True, alt_names=False, conf_type=ConformerTy
     """
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
 
-    info = Chem.rdchem.AtomPDBResidueInfo()
+    info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
     info.SetResidueName(component.id)
     info.SetTempFactor(20.0)
     info.SetOccupancy(1.0)
@@ -123,7 +124,7 @@ def to_pdb_str(component, remove_hs=True, alt_names=False, conf_type=ConformerTy
     pdb_body = ''
 
     try:
-        pdb_body = Chem.MolToPDBBlock(mol_to_save, conf_id)
+        pdb_body = rdkit.Chem.MolToPDBBlock(mol_to_save, conf_id)
     except Exception:
         pdb_body = _to_pdb_str_fallback(mol_to_save, conf_id)
 
@@ -132,14 +133,15 @@ def to_pdb_str(component, remove_hs=True, alt_names=False, conf_type=ConformerTy
     return pdb_string
 
 
-def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
+def to_sdf_str(component: Component, remove_hs: bool=True,
+               conf_type: ConformerType=ConformerType.Ideal):
     """Converts structure to the SDF format.
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
+        conf_type (ConformerType, optional):
             Defaults to ConformerType.Ideal.
 
     Raises:
@@ -151,17 +153,17 @@ def to_sdf_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
 
     mol_block = []
-    mappings = []
+    mappings = {}
     if conf_type == ConformerType.AllConformers:
-        mappings = [ConformerType.Model, ConformerType.Ideal, ConformerType.Computed]
+        conformers = [ConformerType.Model, ConformerType.Ideal, ConformerType.Computed]
     else:
-        mappings = [conf_type]
+        conformers = [conf_type]
 
     try:
-        for conf in mappings:
+        for conf in conformers:
             try:
                 s = '{} - {} conformer'.format(component.id, conf.name)
-                s += Chem.MolToMolBlock(mol_to_save, confId=component.conformers_mapping[conf])
+                s += rdkit.Chem.MolToMolBlock(mol_to_save, confId=component.conformers_mapping[conf])
                 s += '$$$$'
                 mol_block.append(s)
             except ValueError as e:
@@ -395,8 +397,8 @@ def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
     result = {'atoms': [], 'bonds': []}
     conformer = mol_to_save.GetConformer(conf_id)
-    Chem.Kekulize(mol_to_save)
-    Chem.WedgeMolBonds(mol_to_save, conformer)
+    rdkit.Chem.Kekulize(mol_to_save)
+    rdkit.Chem.WedgeMolBonds(mol_to_save, conformer)
 
     for atom in mol_to_save.GetAtoms():
         atom_dict = {}
@@ -468,7 +470,7 @@ def _prepate_structure(component, remove_hs, conf_type):
     mol_to_save = component._2dmol if conf_type == ConformerType.Depiction else component.mol
 
     if remove_hs:
-        mol_to_save = Chem.RemoveHs(mol_to_save, sanitize=False)
+        mol_to_save = rdkit.Chem.RemoveHs(mol_to_save, sanitize=False)
 
     return (mol_to_save, conf_id, conf_type)
 
@@ -506,8 +508,8 @@ def _write_pdb_ccd_cif_info(cif_dict, component):
             exported.
     """
 
-    calc_formula = Chem.rdMolDescriptors.CalcMolFormula(component.mol)
-    calc_weight = Chem.rdMolDescriptors.CalcExactMolWt(component.mol)
+    calc_formula = rdkit.Chem.rdMolDescriptors.CalcMolFormula(component.mol)
+    calc_weight = rdkit.Chem.rdMolDescriptors.CalcExactMolWt(component.mol)
     mod_date = "{}-{:02d}-{:02d}".format(component.modified_date.year, component.modified_date.month, component.modified_date.day)
 
     cif_dict['pdbeccdutils'] = OrderedDict([])
@@ -700,13 +702,13 @@ def _get_cml_bond_type(bond_order):
     Returns:
         str: bond type in the CML language.
     """
-    if bond_order == Chem.rdchem.BondType.SINGLE:
+    if bond_order == rdkit.Chem.rdchem.BondType.SINGLE:
         return '1'
-    elif bond_order == Chem.rdchem.BondType.DOUBLE:
+    elif bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
         return '2'
-    elif bond_order == Chem.rdchem.BondType.TRIPLE:
+    elif bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
         return '3'
-    elif bond_order == Chem.rdchem.BondType.AROMATIC:
+    elif bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
         return 'A'
     else:
         return str(bond_order)
@@ -726,9 +728,9 @@ def _get_ccd_cif_bond_stereo(bond):
 
     stereo = bond.GetStereo()
 
-    if bond.GetStereo() in (Chem.rdchem.BondStereo.STEREOE, Chem.rdchem.BondStereo.STEREOCIS):
+    if stereo in (rdkit.Chem.rdchem.BondStereo.STEREOE, rdkit.Chem.rdchem.BondStereo.STEREOCIS):
         return 'E'
-    elif bond.GetStereo() in (Chem.rdchem.BondStereo.STEREOZ, Chem.rdchem.BondStereo.STEREOTRANS):
+    elif stereo in (rdkit.Chem.rdchem.BondStereo.STEREOZ, rdkit.Chem.rdchem.BondStereo.STEREOTRANS):
         return 'Z'
     else:
         return 'N'
@@ -748,15 +750,15 @@ def _get_ccd_cif_bond_type(bond):
     """
     bond_order = bond.GetBondType()
 
-    if bond_order == Chem.rdchem.BondType.SINGLE:
+    if bond_order == rdkit.Chem.rdchem.BondType.SINGLE:
         return 'SING'
-    elif bond_order == Chem.rdchem.BondType.DOUBLE:
+    elif bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
         return 'DOUB'
-    elif bond_order == Chem.rdchem.BondType.TRIPLE:
+    elif bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
         return 'TRIP'
-    elif bond_order == Chem.rdchem.BondType.AROMATIC:
+    elif bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
         return 'AROM'
-    elif bond_order == Chem.rdchem.BondType.QUADRUPLE:
+    elif bond_order == rdkit.Chem.rdchem.BondType.QUADRUPLE:
         return 'QUAD'
     else:
         return 'SING'
@@ -777,9 +779,9 @@ def _get_ccd_cif_chiral_type(atom):
     """
     chiral_type = atom.GetChiralTag()
 
-    if chiral_type == Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW:
+    if chiral_type == rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW:
         return 'R'
-    elif chiral_type == Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW:
+    elif chiral_type == rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW:
         return 'S'
     else:
         return 'N'
@@ -956,11 +958,11 @@ def _bond_stereo_to_sdf(bond):
     """
     stereo = bond.GetStereo()
 
-    if stereo == Chem.rdchem.BondStereo.STEREONONE:
+    if stereo == rdkit.Chem.rdchem.BondStereo.STEREONONE:
         return '0'
-    elif stereo == Chem.rdchem.BondStereo.STEREOANY:
+    elif stereo == rdkit.Chem.rdchem.BondStereo.STEREOANY:
         return '4'
-    elif stereo in (Chem.rdchem.BondStereo.STEREOCIS, Chem.rdchem.BondStereo.STEREOTRANS):
+    elif stereo in (rdkit.Chem.rdchem.BondStereo.STEREOCIS, rdkit.Chem.rdchem.BondStereo.STEREOTRANS):
         return '3'
     else:
         return '0'
@@ -978,13 +980,13 @@ def _bond_type_to_sdf(bond):
     """
     bond_order = bond.GetBondType()
 
-    if bond_order == Chem.rdchem.BondType.SINGLE:
+    if bond_order == rdkit.Chem.rdchem.BondType.SINGLE:
         return '1'
-    elif bond_order == Chem.rdchem.BondType.DOUBLE:
+    elif bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
         return '2'
-    elif bond_order == Chem.rdchem.BondType.TRIPLE:
+    elif bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
         return '3'
-    elif bond_order == Chem.rdchem.BondType.AROMATIC:
+    elif bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
         return 'A'
     else:
         return '0'

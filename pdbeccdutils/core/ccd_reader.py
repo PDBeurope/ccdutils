@@ -26,38 +26,37 @@ of molecules. The basic use can be as easy as this::
 """
 
 import os
-from collections import namedtuple
+from typing import Dict, List, NamedTuple
 
 import rdkit
 
 from mmCif.mmcifIO import MMCIF2Dict
-from pdbeccdutils.core import Component
+from pdbeccdutils.core.component import Component
 from pdbeccdutils.helpers import str_conversions
 from pdbeccdutils.helpers import collection_ext
+from pdbeccdutils.core.models import Descriptor, Properties
 
-Properties = namedtuple('Properties', 'id name formula modified_date pdbx_release_status weight')
-Descriptor = namedtuple('Descriptor', 'type program value')
-CCDReaderResult = namedtuple('CCDReaderResult', 'warnings errors component')
-try:
-    CCDReaderResult.__doc__ = """
-    Namedtuple for the result of reading an individual PDB chemical
-    component definition (CCD).
+CCDReaderResult = NamedTuple('CCDReaderResult',
+                             [('warnings', List[str]),
+                              ('errors', List[str]),
+                              ('component', Component)])
 
-    Args:
-        warnings (:obj:`list` of :obj:`str`): A list of any warnings
-            found while reading the CCD. If no warnings found `warnings`
-            will be empty.
-        errors: (:obj:`list` of :obj:`str`): A list of any errors
-            found while reading the CCD. If no warnings found `errors`
-            will be empty.
-        component (pdbeccdutils.core.component.Component): internal
-            representation of the CCD read-in.
-    """
-except AttributeError:  # for python 2
-    pass
+CCDReaderResult.__doc__ = """
+Namedtuple for the result of reading an individual PDB chemical
+component definition (CCD).
+
+Args:
+    warnings (:obj:`list` of :obj:`str`): A list of any warnings
+        found while reading the CCD. If no warnings found `warnings`
+        will be empty.
+    errors: (:obj:`list` of :obj:`str`): A list of any errors
+        found while reading the CCD. If no warnings found `errors`
+        will be empty.
+    component (Component): internal representation of the CCD read-in.
+"""
 
 
-def read_pdb_cif_file(path_to_cif):
+def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
     """
     Read in single wwpdb cif component and create its internal
     representation.
@@ -80,7 +79,7 @@ def read_pdb_cif_file(path_to_cif):
     return _parse_pdb_mmcif(cif_dict)
 
 
-def read_pdb_components_file(path_to_cif):
+def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
     """
     Process multiple compounds stored in the wwpdb CCD
     `components.cif` file.
@@ -93,7 +92,7 @@ def read_pdb_components_file(path_to_cif):
         ValueError: if the file does not exist.
 
     Returns:
-        {str, CCDReaderResult}: Internal representation of all
+        dict(str, CCDReaderResult): Internal representation of all
         the compponents in the `components.cif` file.
     """
     if not os.path.isfile(path_to_cif):
@@ -144,7 +143,7 @@ def _parse_pdb_atoms(mol, atoms):
     Setup atoms in the component
 
     Args:
-        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
+        mol (rdkit.Chem.Mol): Rdkit Mol object with the
             compound representation.
         atoms (dict): MMCIF dictionary with parsed _chem_comp_atom
             category.

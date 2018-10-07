@@ -27,10 +27,11 @@ from collections import namedtuple
 import rdkit
 
 import pdbeccdutils
-from pdbeccdutils.core import (CCDUtilsError, ConformerType, ccd_reader,
-                               structure_writer)
-from pdbeccdutils.computations import DepictionManager
 from pdbeccdutils.computations.interactions import ProtLigInteractions
+from pdbeccdutils.core import ccd_reader, structure_writer
+from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.models import ConformerType
+from pdbeccdutils.core.exceptions import CCDUtilsError
 
 # region logging
 

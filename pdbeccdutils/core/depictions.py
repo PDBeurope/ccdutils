@@ -16,17 +16,13 @@
 # under the License.
 
 import os
-from collections import namedtuple
 
 import numpy
 import rdkit
 from scipy.spatial import KDTree
 
-from pdbeccdutils.core.enums import DepictionSource
-from pdbeccdutils.utils import config
-
-Mapping = namedtuple('Mapping', 'atom_mapping bond_mapping')
-DepictionResult = namedtuple('DepictionResult', 'source template_name mol score')
+import pdbeccdutils.utils.config as config
+from pdbeccdutils.core.models import DepictionSource, DepictionResult, Mapping
 
 
 class DepictionManager:

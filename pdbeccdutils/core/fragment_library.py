@@ -18,13 +18,12 @@
 import csv
 import os
 
-from rdkit import Chem
-from rdkit import rdBase
+from rdkit import Chem, rdBase
 from rdkit.Chem import AllChem
 
-from pdbeccdutils.utils import config
-from pdbeccdutils.computations import DepictionManager
-from pdbeccdutils.core import DepictionSource
+import pdbeccdutils.utils.config as config
+from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.models import DepictionSource
 
 
 class FragmentLibrary:
