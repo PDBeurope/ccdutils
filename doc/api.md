@@ -13,6 +13,7 @@ The pdbeccdutils package is made up of the following modules:
 
 ```eval_rst
 .. toctree::    
+    pdbeccdutils.computations
     pdbeccdutils.core
     pdbeccdutils.helpers
     pdbeccdutils.utils

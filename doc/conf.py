@@ -12,8 +12,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
 from recommonmark.parser import CommonMarkParser
 from recommonmark.transform import AutoStructify
 
@@ -41,12 +39,17 @@ release = '0.2.1'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.todo',
     'sphinx.ext.napoleon',
+    'sphinx_autodoc_typehints',
+    'sphinx.ext.todo',
     'sphinx.ext.doctest',
     'sphinx.ext.coverage',
     'sphinx.ext.githubpages',
+    'sphinx.ext.intersphinx'
 ]
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None)}
+# 'rdkit': ('https://rdkit.org/Python_Docs', None)
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -97,7 +100,7 @@ html_theme_options = {
     'navigation_depth': 4,
     'logo_only': False,
     'display_version': True,
-    'prev_next_buttons_location': 'bottom',
+    'prev_next_buttons_location': 'bottom'
 }
 html_logo = "logo.png"
 # Add any paths that contain custom static files (such as style sheets) here,

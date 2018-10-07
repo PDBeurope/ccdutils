@@ -2,8 +2,10 @@
 .. _pipelines:
 ```
 
-# PDBeChem
+# Pipelines
+
+## PDBeChem
 TODO
 
-# Protein-ligand interactions
+## Protein-ligand interactions
 TODO
