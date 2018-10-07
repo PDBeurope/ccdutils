@@ -5,7 +5,7 @@ before_script:
   - conda create -c rdkit -n rdkit-doc rdkit python=3.6.5
   - source activate rdkit-doc
   - pip install -e .
-  - pip install pytest-cov sphinx sphinx_rtd_theme recommonmark
+  - pip install pytest-cov sphinx sphinx_rtd_theme recommonmark sphinx-autodoc-typehints
 
 test:
   script:
