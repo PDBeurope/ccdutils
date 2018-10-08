@@ -35,10 +35,12 @@ from xml.dom import minidom
 import rdkit
 
 import pdbeccdutils
-from pdbeccdutils.core import structure_writer as writer
-from pdbeccdutils.core import ConformerType, DepictionSource
-from pdbeccdutils.core import ccd_reader, FragmentLibrary
-from pdbeccdutils.utils import DepictionManager, PubChemDownloader, config
+from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.core import ccd_writer
+from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.models import ConformerType, DepictionSource
+from pdbeccdutils.core.fragment_library import FragmentLibrary
+from pdbeccdutils.utils import PubChemDownloader, config
 
 
 def create_parser():
@@ -213,7 +215,7 @@ def process_single_component(args, ccd_reader_result, library,
     issues += export_structure_formats(component, parent_dir, ideal_conformer)
 
     # get xml representation
-    xml_repr = writer.to_xml_xml(ccd_reader_result.component)
+    xml_repr = ccd_writer.to_xml_xml(ccd_reader_result.component)
     chem_comp_xml.append(xml_repr)
 
     # write log
@@ -381,10 +383,8 @@ def write_molecule(path, component, alt_names, conformer_type):
         list of str: encountered issues
     """
     try:
-        writer.write_molecule(path, component,
-                              remove_hs=False,
-                              alt_names=alt_names,
-                              conf_type=conformer_type)
+        ccd_writer.write_molecule(path, component, remove_hs=False, alt_names=alt_names,
+                                  conf_type=conformer_type)
         return []
     except Exception:
         with open(path, 'w') as f:

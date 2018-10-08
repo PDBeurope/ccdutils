@@ -6,7 +6,6 @@ import argparse
 import os
 import sys
 
-from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.utils import PubChemDownloader
 
 

@@ -21,7 +21,7 @@ def _get_matches(mol, smarts):
     return matches
 
 
-def generate_sim_score(template, query, smarts):
+def _generate_sim_score(template, query, smarts):
     """Given the two moleculs and their common subgraph represented as
     smarts string returns similarity score.
 
@@ -83,7 +83,6 @@ def compare_molecules(template, query, thresh):
         int - size of common subgraph
         float - similarity score
     """
-    ms = [template, query]
     sim_arr = ['', '', 0, 0]
 
     sim_arr[0] = template.GetNumAtoms()
@@ -101,7 +100,7 @@ def compare_molecules(template, query, thresh):
                                           timeout=40,
                                           completeRingsOnly=True)
 
-    matches, sim_score = generate_sim_score(template, query, mcs_graph.smartsString)
+    matches, sim_score = _generate_sim_score(template, query, mcs_graph.smartsString)
 
     sim_arr[2] = sim_score
     sim_arr[3] = matches

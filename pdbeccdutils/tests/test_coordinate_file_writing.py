@@ -1,9 +1,8 @@
 import os
 import pytest
 from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs, file_name_in_tsts_out
-from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.core import structure_writer
-from pdbeccdutils.core import ConformerType
+from pdbeccdutils.core import ccd_reader, ccd_writer
+from pdbeccdutils.core.models import ConformerType
 
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
@@ -34,10 +33,10 @@ class TestSDF:
                 if os.path.isfile(sdf_file):
                     os.remove(sdf_file)
 
-                structure_writer.write_molecule(path=sdf_file,
-                                                component=component,
-                                                conf_type=conf_type,
-                                                remove_hs=remove_hs)
+                ccd_writer.write_molecule(path=sdf_file,
+                                          component=component,
+                                          conf_type=conf_type,
+                                          remove_hs=remove_hs)
                 assert os.path.isfile(sdf_file)
 
                 # UNL component does not have coordinates. Only the default ideal coords are created.

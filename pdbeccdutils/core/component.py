@@ -15,16 +15,20 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import io
 import re
 import sys
-from collections import OrderedDict
 from datetime import date
+from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
 import rdkit.Chem.Draw as Draw
-from pdbeccdutils.core import CCDUtilsError, ConformerType, ReleaseStatus
-from pdbeccdutils.helpers import IOGrabber, drawing
+
+import pdbeccdutils.helpers.drawing as drawing
+from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.core.fragment_library import FragmentLibrary
+from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties, ReleaseStatus)
+from pdbeccdutils.helpers.io_grabber import IOGrabber
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -32,27 +36,28 @@ METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,
 
 class Component:
     """
-    Wrapper for the rdkit.Chem.rdchem.Mol object enabling some of its
+    Wrapper for the rdkit.Chem.Mol object enabling some of its
     functionality and handling possible erroneous situations.
 
     Returns:
-        pdbeccdutils.core.Component: instance object
+        Component: instance object
     """
 
-    def __init__(self, mol, ccd_cif_dict=None, properties=None, descriptors=None):
+    def __init__(self, mol: rdkit.Chem.Mol, ccd_cif_dict: Dict[str, Any]=None,
+                 properties: Properties=None, descriptors: List[Descriptor]=None) -> None:
 
         self.mol = mol
         self.ccd_cif_dict = ccd_cif_dict
-        self.fragments = {}
+        self.fragments: Dict[str, int] = {}
         self._2dmol = None
         self._id = ''
         self._name = ''
         self._formula = ''
-        self._modified_date = ''
+        self._modified_date = None
         self._pdbx_release_status = ReleaseStatus.NOT_SET
-        self._descriptors = []
-        self._inchi_from_rdkit = None
-        self._inchikey_from_rdkit = None
+        self._descriptors: List[Descriptor] = []
+        self._inchi_from_rdkit = ''
+        self._inchikey_from_rdkit = ''
 
         self.conformers_mapping = \
             {ConformerType.AllConformers: - 1,
@@ -66,14 +71,14 @@ class Component:
             self._name = properties.name
             self._formula = properties.formula
             self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
-            self._modified_date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+            self._modified_date: date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
 
         if descriptors is not None:
             self._descriptors = descriptors
 
     # region properties
     @property
-    def id(self):
+    def id(self) -> str:
         """
         Supply the unique identifier for the PDB-CCD,
         for example 'ATP'.
@@ -89,7 +94,7 @@ class Component:
         return self._id
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         Supply the 'full name' of the PDB-CCD, for example 'ETHANOL'.
         Obtained from PDB-CCD's _chem_comp.name:
@@ -104,7 +109,7 @@ class Component:
         return self._name
 
     @property
-    def formula(self):
+    def formula(self) -> str:
         """
         Supply the chemical formula for the PDB-CCD,
         for example 'C2 H6 O'.
@@ -120,7 +125,7 @@ class Component:
         return self._formula
 
     @property
-    def pdbx_release_status(self):
+    def pdbx_release_status(self) -> ReleaseStatus:
         """
         Supply the pdbx_release_status for the PDB-CCD.
         Obtained from PDB-CCD's _chem_comp.pdbx_rel_status:
@@ -134,15 +139,15 @@ class Component:
         return self._pdbx_release_status
 
     @property
-    def modified_date(self):
+    def modified_date(self) -> Optional[date]:
         return self._modified_date
 
     @property
-    def descriptors(self):
+    def descriptors(self) -> List[Descriptor]:
         return self._descriptors
 
     @property
-    def inchikey(self):
+    def inchikey(self) -> str:
         """
         Supply the InChIKey for the PDB-CCD.
         Obtained from `PDB-CCD's _pdbx_chem_comp_descriptor` table line
@@ -158,18 +163,18 @@ class Component:
         return next((x.value for x in self._descriptors if x.type == 'InChIKey'), '')
 
     @property
-    def inchi(self):
+    def inchi(self) -> str:
         return next((x.value for x in self._descriptors if x.type == 'InChI'), '')
 
     @property
-    def inchi_from_rdkit(self):
+    def inchi_from_rdkit(self) -> str:
         """
         provides the InChI worked out by rkdit
 
         Returns:
             str: the InChI or emptry '' if there was an error finding it.
         """
-        if self._inchi_from_rdkit is None:
+        if len(self._inchi_from_rdkit) == 0:
             try:
                 self._inchi_from_rdkit = rdkit.Chem.inchi.MolToInchi(self.mol)
             except ValueError:
@@ -177,14 +182,14 @@ class Component:
         return self._inchi_from_rdkit
 
     @property
-    def inchikey_from_rdkit(self):
+    def inchikey_from_rdkit(self) -> str:
         """
         provides the InChIKey worked out by rdkit
 
         Returns:
             str: the InChIKey or '' if there was an error finding it.
         """
-        if self._inchikey_from_rdkit is None:
+        if len(self._inchikey_from_rdkit) == 0:
             inchi = self.inchi_from_rdkit
             if inchi != 'ERROR':
                 self._inchikey_from_rdkit = rdkit.Chem.inchi.InchiToInchiKey(inchi)
@@ -195,19 +200,19 @@ class Component:
         return self._inchikey_from_rdkit
 
     @property
-    def released(self):
+    def released(self) -> bool:
         """ returns True if PDB-CCD has been released.
         Tests pdbx_release_status is REL"""
         return self._pdbx_release_status == ReleaseStatus.REL
 
     @property
-    def mol_no_h(self):
+    def mol_no_h(self) -> rdkit.Chem.Mol:
         no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
         rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
         return no_h
 
     @property
-    def number_atoms(self):
+    def number_atoms(self) -> int:
         """
         Supplies the number of atoms in the _chem_comp_atom table
 
@@ -217,7 +222,7 @@ class Component:
         return self.mol.GetNumAtoms()
 
     @property
-    def atoms_ids(self):
+    def atoms_ids(self) -> Tuple[Any, ...]:
         """
         Supplies a list of the atom_ids obtained from
         `_chem_comp_atom.atom_id`, see:
@@ -236,9 +241,9 @@ class Component:
                      atom in self.mol.GetAtoms())
     # endregion properties
 
-    def inchikey_from_rdkit_matches_ccd(self, connectivity_only=False):
+    def inchikey_from_rdkit_matches_ccd(self, connectivity_only: bool=False) -> bool:
         """
-        checks whether inchikey matches between ccd and rdkit
+        Checks whether inchikey matches between ccd and rdkit
 
         Args:
             connectivity_only (bool): restrict to the first 14 character - the connectivity information.
@@ -257,19 +262,18 @@ class Component:
             return False
         return True
 
-    def compute_2d(self, manager, remove_hs=True):
-        """
-        Compute 2d depiction of the component using DepictionManager
-        instance
+    def compute_2d(self, manager: DepictionManager, remove_hs: bool=True) -> rdkit.Chem.Mol:
+        """Compute 2d depiction of the component using DepictionManager
+        instance.
 
         Args:
-            manager (pdbeccdutils.utils.DepictionManager):
-                Instance of the ligand depiction class.
+            manager (DepictionManager): Instance of the ligand depiction
+                class.
             remove_hs (bool, optional): Defaults to True. Remove
                 hydrogens prior to depiction.
 
         Returns:
-            rdkit.Chem.rdchem.Mol: 2D depiction of the ligand.
+            rdkit.Chem.Mol: 2D depiction of the ligand.
         """
         mol_copy = rdkit.Chem.RWMol(self.mol)
         if remove_hs:
@@ -284,7 +288,8 @@ class Component:
         else:
             return None
 
-    def export_2d_svg(self, file_name, width=500, names=False, atom_highlight={}, bond_highlight=None):
+    def export_2d_svg(self, file_name: str, width: int=500, names: bool=False,
+                      atom_highlight: Dict[Any, Tuple]={}, bond_highlight: Dict[Tuple, Tuple]={}):
         """
         Save 2d depiction of the component as an SVG file.
 
@@ -304,7 +309,6 @@ class Component:
                 {(0, 1): (0.5, 0.5, 0.5)}
         Raises:
             CCDUtilsError: If bond or atom does not exist.
-
         """
         if self._2dmol is None:
             drawing.save_no_image(file_name, width=width)
@@ -316,7 +320,7 @@ class Component:
         if all(isinstance(i, str) for i in atom_highlight.keys()):
             atom_highlight = {atom_mapping[k]: v for k, v in atom_highlight.items()}
 
-        if bond_highlight is not None:
+        if len(bond_highlight) > 0:
             if all(isinstance(i[0], str) and isinstance(i[1], str) for i in bond_highlight.keys()):
                 temp_highlight = {}
                 for k, v in bond_highlight.items():
@@ -335,9 +339,9 @@ class Component:
 
         self._draw_molecule(drawer, file_name, width, atom_highlight, bond_highlight)
 
-    def compute_3d(self):
+    def compute_3d(self) -> bool:
         """
-        Generate 3D coordinates using ETKDG method from RdKit.
+        Generate 3D coordinates using ETKDGv2 method from RDKit.
 
         Returns:
             bool: Result of the structure generation process.
@@ -347,7 +351,7 @@ class Component:
 
         try:
             conf_id = rdkit.Chem.AllChem.EmbedMolecule(self.mol, options)
-            result = rdkit.Chem.AllChem.UFFOptimizeMolecule(self.mol, confId=conf_id, maxIters=1000)
+            rdkit.Chem.AllChem.UFFOptimizeMolecule(self.mol, confId=conf_id, maxIters=1000)
             self.conformers_mapping[ConformerType.Computed] = conf_id
             return True
         except RuntimeError:
@@ -355,7 +359,7 @@ class Component:
         except ValueError:
             return False  # sanitization issue here
 
-    def sanitize(self, fast=False):
+    def sanitize(self, fast: bool=False) -> bool:
         """
         Attempts to sanitize mol in place. RDKit's standard error can be
         processed in order to find out what went wrong with sanitization
@@ -386,14 +390,14 @@ class Component:
 
         return success
 
-    def has_degenerated_conformer(self, type):
+    def has_degenerated_conformer(self, type: ConformerType) -> bool:
         """
         Determine if given conformer has missing coordinates. This can
         be used to determine, whether or not the coordinates should be
         regenerated.
 
         Args:
-            type (pdbeccdutils.core.ConformerType): type of coformer
+            type (ConformerType): type of coformer
                 to be inspected.
 
         Raises:
@@ -415,16 +419,16 @@ class Component:
             return True
         return False
 
-    def locate_fragment(self, mol):
+    def locate_fragment(self, mol: rdkit.Chem.Mol) -> List[List[rdkit.Chem.Atom]]:
         """
         Identify substructure match in the component.
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): Fragment to be matched with
+            mol (rdkit.Chem.Mol): Fragment to be matched with
                 structure
 
         Returns:
-            list(list(rdkit.Chem.rdchem.Atoms)): list of fragments identified in the component as a list of Atoms.
+            list(list(rdkit.Chem.Atom)): list of fragments identified in the component as a list of Atoms.
         """
         result = []
         if mol is None:
@@ -437,11 +441,11 @@ class Component:
 
         return result
 
-    def library_search(self, fragment_library):
+    def library_search(self, fragment_library: FragmentLibrary) -> int:
         """Identify fragments from the fragment library in this component
 
         Args:
-            fragment_library (pdbeccdutils.core.FragmentLibrary):
+            fragment_library (FragmentLibrary):
                 Fragment library.
 
         Returns:
@@ -467,7 +471,7 @@ class Component:
         errors are taken care are of.
 
         Args:
-            rwmol (rdkit.Chem.rdchem.Mol): rdkit molecule to be
+            rwmol (rdkit.Chem.Mol): rdkit molecule to be
                 sanitized
 
         Returns:
@@ -503,7 +507,7 @@ class Component:
 
                 # change the bond type to dative
                 bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-                bond.SetBondType(rdkit.Chem.rdchem.BondType.DATIVE)
+                bond.SetBondType(rdkit.Chem.BondType.DATIVE)
 
                 if erroneous_atom.GetExplicitValence() == valency:
                     erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
@@ -512,12 +516,12 @@ class Component:
             attempts -= 1
         return False
 
-    def _fix_molecule_fast(self, rwmol):
+    def _fix_molecule_fast(self, rwmol: rdkit.Chem.Mol):
         """
         Fast sanitization process. Fixes just metal-N valence issues
 
         Args:
-            rwmol (rdkit.Chem.rdchem.Mol): rdkit mol to be sanitized
+            rwmol (rdkit.Chem.Mol): rdkit mol to be sanitized
 
         Returns:
             bool: Whether or not sanitization succeeded
@@ -531,7 +535,7 @@ class Component:
 
             # change the bond type to dative
             bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-            bond.SetBondType(rdkit.Chem.rdchem.BondType.DATIVE)
+            bond.SetBondType(rdkit.Chem.BondType.DATIVE)
 
             # change the valency
             if erroneous_atom.GetExplicitValence() == 4:
@@ -571,7 +575,7 @@ class Component:
         symbol and atom index.
 
         Args:
-            atom (rdkit.Chem.rdChem.Atom): rdkit atom
+            atom (rdkit.Chem.Atom): rdkit atom
 
         Returns:
             str: atom name

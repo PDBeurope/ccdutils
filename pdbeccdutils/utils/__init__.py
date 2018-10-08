@@ -1,2 +1,1 @@
-from pdbeccdutils.utils.depictions import DepictionManager, DepictionValidator
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader

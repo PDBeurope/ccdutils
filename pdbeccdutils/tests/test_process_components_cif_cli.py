@@ -5,9 +5,7 @@ method based on
 http://dustinrcollins.com/testing-python-command-line-apps
 adapted to use nose then converted to pytest
 """
-import glob
 import os
-import re
 import shutil
 import xml.etree.ElementTree as ET
 

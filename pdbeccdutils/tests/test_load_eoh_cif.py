@@ -3,10 +3,8 @@ load EOH.cif from file and test important cif item.
 """
 import pytest
 from pdbeccdutils.tests.tst_utilities import cif_filename
-from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.core import ReleaseStatus
-from pdbeccdutils.core import structure_writer
-from pdbeccdutils.core import ConformerType
+from pdbeccdutils.core import ccd_reader, ccd_writer
+from pdbeccdutils.core.models import ReleaseStatus, ConformerType
 
 
 class TestLoadEOH:
@@ -80,7 +78,7 @@ class TestLoadEOH:
 
     @staticmethod
     def test_to_sdf_string_ideal_no_h(component_eoh):
-        sdf_string = structure_writer.to_sdf_str(component_eoh)
+        sdf_string = ccd_writer.to_sdf_str(component_eoh)
         # there should be two carbons and no hydrogen atoms:
         assert sdf_string.count(' C ') == 2
         assert sdf_string.count(' O ') == 1
@@ -91,7 +89,7 @@ class TestLoadEOH:
 
     @staticmethod
     def test_to_sdf_string_ideal_with_h(component_eoh):
-        sdf_string = structure_writer.to_sdf_str(component_eoh, remove_hs=False)
+        sdf_string = ccd_writer.to_sdf_str(component_eoh, remove_hs=False)
         # six hydrogen atoms:
         assert sdf_string.count(' H ') == 6
         # check z coordinate of the first hydrogen atom
@@ -99,7 +97,7 @@ class TestLoadEOH:
 
     @staticmethod
     def test_to_sdf_string_model_no_h(component_eoh):
-        sdf_string = structure_writer.to_sdf_str(component_eoh, conf_type=ConformerType.Model)
+        sdf_string = ccd_writer.to_sdf_str(component_eoh, conf_type=ConformerType.Model)
         # there should be two carbons and no hydrogen atoms:
         assert sdf_string.count(' C ') == 2
         assert sdf_string.count(' O ') == 1

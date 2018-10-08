@@ -22,13 +22,6 @@
     :members:
 ```
 
-## pdbeccdutils.core.enums
-
-```eval_rst
-.. automodule:: pdbeccdutils.core.enums
-    :members:
-```
-
 ## pdbeccdutils.core.fragment_library
 
 ```eval_rst
@@ -36,6 +29,12 @@
     :members:
 ```
 
+## pdbeccdutils.core.models
+
+```eval_rst
+.. automodule:: pdbeccdutils.core.models
+    :members:
+```
 
 ## pdbeccdutils.core.exceptions
 

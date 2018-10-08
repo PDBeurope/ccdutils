@@ -15,7 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import rdkit
 from enum import IntEnum
+from typing import Dict, List, NamedTuple
 
 
 class DepictionSource(IntEnum):
@@ -49,3 +51,27 @@ class ReleaseStatus(IntEnum):
     OBS = 4
     REF_ONLY = 5
     REL = 6
+
+
+Mapping = NamedTuple('Mapping',
+                     [('atom_mapping', Dict[int, int]),
+                      ('bond_mapping', Dict[int, rdkit.Chem.BondType])])
+
+DepictionResult = NamedTuple('DepictionResult',
+                             [('source', str),
+                              ('template_name', str),
+                              ('mol', rdkit.Chem.Mol),
+                              ('score', float)])
+
+Properties = NamedTuple('Properties',
+                        [('id', str),
+                         ('name', str),
+                         ('formula', str),
+                         ('modified_date', str),
+                         ('pdbx_release_status', str),
+                         ('weight', str)])
+
+Descriptor = NamedTuple('Descriptor',
+                        [('type', str),
+                         ('program', str),
+                         ('value', str)])

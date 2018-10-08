@@ -16,14 +16,9 @@
 # under the License.
 
 import json
-import logging
 import os
-import sys
 import urllib.request
 
-from rdkit import Chem
-
-from pdbeccdutils.core import ReleaseStatus
 from pdbeccdutils.core import ccd_reader as sr
 
 
