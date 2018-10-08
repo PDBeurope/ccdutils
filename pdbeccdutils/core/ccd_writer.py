@@ -172,7 +172,7 @@ def to_sdf_str(component: Component, remove_hs: bool=True,
                 else:
                     raise CCDUtilsError('Error writing SDF file - {}'.format(e))
     except Exception:
-        mappings = {m.name: component.conformers_mapping[m] for m in mappings}
+        mappings = {m.name: component.conformers_mapping[m] for m in conformers}
         mol_block = _to_sdf_str_fallback(mol_to_save, component.id, mappings)
 
     return "\n".join(mol_block)
