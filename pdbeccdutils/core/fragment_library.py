@@ -18,12 +18,12 @@
 import csv
 import os
 
-from rdkit import Chem, rdBase
+import rdkit
+from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.Chem import rdCoordGen
 
 import pdbeccdutils.utils.config as config
-from pdbeccdutils.core.depictions import DepictionManager
-from pdbeccdutils.core.models import DepictionSource
 
 
 class FragmentLibrary:
@@ -35,7 +35,7 @@ class FragmentLibrary:
 
     def __init__(self, path=config.fragment_library, header=True, delimiter='\t', quotechar='"'):
         self.name = os.path.basename(path).split('.')[0]
-        self.library = self._read_in_library(path, header, delimiter, quotechar)
+        self._read_in_library(path, header, delimiter, quotechar)
 
     def _read_in_library(self, path, header, delimiter, quotechar):
         """Fragment library parser
@@ -46,9 +46,11 @@ class FragmentLibrary:
             delimiter (str): Delimiter symbol.
             quotechar (str): Quotechar symbol.
         """
-        rdBase.DisableLog('rdApp.*')
-        library = {}
-        depiction_manager = DepictionManager()
+        rdkit.rdBase.DisableLog('rdApp.*')
+        rdCoordGen.SetDefaultTemplateFileDir(config.coordgen_templates)
+        rdCoordGen.CoordGenParams.coordgenScaling = 33  # to get single bond length 1.5
+
+        self.library = {}
 
         with open(path, 'r') as csvfile:
             library_reader = csv.reader(csvfile, delimiter=delimiter, quotechar=quotechar)
@@ -64,12 +66,10 @@ class FragmentLibrary:
                     if row[1] == 'LIKE':
                         [bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED) for bond in mol.GetBonds()]
                 Chem.SanitizeMol(mol, catchErrors=True)
-                _generate_fragment_conformer(mol)
-                mol = _depict_fragment(row[0], mol, depiction_manager)
+                rdCoordGen.AddCoords(mol)
+                self.library[row[0]] = mol
 
-                library[row[0]] = mol
-        rdBase.EnableLog('rdApp.*')
-        return library
+        rdkit.rdBase.EnableLog('rdApp.*')
 
     def to_image(self, path):
         """Export image with all fragments.
@@ -81,35 +81,18 @@ class FragmentLibrary:
                                         legends=list(self.library.keys()), molsPerRow=10)
         img.save(path)
 
+    def generate_conformers(self):
+        """Generate 3D coordinates for the fragment library.
 
-def _depict_fragment(name, mol, depiction_manager):
-    """Get nice 2D coords of the fragments
+        """
+        rdkit.rdBase.DisableLog('rdApp.*')
+        options = AllChem.ETKDGv2()
+        options.clearConfs = False
 
-    Args:
-        name (str): Molecule name.
-        mol (rdkit.Chem.rdchem.Mol): Molecule to be processed.
-        depiction_manager (pdbeccdutils.computations.DepictionManager):
-            DepictionManager instance to create nice 2D layout
-
-    Returns:
-        rdkit.Chem.rdChem.Mol: Mol with 2D coords.
-    """
-    result = depiction_manager.depict_molecule(name, mol)
-    return result.mol if result.source is not DepictionSource.Failed else mol
-
-
-def _generate_fragment_conformer(mol):
-    """Generate 3D coordinates for the fragment so it can be depicted
-    by the DepictionManager
-
-    Args:
-        mol (rdkit.Chem.rdchem.Mol): Molecule to be processed.
-    """
-    options = AllChem.ETKDGv2()
-    options.clearConfs = False
-
-    try:
-        AllChem.EmbedMolecule(mol, options)
-        AllChem.UFFOptimizeMolecule(mol)
-    except Exception:
-        pass  # don't care if it fails
+        for k, v in self.library.items():
+            try:
+                AllChem.EmbedMolecule(v, options)
+                AllChem.UFFOptimizeMolecule(v)
+            except Exception:
+                pass  # don't care if it fails
+        rdkit.rdBase.EnableLog('rdApp.*')
