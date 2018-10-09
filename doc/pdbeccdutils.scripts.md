@@ -1,6 +1,7 @@
 # pdbeccdutils.scripts
 
 ## Protein-ligand interaction pipeline
+
 This script is used to generate protein-ligand interactions information
 for bound molecules from mmcif files
 
@@ -17,7 +18,7 @@ Journal of Molecular Biology, 429(3), 365–371.
 The refactored version can be installed from source using:
 
 ```console
-git clone -b development https://github.com/lpravda/arpeggio.git 
+git clone -b development https://github.com/lpravda/arpeggio.git
 pip install -e arpeggio
 ```
 
@@ -27,13 +28,15 @@ pip install -e arpeggio
 ```
 
 ## PDBeChem pipeline
+
 ```eval_rst
 .. automodule:: pdbeccdutils.scripts.process_components_cif_cli
     :members:
-```    
+```
 
 ## Setup pubchem library
+
 ```eval_rst
 .. automodule:: pdbeccdutils.scripts.setup_pubchem_library_cli
     :members:
-```    
+```
