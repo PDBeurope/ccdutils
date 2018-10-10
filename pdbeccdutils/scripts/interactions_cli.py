@@ -102,7 +102,7 @@ def create_parser():
         "coordinate_server": "Path to the coordinate server local.js binary",
         "input_dir": "path to the input data location (expected structure: ./tq/1tqn/assembly_generation/1tqn-assembly.xml and ./tq/1tqn/clean_mmcif/1tqn_updated.cif.gz)",
         "chimerax": "location of the ChimeraX binary",
-
+        "discarded_ligands": "list of het codes to be discarded (e.g. HOH, SO4, etc.)"
     }
 
     parser.add_argument('--config', required=True,
@@ -166,7 +166,7 @@ def interactions_pipeline(args):
         try:
             _process_single_structure(args.config, depictor, pdb)
         except Exception as e:
-            logger.error(f'FAILED {pdb} | {str(e)}', file=sys.stderr)
+            logger.debug(f'FAILED {pdb} | {str(e)}', file=sys.stderr)
 
 
 def _process_single_structure(config, depictor, pdb):
@@ -191,7 +191,7 @@ def _process_single_structure(config, depictor, pdb):
     protonated_cif_path = os.path.join(wd, f'{pdb}_h.cif')
     protonated_pdb_path = os.path.join(wd, f'{pdb}_h.pdb')
 
-    interactions = ProtLigInteractions(assembly_path, ['HOH', 'SO4'])  # encode res. names as a parameter!!
+    interactions = ProtLigInteractions(assembly_path, config.discarded_ligands)
 
     if len(interactions.bound_molecules) == 0:
         logger.debug('No bound molecules found. Skipping entry.')
@@ -205,7 +205,7 @@ def _process_single_structure(config, depictor, pdb):
     interactions.path = protonated_cif_path
     for bm in interactions.bound_molecules:
         i += 1
-        logger.debug(f'Bound molecule composition: {str(bm)}')
+        logger.debug(f'Running arpeggio (bm{i}) for: {str(bm)}')
 
         for ligand in map(lambda l: l.name, bm.residues):
             if ligand not in result_bag['depictions']:
@@ -213,9 +213,6 @@ def _process_single_structure(config, depictor, pdb):
                 ligand_layout = __create_ligand_layout(depictor, ligand_path)
                 result_bag['depictions'][ligand] = ligand_layout[ligand]
 
-        print('getting contacts')
-        print(bm.to_arpeggio_format())
-        print(type(bm.to_arpeggio_format()))
         contacts = interactions.get_interaction(bm.to_arpeggio_format())
         result_bag[f'bm{i}'] = {'contacts': contacts}
         result_bag[f'bm{i}']['composition'] = bm.to_dict()
