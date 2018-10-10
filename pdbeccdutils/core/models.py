@@ -17,17 +17,34 @@
 
 import rdkit
 from enum import IntEnum
-from typing import Dict, List, NamedTuple
+from typing import NamedTuple
 
 
 class DepictionSource(IntEnum):
-    Pubchem = 1
+    """Where does the depiction come from.
+
+    Attributes:
+        Pubchem - Pubchem layout used
+        Template - general substructure used
+        RDKit - RDKit functionality using Coordgen.
+        Failed - Nothing worked.
+    """
+    PubChem = 1
     Template = 2
-    RdKit = 3
+    RDKit = 3
     Failed = 4
 
 
 class ConformerType(IntEnum):
+    """Conformer type of the `Component` object.
+
+    Attributes:
+        Ideal
+        Model
+        Depiction: 2D conformation
+        Computed
+        AllConformers
+    """
     Ideal = 1
     Model = 2
     Depiction = 3
@@ -36,11 +53,11 @@ class ConformerType(IntEnum):
 
 
 class ReleaseStatus(IntEnum):
-    """ an enumeration for pdbx_release_status
+    """An enumeration for pdbx_release_status
     allowed values include REL and HOLD, see:
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_chem_comp.pdbx_release_status.html
 
-    Notes
+    Notes:
         An additional value 'NOT_SET' has been added for case where
         pdbx_release_status has not been set.
     """
@@ -53,15 +70,22 @@ class ReleaseStatus(IntEnum):
     REL = 6
 
 
-Mapping = NamedTuple('Mapping',
-                     [('atom_mapping', Dict[int, int]),
-                      ('bond_mapping', Dict[int, rdkit.Chem.BondType])])
-
 DepictionResult = NamedTuple('DepictionResult',
-                             [('source', str),
+                             [('source', DepictionSource),
                               ('template_name', str),
                               ('mol', rdkit.Chem.Mol),
                               ('score', float)])
+
+DepictionResult.__doc__ = """
+            Depictions result details.
+
+            Args:
+                source (DepictionSource): Source of the depiction.
+                template_name (str): template name.
+                mol (rdkit.Chem.Mol): RDKit mol object.
+                score (float): Quality of the depiction, lower is better.
+
+            """
 
 Properties = NamedTuple('Properties',
                         [('id', str),
@@ -70,6 +94,19 @@ Properties = NamedTuple('Properties',
                          ('modified_date', str),
                          ('pdbx_release_status', str),
                          ('weight', str)])
+
+Properties.__doc__ = """
+            Properties of the component these often come from _chem_comp
+            namespace
+
+            Args:
+                id (str): _chem_comp.id
+                name (str): _chem_comp.name
+                formula (str): _chem_comp.formula
+                modified_date (str): _chem_comp.pdbx_modified_date
+                pdbx_release_status (str): _chem_comp.pdbx_release_status
+                weight (str): _chem_comp.formula_weight
+            """
 
 Descriptor = NamedTuple('Descriptor',
                         [('type', str),

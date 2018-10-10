@@ -133,15 +133,5 @@ class PubChemDownloader:
             matrix[i, i] = factor
         matrix[3, 3] = 1
 
-        # bullshit fix starting:
-        # try:
-        # Chem
-        #    from rdkit import Chem
-        # except Exception as e:
-        #    print(str(e))
-        #    print('I fucking failed')
-        # if this is removed the protein-interaction pipeline fails on
-        # Linux with segmentation fault. No idea why.
-        # Will be removed in future when stable data structure is present
         AllChem.TransformMol(mol, matrix)
         Chem.MolToMolFile(mol, path)
