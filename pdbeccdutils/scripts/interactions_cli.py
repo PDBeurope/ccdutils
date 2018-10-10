@@ -28,10 +28,10 @@ import rdkit
 
 import pdbeccdutils
 from pdbeccdutils.computations.interactions import ProtLigInteractions
-from pdbeccdutils.core import ccd_reader, structure_writer
+from pdbeccdutils.core import ccd_reader, ccd_writer
 from pdbeccdutils.core.depictions import DepictionManager
-from pdbeccdutils.core.models import ConformerType
 from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.core.models import ConformerType
 
 # region logging
 
@@ -40,27 +40,29 @@ def _set_up_logger(args):
     """Set up application level logging.
 
     Args:
-        args (ArgumentParser): Parsed arguments.
+        args argparse.Namespace: Parsed arguments.
 
     Returns:
         logging.logger: Application log.
     """
 
-    logger = logging.getLogger(' ')
+    logger = logging.getLogger(__name__)
+
     level = logging.DEBUG if args.debug else logging.WARNING
     format = '[%(asctime)-15s]  %(message)s'
     logging.basicConfig(level=level, format=format, datefmt='%a, %d %b %Y %H:%M:%S')
+
     logger.debug(f'PDBe protein-ligand interactions pipeline using:')
     logger.debug(f'pdbeccdutils core v. {pdbeccdutils.__version__} RDKit v. {rdkit.__version__}')
 
-    return logger
+    logging.getLogger().disabled = True
 
 
 def _log_settings(args):
     """Compose initial message about application settings.
 
     Args:
-        args (ArgumentParser): Application arguments.
+        args (argparse.Namespace): Application arguments.
 
     Returns:
         str: initial application message.
@@ -87,7 +89,7 @@ def create_parser():
     Sets up a parser to get command line options.
 
     Returns:
-         ArgumentParser parser
+         argparse.Namespace parser
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
 
@@ -130,7 +132,7 @@ def check_args(args):
     """Validate suplied arguments.
 
     Args:
-        args (ArgumentParser): an argparse namespace containing the required arguments
+        args (argparse.Namespace): an argparse namespace containing the required arguments
     """
 
     __validate_file_exists('Config', args.config)
@@ -151,19 +153,20 @@ def interactions_pipeline(args):
     """Given arguments compute protein-ligand interactions.
 
     Args:
-        args (ArgumentParser): Command line arguments
+        args (argparse.Namespace): Command line arguments
     """
-    logger = _set_up_logger(args)
+    logger = logging.getLogger(__name__)
+    _set_up_logger(args)
     settings = _log_settings(args)
     logger.debug(settings)
     depictor = DepictionManager(pubchem_templates_path=args.config.pubchem_templates)
 
     for pdb in args.pdbs:
-        logging.debug(f'Processing... {pdb}.')
+        logger.debug(f'Processing... {pdb}.')
         try:
             _process_single_structure(args.config, depictor, pdb)
         except Exception as e:
-            logging.error(f'FAILED {pdb} | {str(e)}', file=sys.stderr)
+            logger.error(f'FAILED {pdb} | {str(e)}', file=sys.stderr)
 
 
 def _process_single_structure(config, depictor, pdb):
@@ -179,6 +182,7 @@ def _process_single_structure(config, depictor, pdb):
         depictor (DepictionManager): Helper class to get nice 2D images.
         pdb (str): Pdb id.
     """
+    logger = logging.getLogger(__name__)
     result_bag = {'depictions': {}}
     wd = os.path.join(config.output_dir, pdb[1:3], pdb)
     os.makedirs(wd, exist_ok=True)
@@ -190,10 +194,10 @@ def _process_single_structure(config, depictor, pdb):
     interactions = ProtLigInteractions(assembly_path, ['HOH', 'SO4'])  # encode res. names as a parameter!!
 
     if len(interactions.bound_molecules) == 0:
-        logging.debug('No bound molecules found. Skipping entry.')
+        logger.debug('No bound molecules found. Skipping entry.')
         return
     else:
-        logging.debug(f'{len(interactions.bound_molecules)} bound molecule(s) found.')
+        logger.debug(f'{len(interactions.bound_molecules)} bound molecule(s) found.')
 
     __add_hydrogens(config, wd, assembly_path, protonated_cif_path, protonated_pdb_path)
 
@@ -201,7 +205,7 @@ def _process_single_structure(config, depictor, pdb):
     interactions.path = protonated_cif_path
     for bm in interactions.bound_molecules:
         i += 1
-        logging.debug(f'Bound molecule composition: {str(bm)}')
+        logger.debug(f'Bound molecule composition: {str(bm)}')
 
         for ligand in map(lambda l: l.name, bm.residues):
             if ligand not in result_bag['depictions']:
@@ -247,13 +251,14 @@ def __get_cs_structure(config, wd, pdb):
     of the given protein.
 
     Args:
-        config (ArgumentParser): Application configuration.
+        config (argparse.Namespace): Application configuration.
         wd (str): working directory
         pdb (str): 4-letter PDB id.
 
     Returns:
         str: Path to the stored assembly structure
     """
+    logger = logging.getLogger(__name__)
     input_str_path = os.path.join(config.input_dir, pdb[1:3], pdb, "clean_mmcif", f'{pdb}_updated.cif.gz')
     assembly_str_path = os.path.join(wd, f'{pdb}_assembly.cif')
     xml_path = os.path.join(config.input_dir,
@@ -287,9 +292,9 @@ def __get_cs_structure(config, wd, pdb):
         if not cs_structure_generation_success:
             raise CCDUtilsError('Structure generation using CoordinateServer failed.')
         else:
-            logging.debug(f'{pdb} is likely to be NMR structure, generating /full structue.')
+            logger.debug(f'{pdb} is likely to be NMR structure, generating /full structue.')
     else:
-        logging.debug(f'Generated {pdb} with the assembly id {assembly_id}.')
+        logger.debug(f'Generated {pdb} with the assembly id {assembly_id}.')
 
     return assembly_str_path
 
@@ -298,7 +303,7 @@ def __run_cs(config, wd, cs_config_data):
     """Runs the coordinate server given the configuration file.
 
     Args:
-        config (ArgumentParser): Application configuration.
+        config (argparse.Namespace): Application configuration.
         wd (str): working directory.
         cs_config_data (dict of str): CoordinateServer config.
 
@@ -328,7 +333,7 @@ def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
     The command being used is `addh hbonds true`.
 
     Args:
-        config (ArgumentParser): Application configuration.
+        config (argparse.Namespace): Application configuration.
         wd (str): Working directory
         structure (str): Path to the original struture
         protonated_cif (str): Path to the CIF protonated structure.
@@ -338,7 +343,8 @@ def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
         CCDUtilsError: If the ChimeraX fails or the protein structure
         does not exist.
     """
-    logging.debug('Protonation started.')
+    logger = logging.getLogger(__name__)
+    logger.debug('Protonation started.')
     cmd_file = os.path.join(wd, 'chimera_config.cxc')
     with open(cmd_file, 'w') as f:
 
@@ -351,7 +357,7 @@ def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
         ]))
     try:
         subprocess.call([config.chimerax, '--nogui', '--cmd', f'open {cmd_file}', '--silent'])
-        logging.debug('Protonation finished.')
+        logger.debug('Protonation finished.')
     except Exception:
         raise CCDUtilsError('Error while protonating file.')
 
@@ -377,7 +383,7 @@ def __create_ligand_layout(depictor, ligand_path):
     component.sanitize()
     component.compute_2d(depictor)
 
-    return structure_writer.to_json_dict(component, remove_hs=True, conf_type=ConformerType.Depiction)
+    return ccd_writer.to_json_dict(component, remove_hs=True, conf_type=ConformerType.Depiction)
 
 
 def main():
