@@ -17,7 +17,14 @@
 
 import json
 import os
+import urllib
 import urllib.request
+from urllib.error import HTTPError, URLError
+
+
+import numpy
+from rdkit import Chem
+from rdkit.Chem import AllChem
 
 from pdbeccdutils.core import ccd_reader as sr
 
@@ -27,13 +34,13 @@ class PubChemDownloader:
     Toolkit to retrieve 2D layouts from the PubChem database.
     """
 
-    def __init__(self, pubchem_templates):
+    def __init__(self, pubchem_templates: str) -> None:
         if not os.path.isdir(pubchem_templates):
             raise ValueError(pubchem_templates + ' is not a valid path')
 
         self.pubchem_templates = pubchem_templates
 
-    def update_ccd_dir(self, components):
+    def update_ccd_dir(self, components: str):
         """Update 2D images of pdbechem components which are available
         in the pubchem database
 
@@ -44,9 +51,9 @@ class PubChemDownloader:
 
         for f in os.listdir(components):
             c = sr.read_pdb_cif_file(os.path.join(components, f)).component
-            self.download_template(c)
+            self.process_template(c)
 
-    def update_ccd_file(self, ccd):
+    def update_ccd_file(self, ccd: str) -> None:
         """Update 2d images of pdbechem components which are available
         in the pubchem database from CCD files.
 
@@ -56,37 +63,85 @@ class PubChemDownloader:
         components = sr.read_pdb_components_file(ccd)
 
         for k, v in components.items():
-            self.download_template(v.component)
+            self.process_template(v.component)
 
-    def download_template(self, component):
-        """Downloads 2D layout of a given component
+    def process_template(self, component):
+        """Process template for a given component. First the component
+        is attempted to be downloaded and rescaled. Since the RDKit
+        default depiction has 1.5A single bond size whereas templates
+        from pubchem are 1.0A.
 
         Args:
             component (pdbeccdutils.core.component.Component): Component
             destination (str): Path to the pubchem 2D template dir
 
         Returns:
-            bool: whether or not the new template has been downloaded
+            bool: whether or not the new template has been processed
+        """
+        destination = os.path.join(self.pubchem_templates, f'{component.id}.sdf')
+        downloaded = self.download_template(destination, component.id, component.inchikey)
+
+        if downloaded:
+            self._rescale_molecule(destination, 1.5)
+
+        return downloaded
+
+    def download_template(self, destination: str, template_id: str, inchikey: str) -> bool:
+        """Download 2D layout from the PubChem FTP.
+
+        Args:
+            destination (str): Path to the pubchem template
+            template_id (str): CCD id of a pubchem template
+            inchikey (str): CCD's INCHIKey
+
+        Returns:
+            bool: If the download was succesfull or no.
         """
         pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
 
-        template = os.path.join(self.pubchem_templates, component.id + '.sdf')
-        if os.path.isfile(template):
+        if os.path.isfile(destination):
             return False
 
-        inchikey = component.inchikey
-
         try:
-            inchi_url = '{}/inchikey/{}/cids/json'.format(pubchem_api, inchikey)
+            inchi_url = f'{pubchem_api}/inchikey/{inchikey}/cids/json'
             response = urllib.request.urlopen(inchi_url).read().decode('utf-8')
             jsonFile = json.loads(response)
             cid = jsonFile['IdentifierList']['CID'][0]
 
-            structure_url = '{}/cid/{}/record/SDF/?record_type=2d&response_type=save&response_basename={}'.format(pubchem_api, cid, component.id + '.sdf')
-            urllib.request.urlretrieve(structure_url, template)
+            structure_url = f'{pubchem_api}/cid/{cid}/record/SDF/?record_type=2d&response_type=save&response_basename={template_id}.sdf'
+            urllib.request.urlretrieve(structure_url, destination)
+
             return True
 
-        except urllib.request.HTTPError:
+        except HTTPError:
             return False
-        except urllib.error.URLError:
+        except URLError:
             return False
+
+    def _rescale_molecule(self, path, factor):
+        """
+        Rescale molecule coords to a given factor
+
+        Args:
+            path (str) Path to the molecule to be rescaled.
+            factor (float): rescaling factor
+        """
+        mol = Chem.MolFromMolFile(path, sanitize=True)
+        matrix = numpy.zeros((4, 4), numpy.float)
+
+        for i in range(3):
+            matrix[i, i] = factor
+        matrix[3, 3] = 1
+
+        # bullshit fix starting:
+        # try:
+        # Chem
+        #    from rdkit import Chem
+        # except Exception as e:
+        #    print(str(e))
+        #    print('I fucking failed')
+        # if this is removed the protein-interaction pipeline fails on
+        # Linux with segmentation fault. No idea why.
+        # Will be removed in future when stable data structure is present
+        AllChem.TransformMol(mol, matrix)
+        Chem.MolToMolFile(mol, path)
