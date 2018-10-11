@@ -3,6 +3,9 @@ from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.computations.parity_method import compare_molecules
 
+"""Test of PARITY method
+"""
+
 
 class TestParity:
 
@@ -15,7 +18,7 @@ class TestParity:
         ("UNL", 'GOL', 0.00),
         ("MAN", 'GLC', 1.00),
     ])
-    def test_images_with_names_created(id_1, id_2, score):
+    def test_parity_method(id_1, id_2, score):
         c1 = ccd_reader.read_pdb_cif_file(cif_filename(id_1)).component
         c2 = ccd_reader.read_pdb_cif_file(cif_filename(id_2)).component
 
