@@ -22,12 +22,14 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
 import rdkit.Chem.Draw as Draw
+from rdkit.Chem.Scaffolds import MurckoScaffold
+from rdkit.Chem import BRICS
 
 import pdbeccdutils.helpers.drawing as drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
-from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties, ReleaseStatus)
+from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties, ReleaseStatus, ScaffoldingMethod)
 from pdbeccdutils.helpers.io_grabber import IOGrabber
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
@@ -461,6 +463,31 @@ class Component:
                 pass
 
         return matches_found
+
+    def get_scaffolds(self, scaffolding_method=ScaffoldingMethod.Murcko_scaffold):
+
+        """[summary]
+            scaffolding_method ([type], optional): Defaults to
+                ScaffoldingMethods.Murcko_scaffold. Available
+                methods are Murcko, Murcko generic and BRICS.
+
+        Returns:
+            list of rdkit.Mol: [description]
+        """
+        scaffold = None
+        #add the process
+
+        if scaffolding_method == ScaffoldingMethod.Murcko_scaffold:
+            scaffold = [(MurckoScaffold.GetScaffoldForMol(self.mol))]
+
+        elif scaffolding_method == ScaffoldingMethod.Murcko_generic:
+            scaffold = [(MurckoScaffold.MakeScaffoldGeneric(self.mol))]
+
+        elif scaffolding_method == ScaffoldingMethod.Brics:
+            scaffold = BRICS.BRICSDecompose(self.mol)
+            scaffold = list(map(lambda l: rdkit.Chem.MolFromSmiles(l), scaffold))
+
+        return scaffold
 
     def _fix_molecule(self, rwmol):
         """
