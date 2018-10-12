@@ -69,15 +69,15 @@ class ReleaseStatus(IntEnum):
     REF_ONLY = 5
     REL = 6
 
+
 class ScaffoldingMethod(IntEnum):
     """
     Rdkit scaffold methods
     """
 
-    Murcko_scaffold = 1
-    Murcko_generic = 2
+    MurckoScaffold = 1
+    MurckoGeneric = 2
     Brics = 3
-
 
 
 DepictionResult = NamedTuple('DepictionResult',

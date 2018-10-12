@@ -22,14 +22,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
 import rdkit.Chem.Draw as Draw
-from rdkit.Chem.Scaffolds import MurckoScaffold
 from rdkit.Chem import BRICS
+from rdkit.Chem.Scaffolds import MurckoScaffold
 
 import pdbeccdutils.helpers.drawing as drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
-from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties, ReleaseStatus, ScaffoldingMethod)
+from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties,
+                                      ReleaseStatus, ScaffoldingMethod)
 from pdbeccdutils.helpers.io_grabber import IOGrabber
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
@@ -464,23 +465,20 @@ class Component:
 
         return matches_found
 
-    def get_scaffolds(self, scaffolding_method=ScaffoldingMethod.Murcko_scaffold):
-
+    def get_scaffolds(self, scaffolding_method=ScaffoldingMethod.MurckoScaffold):
         """[summary]
-            scaffolding_method ([type], optional): Defaults to
-                ScaffoldingMethods.Murcko_scaffold. Available
-                methods are Murcko, Murcko generic and BRICS.
+            scaffolding_method (ScaffoldingMethod, optional):
+                Defaults to MurckoScaffold. Scaffolding method to use
 
         Returns:
-            list of rdkit.Mol: [description]
+            list of rdkit.Mol: Scaffolds found in the component.
         """
         scaffold = None
-        #add the process
 
-        if scaffolding_method == ScaffoldingMethod.Murcko_scaffold:
+        if scaffolding_method == ScaffoldingMethod.MurckoScaffold:
             scaffold = [(MurckoScaffold.GetScaffoldForMol(self.mol))]
 
-        elif scaffolding_method == ScaffoldingMethod.Murcko_generic:
+        elif scaffolding_method == ScaffoldingMethod.MurckoGeneric:
             scaffold = [(MurckoScaffold.MakeScaffoldGeneric(self.mol))]
 
         elif scaffolding_method == ScaffoldingMethod.Brics:
