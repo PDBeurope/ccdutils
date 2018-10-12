@@ -22,12 +22,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
 import rdkit.Chem.Draw as Draw
+from rdkit.Chem import BRICS
+from rdkit.Chem.Scaffolds import MurckoScaffold
 
 import pdbeccdutils.helpers.drawing as drawing
-from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
-from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties, ReleaseStatus)
+from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties,
+                                      ReleaseStatus, ScaffoldingMethod)
 from pdbeccdutils.helpers.io_grabber import IOGrabber
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
@@ -262,7 +265,7 @@ class Component:
             return False
         return True
 
-    def compute_2d(self, manager: DepictionManager, remove_hs: bool=True) -> rdkit.Chem.Mol:
+    def compute_2d(self, manager: DepictionManager, remove_hs: bool=True) -> DepictionResult:
         """Compute 2d depiction of the component using DepictionManager
         instance.
 
@@ -273,20 +276,17 @@ class Component:
                 hydrogens prior to depiction.
 
         Returns:
-            rdkit.Chem.Mol: 2D depiction of the ligand.
+            DepictionResult: Object with the details about depiction process.
         """
         mol_copy = rdkit.Chem.RWMol(self.mol)
         if remove_hs:
             mol_copy = rdkit.Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
             rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
-        result_log = manager.depict_molecule(self._id, mol_copy)
 
-        if result_log is not None:
-            # add conformer
-            self._2dmol = result_log.mol
-            return result_log
-        else:
-            return None
+        result_log = manager.depict_molecule(self._id, mol_copy)
+        self._2dmol = result_log.mol
+
+        return result_log
 
     def export_2d_svg(self, file_name: str, width: int=500, names: bool=False,
                       atom_highlight: Dict[Any, Tuple]={}, bond_highlight: Dict[Tuple, Tuple]={}):
@@ -465,6 +465,28 @@ class Component:
 
         return matches_found
 
+    def get_scaffolds(self, scaffolding_method=ScaffoldingMethod.MurckoScaffold):
+        """[summary]
+            scaffolding_method (ScaffoldingMethod, optional):
+                Defaults to MurckoScaffold. Scaffolding method to use
+
+        Returns:
+            list of rdkit.Mol: Scaffolds found in the component.
+        """
+        scaffold = None
+
+        if scaffolding_method == ScaffoldingMethod.MurckoScaffold:
+            scaffold = [(MurckoScaffold.GetScaffoldForMol(self.mol))]
+
+        elif scaffolding_method == ScaffoldingMethod.MurckoGeneric:
+            scaffold = [(MurckoScaffold.MakeScaffoldGeneric(self.mol))]
+
+        elif scaffolding_method == ScaffoldingMethod.Brics:
+            scaffold = BRICS.BRICSDecompose(self.mol)
+            scaffold = list(map(lambda l: rdkit.Chem.MolFromSmiles(l), scaffold))
+
+        return scaffold
+
     def _fix_molecule(self, rwmol):
         """
         Single molecule sanitization process. Presently, only valence
@@ -550,7 +572,7 @@ class Component:
         try:
             copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True,
                                                                     kekulize=True, addChiralHs=True)
-        except RuntimeError:
+        except (RuntimeError, ValueError):
             copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=False,
                                                                     kekulize=True, addChiralHs=True)
 

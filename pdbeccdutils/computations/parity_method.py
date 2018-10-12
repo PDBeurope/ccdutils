@@ -2,21 +2,39 @@
 Jon Tyczak to Abhik to be used by the cofactors pipeline.
 """
 
-import rdkit
+from rdkit import Chem
+from rdkit.Chem import rdFMCS
+from typing import NamedTuple
+
+ParityResult = NamedTuple('ParityResult',
+                          [('template_atoms', int),
+                           ('query_atoms', int),
+                           ('match_count', int),
+                           ('similarity_score', float)])
+ParityResult.__doc__ = """
+NamedTuple for the result of parity method along with the details
+necessary for calculating the similarity score.
+
+Args:
+    template_atoms (int): Number of template atoms.
+    query_atoms (int): Number of query molecule atoms.
+    match_count (int): Size o the common subgaph match.
+    similarity_score (float): Calculate similarity score.
+"""
 
 
 def _get_matches(mol, smarts):
     """Gets the subgraph match for the parity method.
 
     Args:
-        mol (rdkit.chem.rdchem.Mol): Molecule to be queried
+        mol (rdkit.Chem.Mol): Molecule to be queried
         smarts (str): Molecule representation in SMARTS.
 
     Returns:
         int: Molecular subgraph matches.
     """
 
-    patt = rdkit.Chem.MolFromSmarts(smarts)
+    patt = Chem.MolFromSmarts(smarts)
     matches = mol.GetSubstructMatches(patt, uniquify=False)
     return matches
 
@@ -26,8 +44,8 @@ def _generate_sim_score(template, query, smarts):
     smarts string returns similarity score.
 
     Args:
-        template (rdkit.chem.rdchem.Mol): template molecule.
-        query (rdkit.Chem.rdchem.Mol): query molecule.
+        template (rdkit.Chem.Mol): template molecule.
+        query (rdkit.Chem.Mol): query molecule.
         smarts (str): common subgraph in the SMARTS format.
 
     Returns:
@@ -36,9 +54,9 @@ def _generate_sim_score(template, query, smarts):
     """
 
     if template.GetNumAtoms() == 1:
-        smarts = rdkit.Chem.MolToSmarts(template)
+        smarts = Chem.MolToSmarts(template)
     elif query.GetNumAtoms() == 1:
-        smarts = rdkit.Chem.MolToSmarts(query)
+        smarts = Chem.MolToSmarts(query)
     if smarts is None:
         best_matches = 0
         best_sim_score = 0.0
@@ -66,43 +84,35 @@ def _generate_sim_score(template, query, smarts):
     return (best_matches, best_sim_score)
 
 
-def compare_molecules(template, query, thresh):
+def compare_molecules(template, query, thresh=0.01):
     """Given the two molecules calculates their similarity score.
     If expected similarity score is lower than the threshold nothing
     is calculated.
 
     Args:
-        template (rdkit.Chem.rdchem.Mol): Template molecule
-        query (rdkit.Chem.rdchem.Mol): Query molecule
-        thresh (float): Threshold score for the match to be considered.
+        template (rdkit.Chem.Mol): Template molecule
+        query (rdkit.Chem.Mol): Query molecule
+        thresh (float, optional): Defaults to 0.01: Threshold score for
+            the match to be considered.
 
     Returns:
-        (int, int, int, float):
-        int - template atom count
-        int - query atom count
-        int - size of common subgraph
-        float - similarity score
+        ParityResult: Result of the PARITY comparison.
     """
-    sim_arr = ['', '', 0, 0]
+    templ_atoms = template.GetNumAtoms()
+    query_atoms = query.GetNumAtoms()
 
-    sim_arr[0] = template.GetNumAtoms()
-    sim_arr[1] = query.GetNumAtoms()
-
-    min_num_atoms = min(sim_arr[0], sim_arr[1])
-    max_sim_score = float(min_num_atoms) / float(sim_arr[0] + sim_arr[1] - min_num_atoms)
+    min_num_atoms = min(templ_atoms, query_atoms)
+    max_sim_score = float(min_num_atoms) / float(templ_atoms + query_atoms - min_num_atoms)
 
     if max_sim_score < thresh:
-        return sim_arr
+        return ParityResult(templ_atoms, query_atoms, 0, 0)
 
-    mcs_graph = rdkit.Chem.rdFMCS.FindMCS([template, query],
-                                          bondCompare=rdkit.Chem.rdFMCS.BondCompare.CompareAny,
-                                          atomCompare=rdkit.Chem.rdFMCS.AtomCompare.CompareAny,
-                                          timeout=40,
-                                          completeRingsOnly=True)
+    mcs_graph = rdFMCS.FindMCS([template, query],
+                               bondCompare=rdFMCS.BondCompare.CompareAny,
+                               atomCompare=rdFMCS.AtomCompare.CompareAny,
+                               timeout=40,
+                               completeRingsOnly=True)
 
     matches, sim_score = _generate_sim_score(template, query, mcs_graph.smartsString)
 
-    sim_arr[2] = sim_score
-    sim_arr[3] = matches
-
-    return sim_arr
+    return ParityResult(templ_atoms, query_atoms, matches, sim_score)

@@ -4,16 +4,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 ```
+
 # pdbeccdutils: Small molecules chemistry toolkit
 
-
 ## User guide
+
 Getting started with pdbeccdutils
 
 ```eval_rst
 .. toctree::
    :maxdepth: 1
-    
+
    guide/intro
    guide/install
    guide/depictions

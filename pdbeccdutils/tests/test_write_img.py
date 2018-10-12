@@ -37,7 +37,7 @@ class TestWriteImg:
         ("BCD", 'C66', True),
         ("ATP", '<svg:rect', False),
         ("08T", '<svg:rect', False),
-        ("10R", 'Image not', False),
+        ("10R", '<svg:rect', False),
         ("0OD", '<svg:rect', False),
     ])
     def test_image_generation_with_names(tmpdir, id, expected, names):

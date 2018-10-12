@@ -17,12 +17,14 @@
 
 import os
 
-import numpy
-import rdkit
+from rdkit import Chem
+from rdkit import Geometry
+from rdkit.Chem import rdCoordGen
+from rdkit.Chem import AllChem
 from scipy.spatial import KDTree
 
 import pdbeccdutils.utils.config as config
-from pdbeccdutils.core.models import DepictionSource, DepictionResult, Mapping
+from pdbeccdutils.core.models import DepictionSource, DepictionResult
 
 
 class DepictionManager:
@@ -48,8 +50,11 @@ class DepictionManager:
                 for depicting ligand e.g. porphyring rings.
 
         """
+        self.coordgen_params = rdCoordGen.CoordGenParams()
+        self.coordgen_params.coordgenScaling = 50 / 1.5
+        self.coordgen_params.templateFileDir = config.coordgen_templates
 
-        self.pubchem_templates = []
+        self.pubchem_templates = pubchem_templates_path if os.path.isdir(pubchem_templates_path) else ''
         self.substructures = []
 
         if os.path.isdir(general_templates_path):
@@ -57,98 +62,7 @@ class DepictionManager:
                                   self._load_template(os.path.join(general_templates_path, k))
                                   for k in os.listdir(general_templates_path)}
 
-        if os.path.isdir(pubchem_templates_path):
-            self.pubchem_templates = {k.split('.')[0]:
-                                      os.path.join(pubchem_templates_path, k)
-                                      for k in os.listdir(pubchem_templates_path)}
-
-    def _load_template(self, path):
-        """
-        Loads a template molecule with 2D coordinates
-
-        Args:
-            path (str): path to the model molecule in *.sdf,
-                or *.pdb format
-
-        Raises:
-            ValueError: if unsuported format is used: sdf|pdb
-
-        Returns:
-            rdkit.Chem.rdchem.Mol: RDKit representation of the template
-        """
-        mol = rdkit.Chem.RWMol()
-        extension = os.path.basename(path).split('.')[1]
-
-        if extension == 'sdf':
-            mol = rdkit.Chem.MolFromMolFile(path, removeHs=True)
-        elif extension == 'pdb':
-            mol = rdkit.Chem.MolFromPDBFile(path, removeHs=True)
-        else:
-            raise ValueError('Unsupported molecule type \'{}\''.format(extension))
-
-        [x.SetAtomicNum(6) for x in mol.GetAtoms()]
-        [x.SetBondType(rdkit.Chem.BondType.UNSPECIFIED) for x in mol.GetBonds()]
-
-        return mol
-
-    def _anonymization(self, mol):
-        """
-        Converts all molecule atoms into carbons and all bonds into
-        single ones. This is used for the substructure matching step.
-        Original mapping of both is returned.
-
-        Args:
-            mol (rdkit.Chem.rdchem.Mol): molecule to be anonymized
-
-        Returns:
-            Mappings: original mapping between atoms and bonds
-            of the molecule
-        """
-        molAtomMapping = {atom.GetIdx(): atom.GetAtomicNum() for atom in mol.GetAtoms()}
-        molBondMapping = {bond.GetIdx(): bond.GetBondType() for bond in mol.GetBonds()}
-
-        [x.SetAtomicNum(6) for x in mol.GetAtoms()]
-        [x.SetBondType(rdkit.Chem.BondType.SINGLE) for x in mol.GetBonds()]
-
-        return Mapping(atom_mapping=molAtomMapping, bond_mapping=molBondMapping)
-
-    def _deanonymization(self, mol, mappings):
-        """
-        Based on the original mapping restores atom elements and
-        bond types.
-
-        Args:
-            mol (rdkit.Chem.rdchem.Mol): molecule to be restored
-            mappings (Mapping): Original bond and atom info
-        """
-
-        [x.SetAtomicNum(mappings.atom_mapping[x.GetIdx()]) for x in mol.GetAtoms()]
-        [x.SetBondType(mappings.bond_mapping[x.GetIdx()]) for x in mol.GetBonds()]
-
-    def _rescale_molecule(self, mol, factor):
-        """
-        Rescale molecule coords to a given factor
-
-        Args:
-            mol (rdkit.Chem.rdchem.Mol) molecule to be rescaled
-            factor (float): rescaling factor
-        """
-        matrix = numpy.zeros((4, 4), numpy.float)
-
-        for i in range(3):
-            matrix[i, i] = factor
-        matrix[3, 3] = 1
-
-        rdkit
-        import rdkit
-        # those two lines are here because of very weird underetministic
-        # import issue on Linux.
-        # essentially if they are removed, protein-interactions pipeline
-        # fails with segmentation fault.
-        # Will be removed in future when stable data structure is present
-        rdkit.Chem.AllChem.TransformMol(mol, matrix)
-
-    def depict_molecule(self, id, mol):
+    def depict_molecule(self, het_id, mol):
         """
         Given input molecule tries to generate its depictions.
 
@@ -159,20 +73,19 @@ class DepictionManager:
 
         Arguments:
             id (str): id of the ligand
-            mol (Chem.rdchem.Mol): molecule to be depicted
+            mol (rdkit.Chem.Mol): molecule to be depicted
 
         Returns:
-            pdbeccdutils.utils.DepictionResult: Summary of the ligand
-            depiction process.
+            DepictionResult: Summary of the ligand depiction process.
         """
-        temp_mol = rdkit.Chem.RWMol(mol)
-        mappings = self._anonymization(temp_mol)
-        templateMol = rdkit.Chem.RWMol(temp_mol).GetMol()
-        pubchemMol = rdkit.Chem.RWMol(temp_mol).GetMol()
-        rdkitMol = rdkit.Chem.RWMol(temp_mol).GetMol()
+        temp_mol = Chem.RWMol(mol)
+
+        templateMol = Chem.RWMol(temp_mol).GetMol()
+        pubchemMol = Chem.RWMol(temp_mol).GetMol()
+        rdkitMol = Chem.RWMol(temp_mol).GetMol()
         results = []
 
-        pubchem_res = self._get_2D_by_pubchem(id, pubchemMol) if self.pubchem_templates else None
+        pubchem_res = self._get_2D_by_pubchem(het_id, pubchemMol) if len(self.pubchem_templates) > 0 else None
         template_res = self._get_2D_by_template(templateMol) if self.substructures else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
@@ -186,27 +99,71 @@ class DepictionManager:
         results.sort(key=lambda l: (l.score, l.source))
 
         if len(results) > 0:
-            self._deanonymization(results[0].mol, mappings)
             return results[0]
         else:
             return DepictionResult(source=DepictionSource.Failed, template_name='', mol=None, score=1000)
+
+    def _get_pubchem_template_path(self, het_id):
+        """Get path to the PubChem template if it exists.
+
+        Args:
+            het_id (str): Ligand in.
+
+        Returns:
+            str: Path to the PubChem layout.
+        """
+        path = os.path.join(self.pubchem_templates, f'{het_id}.sdf')
+
+        return path if os.path.isfile(path) else ''
+
+    def _load_template(self, path):
+        """
+        Loads a template molecule with 2D coordinates
+
+        Args:
+            path (str): path to the model molecule in *.sdf,
+                or *.pdb format
+
+        Raises:
+            ValueError: if unsuported format is used: sdf|pdb
+
+        Returns:
+            rdkit.Chem.Mol: RDKit representation of the template
+        """
+        mol = Chem.RWMol()
+        extension = os.path.basename(path).split('.')[1]
+
+        if extension == 'sdf':
+            mol = Chem.MolFromMolFile(path, sanitize=True, removeHs=True)
+        elif extension == 'pdb':
+            mol = Chem.MolFromPDBFile(path, sanitize=True, removeHs=True)
+        else:
+            raise ValueError('Unsupported molecule type \'{}\''.format(extension))
+
+        p = Chem.AdjustQueryParameters()
+        p.makeAtomsGeneric = True
+        p.makeBondsGeneric = True
+
+        mol = Chem.AdjustQueryProperties(mol, p)
+
+        return mol
 
     def _get_2D_by_rdkit(self, mol):
         """
         Get depiction done using solely the default RDKit functionality.
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
+            mol (rdkit.Chem.Mol): Mol to be depicted
 
         Returns:
             DepictionResult: Depiction with some usefull metadata
         """
         try:
-            rdkit.Chem.AllChem.GenerateDepictionMatching3DStructure(mol, mol)
+            rdCoordGen.AddCoords(mol, self.coordgen_params)
             flaws = DepictionValidator(mol).depiction_score()
-            return DepictionResult(source=DepictionSource.RdKit, template_name=None, mol=mol, score=flaws)
+            return DepictionResult(source=DepictionSource.RDKit, template_name=None, mol=mol, score=flaws)
         except Exception:
-            return None
+            return DepictionResult(source=DepictionSource.Failed, template_name=None, mol=None, score=1000)
 
     def _get_2D_by_pubchem(self, id, mol):
         """
@@ -220,36 +177,36 @@ class DepictionManager:
             DepictionResult: Depiction with some usefull metadata
         """
         try:
-            if id in self.pubchem_templates:
-                template = self._load_template(self.pubchem_templates[id])
-                self._rescale_molecule(template, 1.5)
+            template_path = self._get_pubchem_template_path(id)
+            if len(template_path) > 0:
+                template = self._load_template(template_path)
 
                 if mol.HasSubstructMatch(template):
-                    rdkit.Chem.AllChem.GenerateDepictionMatching2DStructure(mol, template)
+                    AllChem.GenerateDepictionMatching2DStructure(mol, template)
                     flaws = DepictionValidator(mol).depiction_score()
-                    return DepictionResult(source=DepictionSource.Pubchem, template_name=id, mol=mol, score=flaws)
-        except Exception:
-            pass
+                    return DepictionResult(source=DepictionSource.PubChem, template_name=id, mol=mol, score=flaws)
+        except Exception as e:
+            print(str(e))
 
-        return None
+        return DepictionResult(source=DepictionSource.Failed, template_name=None, mol=None, score=1000)
 
     def _get_2D_by_template(self, mol):
         """
         Depict ligand using user-provided templates
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
+            mol (rdkit.Chem.Mol): Mol to be depicted
 
         Returns:
-            list of pdbecccdutils.DepictionResult: Depictions with their
+            list of DepictionResult: Depictions with their
             quality and metadata.
         """
         results = list()
         try:
             for key, template in self.substructures.items():
-                temp_mol = rdkit.Chem.RWMol(mol)
+                temp_mol = Chem.RWMol(mol)
                 if temp_mol.HasSubstructMatch(template):
-                    rdkit.Chem.AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
+                    AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
                     flaws = DepictionValidator(temp_mol).depiction_score()
                     results.append(DepictionResult(source=DepictionSource.Template,
                                                    template_name=key, mol=temp_mol, score=flaws))
@@ -293,8 +250,8 @@ class DepictionValidator:
         atomC = self.conformer.GetAtomPosition(bondB.GetBeginAtomIdx())
         atomD = self.conformer.GetAtomPosition(bondB.GetEndAtomIdx())
 
-        vecA = rdkit.Geometry.Point2D(atomB.x - atomA.x, atomB.y - atomA.y)
-        vecB = rdkit.Geometry.Point2D(atomD.x - atomC.x, atomD.y - atomC.y)
+        vecA = Geometry.Point2D(atomB.x - atomA.x, atomB.y - atomA.y)
+        vecB = Geometry.Point2D(atomD.x - atomC.x, atomD.y - atomC.y)
 
         # Cramer rule to identify intersection
         det = vecA.x * -vecB.y + vecA.y * vecB.x

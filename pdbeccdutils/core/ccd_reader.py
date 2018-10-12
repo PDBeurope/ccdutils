@@ -42,7 +42,7 @@ CCDReaderResult = NamedTuple('CCDReaderResult',
                               ('component', Component)])
 
 CCDReaderResult.__doc__ = """
-Namedtuple for the result of reading an individual PDB chemical
+NamedTuple for the result of reading an individual PDB chemical
 component definition (CCD).
 
 Args:

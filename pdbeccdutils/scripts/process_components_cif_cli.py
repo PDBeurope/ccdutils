@@ -38,6 +38,7 @@ import pdbeccdutils
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core import ccd_writer
 from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.utils import PubChemDownloader, config
@@ -48,7 +49,7 @@ def create_parser():
     Sets up parse the command line options.
 
     Returns:
-         ArgumentParser parser
+         argparse.Namespace parser
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     add_arg = parser.add_argument
@@ -72,7 +73,8 @@ def check_args(args):
     """Validate suplied arguments.
 
     Args:
-        args (ArgumentParser): an argparse namespace containing the required arguments
+        args (argparse.Namespace): an argparse namespace containing the
+            required arguments
     """
     if not os.path.isfile(args.components_cif):
         print(f'{args.components_cif} does not exist', file=sys.stderr)
@@ -92,12 +94,13 @@ def pdbechem_pipeline(args):
     Processes components.cif for PDBeChem type output
 
     Args:
-        args (ArgumentParser): an argparse namespace containing the
+        args (argparse.Namespace): an argparse namespace containing the
             required arguments
     """
 
     # set up logging
-    logger = _set_up_logger(args)
+    _set_up_logger(args)
+    logger = logging.getLogger(__name__)
     settings = _log_settings(args)
     logger.debug(settings)
 
@@ -115,11 +118,11 @@ def pdbechem_pipeline(args):
 
     for key, ccd_reader_result in ccd_reader_result.items():
         try:
-            logger.debug(f'{key} | processing...')
+            logger.info(f'{key} | processing...')
             process_single_component(args, ccd_reader_result, fragment_library, chem_comp_xml,
-                                     depictions, pubchem_templates, logger)
+                                     depictions, pubchem_templates)
         except Exception as e:
-            logger.debug(f'{key} | FAILURE {str(e)}.')
+            logger.error(f'{key} | FAILURE {str(e)}.')
         counter -= 1
 
         if counter == 0:
@@ -135,27 +138,22 @@ def _set_up_logger(args):
     """Set up application level logging.
 
     Args:
-        args (ArgumentParser): Parsed arguments.
-
-    Returns:
-        logging.logger: Application log.
+        args (argparse.Namespace): Parsed arguments.
     """
 
-    logger = logging.getLogger(' ')
-    level = logging.DEBUG if args.debug else logging.WARNING
+    logger = logging.getLogger(__name__)
+    level = logging.DEBUG if args.debug else logging.ERROR
     format = '[%(asctime)-15s]  %(message)s'
     logging.basicConfig(level=level, format=format, datefmt='%a, %d %b %Y %H:%M:%S')
-    logger.debug(f'PDBeChem pipeline using:')
-    logger.debug(f'pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}')
-
-    return logger
+    logger.info(f'PDBeChem pipeline using:')
+    logger.info(f'pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}')
 
 
 def _log_settings(args):
     """Compose initial message about application settions.
 
     Args:
-        args (ArgumentParser): Application arguments.
+        args (argparse.Namespace): Application arguments.
 
     Returns:
         str: initial application message.
@@ -174,21 +172,20 @@ def _log_settings(args):
 
 def process_single_component(args, ccd_reader_result, library,
                              chem_comp_xml, depictions,
-                             pubchem_templates, logger):
+                             pubchem_templates):
     """Process PDB-CCD component
 
     Args:
-        args (ArgumentParser): Application arguments
-        ccd_reader_result (pdbeccdutils.core.CCDReaderResult):
+        args (argparse.Namespace): Application arguments
+        ccd_reader_result (CCDReaderResult):
             pdbeccdutils parser output.
-        library (pdbeccdutils.core.FragmentLibrary): fragment library
+        library (FragmentLibrary): fragment library
         chem_comp_xml (xml.etree.ElementTree.Element): root of the
             PDB-CCD XML representation
-        depictions (pdbeccdutils.utils.DepictionManager): Object to take
+        depictions (DepictionManager): Object to take
             care of the pretty depictions.
-        pubchem_templates (pdbeccdutils.utils.PubChemDownloader):
+        pubchem_templates (PubChemDownloader):
             Object to take care of the puchem templates fetching.
-        logger (logging.loger): Application log
     """
     ccd_id = ccd_reader_result.component.id
     parent_dir = os.path.join(args.output_dir, ccd_id[0], ccd_id)
@@ -219,6 +216,7 @@ def process_single_component(args, ccd_reader_result, library,
     chem_comp_xml.append(xml_repr)
 
     # write log
+    logger = logging.getLogger(__name__)
     [logger.debug(f'{ccd_id} | {msg}') for msg in issues]
 
 
@@ -229,7 +227,7 @@ def check_component_parsing(ccd_reader_result):
     was in the source file and is reproduced by rdkit.
 
     Args:
-        ccd_reader_result (pdbeccdutils.core.ccd_reader.CCDReaderResult):
+        ccd_reader_result (CCDReaderResult):
             Output of the parsing process.
 
     Returns:
@@ -252,12 +250,12 @@ def check_component_parsing(ccd_reader_result):
     return issues
 
 
-def check_component_structure(component):
+def check_component_structure(component: Component):
     """Checks whether or not the component has degenerated ideal
     coordinates. If so, new conformer is attempted to be generated.
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             processed.
 
     Returns:
@@ -277,15 +275,15 @@ def download_template(pubchem_templates, component):
     """Attempts to download a pubchem template for the given component
 
     Args:
-        pubchem_templates (pdbeccdutils.utils.PubChemDownloader):
+        pubchem_templates (PubChemDownloader):
             Pubchem downloader instance.
-        component (pdbeccdutils.core.Component): Component to be used.
+        component (Component): Component to be used.
 
     Returns:
         (list of str): information whether or not the new template has
             been downloaded.
     """
-    component_downloaded = pubchem_templates.download_template(component)
+    component_downloaded = pubchem_templates.process_template(component)
     if component_downloaded:
         return ['downloaded new pubchem template.']
 
@@ -298,8 +296,8 @@ def generate_depictions(component, depictions, parent_dir):
     and without atom names.
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be depicted.
-        depictions (pdbeccdutils.utils.DepictionManager): Helper class
+        component (Component): Component to be depicted.
+        depictions (DepictionManager): Helper class
             to carry out depiction process.
         parent_dir (str): Where the depiction should be stored
 
@@ -315,6 +313,7 @@ def generate_depictions(component, depictions, parent_dir):
     else:
         if depiction_result.score > 0.99:
             issues.append('collision free image could not be generated.')
+        issues.append(f'2d generated using {depiction_result.source.name} with score {depiction_result.score}.')
 
     for i in range(100, 600, 100):
         component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_{i}.svg'), width=i)
@@ -327,9 +326,8 @@ def search_fragment_library(component, library):
     """Search
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be processed
-        library (pdbeccdutils.core.FragmentLibrary): Fragment library
-            to be used.
+        component (Component): Component to be processed
+        library (FragmentLibrary): Fragment library to be used.
 
     Returns:
         list of str: info msg.
@@ -347,9 +345,9 @@ def export_structure_formats(component, parent_dir, ideal_conformer):
     PDBeChem FTP area.
 
     Args:
-        component (pdbeccdutils.core.Component): Component being processed.
+        component (Component): Component being processed.
         parent_dir (str): Working directory.
-        ideal_conformer (pdbeccdutils.core.ConformerType): ConformerType
+        ideal_conformer (ConformerType): ConformerType
             to be used for ideal coordinates.
 
     Returns:
@@ -374,10 +372,10 @@ def write_molecule(path, component, alt_names, conformer_type):
 
     Args:
         path str: Path where the molecule will be stored.
-        component (pdbeccdutils.core.Component): Component to be written.
+        component (Component): Component to be written.
         alt_names (bool): Whether or not molecule will be written with
             alternate names.
-        conformer_type (pdbeccdutils.core.Component): Conformer to be written.
+        conformer_type (Component): Conformer to be written.
 
     Returns:
         list of str: encountered issues

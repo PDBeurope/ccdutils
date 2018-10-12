@@ -1,6 +1,5 @@
 # pdbeccdutils.core
 
-
 ## pdbeccdutils.core.ccd_reader
 
 ```eval_rst
@@ -18,7 +17,7 @@
 ## pdbeccdutils.core.structure_writer
 
 ```eval_rst
-.. automodule:: pdbeccdutils.core.structure_writer
+.. automodule:: pdbeccdutils.core.ccd_writer
     :members:
 ```
 
@@ -41,4 +40,4 @@
 ```eval_rst
 .. automodule:: pdbeccdutils.core.exceptions
     :members:
-```    
+```

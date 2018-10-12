@@ -13,10 +13,10 @@ def main():
     """Main method of the whole process.
     """
     parser = argparse.ArgumentParser(description='PDBe downloader of pubchem depictions')
-    parser.add_argument('-components_dir', type=str, default='',
+    parser.add_argument('--components_dir', type=str, default='',
                         help='Path to the directory with CCD files', required=False)
-    parser.add_argument('-ccd', type=str, default='', help='Path to the CCD file', required=False)
-    parser.add_argument('-pubchem_templates', type=str, help='Path to the pubchem templates.',
+    parser.add_argument('--ccd', type=str, default='', help='Path to the CCD file', required=False)
+    parser.add_argument('--pubchem_templates', type=str, help='Path to the pubchem templates.',
                         required=True)
 
     config = parser.parse_args()
@@ -29,5 +29,5 @@ def main():
         pubchem.update_ccd_file(config.ccd)
         sys.exit(os.EX_OK)
     else:
-        print('Either components_dir or components.cif file needs to be set as a source of data.')
+        print('Either components_dir or components.cif file needs to be set as a source of data.', file=sys.stderr)
         sys.exit(os.EX_USAGE)

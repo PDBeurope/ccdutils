@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pdbeccdutils',
-      version='0.2',
+      version='0.3',
       description='Toolkit to deal with wwPDB chemical components definitions for small molecules.',
       project_urls={
           'Source code': 'https://gitlab.ebi.ac.uk/pdbe/ccdutils',
@@ -14,7 +14,8 @@ setup(name='pdbeccdutils',
       packages=['pdbeccdutils'],
       scripts=['bin/setup_pubchem_library',
                'bin/process_components_cif',
-               'bin/protein_interactions'],
+               'bin/protein_interactions',
+               'bin/murcko_scaffold_cif'],
       zip_safe=False,
       include_package_data=True,
       install_requires=['Pillow', 'scipy', 'pdbecif'],
