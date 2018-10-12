@@ -1,0 +1,4 @@
+from pdbeccdutils.scripts.murcko_scaffold_cif_cli import main
+
+if __name__ == "__main__":
+    main()
