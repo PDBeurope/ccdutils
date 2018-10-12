@@ -34,9 +34,16 @@ pip install -e arpeggio
     :members:
 ```
 
-## Setup pubchem library
+## Setup PubChem library
 
 ```eval_rst
 .. automodule:: pdbeccdutils.scripts.setup_pubchem_library_cli
+    :members:
+```
+
+## Get MURCKO scaffolds
+
+```eval_rst
+.. automodule:: pdbeccdutils.scripts.murcko_scaffold_cif_cli
     :members:
 ```

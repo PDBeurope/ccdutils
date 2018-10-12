@@ -122,3 +122,13 @@ Descriptor = NamedTuple('Descriptor',
                         [('type', str),
                          ('program', str),
                          ('value', str)])
+
+Descriptor.__doc__ = """
+        Descriptor obtained from the cif file. This is essentially
+        _pdbx_chem_comp_descriptor field.
+
+        Args:
+            type (str): `_pdbx_chem_comp_descriptor.type` in CIF language.
+            program (str): `_pdbx_chem_comp_descriptor.program` in CIF language.
+            value (str): `_pdbx_chem_comp_descriptor.descriptor` in CIF language.
+        """

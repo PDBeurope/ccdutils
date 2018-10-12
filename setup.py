@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pdbeccdutils',
-      version='0.2',
+      version='0.3',
       description='Toolkit to deal with wwPDB chemical components definitions for small molecules.',
       project_urls={
           'Source code': 'https://gitlab.ebi.ac.uk/pdbe/ccdutils',
