@@ -214,7 +214,11 @@ def _process_single_structure(config, depictor, pdb):
                 result_bag['depictions'][ligand] = ligand_layout[ligand]
 
         contacts = interactions.get_interaction(bm.to_arpeggio_format())
-        result_bag[f'bm{i}'] = {'contacts': contacts}
+        contacts_filtered = list(filter(lambda l:
+                                        l['interacting_entities'] in ('INTER', 'SELECTION_WATER'),
+                                        contacts))
+
+        result_bag[f'bm{i}'] = {'contacts': contacts_filtered}
         result_bag[f'bm{i}']['composition'] = bm.to_dict()
 
     with open(os.path.join(wd, 'contacts.json'), 'w') as f:
