@@ -275,6 +275,16 @@ class ProtLigInteractions:
         Returns:
             BoundMolecule: All the bound molecules in a given entry.
         """
+        def _preprocess_pdb_parser_output(dictionary, label):
+            if label not in dictionary:
+                return []
+
+            check_element = list(dictionary[label].keys())[0]
+            values = (dictionary[label]
+                      if type(dictionary[label][check_element]) is list
+                      else {k: [v] for k, v in dictionary[label].items()})
+            return values
+
         def __filter_ligands_from_nonpoly_schema(schema, bms):
             ligands = set([i for i in schema['mon_id']])
             bms.residues = set(filter(lambda l: l.name in ligands, bms.residues))
@@ -293,14 +303,14 @@ class ProtLigInteractions:
 
             return g
 
-        def __add_connections(g, struct_conn):
+        def __add_connections(struct_conn, bms):
             for i in range(len(struct_conn['id'])):
                 ptnr1 = filter(lambda l:
                                l.name == struct_conn['ptnr1_label_comp_id'][i] and
-                               l.res_id == struct_conn['ptnr1_auth_seq_id'][i], g.residues)
+                               l.res_id == struct_conn['ptnr1_auth_seq_id'][i], bms.residues)
                 ptnr2 = filter(lambda l:
                                l.name == struct_conn['ptnr2_label_comp_id'][i] and
-                               l.res_id == struct_conn['ptnr2_auth_seq_id'][i], g.residues)
+                               l.res_id == struct_conn['ptnr2_auth_seq_id'][i], bms.residues)
 
                 for x in ptnr1:
                     for y in ptnr2:
@@ -308,7 +318,7 @@ class ProtLigInteractions:
                         ptnr2_chain = struct_conn['ptnr2_auth_asym_id'][i]
 
                         if x.chain == ptnr1_chain and y.chain == ptnr2_chain:
-                            g.add_connection(Connection(x, y))
+                            bms.add_connection(Connection(x, y))
                             continue
 
                         if '-' in x.chain and '-' in y.chain:
@@ -316,18 +326,21 @@ class ProtLigInteractions:
                             y_split = y.chain.split('-')
 
                             if x_split[0] == ptnr1_chain and y_split[0] == ptnr2_chain and x_split[1] == y_split[1]:
-                                g.add_connection(Connection(x, y))
+                                bms.add_connection(Connection(x, y))
 
         parsed_str = list(MMCIF2Dict().parse(path).values())[0]
 
         if '_pdbx_nonpoly_scheme' not in parsed_str:
             return BoundMoleculeContainer()
 
+        nonpoly_scheme = _preprocess_pdb_parser_output(parsed_str, '_pdbx_nonpoly_scheme')
+        struct_conn = _preprocess_pdb_parser_output(parsed_str, '_struct_conn')
+
         bms = __parse_ligands_from_atom_sites(parsed_str['_atom_site'])
-        __filter_ligands_from_nonpoly_schema(parsed_str['_pdbx_nonpoly_scheme'], bms)
+        __filter_ligands_from_nonpoly_schema(nonpoly_scheme, bms)
 
         if '_struct_conn' in parsed_str:
-            __add_connections(bms, parsed_str['_struct_conn'])
+            __add_connections(struct_conn, bms)
 
         return bms
 

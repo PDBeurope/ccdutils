@@ -45,15 +45,9 @@ def _set_up_logger(args):
     Returns:
         logging.logger: Application log.
     """
-
-    logger = logging.getLogger(__name__)
-
     level = logging.DEBUG if args.debug else logging.WARNING
     format = '[%(asctime)-15s]  %(message)s'
     logging.basicConfig(level=level, format=format, datefmt='%a, %d %b %Y %H:%M:%S')
-
-    logger.debug(f'PDBe protein-ligand interactions pipeline using:')
-    logger.debug(f'pdbeccdutils core v. {pdbeccdutils.__version__} RDKit v. {rdkit.__version__}')
 
     logging.getLogger().disabled = True
 
@@ -78,6 +72,7 @@ def _log_settings(args):
     settings += '{:29s}{:25s}{}\n'.format('', 'coordinate_server', args.config.coordinate_server)
     settings += '{:29s}{:25s}{}\n'.format('', 'ChimeraX', args.config.chimerax)
     settings += '{:29s}{:25s}{}\n'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
+    settings += '{:29s}{:25s}{}\n'.format('', 'discarded_ligands', ','.join(args.config.discarded_ligands))
     settings += '{:29s}{:25s}{}'.format('', 'running on ' + str(len(args.pdbs)) + ' structures.', '')
 
     return settings
@@ -112,6 +107,7 @@ def create_parser():
     selection_group.add_argument('-p', '--pdbs', type=str, nargs='+', help='List of pdb ids to be processed.')
     selection_group.add_argument('-sf', '--selection-file', type=str, help='Selections as above, but listed in a file.')
     parser.add_argument('--debug', action='store_true', help='Turn on debug message logging output')
+    parser.add_argument('--no_header', action='store_true', help='Turn off header information for the script.')
 
     return parser
 
@@ -157,8 +153,13 @@ def interactions_pipeline(args):
     """
     logger = logging.getLogger(__name__)
     _set_up_logger(args)
-    settings = _log_settings(args)
-    logger.debug(settings)
+
+    if not args.no_header:
+        logger.info(f'PDBe protein-ligand interactions pipeline using:')
+        logger.info(f'pdbeccdutils core v. {pdbeccdutils.__version__} RDKit v. {rdkit.__version__}')
+        settings = _log_settings(args)
+        logger.info(settings)
+
     depictor = DepictionManager(pubchem_templates_path=args.config.pubchem_templates)
 
     for pdb in args.pdbs:
