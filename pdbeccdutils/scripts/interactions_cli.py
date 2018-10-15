@@ -166,7 +166,8 @@ def interactions_pipeline(args):
         try:
             _process_single_structure(args.config, depictor, pdb)
         except Exception as e:
-            logger.debug(f'FAILED {pdb} | {str(e)}', file=sys.stderr)
+            logger.error(f'{pdb} | FAILED')
+            logger.exception(e)
 
 
 def _process_single_structure(config, depictor, pdb):

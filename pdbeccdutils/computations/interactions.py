@@ -275,18 +275,9 @@ class ProtLigInteractions:
         Returns:
             BoundMolecule: All the bound molecules in a given entry.
         """
-        def __parse_ligands_from_nonpoly_schema(schema):
-            g = BoundMoleculeContainer()
-            for i in range(len(schema['asym_id'])):
-                n = Residue(
-                    schema['mon_id'][i],  # aka label_comp_id
-                    schema['pdb_strand_id'][i],  # aka auth_asym_id
-                    schema['pdb_seq_num'][i])  # aka auth_seq_id
-
-                if n.name not in to_discard:
-                    g.add_node(n)
-
-            return g
+        def __filter_ligands_from_nonpoly_schema(schema, bms):
+            ligands = set([i for i in schema['mon_id']])
+            bms.residues = set(filter(lambda l: l.name in ligands, bms.residues))
 
         def __parse_ligands_from_atom_sites(atom_sites):
             g = BoundMoleculeContainer()
@@ -332,8 +323,8 @@ class ProtLigInteractions:
         if '_pdbx_nonpoly_scheme' not in parsed_str:
             return BoundMoleculeContainer()
 
-        #bms = __parse_ligands_from_nonpoly_schema(parsed_str['_pdbx_nonpoly_scheme'])
         bms = __parse_ligands_from_atom_sites(parsed_str['_atom_site'])
+        __filter_ligands_from_nonpoly_schema(parsed_str['_pdbx_nonpoly_scheme'], bms)
 
         if '_struct_conn' in parsed_str:
             __add_connections(bms, parsed_str['_struct_conn'])
