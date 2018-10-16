@@ -26,9 +26,9 @@ class BoundMoleculeContainer:
     of disconnected components.
     """
 
-    def __init__(self, residues=set(), connections=set()):
-        self.residues = residues
-        self.connections = connections
+    def __init__(self, residues=None, connections=None):
+        self.residues = set() if residues is None else residues
+        self.connections = set() if connections is None else connections
 
     def __str__(self):
         return '-'.join(map(lambda l: str(l), self.residues))
@@ -175,7 +175,7 @@ class Connection:
 
 
 class ProtLigInteractions:
-    def __init__(self, structure, to_discard=[]):
+    def __init__(self, structure, to_discard=None):
         """Create protein - ligand interaction object.
 
         Args:
@@ -184,6 +184,7 @@ class ProtLigInteractions:
                 names to be discarded prior to protein-ligand interaction
                 lookup.
         """
+        to_discard = [] if to_discard is None else to_discard
         self.bound_molecules = self._infer_bound_molecules(structure, to_discard)
         self.path = structure
 
