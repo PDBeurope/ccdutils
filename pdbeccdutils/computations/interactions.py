@@ -84,10 +84,11 @@ class Residue:
     """Represents a single residue.
     """
 
-    def __init__(self, name, chain, res_id):
+    def __init__(self, name, chain, res_id, ins_code):
         self.name = name
         self.chain = chain
         self.res_id = res_id
+        self.ins_code = '' if ins_code in ('.', '?') else ins_code
 
     def __eq__(self, other):
         if self.name != other.name:
@@ -95,6 +96,8 @@ class Residue:
         if self.chain != other.chain:
             return False
         if self.res_id != other.res_id:
+            return False
+        if self.ins_code != other.ins_code:
             return False
 
         return True
@@ -109,22 +112,24 @@ class Residue:
         return {
             'label_comp_id': self.name,
             'auth_asym_id': self.chain,
-            'auth_seq_id': self.res_id
+            'auth_seq_id': self.res_id,
+            'pdbx_PDB_ins_code': self.ins_code
         }
 
     def __hash__(self):
-        return hash(self.chain + self.res_id + self.name)
+        return hash(self.chain + self.res_id + self.name + self.ins_code)
 
     def __str__(self):
-        return f'/{self.name}/{self.res_id}/{self.chain}/'
+        return f'/{self.name}/{self.res_id}{self.ins_code}/{self.chain}/'
 
     def to_arpeggio(self):
         """Gets Arpeggio style representation of a residue e.g. `/A/129/`
+        or /A/129A/ in case there is an insertion code.
 
         Returns:
             str: Residue description in Arpeggio style.
         """
-        return f'/{self.chain}/{self.res_id}/'
+        return f'/{self.chain}/{self.res_id}{self.ins_code}/'
 
 
 class Connection:
@@ -258,7 +263,7 @@ class ProtLigInteractions:
         while True:
             component = temp.pop_bound_molecule()
             if component is None:
-                return bms
+                return sorted(bms, key=lambda l: (-len(list(l.residues)), list(l.residues)[0].name))
             else:
                 bms.append(component)
 
@@ -297,7 +302,8 @@ class ProtLigInteractions:
                     n = Residue(
                         atom_sites['label_comp_id'][i],  # aka label_comp_id
                         atom_sites['auth_asym_id'][i],  # aka auth_asym_id
-                        atom_sites['auth_seq_id'][i])  # aka auth_seq_id
+                        atom_sites['auth_seq_id'][i],  # aka auth_seq_id
+                        atom_sites['pdbx_PDB_ins_code'][i])  # aka pdbx_PDB_ins_code
 
                     if n.name not in to_discard:
                         g.add_node(n)
@@ -308,10 +314,12 @@ class ProtLigInteractions:
             for i in range(len(struct_conn['id'])):
                 ptnr1 = filter(lambda l:
                                l.name == struct_conn['ptnr1_label_comp_id'][i] and
-                               l.res_id == struct_conn['ptnr1_auth_seq_id'][i], bms.residues)
+                               l.res_id == struct_conn['ptnr1_auth_seq_id'][i] and
+                               l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr1_PDB_ins_code'][i]), bms.residues)
                 ptnr2 = filter(lambda l:
                                l.name == struct_conn['ptnr2_label_comp_id'][i] and
-                               l.res_id == struct_conn['ptnr2_auth_seq_id'][i], bms.residues)
+                               l.res_id == struct_conn['ptnr2_auth_seq_id'][i] and
+                               l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr2_PDB_ins_code'][i]), bms.residues)
 
                 for x in ptnr1:
                     for y in ptnr2:
@@ -329,6 +337,8 @@ class ProtLigInteractions:
                             if x_split[0] == ptnr1_chain and y_split[0] == ptnr2_chain and x_split[1] == y_split[1]:
                                 bms.add_connection(Connection(x, y))
 
+        def __get_ins_code(field):
+            return '' if field in ('.', '?') else field
         parsed_str = list(MMCIF2Dict().parse(path).values())[0]
 
         if '_pdbx_nonpoly_scheme' not in parsed_str:
