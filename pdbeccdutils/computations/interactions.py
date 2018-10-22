@@ -47,7 +47,7 @@ class BoundMoleculeContainer:
 
         results_bag = {'residues': [], 'connections': []}
         results_bag['residues'] = list(map(lambda l: l.to_dict(), nodes))
-        results_bag['connections'] = list(map(lambda l: (nodes.index(l[0]), nodes.index(l[1])), self.connections))
+        results_bag['connections'] = list(map(lambda l: (l[0].id, l[1].id), self.connections))
 
         return results_bag
 
@@ -89,15 +89,10 @@ class Residue:
         self.chain = chain
         self.res_id = res_id
         self.ins_code = '' if ins_code in ('.', '?') else ins_code
+        self.id = f'{chain}{res_id}{self.ins_code}'
 
     def __eq__(self, other):
-        if self.name != other.name:
-            return False
-        if self.chain != other.chain:
-            return False
-        if self.res_id != other.res_id:
-            return False
-        if self.ins_code != other.ins_code:
+        if self.id != other.id:
             return False
 
         return True
@@ -110,6 +105,7 @@ class Residue:
             with the mmCIF keys.
         """
         return {
+            'id': self.id,
             'label_comp_id': self.name,
             'auth_asym_id': self.chain,
             'auth_seq_id': self.res_id,
