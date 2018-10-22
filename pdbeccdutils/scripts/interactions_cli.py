@@ -16,9 +16,12 @@
 # under the License.
 
 import argparse
+import gzip
 import json
 import logging
 import os
+import pathlib
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -33,6 +36,7 @@ from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
 
+to_gzip = ('.json', '.pdb', '.cif')
 # region logging
 
 
@@ -71,6 +75,8 @@ def _log_settings(args):
     settings += '{:29s}{:25s}{}\n'.format('', 'node', args.config.node)
     settings += '{:29s}{:25s}{}\n'.format('', 'coordinate_server', args.config.coordinate_server)
     settings += '{:29s}{:25s}{}\n'.format('', 'ChimeraX', args.config.chimerax)
+    settings += '{:29s}{:25s}{}\n'.format('', 'no_header', ('ON' if args.no_header else 'OFF'))
+    settings += '{:29s}{:25s}{}\n'.format('', 'gzip', ('ON' if args.gzip else 'OFF'))
     settings += '{:29s}{:25s}{}\n'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
     settings += '{:29s}{:25s}{}\n'.format('', 'discarded_ligands', ','.join(args.config.discarded_ligands))
     settings += '{:29s}{:25s}{}'.format('', 'running on ' + str(len(args.pdbs)) + ' structures.', '')
@@ -108,6 +114,7 @@ def create_parser():
     selection_group.add_argument('-sf', '--selection-file', type=str, help='Selections as above, but listed in a file.')
     parser.add_argument('--debug', action='store_true', help='Turn on debug message logging output')
     parser.add_argument('--no_header', action='store_true', help='Turn off header information for the script.')
+    parser.add_argument('--gzip', action='store_true', help='Whether or not should be all the files compressed to save space.')
 
     return parser
 
@@ -145,14 +152,18 @@ def check_args(args):
     __validate_file_exists('coordinate_server', args.config.coordinate_server)
 
 
-def interactions_pipeline(args):
+def interactions_pipeline(args) -> bool:
     """Given arguments compute protein-ligand interactions.
 
     Args:
         args (argparse.Namespace): Command line arguments
+
+    Returns:
+        bool: Whether or not errors have been encountered
     """
     logger = logging.getLogger(__name__)
     _set_up_logger(args)
+    success = True
 
     if not args.no_header:
         logger.info(f'PDBe protein-ligand interactions pipeline using:')
@@ -165,13 +176,16 @@ def interactions_pipeline(args):
     for pdb in args.pdbs:
         logger.debug(f'Processing... {pdb}.')
         try:
-            _process_single_structure(args.config, depictor, pdb)
+            _process_single_structure(args, depictor, pdb)
         except Exception as e:
+            success = False
             logger.error(f'{pdb} | FAILED')
             logger.exception(e)
 
+    return success
 
-def _process_single_structure(config, depictor, pdb):
+
+def _process_single_structure(args, depictor, pdb):
     """Process a single pdb file and get composition of bound molecules
     along with the protein-ligand contacts and nice 2D depictions of
     ligands present in the bound molecules.
@@ -180,11 +194,12 @@ def _process_single_structure(config, depictor, pdb):
     This is temporary implementation before the process is split into two
 
     Args:
-        config (Namedtuple): Application configuration from the json file.
+        args (argparse.Namespace): Application configuration.
         depictor (DepictionManager): Helper class to get nice 2D images.
         pdb (str): Pdb id.
     """
     logger = logging.getLogger(__name__)
+    config = args.config
     result_bag = {'depictions': {}}
     wd = os.path.join(config.output_dir, pdb[1:3], pdb)
     os.makedirs(wd, exist_ok=True)
@@ -226,9 +241,12 @@ def _process_single_structure(config, depictor, pdb):
     with open(os.path.join(wd, 'contacts.json'), 'w') as f:
         json.dump(result_bag, f, sort_keys=True, indent=4)
 
+    if args.gzip:
+        __gzip_folder(wd)
+
 
 def __get_assembly_id(path):
-    """
+    """Get biological assembly id.
 
     Args:
         path (str): Path to the assembly configuration in XML format.
@@ -240,6 +258,9 @@ def __get_assembly_id(path):
     Returns:
         str: preferred assembly id for a given PDB entry.
     """
+    if not os.path.isfile(path):
+        raise (f'Assembly configuration file {path} does not exist.')
+
     xml = ET.parse(path)
 
     for node in xml.getroot().iter('assembly'):
@@ -387,6 +408,22 @@ def __create_ligand_layout(depictor, ligand_path):
     component.compute_2d(depictor)
 
     return ccd_writer.to_json_dict(component, remove_hs=True, conf_type=ConformerType.Depiction)
+
+
+def __gzip_folder(path):
+    """Gzip all content of the calculation folder into gzip with the
+    exception of config files.
+
+    Args:
+        path (str): Path to the working directory
+    """
+    for input_file in os.listdir(path):
+        path_f = os.path.join(path, input_file)
+        if pathlib.Path(path_f).suffix in to_gzip:
+            with open(path_f, 'rb') as f_in:
+                with gzip.open(f'{path_f}.gz', 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+            os.remove(path_f)
 
 
 def main():
