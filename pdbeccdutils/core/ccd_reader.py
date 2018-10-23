@@ -36,24 +36,25 @@ from pdbeccdutils.helpers import str_conversions
 from pdbeccdutils.helpers import collection_ext
 from pdbeccdutils.core.models import Descriptor, Properties
 
-CCDReaderResult = NamedTuple('CCDReaderResult',
-                             [('warnings', List[str]),
-                              ('errors', List[str]),
-                              ('component', Component)])
 
-CCDReaderResult.__doc__ = """
-NamedTuple for the result of reading an individual PDB chemical
-component definition (CCD).
+class CCDReaderResult(NamedTuple):
+    """
+    NamedTuple for the result of reading an individual PDB chemical
+    component definition (CCD).
 
-Args:
-    warnings (:obj:`list` of :obj:`str`): A list of any warnings
-        found while reading the CCD. If no warnings found `warnings`
-        will be empty.
-    errors: (:obj:`list` of :obj:`str`): A list of any errors
-        found while reading the CCD. If no warnings found `errors`
-        will be empty.
-    component (Component): internal representation of the CCD read-in.
-"""
+    Attributes:
+        component (Component): internal representation of the CCD read-in.
+        errors: (:obj:`list` of :obj:`str`): A list of any errors
+            found while reading the CCD. If no warnings found `errors`
+            will be empty.
+        warnings (:obj:`list` of :obj:`str`): A list of any warnings
+            found while reading the CCD. If no warnings found `warnings`
+            will be empty.
+    """
+
+    warnings: List[str]
+    errors: List[str]
+    component: Component
 
 
 def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
@@ -143,7 +144,7 @@ def _parse_pdb_atoms(mol, atoms):
     Setup atoms in the component
 
     Args:
-        mol (rdkit.Chem.Mol): Rdkit Mol object with the
+        mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
             compound representation.
         atoms (dict): MMCIF dictionary with parsed _chem_comp_atom
             category.
@@ -276,7 +277,7 @@ def _parse_pdb_properties(chem_comp):
     Parse useful informations from _chem_comp category
 
     Args:
-        rdkit.Chem_comp (dict): the mmcif category with rdkit.Chem_comp info.
+        chem_comp (dict): the mmcif category with rdkit.Chem_comp info.
 
     Returns:
         Properties: namedtuple with the property info
@@ -319,7 +320,7 @@ def _preprocess_pdb_parser_output(dictionary, label, warnings):
 
 def _bond_pdb_order(value_order):
     """
-    Transpil mmcif bond order into rdkit language
+    Transpils mmcif bond order into rdkit language
 
     Args:
         value_order (str): bond type as a str

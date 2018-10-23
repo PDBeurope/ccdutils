@@ -48,8 +48,8 @@ extensions = [
     'sphinx.ext.intersphinx'
 ]
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None)}
-# 'rdkit': ('https://rdkit.org/Python_Docs', None)
+    'python': ('https://docs.python.org/3', None),
+    'rdkit': ('https://www.rdkit.org/docs/', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -188,5 +188,18 @@ def setup(app):
         'auto_toc_tree_section': 'Contents',
     }, True)
     app.add_transform(AutoStructify)
+    app.connect(
+        'autodoc-process-docstring',
+        no_namedtuple_attrib_docstring,)
 
+
+def no_namedtuple_attrib_docstring(app, what, name,
+                                   obj, options, lines):
+    is_namedtuple_docstring = (
+        len(lines) == 1 and
+        lines[0].startswith('Alias for field number')
+    )
+    if is_namedtuple_docstring:
+        # We don't return, so we need to purge in-place
+        del lines[:]
 # endregion

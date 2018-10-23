@@ -28,9 +28,6 @@ import pdbeccdutils.utils.config as config
 
 class FragmentLibrary:
     """Implementation of fragment library.
-
-    Returns:
-        pdbeccdutils.core.FragmentLibrary: Instance of the object
     """
 
     def __init__(self, path=config.fragment_library, header=True, delimiter='\t', quotechar='"'):

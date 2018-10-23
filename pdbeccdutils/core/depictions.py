@@ -73,7 +73,7 @@ class DepictionManager:
 
         Arguments:
             id (str): id of the ligand
-            mol (rdkit.Chem.Mol): molecule to be depicted
+            mol (rdkit.Chem.rdchem.Mol): molecule to be depicted
 
         Returns:
             DepictionResult: Summary of the ligand depiction process.
@@ -128,7 +128,7 @@ class DepictionManager:
             ValueError: if unsuported format is used: sdf|pdb
 
         Returns:
-            rdkit.Chem.Mol: RDKit representation of the template
+            rdkit.Chem.rdchem.Mol: RDKit representation of the template
         """
         mol = Chem.RWMol()
         extension = os.path.basename(path).split('.')[1]
@@ -153,7 +153,7 @@ class DepictionManager:
         Get depiction done using solely the default RDKit functionality.
 
         Args:
-            mol (rdkit.Chem.Mol): Mol to be depicted
+            mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
 
         Returns:
             DepictionResult: Depiction with some usefull metadata
@@ -195,10 +195,10 @@ class DepictionManager:
         Depict ligand using user-provided templates
 
         Args:
-            mol (rdkit.Chem.Mol): Mol to be depicted
+            mol (rdkit.Chem.rchem.Mol): Mol to be depicted
 
         Returns:
-            list of DepictionResult: Depictions with their
+            :obj:`list` of :obj:`DepictionResult`: Depictions with their
             quality and metadata.
         """
         results = list()
@@ -358,7 +358,7 @@ class DepictionValidator:
         Ideally that should be 0.
 
         Returns:
-            float: Penalty score
+            float: Penalty score.
         """
 
         collision_penalty = 1

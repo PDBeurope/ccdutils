@@ -46,7 +46,7 @@ class Component:
         Component: instance object
     """
 
-    def __init__(self, mol: rdkit.Chem.Mol, ccd_cif_dict: Dict[str, Any]=None,
+    def __init__(self, mol: rdkit.Chem.rdchem.Mol, ccd_cif_dict: Dict[str, Any]=None,
                  properties: Properties=None, descriptors: List[Descriptor]=None) -> None:
 
         self.mol = mol
@@ -209,7 +209,7 @@ class Component:
         return self._pdbx_release_status == ReleaseStatus.REL
 
     @property
-    def mol_no_h(self) -> rdkit.Chem.Mol:
+    def mol_no_h(self) -> rdkit.Chem.rdchem.Mol:
         no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
         rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
         return no_h
@@ -289,24 +289,23 @@ class Component:
         return result_log
 
     def export_2d_svg(self, file_name: str, width: int=500, names: bool=False,
-                      atom_highlight: Dict[Any, Tuple]={}, bond_highlight: Dict[Tuple, Tuple]={}):
+                      atom_highlight: Dict[Any, Tuple] = None,
+                      bond_highlight: Dict[Tuple, Tuple]=None):
         """
         Save 2d depiction of the component as an SVG file.
 
         Args:
-            file_name (str): path to store 2d depiction.
-                width (int, optional): Defaults to 500.
-                Width of a frame in pixels.
-            names (bool, optional): Defaults to False. Whether or not
-                to include atom names in depiction. If atom name is
-                not set, element symbol is used instead.
-            atomHighlight (dict, optional): Defaults to {}. Atoms names
-                to be highlighted along with colors in RGB.
-                eg. {'CA': (0.5, 0.5, 0.5)} or {0: (0.5, 0.5, 0.5)}
-            bondHighlight (dict, optional): Defaults to None. Bonds to be
-                highlighted along with colors in RGB.
-                eg. {('CA', 'CB'): (0.5, 0.5, 0.5)} or
-                {(0, 1): (0.5, 0.5, 0.5)}
+            file_name (str): path to store 2d depiction
+            width (int, optional): Defaults to 500. Width of a frame in pixels.
+            names (bool, optional): Defaults to False. Whether or not to
+                include atom names in depiction. If atom name is not set, element symbol is used instead.
+            atomHighlight (:obj:`dict` of :obj:`tuple` of :obj:`float`, optional):
+                Defaults to None. Atoms names to be highlighted along
+                with colors in RGB. e.g. {'CA': (0.5, 0.5, 0.5)} or {0: (0.5, 0.5, 0.5)}
+            bondHighlight (:obj:`dict` of :obj:`tuple` of :obj:`float`, optional):
+                Defaults to None. Bonds to be highlighted along with
+                colors in RGB. e.g. {('CA', 'CB'): (0.5, 0.5, 0.5)} or {(0, 1): (0.5, 0.5, 0.5)}
+
         Raises:
             CCDUtilsError: If bond or atom does not exist.
         """
@@ -317,8 +316,13 @@ class Component:
         drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
         atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self._2dmol.GetAtoms())}
 
+        atom_highlight = {} if atom_highlight is None else atom_highlight
+        bond_highlight = {} if bond_highlight is None else bond_highlight
+
         if all(isinstance(i, str) for i in atom_highlight.keys()):
             atom_highlight = {atom_mapping[k]: v for k, v in atom_highlight.items()}
+        else:
+            atom_highlight = {}
 
         if len(bond_highlight) > 0:
             if all(isinstance(i[0], str) and isinstance(i[1], str) for i in bond_highlight.keys()):
@@ -419,16 +423,18 @@ class Component:
             return True
         return False
 
-    def locate_fragment(self, mol: rdkit.Chem.Mol) -> List[List[rdkit.Chem.Atom]]:
+    def locate_fragment(self, mol: rdkit.Chem.rdchem.Mol) -> List[List[rdkit.Chem.rdchem.Atom]]:
         """
         Identify substructure match in the component.
 
         Args:
-            mol (rdkit.Chem.Mol): Fragment to be matched with
+            mol (rdkit.Chem.rdchem.Mol): Fragment to be matched with
                 structure
 
         Returns:
-            list(list(rdkit.Chem.Atom)): list of fragments identified in the component as a list of Atoms.
+            (:obj:`list` of :obj:`list` of :obj:`rdkit.Chem.rdchem.Atom`):
+                list of fragments identified in the component as a list
+                of Atoms.
         """
         result = []
         if mol is None:
@@ -466,12 +472,12 @@ class Component:
         return matches_found
 
     def get_scaffolds(self, scaffolding_method=ScaffoldingMethod.MurckoScaffold):
-        """[summary]
+        """
             scaffolding_method (ScaffoldingMethod, optional):
                 Defaults to MurckoScaffold. Scaffolding method to use
 
         Returns:
-            list of rdkit.Mol: Scaffolds found in the component.
+            :obj:`list` of :obj:`rdkit.Chem.rdchem.Mol`: Scaffolds found in the component.
         """
         scaffold = None
 
@@ -487,13 +493,13 @@ class Component:
 
         return scaffold
 
-    def _fix_molecule(self, rwmol):
+    def _fix_molecule(self, rwmol: rdkit.Chem.rdchem.RWMol):
         """
         Single molecule sanitization process. Presently, only valence
         errors are taken care are of.
 
         Args:
-            rwmol (rdkit.Chem.Mol): rdkit molecule to be
+            rwmol (rdkit.Chem.rdchem.RWMol): rdkit molecule to be
                 sanitized
 
         Returns:
@@ -538,12 +544,12 @@ class Component:
             attempts -= 1
         return False
 
-    def _fix_molecule_fast(self, rwmol: rdkit.Chem.Mol):
+    def _fix_molecule_fast(self, rwmol: rdkit.Chem.rdchem.Mol):
         """
         Fast sanitization process. Fixes just metal-N valence issues
 
         Args:
-            rwmol (rdkit.Chem.Mol): rdkit mol to be sanitized
+            rwmol (rdkit.Chem.rdchem.Mol): rdkit mol to be sanitized
 
         Returns:
             bool: Whether or not sanitization succeeded
@@ -588,7 +594,7 @@ class Component:
         with open(file_name, 'w') as f:
             f.write(drawer.GetDrawingText())
 
-    def _get_atom_name(self, atom):
+    def _get_atom_name(self, atom: rdkit.Chem.rdchem.Atom):
         """Supplies atom_id obrained from `_chem_comp_atom.atom_id`, see:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Categories/chem_comp_atom.html
@@ -597,7 +603,7 @@ class Component:
         symbol and atom index.
 
         Args:
-            atom (rdkit.Chem.Atom): rdkit atom
+            atom (rdkit.Chem.rdchem.Atom): rdkit atom
 
         Returns:
             str: atom name

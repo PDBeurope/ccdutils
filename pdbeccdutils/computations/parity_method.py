@@ -6,29 +6,30 @@ from rdkit import Chem
 from rdkit.Chem import rdFMCS
 from typing import NamedTuple
 
-ParityResult = NamedTuple('ParityResult',
-                          [('template_atoms', int),
-                           ('query_atoms', int),
-                           ('match_count', int),
-                           ('similarity_score', float)])
-ParityResult.__doc__ = """
-NamedTuple for the result of parity method along with the details
-necessary for calculating the similarity score.
 
-Args:
-    template_atoms (int): Number of template atoms.
-    query_atoms (int): Number of query molecule atoms.
-    match_count (int): Size o the common subgaph match.
-    similarity_score (float): Calculate similarity score.
+class ParityResult(NamedTuple):
+    """
+    NamedTuple for the result of parity method along with the details
+    necessary for calculating the similarity score.
+
+    Attributes:
+        template_atoms (int): Number of template atoms.
+        query_atoms (int): Number of query molecule atoms.
+        match_count (int): Size o the common subgaph match.
+        similarity_score (float): Calculate similarity score.
 """
+    template_atoms: int
+    query_atoms: int
+    match_count: int
+    similarity_score: float
 
 
 def _get_matches(mol, smarts):
     """Gets the subgraph match for the parity method.
 
     Args:
-        mol (rdkit.Chem.Mol): Molecule to be queried
-        smarts (str): Molecule representation in SMARTS.
+        mol(rdkit.Chem.rdchem.Mol): Molecule to be queried
+        smarts(str): Molecule representation in SMARTS.
 
     Returns:
         int: Molecular subgraph matches.
@@ -44,9 +45,9 @@ def _generate_sim_score(template, query, smarts):
     smarts string returns similarity score.
 
     Args:
-        template (rdkit.Chem.Mol): template molecule.
-        query (rdkit.Chem.Mol): query molecule.
-        smarts (str): common subgraph in the SMARTS format.
+        template(rdkit.Chem.rdchem.Mol): template molecule.
+        query(rdkit.Chem.Mol): query molecule.
+        smarts(str): common subgraph in the SMARTS format.
 
     Returns:
         (int, int): tuple of size of the common subgraph and the
@@ -90,9 +91,9 @@ def compare_molecules(template, query, thresh=0.01):
     is calculated.
 
     Args:
-        template (rdkit.Chem.Mol): Template molecule
-        query (rdkit.Chem.Mol): Query molecule
-        thresh (float, optional): Defaults to 0.01: Threshold score for
+        template(rdkit.Chem.rdchem.Mol): Template molecule
+        query(rdkit.Chem.rdchem.Mol): Query molecule
+        thresh(float, optional): Defaults to 0.01: Threshold score for
             the match to be considered.
 
     Returns:
