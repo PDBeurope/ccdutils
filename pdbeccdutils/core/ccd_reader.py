@@ -36,26 +36,6 @@ from pdbeccdutils.helpers import str_conversions
 from pdbeccdutils.helpers import collection_ext
 from pdbeccdutils.core.models import Descriptor, Properties
 
-<<<<<<< HEAD
-CCDReaderResult = NamedTuple('CCDReaderResult',
-                             [('warnings', List[str]),
-                              ('errors', List[str]),
-                              ('component', Component)])
-
-CCDReaderResult.__doc__ = """
-NamedTuple for the result of reading an individual PDB chemical
-component definition (CCD).
-
-Args:
-    warnings (:obj:`list` of :obj:`str`): A list of any warnings
-        found while reading the CCD. If no warnings found `warnings`
-        will be empty.
-    errors: (:obj:`list` of :obj:`str`): A list of any errors
-        found while reading the CCD. If no warnings found `errors`
-        will be empty.
-    component (Component): internal representation of the CCD read-in.
-"""
-=======
 
 class CCDReaderResult(NamedTuple):
     """
@@ -75,7 +55,7 @@ class CCDReaderResult(NamedTuple):
     warnings: List[str]
     errors: List[str]
     component: Component
->>>>>>> master
+
 
 
 def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
