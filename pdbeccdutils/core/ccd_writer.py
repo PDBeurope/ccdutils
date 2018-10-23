@@ -16,11 +16,11 @@
 # under the License.
 
 """Structure writing module. Presently the following formats are supported:
-    SDF, CIF, PDB, JSON, XYZ, XML, CML
+    SDF, CIF, PDB, JSON, XYZ, XML, CML.
 
 Raises:
-    CCDUtilsError: If deemed format is not supported
-    CCDUtilsError: If an error unrecoverable error occured.
+    CCDUtilsError: If deemed format is not supported or an unrecoverable
+        error occures.
 """
 import copy
 import json
@@ -47,12 +47,12 @@ def write_molecule(path, component: Component, remove_hs: bool=True, alt_names: 
     Args:
         path (str): Path to the file. Extension determines format to be
             used.
-        component (pdbeccdutils.core.Component): Component to be exported
+        component (Component): Component to be exported
         remove_hs (bool, optional): Defaults to True. Whether or not
             hydrogens should be removed.
         alt_names (bool, optional): Defaults to False. Whether or not
             alternate names should be exported.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
+        conf_type (ConformerType, optional):
             Defaults to ConformerType.Ideal. Conformer type to be
             exported.
 
@@ -89,13 +89,11 @@ def to_pdb_str(component: Component, remove_hs: bool=True, alt_names: bool=False
     """Converts structure to the PDB format.
 
     Args:
-        component (Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
         alt_names (bool, optional): Defaults to False. Whether or not
             alternate atom names should be exported.
-        conf_type (ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+        conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Returns:
         str: String representation of the component in the PDB format.
@@ -138,11 +136,9 @@ def to_sdf_str(component: Component, remove_hs: bool=True,
     """Converts structure to the SDF format.
 
     Args:
-        component (Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+        conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Raises:
         CCDUtilsError: In case the structure could not be exported.
@@ -183,11 +179,9 @@ def to_xyz_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     ConformerType.AllConformers.
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+        conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Returns:
         str: String representation of the component in the XYZ format
@@ -211,11 +205,9 @@ def to_xml_xml(component, remove_hs=True, conf_type=ConformerType.Ideal):
     """Converts structure to the XML format and returns its XML repr.
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+        conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Returns:
         xml.etree.ElementTree.Element: XML object
@@ -244,17 +236,15 @@ def to_xml_xml(component, remove_hs=True, conf_type=ConformerType.Ideal):
     return root
 
 
-def to_xml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
+def to_xml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ideal):
     """Converts structure to the XML format. Presently just molecule
     metadata are serialized without any coordinates, which is in
     accordance with the content of the PDBeChem area.
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+        conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Returns:
         str: String representation of the component in CML format.
@@ -267,15 +257,14 @@ def to_xml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     return pretty.toprettyxml(indent="  ")
 
 
-def to_pdb_ccd_cif_file(path, component, remove_hs=True):
+def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
     """Converts structure to the PDB CIF format. Both model and ideal
     coordinates are stored. In case ideal coordinates are missing, rdkit
     attempts to generate 3D coordinates of the conformer.
 
     Args:
         path (str): Path to save cif file.
-        component (pdbeccdutils.core.Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
     """
     if type(component.ccd_cif_dict) is not dict:
@@ -308,16 +297,14 @@ def to_pdb_ccd_cif_file(path, component, remove_hs=True):
     cfd.write(cif_copy)
 
 
-def to_cml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
+def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ideal):
     """Converts structure to the EBI representation of the molecule in
     CML format: http://cml.sourceforge.net/schema/cmlCore.xsd
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+        conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Returns:
         str: String representation of the component in CML format.
@@ -373,15 +360,15 @@ def to_cml_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
     return pretty.toprettyxml(indent="  ")
 
 
-def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
+def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.Ideal):
     """Returns component information in dictionary suitable for json
     formating
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
+        conf_type (ConformerType, optional):
             Defaults to ConformerType.Ideal.
 
     Raises:
@@ -389,7 +376,7 @@ def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
         not supported not is planned.
 
     Returns:
-        [dict of str]: dictionary representation of the component
+        :obj:`dict` of :obj:`str`: dictionary representation of the component
     """
     if conf_type == ConformerType.AllConformers:
         raise AttributeError('All conformer export is not suppoted for json export')
@@ -428,18 +415,16 @@ def to_json_dict(component, remove_hs=True, conf_type=ConformerType.Ideal):
     return {component.id: result}
 
 
-def to_json_str(component, remove_hs=True, conf_type=ConformerType.Ideal):
+def to_json_str(component: Component, remove_hs=True, conf_type=ConformerType.Ideal):
     """Converts structure into JSON representation. https://www.json.org/
 
     Args:
-        component (pdbeccdutils.core.Component): Component to be
-            exported.
+        component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
-            Defaults to ConformerType.Ideal.
+        conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Returns:
-        [str]: json representation of the component as a string.
+        str: json representation of the component as a string.
 
     """
 
@@ -459,7 +444,7 @@ def _prepate_structure(component, remove_hs, conf_type):
         component (pdbeccdutils.core.Component): Component to be
             exported.
         remove_hs (bool, optional): Defaults to True.
-        conf_type (pdbeccdutils.core.ConformerType, optional):
+        conf_type (ConformerType, optional):
             Defaults to ConformerType.Ideal.
 
     Returns:
@@ -504,7 +489,7 @@ def _write_pdb_ccd_cif_info(cif_dict, component):
     Args:
         cif_dict (dict of str: str): cif representation of the molecule
             in a dictionary.
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             exported.
     """
 
@@ -541,7 +526,7 @@ def _write_pdb_ccd_cif_atoms(cif_dict, component):
     Args:
         cif_dict (dict of str: str): cif representation of the molecule
             in a dictionary.
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             exported.
     """
 
@@ -612,7 +597,7 @@ def _write_pdb_ccd_cif_bonds(cif_dict, component):
     Args:
         cif_dict (dict of str: str): cif representation of the molecule
             in a dictionary.
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             exported.
     """
     if component.mol.GetNumBonds() < 1:
@@ -647,7 +632,7 @@ def _write_pdb_ccd_cif_descriptor(cif_dict, component):
     Args:
         cif_dict (dict of str: str): cif representation of the molecule
             in a dictionary.
-        component (pdbeccdutils.core.Component): Component to be
+        component (Component): Component to be
             exported.
     """
 
@@ -792,9 +777,9 @@ def _get_atom_coord(component, at_id, conformer_type):
     conformer.
 
     Args:
-        component (pdbeccdutils.core.Component): component to be processed.
+        component (Component): component to be processed.
         at_id (int): atom id to be retrieved.
-        conformer_type (pdbeccdutils.core.ConformerType): conformer type
+        conformer_type (ConformerType): conformer type
 
     Returns:
         rdkit.Geometry.rdGeometry.Point3D: 3D coordinates of the atom.

@@ -26,7 +26,7 @@ import numpy
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from pdbeccdutils.core import ccd_reader as sr
+from pdbeccdutils.core import ccd_reader
 
 
 class PubChemDownloader:
@@ -50,7 +50,7 @@ class PubChemDownloader:
         """
 
         for f in os.listdir(components):
-            c = sr.read_pdb_cif_file(os.path.join(components, f)).component
+            c = ccd_reader.read_pdb_cif_file(os.path.join(components, f)).component
             self.process_template(c)
 
     def update_ccd_file(self, ccd: str) -> None:
@@ -60,7 +60,7 @@ class PubChemDownloader:
         Args:
             ccd (str): Path to the the `.cif` CCD file
         """
-        components = sr.read_pdb_components_file(ccd)
+        components = ccd_reader.read_pdb_components_file(ccd)
 
         for k, v in components.items():
             self.process_template(v.component)
@@ -72,7 +72,7 @@ class PubChemDownloader:
         from pubchem are 1.0A.
 
         Args:
-            component (pdbeccdutils.core.component.Component): Component
+            component (Component): Component
             destination (str): Path to the pubchem 2D template dir
 
         Returns:

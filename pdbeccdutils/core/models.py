@@ -80,22 +80,22 @@ class ScaffoldingMethod(IntEnum):
     Brics = 3
 
 
-DepictionResult = NamedTuple('DepictionResult',
-                             [('source', DepictionSource),
-                              ('template_name', str),
-                              ('mol', rdkit.Chem.Mol),
-                              ('score', float)])
+class DepictionResult(NamedTuple):
+    """
+    Depictions result details.
 
-DepictionResult.__doc__ = """
-            Depictions result details.
+    Args:
+        source (DepictionSource): Source of the depiction.
+        template_name (str): template name.
+        mol (rdkit.Chem.rdchem.Mol): RDKit mol object.
+        score (float): Quality of the depiction, lower is better.
 
-            Args:
-                source (DepictionSource): Source of the depiction.
-                template_name (str): template name.
-                mol (rdkit.Chem.Mol): RDKit mol object.
-                score (float): Quality of the depiction, lower is better.
+    """
+    source: DepictionSource
+    template_name: str
+    mol: rdkit.Chem.rdchem.Mol
+    score: float
 
-            """
 
 Properties = NamedTuple('Properties',
                         [('id', str),
@@ -118,17 +118,17 @@ Properties.__doc__ = """
                 weight (str): _chem_comp.formula_weight
             """
 
-Descriptor = NamedTuple('Descriptor',
-                        [('type', str),
-                         ('program', str),
-                         ('value', str)])
 
-Descriptor.__doc__ = """
-        Descriptor obtained from the cif file. This is essentially
-        _pdbx_chem_comp_descriptor field.
+class Descriptor(NamedTuple):
+    """
+    Descriptor obtained from the cif file. This is essentially
+    _pdbx_chem_comp_descriptor field.
 
-        Args:
-            type (str): `_pdbx_chem_comp_descriptor.type` in CIF language.
-            program (str): `_pdbx_chem_comp_descriptor.program` in CIF language.
-            value (str): `_pdbx_chem_comp_descriptor.descriptor` in CIF language.
-        """
+    Args:
+        type (str): `_pdbx_chem_comp_descriptor.type` in CIF language.
+        program (str): `_pdbx_chem_comp_descriptor.program` in CIF language.
+        value (str): `_pdbx_chem_comp_descriptor.descriptor` in CIF language.
+    """
+    type: str
+    program: str
+    value: str
