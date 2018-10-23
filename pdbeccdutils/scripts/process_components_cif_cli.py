@@ -30,17 +30,17 @@ import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
+from multiprocessing import Process, Queue
 from xml.dom import minidom
 
 import rdkit
 
 import pdbeccdutils
-from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.core import ccd_writer
-from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core import ccd_reader, ccd_writer
 from pdbeccdutils.core.component import Component
-from pdbeccdutils.core.models import ConformerType, DepictionSource
+from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.fragment_library import FragmentLibrary
+from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import PubChemDownloader, config
 
 
@@ -313,7 +313,7 @@ def generate_depictions(component, depictions, parent_dir):
     else:
         if depiction_result.score > 0.99:
             issues.append('collision free image could not be generated.')
-        issues.append(f'2d generated using {depiction_result.source.name} with score {depiction_result.score}.')
+        issues.append(f'2D generated using {depiction_result.source.name} with score {depiction_result.score}.')
 
     for i in range(100, 600, 100):
         component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_{i}.svg'), width=i)

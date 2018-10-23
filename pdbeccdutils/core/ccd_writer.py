@@ -27,6 +27,7 @@ import json
 import math
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
+from typing import List
 from xml.dom import minidom
 
 import mmCif.mmcifIO as mmcif
@@ -273,8 +274,8 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
     cif_copy = copy.deepcopy(component.ccd_cif_dict)
 
     if remove_hs:
-        h_indices = [i for i, x in enumerate(cif_copy['_chem_comp_atom']['type_symbol']) if x == "H"]
-        h_names = [cif_copy['_chem_comp_atom']['atom_id'][i] for i in h_indices]
+        h_indices: List[int] = [i for i, x in enumerate(cif_copy['_chem_comp_atom']['type_symbol']) if x == "H"]
+        h_names: List[str] = [cif_copy['_chem_comp_atom']['atom_id'][i] for i in h_indices]
 
         hb_indices = []
         for key in ('atom_id_1', 'atom_id_2'):

@@ -57,6 +57,7 @@ class CCDReaderResult(NamedTuple):
     component: Component
 
 
+
 def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
     """
     Read in single wwpdb cif component and create its internal
