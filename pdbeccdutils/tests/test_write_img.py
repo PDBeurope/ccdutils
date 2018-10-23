@@ -35,10 +35,10 @@ class TestWriteImg:
         ("ATP", 'C5&apos;', True),
         ("08T", 'BE', True),
         ("BCD", 'C66', True),
-        ("ATP", '<svg:rect', False),
-        ("08T", '<svg:rect', False),
-        ("10R", '<svg:rect', False),
-        ("0OD", '<svg:rect', False),
+        ("ATP", '<rect', False),
+        ("08T", '<rect', False),
+        ("10R", '<rect', False),
+        ("0OD", '<rect', False),
     ])
     def test_image_generation_with_names(tmpdir, id, expected, names):
         mol = load_molecule(id)

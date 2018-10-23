@@ -115,7 +115,7 @@ class TestCutDownComponentsCif:
         as expected.
         """
         path = os.path.join(pipeline_wd, id[0], id, '{}_100_names.svg'.format(id))
-        pattern = '<svg:tspan>{}</svg:tspan>'.format(name)
+        pattern = '<tspan>{}</tspan>'.format(name)
 
         with open(path) as f:
             str_repr = f.read()
