@@ -62,8 +62,6 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-doc/_build/
 
 # PyBuilder
 target/
@@ -100,3 +98,8 @@ pdbeccdutils/tests/out
 
 # mypy cache
 .mypy_cache
+
+# Sphinx documentation
+doc/_build/
+
+.metrics
