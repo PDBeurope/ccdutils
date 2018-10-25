@@ -109,7 +109,7 @@ class Residue:
             'label_comp_id': self.name,
             'auth_asym_id': self.chain,
             'auth_seq_id': self.res_id,
-            'pdbx_PDB_ins_code': self.ins_code
+            'pdbx_PDB_ins_code': ' ' if len(self.ins_code) == 0 else self.ins_code
         }
 
     def __hash__(self):
@@ -189,6 +189,12 @@ class ProtLigInteractions:
         self.bound_molecules = self._infer_bound_molecules(structure, to_discard)
         self.path = structure
 
+    def initialize(self):
+        self.compl = InteractionComplex(self.path)
+        self.compl.structure_checks()
+        self.compl.address_ambiguities()
+        self.compl.initialize()
+
     def get_all_interactions(self, interaction_cutoff=5.0, compensation_factor=0.1,
                              include_neighbours=False):
         """Retrieve interactions for all bound molecules found in the
@@ -235,13 +241,9 @@ class ProtLigInteractions:
         Returns:
             dict of str: Interactions in a dictionary like schema.
         """
+        self.compl.run_arpeggio(selection, interaction_cutoff, compensation_factor, include_neighbours)
 
-        compl = InteractionComplex(self.path)
-        compl.structure_checks()
-        compl.address_ambiguities()
-        compl.run_arpeggio(selection, interaction_cutoff, compensation_factor, include_neighbours)
-
-        return compl.get_contacts()
+        return self.compl.get_contacts()
 
     def _infer_bound_molecules(self, structure, to_discard):
         """Identify bound molecules in the input protein structure.
@@ -259,7 +261,7 @@ class ProtLigInteractions:
         while True:
             component = temp.pop_bound_molecule()
             if component is None:
-                return sorted(bms, key=lambda l: (-len(list(l.residues)), list(l.residues)[0].name))
+                return sorted(bms, key=lambda l: (-len(list(l.residues)), list(l.residues)[0].name, int(list(l.residues)[0].res_id)))
             else:
                 bms.append(component)
 

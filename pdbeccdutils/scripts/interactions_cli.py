@@ -200,7 +200,7 @@ def _process_single_structure(args, depictor, pdb):
     """
     logger = logging.getLogger(__name__)
     config = args.config
-    result_bag = {'depictions': {}}
+    result_bag = {'entry': pdb, 'depictions': {}, 'boundMolecules': []}
     wd = os.path.join(config.output_dir, pdb[1:3], pdb)
     os.makedirs(wd, exist_ok=True)
 
@@ -218,8 +218,10 @@ def _process_single_structure(args, depictor, pdb):
 
     __add_hydrogens(config, wd, assembly_path, protonated_cif_path, protonated_pdb_path)
 
+    logger.debug('Initializing arpeggio.')
     i = 0
     interactions.path = protonated_cif_path
+    interactions.initialize()
     for bm in interactions.bound_molecules:
         i += 1
         logger.debug(f'Running arpeggio (bm{i}) for: {str(bm)}')
@@ -235,8 +237,11 @@ def _process_single_structure(args, depictor, pdb):
                                         l['interacting_entities'] in ('INTER', 'SELECTION_WATER'),
                                         contacts))
 
-        result_bag[f'bm{i}'] = {'contacts': contacts_filtered}
-        result_bag[f'bm{i}']['composition'] = bm.to_dict()
+        result_bag['boundMolecules'].append({
+            'id': f'bm{i}',
+            'contacts': contacts_filtered,
+            'composition': bm.to_dict()
+        })
 
     with open(os.path.join(wd, 'contacts.json'), 'w') as f:
         json.dump(result_bag, f, sort_keys=True, indent=4)
@@ -259,7 +264,7 @@ def __get_assembly_id(path):
         str: preferred assembly id for a given PDB entry.
     """
     if not os.path.isfile(path):
-        raise (f'Assembly configuration file {path} does not exist.')
+        raise AttributeError(f'Assembly configuration file {path} does not exist.')
 
     xml = ET.parse(path)
 
