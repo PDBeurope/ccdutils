@@ -20,26 +20,21 @@ import gzip
 import json
 import logging
 import os
-import pathlib
 import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from collections import namedtuple
+from xml.dom import minidom
 
 import rdkit
 
 import pdbeccdutils
 from pdbeccdutils.computations.interactions import ProtLigInteractions
-from pdbeccdutils.core import ccd_reader, ccd_writer
-from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
-from pdbeccdutils.core.models import ConformerType
 
-to_gzip = ('.json', '.pdb', '.cif')
+
 # region logging
-
-
 def _set_up_logger(args):
     """Set up application level logging.
 
@@ -67,9 +62,6 @@ def _log_settings(args):
     """
 
     settings = 'Settings:\n'
-    settings += '{:29s}{:25s}{}\n'.format('', 'generic_templates', args.config.generic_templates)
-    settings += '{:29s}{:25s}{}\n'.format('', 'pubchem_templates', args.config.pubchem_templates)
-    settings += '{:29s}{:25s}{}\n'.format('', 'components', args.config.components)
     settings += '{:29s}{:25s}{}\n'.format('', 'output_dir', args.config.output_dir)
     settings += '{:29s}{:25s}{}\n'.format('', 'input_dir', args.config.input_dir)
     settings += '{:29s}{:25s}{}\n'.format('', 'node', args.config.node)
@@ -77,6 +69,7 @@ def _log_settings(args):
     settings += '{:29s}{:25s}{}\n'.format('', 'ChimeraX', args.config.chimerax)
     settings += '{:29s}{:25s}{}\n'.format('', 'no_header', ('ON' if args.no_header else 'OFF'))
     settings += '{:29s}{:25s}{}\n'.format('', 'gzip', ('ON' if args.gzip else 'OFF'))
+    settings += '{:29s}{:25s}{}\n'.format('', 'xml', ('ON' if args.xml else 'OFF'))
     settings += '{:29s}{:25s}{}\n'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
     settings += '{:29s}{:25s}{}\n'.format('', 'discarded_ligands', ','.join(args.config.discarded_ligands))
     settings += '{:29s}{:25s}{}'.format('', 'running on ' + str(len(args.pdbs)) + ' structures.', '')
@@ -85,23 +78,20 @@ def _log_settings(args):
 # endregion
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     """
     Sets up a parser to get command line options.
 
     Returns:
-         argparse.Namespace parser
+         argparse.ArgumentParser parser
     """
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
 
     temp_config = {
-        "pubchem_templates": "path to the pubchem templates",
-        "generic_templates": "path to the generic templates",
         "output_dir": "path to the output directory",
-        "components": "Path to the components in the mmcif file (expected structure: mmcif/A/ATP/ATP.cif)",
+        "input_dir": "path to the input data location (expected structure: ./tq/1tqn/assembly_generation/1tqn-assembly.xml and ./tq/1tqn/clean_mmcif/1tqn_updated.cif.gz)",
         "node": "Path to the node.js binary",
         "coordinate_server": "Path to the coordinate server local.js binary",
-        "input_dir": "path to the input data location (expected structure: ./tq/1tqn/assembly_generation/1tqn-assembly.xml and ./tq/1tqn/clean_mmcif/1tqn_updated.cif.gz)",
         "chimerax": "location of the ChimeraX binary",
         "discarded_ligands": "list of het codes to be discarded (e.g. HOH, SO4, etc.)"
     }
@@ -114,11 +104,13 @@ def create_parser():
     selection_group.add_argument('-sf', '--selection-file', type=str, help='Selections as above, but listed in a file.')
     parser.add_argument('--debug', action='store_true', help='Turn on debug message logging output')
     parser.add_argument('--no_header', action='store_true', help='Turn off header information for the script.')
+    parser.add_argument('--xml', action='store_true', help='Provide optional XML output.')
     parser.add_argument('--gzip', action='store_true', help='Whether or not should be all the files compressed to save space.')
 
     return parser
 
 
+# region parameter validation
 def __validate_file_exists(name, p):
     """Check if the file exists
 
@@ -150,6 +142,7 @@ def check_args(args):
 
     __validate_file_exists('ChimeraX', args.config.chimerax)
     __validate_file_exists('coordinate_server', args.config.coordinate_server)
+#endregion
 
 
 def interactions_pipeline(args) -> bool:
@@ -171,12 +164,10 @@ def interactions_pipeline(args) -> bool:
         settings = _log_settings(args)
         logger.info(settings)
 
-    depictor = DepictionManager(pubchem_templates_path=args.config.pubchem_templates)
-
     for pdb in args.pdbs:
         logger.debug(f'Processing... {pdb}.')
         try:
-            _process_single_structure(args, depictor, pdb)
+            _process_single_structure(args, pdb)
         except Exception as e:
             success = False
             logger.error(f'{pdb} | FAILED')
@@ -185,13 +176,9 @@ def interactions_pipeline(args) -> bool:
     return success
 
 
-def _process_single_structure(args, depictor, pdb):
+def _process_single_structure(args, pdb):
     """Process a single pdb file and get composition of bound molecules
-    along with the protein-ligand contacts and nice 2D depictions of
-    ligands present in the bound molecules.
-
-    TODO
-    This is temporary implementation before the process is split into two
+    along with the protein-ligand contacts.
 
     Args:
         args (argparse.Namespace): Application configuration.
@@ -226,12 +213,6 @@ def _process_single_structure(args, depictor, pdb):
         i += 1
         logger.debug(f'Running arpeggio (bm{i}) for: {str(bm)}')
 
-        for ligand in map(lambda l: l.name, bm.residues):
-            if ligand not in result_bag['depictions']:
-                ligand_path = os.path.join(config.components, ligand[0], ligand, f'{ligand}.cif')
-                ligand_layout = __create_ligand_layout(depictor, ligand_path)
-                result_bag['depictions'][ligand] = ligand_layout[ligand]
-
         contacts = interactions.get_interaction(bm.to_arpeggio_format())
         contacts_filtered = list(filter(lambda l:
                                         l['interacting_entities'] in ('INTER', 'SELECTION_WATER'),
@@ -245,6 +226,11 @@ def _process_single_structure(args, depictor, pdb):
 
     with open(os.path.join(wd, 'contacts.json'), 'w') as f:
         json.dump(result_bag, f, sort_keys=True, indent=4)
+
+    if args.xml:
+        with open(os.path.join(wd, 'contacts.xml'), 'w') as f:
+            xml_str = __get_xml_repr(result_bag)
+            f.write(xml_str)
 
     if args.gzip:
         __gzip_folder(wd)
@@ -397,24 +383,6 @@ def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
         raise CCDUtilsError('PDB protonated file was not created.')
 
 
-def __create_ligand_layout(depictor, ligand_path):
-    """Retrieve 2D coordinates for a given ligand
-
-    Args:
-        depictor (DepictionManager): Helper class to aid nice 2d layouts.
-        ligand_path (str): Path to the component.
-
-    Returns:
-        [dict of str]: json-like representation of the component layout.
-    """
-
-    component = ccd_reader.read_pdb_cif_file(ligand_path).component
-    component.sanitize()
-    component.compute_2d(depictor)
-
-    return ccd_writer.to_json_dict(component, remove_hs=True, conf_type=ConformerType.Depiction)
-
-
 def __gzip_folder(path):
     """Gzip all content of the calculation folder into gzip with the
     exception of config files.
@@ -424,11 +392,57 @@ def __gzip_folder(path):
     """
     for input_file in os.listdir(path):
         path_f = os.path.join(path, input_file)
-        if pathlib.Path(path_f).suffix in to_gzip:
+        if not input_file.endswith('.gz'):
             with open(path_f, 'rb') as f_in:
                 with gzip.open(f'{path_f}.gz', 'wb') as f_out:
                     shutil.copyfileobj(f_in, f_out)
             os.remove(path_f)
+
+
+def __get_xml_repr(result_bag):
+    root = ET.Element('entry', id=result_bag['entry'])
+    sub = ET.SubElement(root, 'boundMolecules')
+
+    for bm in result_bag['boundMolecules']:
+        bmol = ET.SubElement(sub, 'boundMolecule', {'id': bm['id']})
+        composition = ET.SubElement(bmol, 'composition')
+        connections = ET.SubElement(composition, 'connections')
+        residues = ET.SubElement(composition, 'residues')
+        contacts = ET.SubElement(bmol, 'contacts')
+
+        for residue in bm['composition']['residues']:
+            ET.SubElement(residues, 'residue', {
+                'id': residue['id'],
+                'auth_asym_id': residue['auth_asym_id'],
+                'auth_seq_id': str(residue['auth_seq_id']),
+                'label_comp_id': residue['label_comp_id'],
+                'pdbx_PDB_ins_code': residue['pdbx_PDB_ins_code'],
+            })
+
+        for connection in bm['composition']['connections']:
+            ET.SubElement(connections, 'connection', {'begin': connection[0], 'end': connection[1]})
+
+        for contact in bm['contacts']:
+            c = ET.SubElement(contacts, 'contact')
+
+            __write_atom_xml(c, contact['atom_bgn'])
+            __write_atom_xml(c, contact['atom_end'])
+
+    xml = ET.tostring(root, encoding='unicode')
+    pretty = minidom.parseString(xml)
+
+    return pretty.toprettyxml(indent="  ")
+
+
+def __write_atom_xml(parent, atom):
+    return ET.SubElement(parent, 'atom', {
+        'auth_asym_id': atom['auth_asym_id'],
+        'auth_atom_id': atom['auth_atom_id'],
+        'auth_seq_id': str(atom['auth_seq_id']),
+        'id': atom['id'],
+        'pdbx_PDB_ins_code': atom['pdbx_PDB_ins_code'],
+        'label_comp_id': atom['label_comp_id']
+    })
 
 
 def main():
