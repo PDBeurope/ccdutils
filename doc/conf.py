@@ -24,7 +24,7 @@ author = 'Protein Data Bank in Europe'
 # The short X.Y version
 version = '0.3'
 # The full version, including alpha/beta/rc tags
-release = '0.3'
+release = '0.3.1'
 
 # endregion
 

@@ -26,9 +26,9 @@ class BoundMoleculeContainer:
     of disconnected components.
     """
 
-    def __init__(self, residues=set(), connections=set()):
-        self.residues = residues
-        self.connections = connections
+    def __init__(self, residues=None, connections=None):
+        self.residues = set() if residues is None else residues
+        self.connections = set() if connections is None else connections
 
     def __str__(self):
         return '-'.join(map(lambda l: str(l), self.residues))
@@ -47,7 +47,7 @@ class BoundMoleculeContainer:
 
         results_bag = {'residues': [], 'connections': []}
         results_bag['residues'] = list(map(lambda l: l.to_dict(), nodes))
-        results_bag['connections'] = list(map(lambda l: (nodes.index(l[0]), nodes.index(l[1])), self.connections))
+        results_bag['connections'] = list(map(lambda l: (l[0].id, l[1].id), self.connections))
 
         return results_bag
 
@@ -73,7 +73,9 @@ class BoundMoleculeContainer:
             for e in edges:
                 visited_connections.add(e)
                 self.connections.remove(e)
-                stack.add(e.get_other(processed_node))
+                other_node = e.get_other(processed_node)
+                stack.add(other_node)
+                self.residues.remove(other_node)
 
         return BoundMoleculeContainer(visited_residues, visited_connections)
 
@@ -82,17 +84,15 @@ class Residue:
     """Represents a single residue.
     """
 
-    def __init__(self, name, chain, res_id):
+    def __init__(self, name, chain, res_id, ins_code):
         self.name = name
         self.chain = chain
         self.res_id = res_id
+        self.ins_code = '' if ins_code in ('.', '?') else ins_code
+        self.id = f'{chain}{res_id}{self.ins_code}'
 
     def __eq__(self, other):
-        if self.name != other.name:
-            return False
-        if self.chain != other.chain:
-            return False
-        if self.res_id != other.res_id:
+        if self.id != other.id:
             return False
 
         return True
@@ -105,24 +105,27 @@ class Residue:
             with the mmCIF keys.
         """
         return {
+            'id': self.id,
             'label_comp_id': self.name,
             'auth_asym_id': self.chain,
-            'auth_seq_id': self.res_id
+            'auth_seq_id': self.res_id,
+            'pdbx_PDB_ins_code': ' ' if len(self.ins_code) == 0 else self.ins_code
         }
 
     def __hash__(self):
-        return hash(self.chain + self.res_id + self.name)
+        return hash(self.chain + self.res_id + self.name + self.ins_code)
 
     def __str__(self):
-        return f'/{self.name}/{self.res_id}/{self.chain}/'
+        return f'/{self.name}/{self.res_id}{self.ins_code}/{self.chain}/'
 
     def to_arpeggio(self):
         """Gets Arpeggio style representation of a residue e.g. `/A/129/`
+        or /A/129A/ in case there is an insertion code.
 
         Returns:
             str: Residue description in Arpeggio style.
         """
-        return f'/{self.chain}/{self.res_id}/'
+        return f'/{self.chain}/{self.res_id}{self.ins_code}/'
 
 
 class Connection:
@@ -173,7 +176,7 @@ class Connection:
 
 
 class ProtLigInteractions:
-    def __init__(self, structure, to_discard=[]):
+    def __init__(self, structure, to_discard=None):
         """Create protein - ligand interaction object.
 
         Args:
@@ -182,8 +185,15 @@ class ProtLigInteractions:
                 names to be discarded prior to protein-ligand interaction
                 lookup.
         """
+        to_discard = [] if to_discard is None else to_discard
         self.bound_molecules = self._infer_bound_molecules(structure, to_discard)
         self.path = structure
+
+    def initialize(self):
+        self.compl = InteractionComplex(self.path)
+        self.compl.structure_checks()
+        self.compl.address_ambiguities()
+        self.compl.initialize()
 
     def get_all_interactions(self, interaction_cutoff=5.0, compensation_factor=0.1,
                              include_neighbours=False):
@@ -231,13 +241,9 @@ class ProtLigInteractions:
         Returns:
             dict of str: Interactions in a dictionary like schema.
         """
+        self.compl.run_arpeggio(selection, interaction_cutoff, compensation_factor, include_neighbours)
 
-        compl = InteractionComplex(self.path)
-        compl.structure_checks()
-        compl.address_ambiguities()
-        compl.run_arpeggio(selection, interaction_cutoff, compensation_factor, include_neighbours)
-
-        return compl.get_contacts()
+        return self.compl.get_contacts()
 
     def _infer_bound_molecules(self, structure, to_discard):
         """Identify bound molecules in the input protein structure.
@@ -255,7 +261,7 @@ class ProtLigInteractions:
         while True:
             component = temp.pop_bound_molecule()
             if component is None:
-                return bms
+                return sorted(bms, key=lambda l: (-len(list(l.residues)), list(l.residues)[0].name, int(list(l.residues)[0].res_id)))
             else:
                 bms.append(component)
 
@@ -273,18 +279,19 @@ class ProtLigInteractions:
         Returns:
             BoundMolecule: All the bound molecules in a given entry.
         """
-        def __parse_ligands_from_nonpoly_schema(schema):
-            g = BoundMoleculeContainer()
-            for i in range(len(schema['asym_id'])):
-                n = Residue(
-                    schema['mon_id'][i],  # aka label_comp_id
-                    schema['pdb_strand_id'][i],  # aka auth_asym_id
-                    schema['pdb_seq_num'][i])  # aka auth_seq_id
+        def _preprocess_pdb_parser_output(dictionary, label):
+            if label not in dictionary:
+                return []
 
-                if n.name not in to_discard:
-                    g.add_node(n)
+            check_element = list(dictionary[label].keys())[0]
+            values = (dictionary[label]
+                      if type(dictionary[label][check_element]) is list
+                      else {k: [v] for k, v in dictionary[label].items()})
+            return values
 
-            return g
+        def __filter_ligands_from_nonpoly_schema(schema, bms):
+            ligands = set([i for i in schema['mon_id']])
+            bms.residues = set(filter(lambda l: l.name in ligands, bms.residues))
 
         def __parse_ligands_from_atom_sites(atom_sites):
             g = BoundMoleculeContainer()
@@ -293,38 +300,56 @@ class ProtLigInteractions:
                     n = Residue(
                         atom_sites['label_comp_id'][i],  # aka label_comp_id
                         atom_sites['auth_asym_id'][i],  # aka auth_asym_id
-                        atom_sites['auth_seq_id'][i])  # aka auth_seq_id
+                        atom_sites['auth_seq_id'][i],  # aka auth_seq_id
+                        atom_sites['pdbx_PDB_ins_code'][i])  # aka pdbx_PDB_ins_code
 
                     if n.name not in to_discard:
                         g.add_node(n)
 
             return g
 
-        def __add_connections(g, struct_conn):
+        def __add_connections(struct_conn, bms):
             for i in range(len(struct_conn['id'])):
-                a = filter(lambda l:
-                           l.name == struct_conn['ptnr1_label_comp_id'][i] and
-                           l.chain == struct_conn['ptnr1_auth_asym_id'][i] and
-                           l.res_id == struct_conn['ptnr1_auth_seq_id'][i], g.residues)
-                a = next(a, None)
-                b = filter(lambda l:
-                           l.name == struct_conn['ptnr2_label_comp_id'][i] and
-                           l.chain == struct_conn['ptnr2_auth_asym_id'][i] and
-                           l.res_id == struct_conn['ptnr2_auth_seq_id'][i], g.residues)
-                b = next(b, None)
+                ptnr1 = filter(lambda l:
+                               l.name == struct_conn['ptnr1_label_comp_id'][i] and
+                               l.res_id == struct_conn['ptnr1_auth_seq_id'][i] and
+                               l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr1_PDB_ins_code'][i]), bms.residues)
+                ptnr2 = filter(lambda l:
+                               l.name == struct_conn['ptnr2_label_comp_id'][i] and
+                               l.res_id == struct_conn['ptnr2_auth_seq_id'][i] and
+                               l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr2_PDB_ins_code'][i]), bms.residues)
 
-                if a is not None and b is not None:
-                    g.add_connection(Connection(a, b))
+                for x in ptnr1:
+                    for y in ptnr2:
+                        ptnr1_chain = struct_conn['ptnr1_auth_asym_id'][i]
+                        ptnr2_chain = struct_conn['ptnr2_auth_asym_id'][i]
 
+                        if x.chain == ptnr1_chain and y.chain == ptnr2_chain:
+                            bms.add_connection(Connection(x, y))
+                            continue
+
+                        if '-' in x.chain and '-' in y.chain:
+                            x_split = x.chain.split('-')
+                            y_split = y.chain.split('-')
+
+                            if x_split[0] == ptnr1_chain and y_split[0] == ptnr2_chain and x_split[1] == y_split[1]:
+                                bms.add_connection(Connection(x, y))
+
+        def __get_ins_code(field):
+            return '' if field in ('.', '?') else field
         parsed_str = list(MMCIF2Dict().parse(path).values())[0]
 
         if '_pdbx_nonpoly_scheme' not in parsed_str:
             return BoundMoleculeContainer()
 
-        bms = __parse_ligands_from_nonpoly_schema(parsed_str['_pdbx_nonpoly_scheme'])
+        nonpoly_scheme = _preprocess_pdb_parser_output(parsed_str, '_pdbx_nonpoly_scheme')
+        struct_conn = _preprocess_pdb_parser_output(parsed_str, '_struct_conn')
+
+        bms = __parse_ligands_from_atom_sites(parsed_str['_atom_site'])
+        __filter_ligands_from_nonpoly_schema(nonpoly_scheme, bms)
 
         if '_struct_conn' in parsed_str:
-            __add_connections(bms, parsed_str['_struct_conn'])
+            __add_connections(struct_conn, bms)
 
         return bms
 
