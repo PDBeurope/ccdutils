@@ -194,6 +194,7 @@ def _process_single_structure(args, pdb):
     assembly_path = __get_cs_structure(config, wd, pdb)
     protonated_cif_path = os.path.join(wd, f'{pdb}_h.cif')
     protonated_pdb_path = os.path.join(wd, f'{pdb}_h.pdb')
+    __add_hydrogens(config, wd, assembly_path, protonated_cif_path, protonated_pdb_path)
 
     interactions = ProtLigInteractions(assembly_path, config.discarded_ligands)
 
@@ -201,9 +202,7 @@ def _process_single_structure(args, pdb):
         logger.debug('No bound molecules found. Skipping entry.')
         return
     else:
-        logger.debug(f'{len(interactions.bound_molecules)} bound molecule(s) found.')
-
-    __add_hydrogens(config, wd, assembly_path, protonated_cif_path, protonated_pdb_path)
+        logger.debug(f'{len(interactions.bound_molecules)} bound molecule(s) found.')    
 
     logger.debug('Initializing arpeggio.')
     i = 0
