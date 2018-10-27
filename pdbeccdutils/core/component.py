@@ -51,7 +51,7 @@ class Component:
 
         self.mol = mol
         self.ccd_cif_dict = ccd_cif_dict
-        self.fragments: Dict[str, int] = {}
+        self._fragments: Dict[str, Any] = {}
         self._2dmol = None
         self._id = ''
         self._name = ''
@@ -223,6 +223,22 @@ class Component:
             int: the number of atoms in the PDB-CCD
         """
         return self.mol.GetNumAtoms()
+
+    @property
+    def fragments(self) -> Dict[str, List[List[str]]]:
+        """Lists matched fragments and atom names.
+
+        Returns:
+            Dict[str, List[List[str]]]: Dictionary with fragment names
+            and matched atoms.
+
+        """
+        res: Dict[str, List[List[str]]] = {}
+        for k, mappings in self._fragments.items():
+            res[k] = []
+            for m in mappings:
+                res[k].append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx).GetProp('name'), m)))
+        return res
 
     @property
     def atoms_ids(self) -> Tuple[Any, ...]:
@@ -465,33 +481,37 @@ class Component:
                 matches_found += len(matches)
 
                 if len(matches) > 0:
-                    self.fragments[k] = matches
+                    self._fragments[k] = matches
             except Exception:
                 pass
 
         return matches_found
 
     def get_scaffolds(self, scaffolding_method=ScaffoldingMethod.MurckoScaffold):
-        """
+        """Compute deemed scaffolds for a given compound.
+
+        Args:
             scaffolding_method (ScaffoldingMethod, optional):
                 Defaults to MurckoScaffold. Scaffolding method to use
 
         Returns:
             :obj:`list` of :obj:`rdkit.Chem.rdchem.Mol`: Scaffolds found in the component.
         """
-        scaffold = None
+        try:
+            scaffold = None
 
-        if scaffolding_method == ScaffoldingMethod.MurckoScaffold:
-            scaffold = [(MurckoScaffold.GetScaffoldForMol(self.mol))]
+            if scaffolding_method == ScaffoldingMethod.MurckoScaffold:
+                scaffold = [(MurckoScaffold.GetScaffoldForMol(self.mol))]
 
-        elif scaffolding_method == ScaffoldingMethod.MurckoGeneric:
-            scaffold = [(MurckoScaffold.MakeScaffoldGeneric(self.mol))]
+            elif scaffolding_method == ScaffoldingMethod.MurckoGeneric:
+                scaffold = [(MurckoScaffold.MakeScaffoldGeneric(self.mol))]
 
-        elif scaffolding_method == ScaffoldingMethod.Brics:
-            scaffold = BRICS.BRICSDecompose(self.mol)
-            scaffold = list(map(lambda l: rdkit.Chem.MolFromSmiles(l), scaffold))
-
-        return scaffold
+            elif scaffolding_method == ScaffoldingMethod.Brics:
+                scaffold = BRICS.BRICSDecompose(self.mol)
+                scaffold = list(map(lambda l: rdkit.Chem.MolFromSmiles(l), scaffold))
+            return scaffold
+        except RuntimeError:
+            raise CCDUtilsError(f'Computing scaffolds using method {scaffolding_method.name} failed.')
 
     def _fix_molecule(self, rwmol: rdkit.Chem.rdchem.RWMol):
         """
