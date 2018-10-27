@@ -26,17 +26,19 @@ definitions cif files, sdf files, pdb files and image files.
 In addition creates chem_comp.xml and chem_comp.list for all components.
 """
 import argparse
+import json
 import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
-from multiprocessing import Process, Queue
 from xml.dom import minidom
+from typing import Dict, Any
 
 import rdkit
 
 import pdbeccdutils
 from pdbeccdutils.core import ccd_reader, ccd_writer
+from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.fragment_library import FragmentLibrary
@@ -44,6 +46,7 @@ from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import PubChemDownloader, config
 
 
+# region pre-light tasks
 def create_parser():
     """
     Sets up parse the command line options.
@@ -87,6 +90,43 @@ def check_args(args):
         if args.test_first < 1:
             print(f'Test_first mode needs to have at least 1 component.', file=sys.stderr)
             sys.exit(os.EX_NOINPUT)
+
+
+def _set_up_logger(args):
+    """Set up application level logging.
+
+    Args:
+        args (argparse.Namespace): Parsed arguments.
+    """
+
+    logger = logging.getLogger(__name__)
+    level = logging.DEBUG if args.debug else logging.ERROR
+    format = '[%(asctime)-15s]  %(message)s'
+    logging.basicConfig(level=level, format=format, datefmt='%a, %d %b %Y %H:%M:%S')
+    logger.info(f'PDBeChem pipeline using:')
+    logger.info(f'pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}')
+
+
+def _log_settings(args):
+    """Compose initial message about application settions.
+
+    Args:
+        args (argparse.Namespace): Application arguments.
+
+    Returns:
+        str: initial application message.
+    """
+
+    settings = 'Settings:\n'
+    settings += '{:29s}{:25s}{}\n'.format('', 'components_cif', args.components_cif)
+    settings += '{:29s}{:25s}{}\n'.format('', 'output_dir', args.output_dir)
+    settings += '{:29s}{:25s}{}\n'.format('', 'general_templates', args.general_templates)
+    settings += '{:29s}{:25s}{}\n'.format('', 'pubchem_templates', args.pubchem_templates)
+    settings += '{:29s}{:25s}{}\n'.format('', 'library', args.library)
+    settings += '{:29s}{:25s}{}'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
+
+    return settings
+#endregion
 
 
 def pdbechem_pipeline(args):
@@ -134,42 +174,6 @@ def pdbechem_pipeline(args):
         f.write("\n".join(ids))
 
 
-def _set_up_logger(args):
-    """Set up application level logging.
-
-    Args:
-        args (argparse.Namespace): Parsed arguments.
-    """
-
-    logger = logging.getLogger(__name__)
-    level = logging.DEBUG if args.debug else logging.ERROR
-    format = '[%(asctime)-15s]  %(message)s'
-    logging.basicConfig(level=level, format=format, datefmt='%a, %d %b %Y %H:%M:%S')
-    logger.info(f'PDBeChem pipeline using:')
-    logger.info(f'pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}')
-
-
-def _log_settings(args):
-    """Compose initial message about application settions.
-
-    Args:
-        args (argparse.Namespace): Application arguments.
-
-    Returns:
-        str: initial application message.
-    """
-
-    settings = 'Settings:\n'
-    settings += '{:29s}{:25s}{}\n'.format('', 'components_cif', args.components_cif)
-    settings += '{:29s}{:25s}{}\n'.format('', 'output_dir', args.output_dir)
-    settings += '{:29s}{:25s}{}\n'.format('', 'general_templates', args.general_templates)
-    settings += '{:29s}{:25s}{}\n'.format('', 'pubchem_templates', args.pubchem_templates)
-    settings += '{:29s}{:25s}{}\n'.format('', 'library', args.library)
-    settings += '{:29s}{:25s}{}'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
-
-    return settings
-
-
 def process_single_component(args, ccd_reader_result, library,
                              chem_comp_xml, depictions,
                              pubchem_templates):
@@ -192,6 +196,7 @@ def process_single_component(args, ccd_reader_result, library,
     os.makedirs(parent_dir, exist_ok=True)
     ideal_conformer = ConformerType.Ideal
     component = ccd_reader_result.component
+    json_output = {'het_code': ccd_id}
 
     # check parsing and conformer degeneration
     issues = check_component_parsing(ccd_reader_result)
@@ -205,8 +210,10 @@ def process_single_component(args, ccd_reader_result, library,
         issues += download_template(pubchem_templates, component)
 
     # search fragment library
-    issues += search_fragment_library(component, library)
+    issues += search_fragment_library(component, library, json_output)
 
+    # get scaffolds
+    issues += compute_component_scaffolds(component, json_output)
     # write out files
     issues += generate_depictions(component, depictions, parent_dir)
     issues += export_structure_formats(component, parent_dir, ideal_conformer)
@@ -214,6 +221,9 @@ def process_single_component(args, ccd_reader_result, library,
     # get xml representation
     xml_repr = ccd_writer.to_xml_xml(ccd_reader_result.component)
     chem_comp_xml.append(xml_repr)
+
+    with open(os.path.join(parent_dir, f'{ccd_id}_substructures.json'), 'w') as f:
+        json.dump(json_output, f, sort_keys=True, indent=4)
 
     # write log
     logger = logging.getLogger(__name__)
@@ -271,7 +281,7 @@ def check_component_structure(component: Component):
     return issues
 
 
-def download_template(pubchem_templates, component):
+def download_template(pubchem_templates: PubChemDownloader, component: Component):
     """Attempts to download a pubchem template for the given component
 
     Args:
@@ -290,7 +300,7 @@ def download_template(pubchem_templates, component):
     return []
 
 
-def generate_depictions(component, depictions, parent_dir):
+def generate_depictions(component: Component, depictions: DepictionManager, parent_dir: str):
     """Generate nice 2D depictions for the component. Presently depictions
     are generated in the following resolutions (100,200,300,400,500) with
     and without atom names.
@@ -322,22 +332,63 @@ def generate_depictions(component, depictions, parent_dir):
     return issues
 
 
-def search_fragment_library(component, library):
-    """Search
+def search_fragment_library(component: Component, library: FragmentLibrary, json_output: Dict[str, Any]):
+    """Search fragment library to find hits
 
     Args:
         component (Component): Component to be processed
         library (FragmentLibrary): Fragment library to be used.
+        json_output (Dict[str, Any]): dictionary like structure with the
+            results to be stored.
 
     Returns:
         list of str: info msg.
     """
+    json_output['fragments'] = []
     matches = component.library_search(library)
+
+    for k, v in component.fragments.items():
+        json_output['fragments'].append({
+            'name': k,
+            'smiles': rdkit.Chem.MolToSmiles(library.library[k]),
+            'mapping': v
+        })
 
     if matches > 0:
         return [f'{matches} matches found in the library `{library.name}`.']
     else:
         return []
+
+
+def compute_component_scaffolds(component: Component, json_output: Dict[str, Any]):
+    """Compute scaffolds for a given component.
+
+    Args:
+        component (Component): Component to be processed
+        json_output (Dict[str, Any]): dictionary like structure with the
+            results to be stored.
+
+    Returns:
+        list of str: logging information.
+    """
+    try:
+        scaffolds = component.get_scaffolds()
+    except CCDUtilsError as e:
+        return [str(e)]
+    
+    json_output['scaffolds'] = []
+    for scaffold in scaffolds:
+        atom_names = component.locate_fragment(scaffold)
+        scaffold_atom_names = []
+        for match in atom_names:
+            scaffold_atom_names.append([i.GetProp('name') for i in match])
+
+        json_output['scaffolds'].append({
+            'smiles': rdkit.Chem.MolToSmiles(scaffold),
+            'mapping': scaffold_atom_names
+        })
+
+    return [f'{len(scaffolds)} scaffold(s) were found.']
 
 
 def export_structure_formats(component, parent_dir, ideal_conformer):

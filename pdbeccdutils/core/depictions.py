@@ -16,16 +16,15 @@
 # under the License.
 
 import os
+from typing import Dict
 
 import rdkit
-from rdkit import Chem
-from rdkit import Geometry
-from rdkit.Chem import rdCoordGen
-from rdkit.Chem import AllChem
+from rdkit import Chem, Geometry
+from rdkit.Chem import AllChem, rdCoordGen
 from scipy.spatial import KDTree
 
 import pdbeccdutils.utils.config as config
-from pdbeccdutils.core.models import DepictionSource, DepictionResult
+from pdbeccdutils.core.models import DepictionResult, DepictionSource
 
 
 class DepictionManager:
@@ -35,8 +34,7 @@ class DepictionManager:
     PubCshem templates can be downloaded using PubChemDownloader class.
     """
 
-    def __init__(self, pubchem_templates_path: str = '',
-                 general_templates_path: str = config.coordgen_templates) -> None:
+    def __init__(self, pubchem_templates_path: str ='', general_templates_path: str = config.general_templates)-> None:
         """
         Initialize component which does the ligand depiction.
         If Nones is provided as parameters just the defalt RDKit
@@ -47,17 +45,22 @@ class DepictionManager:
                 Path to the library with 2D structures downloaded from
                 PubChem. Use `setup_pubchem_library` for this task.
             general_templates_path (str, optional): Defaults to
-                config.coordgen_templates (supplied with the pdbeccdutils).
+                config.general_templates (supplied with the pdbeccdutils).
                 Path to the library with general templates to be used
-                for depicting ligand e.g. porphyring rings. This needs to
-                be a single *.mae file.
+                for depicting ligand e.g. porphyring rings.
 
         """
         self.coordgen_params = rdCoordGen.CoordGenParams()
         self.coordgen_params.coordgenScaling = 50 / 1.5
-        self.coordgen_params.templateFileDir = general_templates_path
+        self.coordgen_params.templateFileDir = config.coordgen_templates
 
         self.pubchem_templates = pubchem_templates_path if os.path.isdir(pubchem_templates_path) else ''
+        self.templates: Dict[str, rdkit.Chem.rdchem.Mol] = {}
+
+        if os.path.isdir(general_templates_path):
+            self.templates = {k.split('.')[0]:
+                              self._load_template(os.path.join(general_templates_path, k))
+                              for k in os.listdir(general_templates_path)}
 
     def depict_molecule(self, het_id: str, mol: rdkit.Chem.rdchem.Mol) -> DepictionResult:
         """
@@ -76,15 +79,14 @@ class DepictionManager:
             DepictionResult: Summary of the ligand depiction process.
         """
         temp_mol = Chem.RWMol(mol)
-        coordgen_templs = os.path.join(self.coordgen_params.templateFileDir, 'templates.mae')
-        
+
         templateMol = Chem.RWMol(temp_mol).GetMol()
         pubchemMol = Chem.RWMol(temp_mol).GetMol()
         rdkitMol = Chem.RWMol(temp_mol).GetMol()
         results = []
 
         pubchem_res = self._get_2D_by_pubchem(het_id, pubchemMol) if len(self.pubchem_templates) > 0 else None
-        template_res = self._get_2D_by_template(templateMol) if os.path.isfile(coordgen_templs) else []
+        template_res = self._get_2D_by_template(templateMol) if len(self.templates) > 0 else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
         if pubchem_res is not None:
@@ -201,7 +203,7 @@ class DepictionManager:
         """
         results = list()
         try:
-            for key, template in self.substructures.items():
+            for key, template in self.templates.items():
                 temp_mol = Chem.RWMol(mol)
                 if temp_mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)

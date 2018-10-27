@@ -202,7 +202,7 @@ def _process_single_structure(args, pdb):
         logger.debug('No bound molecules found. Skipping entry.')
         return
     else:
-        logger.debug(f'{len(interactions.bound_molecules)} bound molecule(s) found.')    
+        logger.debug(f'{len(interactions.bound_molecules)} bound molecule(s) found.')
 
     logger.debug('Initializing arpeggio.')
     i = 0
