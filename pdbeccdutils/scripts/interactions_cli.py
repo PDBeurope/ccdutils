@@ -366,7 +366,7 @@ def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
             f'open {structure}',
             'addh hbond true',
             f'save {protonated_cif} format mmcif',
-            f'save {protonated_pdb} format pdb',
+            #f'save {protonated_pdb} format pdb',
             'exit'
         ]))
     try:
