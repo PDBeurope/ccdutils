@@ -181,13 +181,12 @@ def _process_single_structure(args, pdb):
     along with the protein-ligand contacts.
 
     Args:
-        args (argparse.Namespace): Application configuration.
-        depictor (DepictionManager): Helper class to get nice 2D images.
+        args (argparse.Namespace): Application configuration.        
         pdb (str): Pdb id.
     """
     logger = logging.getLogger(__name__)
     config = args.config
-    result_bag = {'entry': pdb, 'depictions': {}, 'boundMolecules': []}
+    result_bag = {'entry': pdb, 'boundMolecules': []}
     wd = os.path.join(config.output_dir, pdb[1:3], pdb)
     os.makedirs(wd, exist_ok=True)
 
@@ -200,6 +199,8 @@ def _process_single_structure(args, pdb):
 
     if len(interactions.bound_molecules) == 0:
         logger.debug('No bound molecules found. Skipping entry.')
+        if args.gzip:
+            __gzip_folder(wd)
         return
     else:
         logger.debug(f'{len(interactions.bound_molecules)} bound molecule(s) found.')
