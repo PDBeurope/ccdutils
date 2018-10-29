@@ -378,8 +378,8 @@ def __add_hydrogens(config, wd, structure, protonated_cif, protonated_pdb):
     if not os.path.isfile(protonated_cif):
         raise CCDUtilsError('CIF protonated file was not created.')
 
-    if not os.path.isfile(protonated_pdb):
-        raise CCDUtilsError('PDB protonated file was not created.')
+    #if not os.path.isfile(protonated_pdb):
+    #    raise CCDUtilsError('PDB protonated file was not created.')
 
 
 def __gzip_folder(path):
