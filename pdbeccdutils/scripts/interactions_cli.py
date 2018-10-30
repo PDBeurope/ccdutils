@@ -181,7 +181,7 @@ def _process_single_structure(args, pdb):
     along with the protein-ligand contacts.
 
     Args:
-        args (argparse.Namespace): Application configuration.        
+        args (argparse.Namespace): Application configuration.
         pdb (str): Pdb id.
     """
     logger = logging.getLogger(__name__)

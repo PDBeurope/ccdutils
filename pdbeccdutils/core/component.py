@@ -29,8 +29,7 @@ import pdbeccdutils.helpers.drawing as drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
-from pdbeccdutils.core.models import (ConformerType, Descriptor, Properties,
-                                      ReleaseStatus, ScaffoldingMethod)
+from pdbeccdutils.core.models import (ConformerType, Descriptor, ReleaseStatus, ScaffoldingMethod, CCDProperties)
 from pdbeccdutils.helpers.io_grabber import IOGrabber
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
@@ -47,17 +46,12 @@ class Component:
     """
 
     def __init__(self, mol: rdkit.Chem.rdchem.Mol, ccd_cif_dict: Dict[str, Any]=None,
-                 properties: Properties=None, descriptors: List[Descriptor]=None) -> None:
+                 properties: CCDProperties=None, descriptors: List[Descriptor]=None) -> None:
 
         self.mol = mol
         self.ccd_cif_dict = ccd_cif_dict
         self._fragments: Dict[str, Any] = {}
         self._2dmol = None
-        self._id = ''
-        self._name = ''
-        self._formula = ''
-        self._modified_date = None
-        self._pdbx_release_status = ReleaseStatus.NOT_SET
         self._descriptors: List[Descriptor] = []
         self._inchi_from_rdkit = ''
         self._inchikey_from_rdkit = ''
@@ -68,13 +62,7 @@ class Component:
              ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
              ConformerType.Computed: 2000}
 
-        if properties is not None:
-            mod_date = properties.modified_date.split('-')
-            self._id = properties.id
-            self._name = properties.name
-            self._formula = properties.formula
-            self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
-            self._modified_date: date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+        self.properties: Properties = Properties(self.mol, properties)
 
         if descriptors is not None:
             self._descriptors = descriptors
@@ -94,7 +82,7 @@ class Component:
         Returns:
             str: the _chem_comp.id or ''.
         """
-        return self._id
+        return self.properties._id
 
     @property
     def name(self) -> str:
@@ -109,7 +97,7 @@ class Component:
         Returns:
             str: the _chem_comp.name or ''.
         """
-        return self._name
+        return self.properties._name
 
     @property
     def formula(self) -> str:
@@ -125,7 +113,7 @@ class Component:
         Returns:
             str: the _chem_comp.formula or ''.
         """
-        return self._formula
+        return self.properties._formula
 
     @property
     def pdbx_release_status(self) -> ReleaseStatus:
@@ -139,11 +127,11 @@ class Component:
             pdbeccdutils.core.enums.ReleaseStatus: enum of the release
             status (this includes NOT_SET if no value is defined).
         """
-        return self._pdbx_release_status
+        return self.properties._pdbx_release_status
 
     @property
     def modified_date(self) -> Optional[date]:
-        return self._modified_date
+        return self.properties._modified_date
 
     @property
     def descriptors(self) -> List[Descriptor]:
@@ -206,7 +194,7 @@ class Component:
     def released(self) -> bool:
         """ returns True if PDB-CCD has been released.
         Tests pdbx_release_status is REL"""
-        return self._pdbx_release_status == ReleaseStatus.REL
+        return self.properties._pdbx_release_status == ReleaseStatus.REL
 
     @property
     def mol_no_h(self) -> rdkit.Chem.rdchem.Mol:
@@ -299,7 +287,7 @@ class Component:
             mol_copy = rdkit.Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
             rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
 
-        result_log = manager.depict_molecule(self._id, mol_copy)
+        result_log = manager.depict_molecule(self.id, mol_copy)
         self._2dmol = result_log.mol
 
         return result_log
@@ -629,3 +617,26 @@ class Component:
             str: atom name
         """
         return atom.GetProp('name') if atom.HasProp('name') else atom.GetSymbol() + str(atom.GetIdx())
+
+
+class Properties:
+    """Properties of the CCD component. Some of them are extracted from the input CCD
+    others are computed by RDKit.
+    """
+
+    def __init__(self, mol: rdkit.Chem.rdchem.Mol, properties: Optional[CCDProperties]) -> None:
+        self.mol = mol
+
+        self._pdbx_release_status = ReleaseStatus.NOT_SET
+        self._id = ''
+        self._name = ''
+        self._formula = ''
+        self._modified_date = None
+
+        if properties is not None:
+            mod_date = properties.modified_date.split('-')
+            self._id = properties.id
+            self._name = properties.name
+            self._formula = properties.formula
+            self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
+            self._modified_date: date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
