@@ -12,7 +12,7 @@ class TestParity:
     @staticmethod
     @pytest.mark.parametrize('id_1,id_2,score', [
         ("MAN", 'NAG', 0.74),
-        ("NAD", 'NAG', 0.25),
+        ("NAD", 'NAG', 0.09),
         ("000", '000', 1.00),
         ("SAC", 'GOL', 0.50),
         ("UNL", 'GOL', 0.00),

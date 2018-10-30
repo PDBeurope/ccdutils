@@ -13,8 +13,7 @@ from pdbeccdutils.core.depictions import DepictionManager
 
 def load_molecule(id):
     depiction = DepictionManager()
-    c = ccd_reader.read_pdb_cif_file(cif_filename(id)).component
-    c.sanitize()
+    c = ccd_reader.read_pdb_cif_file(cif_filename(id)).component    
     c.compute_2d(depiction)
     return c
 

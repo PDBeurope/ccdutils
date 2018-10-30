@@ -55,6 +55,7 @@ class Component:
         self._descriptors: List[Descriptor] = []
         self._inchi_from_rdkit = ''
         self._inchikey_from_rdkit = ''
+        self._sanitization_issues = self._sanitize()
 
         self.conformers_mapping = \
             {ConformerType.AllConformers: - 1,
@@ -246,6 +247,16 @@ class Component:
         """
         return tuple(atom.GetProp('name') for
                      atom in self.mol.GetAtoms())
+
+    @property
+    def sanitized(self):
+        """Check whether sanitization process succeeded.
+
+        Returns:
+            bool: Whether or not the sanitization process has been succesfull
+        """
+        return self._sanitization_issues
+
     # endregion properties
 
     def inchikey_from_rdkit_matches_ccd(self, connectivity_only: bool=False) -> bool:
@@ -317,7 +328,7 @@ class Component:
             drawing.save_no_image(file_name, width=width)
             return
 
-        drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
+        drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)        
         atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self._2dmol.GetAtoms())}
 
         atom_highlight = {} if atom_highlight is None else atom_highlight
@@ -367,7 +378,7 @@ class Component:
         except ValueError:
             return False  # sanitization issue here
 
-    def sanitize(self, fast: bool=False) -> bool:
+    def _sanitize(self, fast: bool=False) -> bool:
         """
         Attempts to sanitize mol in place. RDKit's standard error can be
         processed in order to find out what went wrong with sanitization
