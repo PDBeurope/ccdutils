@@ -251,7 +251,7 @@ def check_component_parsing(ccd_reader_result):
     if len(ccd_reader_result.errors) > 0:
         issues.append(f'errors: {";".join(ccd_reader_result.errors)}')
 
-    if not ccd_reader_result.component.sanitize():
+    if not ccd_reader_result.component.sanitized:
         issues.append('sanitization issue.')
 
     if not ccd_reader_result.component.inchikey_from_rdkit_matches_ccd():
@@ -375,7 +375,7 @@ def compute_component_scaffolds(component: Component, json_output: Dict[str, Any
         scaffolds = component.get_scaffolds()
     except CCDUtilsError as e:
         return [str(e)]
-    
+
     json_output['scaffolds'] = []
     for scaffold in scaffolds:
         atom_names = component.locate_fragment(scaffold)

@@ -25,8 +25,7 @@ class TestIn:
     @staticmethod
     @pytest.mark.parametrize('id,smiles', test_inputs)
     def test_scaffold_present(id, smiles):
-        component = ccd_reader.read_pdb_cif_file(cif_filename(id)).component
-        component.sanitize()
+        component = ccd_reader.read_pdb_cif_file(cif_filename(id)).component        
         result = component.get_scaffolds()
 
         assert Chem.MolToSmiles(result[0]) == smiles

@@ -34,7 +34,7 @@ from mmCif.mmcifIO import MMCIF2Dict
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.helpers import str_conversions
 from pdbeccdutils.helpers import collection_ext
-from pdbeccdutils.core.models import Descriptor, Properties
+from pdbeccdutils.core.models import Descriptor, CCDProperties
 
 
 class CCDReaderResult(NamedTuple):
@@ -55,7 +55,6 @@ class CCDReaderResult(NamedTuple):
     warnings: List[str]
     errors: List[str]
     component: Component
-
 
 
 def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
@@ -285,12 +284,12 @@ def _parse_pdb_properties(chem_comp):
     """
     properties = None
     if len(chem_comp) > 0:
-        properties = Properties(id=chem_comp['id'][0],
-                                name=chem_comp['name'][0],
-                                formula=chem_comp['formula'][0],
-                                modified_date=chem_comp['pdbx_modified_date'][0],
-                                pdbx_release_status=chem_comp['pdbx_release_status'][0],
-                                weight=chem_comp['formula_weight'][0])
+        properties = CCDProperties(id=chem_comp['id'][0],
+                                   name=chem_comp['name'][0],
+                                   formula=chem_comp['formula'][0],
+                                   modified_date=chem_comp['pdbx_modified_date'][0],
+                                   pdbx_release_status=chem_comp['pdbx_release_status'][0],
+                                   weight=chem_comp['formula_weight'][0])
     return properties
 
 

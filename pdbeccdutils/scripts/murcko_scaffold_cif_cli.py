@@ -81,10 +81,7 @@ def read_component_cif(args):
     """
     dictionary = ccd_reader.read_pdb_components_file(args.components_cif)
     for k, v in dictionary.items():
-        rdkit_inv = v.component
-        rdkit_inv.sanitize()
-
-        yield rdkit_inv
+        yield v.component
 
 
 def write_csv(data, filename):

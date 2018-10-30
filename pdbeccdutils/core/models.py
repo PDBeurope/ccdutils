@@ -97,17 +97,16 @@ class DepictionResult(NamedTuple):
     score: float
 
 
-Properties = NamedTuple('Properties',
-                        [('id', str),
-                         ('name', str),
-                         ('formula', str),
-                         ('modified_date', str),
-                         ('pdbx_release_status', str),
-                         ('weight', str)])
+CCDProperties = NamedTuple('CCDProperties',
+                           [('id', str),
+                            ('name', str),
+                               ('formula', str),
+                               ('modified_date', str),
+                               ('pdbx_release_status', str),
+                               ('weight', str)])
 
-Properties.__doc__ = """
-            Properties of the component these often come from _chem_comp
-            namespace
+CCDProperties.__doc__ = """
+            Properties of the component comming from _chem_comp namespace.
 
             Args:
                 id (str): _chem_comp.id
