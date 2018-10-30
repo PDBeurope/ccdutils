@@ -328,7 +328,7 @@ class Component:
             drawing.save_no_image(file_name, width=width)
             return
 
-        drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)        
+        drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
         atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self._2dmol.GetAtoms())}
 
         atom_highlight = {} if atom_highlight is None else atom_highlight
@@ -611,7 +611,11 @@ class Component:
         drawer.FinishDrawing()
 
         with open(file_name, 'w') as f:
-            f.write(drawer.GetDrawingText())
+            svg = drawer.GetDrawingText()
+
+            if width < 201:
+                svg = re.sub('stroke-width:2px', 'stroke-width:1px', svg)
+            f.write(svg)
 
     def _get_atom_name(self, atom: rdkit.Chem.rdchem.Atom):
         """Supplies atom_id obrained from `_chem_comp_atom.atom_id`, see:
