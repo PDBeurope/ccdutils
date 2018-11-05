@@ -126,7 +126,7 @@ def _log_settings(args):
     settings += '{:29s}{:25s}{}'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
 
     return settings
-#endregion
+# endregion
 
 
 def pdbechem_pipeline(args):
@@ -316,6 +316,7 @@ def generate_depictions(component: Component, depictions: DepictionManager, pare
     """
     issues = []
     depiction_result = component.compute_2d(depictions)
+
     ccd_id = component.id
 
     if depiction_result.source == DepictionSource.Failed:
