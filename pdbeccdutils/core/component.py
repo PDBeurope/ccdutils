@@ -18,6 +18,7 @@
 import re
 import sys
 from datetime import date
+from io import StringIO
 from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
@@ -29,8 +30,8 @@ import pdbeccdutils.helpers.drawing as drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
-from pdbeccdutils.core.models import (ConformerType, Descriptor, ReleaseStatus, ScaffoldingMethod, CCDProperties)
-from pdbeccdutils.helpers.io_grabber import IOGrabber
+from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
+                                      ReleaseStatus, ScaffoldingMethod)
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -526,17 +527,17 @@ class Component:
         """
         attempts = 10
         success = False
-        while ((not success) and attempts >= 0):
-            out = IOGrabber(sys.stderr)
-            out.start()
-            sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
-            if sanitization_result == 0:
-                out.stop()
-                return True
-            out.stop()
-            raw_error = out.capturedtext
+        log = StringIO()
+        sys.stderr = StringIO()
+        rdkit.Chem.WrapLogs()
 
-            sanitization_failure = re.findall('[a-zA-Z]{1,2}, \\d+', raw_error)
+        while ((not success) and attempts >= 0):
+            sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
+
+            if sanitization_result == 0:
+                return True                        
+
+            sanitization_failure = re.findall('[a-zA-Z]{1,2}, \\d+', log.getvalue())
             if len(sanitization_failure) == 0:
                 return False
 
