@@ -527,18 +527,20 @@ class Component:
         """
         attempts = 10
         success = False
-        log = StringIO()
-        sys.stderr = StringIO()
+        saved_std_err = sys.stderr
+        log = sys.stderr = StringIO()
         rdkit.Chem.WrapLogs()
 
         while ((not success) and attempts >= 0):
             sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
 
             if sanitization_result == 0:
-                return True                        
+                sys.stderr = saved_std_err
+                return True
 
             sanitization_failure = re.findall('[a-zA-Z]{1,2}, \\d+', log.getvalue())
             if len(sanitization_failure) == 0:
+                sys.stderr = saved_std_err
                 return False
 
             split_object = sanitization_failure[0].split(',')  # [0] element [1] valency
@@ -562,6 +564,9 @@ class Component:
                     metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
 
             attempts -= 1
+        
+        sys.stderr = saved_std_err
+        
         return False
 
     def _fix_molecule_fast(self, rwmol: rdkit.Chem.rdchem.Mol):
