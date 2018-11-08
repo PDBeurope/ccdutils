@@ -350,8 +350,9 @@ def search_fragment_library(component: Component, library: FragmentLibrary, json
     for k, v in component.fragments.items():
         json_output['fragments'].append({
             'name': k,
-            'smiles': rdkit.Chem.MolToSmiles(library.library[k]),
-            'mapping': v
+            'smiles': library.library[k].smiles,
+            'mapping': v.mappings,
+            'source': v.source
         })
 
     if matches > 0:

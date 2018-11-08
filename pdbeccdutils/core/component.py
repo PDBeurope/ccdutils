@@ -31,7 +31,7 @@ from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
-                                      ReleaseStatus, ScaffoldingMethod)
+                                      ReleaseStatus, ScaffoldingMethod, FragmentHit)
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -51,7 +51,7 @@ class Component:
 
         self.mol = mol
         self.ccd_cif_dict = ccd_cif_dict
-        self._fragments: Dict[str, Any] = {}
+        self._fragments: Dict[str, FragmentHit] = {}
         self._2dmol = None
         self._descriptors: List[Descriptor] = []
         self._inchi_from_rdkit = ''
@@ -215,7 +215,7 @@ class Component:
         return self.mol.GetNumAtoms()
 
     @property
-    def fragments(self) -> Dict[str, List[List[str]]]:
+    def fragments(self) -> Dict[str, FragmentHit]:
         """Lists matched fragments and atom names.
 
         Returns:
@@ -223,11 +223,15 @@ class Component:
             and matched atoms.
 
         """
-        res: Dict[str, List[List[str]]] = {}
-        for k, mappings in self._fragments.items():
-            res[k] = []
-            for m in mappings:
-                res[k].append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx).GetProp('name'), m)))
+        res: Dict[str, FragmentHit] = {}
+
+        for k, v in self._fragments.items():
+            mappings = []
+
+            for m in v.mappings:
+                mappings.append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx).GetProp('name'), m)))
+            res[k] = FragmentHit(mappings, v.source)
+
         return res
 
     @property
@@ -477,11 +481,11 @@ class Component:
         matches_found = 0
         for k, v in fragment_library.library.items():
             try:
-                matches = self.mol.GetSubstructMatches(v)
+                matches = self.mol.GetSubstructMatches(v.mol)
                 matches_found += len(matches)
 
                 if len(matches) > 0:
-                    self._fragments[k] = matches
+                    self._fragments[k] = FragmentHit(matches, v.source)
             except Exception:
                 pass
 
@@ -564,9 +568,9 @@ class Component:
                     metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
 
             attempts -= 1
-        
+
         sys.stderr = saved_std_err
-        
+
         return False
 
     def _fix_molecule_fast(self, rwmol: rdkit.Chem.rdchem.Mol):
