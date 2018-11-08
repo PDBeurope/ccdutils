@@ -215,7 +215,7 @@ def _process_single_structure(args, pdb):
 
         contacts = interactions.get_interaction(bm.to_arpeggio_format())
         contacts_filtered = list(filter(lambda l:
-                                        l['interacting_entities'] in ('INTER', 'SELECTION_WATER'),
+                                        l['interacting_entities'] in ('INTER', 'INTRA_SELECTION', 'SELECTION_WATER'),
                                         contacts))
 
         result_bag['boundMolecules'].append({
