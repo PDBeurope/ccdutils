@@ -17,7 +17,7 @@
 
 import rdkit
 from enum import IntEnum
-from typing import NamedTuple
+from typing import Any, NamedTuple, List
 
 
 class DepictionSource(IntEnum):
@@ -131,3 +131,30 @@ class Descriptor(NamedTuple):
     type: str
     program: str
     value: str
+
+
+class FragmentEntry(NamedTuple):
+    """Fragment entry in the fragment library
+
+    Args:
+        name (str): Name or id of the fragment
+        smiles (str): Smiles representation of the fragment
+        mol (rdkit.Chem.rdchem.Mol): rdkit mol object with the fragment.
+        source (str): where does this fragment come from.
+    """
+
+    name: str
+    smiles: str
+    mol: rdkit.Chem.rdchem.Mol
+    source: str
+
+
+class FragmentHit(NamedTuple):
+    """Represents a fragment hit in the component
+
+    Args:
+        mapping (list(list(Any))): Mappings with atom names or indices.
+        source (str): Where does this fragment come from.
+    """
+    mappings: List[List[Any]]
+    source: str

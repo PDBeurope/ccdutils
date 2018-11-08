@@ -24,13 +24,17 @@ from rdkit.Chem import AllChem
 from rdkit.Chem import rdCoordGen
 
 import pdbeccdutils.utils.config as config
+from pdbeccdutils.core.models import FragmentEntry
+from typing import Dict
 
 
 class FragmentLibrary:
     """Implementation of fragment library.
     """
 
-    def __init__(self, path=config.fragment_library, header=True, delimiter='\t', quotechar='"'):
+    def __init__(self, path: str = config.fragment_library, header: bool = True,
+                 delimiter: str='\t', quotechar: str='"') -> None:
+        self.library: Dict[str, FragmentEntry] = {}
         self.name = os.path.basename(path).split('.')[0]
         self._read_in_library(path, header, delimiter, quotechar)
 
@@ -47,8 +51,6 @@ class FragmentLibrary:
         rdCoordGen.SetDefaultTemplateFileDir(config.coordgen_templates)
         rdCoordGen.CoordGenParams.coordgenScaling = 33  # to get single bond length 1.5
 
-        self.library = {}
-
         with open(path, 'r') as csvfile:
             library_reader = csv.reader(csvfile, delimiter=delimiter, quotechar=quotechar)
             if header:
@@ -64,7 +66,8 @@ class FragmentLibrary:
                         [bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED) for bond in mol.GetBonds()]
                 Chem.SanitizeMol(mol, catchErrors=True)
                 rdCoordGen.AddCoords(mol)
-                self.library[row[0]] = mol
+
+                self.library[row[0]] = FragmentEntry(row[0], Chem.MolToSmiles(mol), mol, row[6])
 
         rdkit.rdBase.EnableLog('rdApp.*')
 
@@ -74,13 +77,15 @@ class FragmentLibrary:
         Args:
             path (str): Destination of the image
         """
-        img = Chem.Draw.MolsToGridImage(list(self.library.values()),
-                                        legends=list(self.library.keys()), molsPerRow=10)
-        img.save(path)
+        mols = [v.mol for k, v in self.library.items()]
+        names = [v.name for k, v in self.library.items()]
+        img = Chem.Draw.MolsToGridImage(mols, legends=names, molsPerRow=10, useSVG=True)
+
+        with open(path, 'w') as f:
+            f.write(img)
 
     def generate_conformers(self):
         """Generate 3D coordinates for the fragment library.
-
         """
         rdkit.rdBase.DisableLog('rdApp.*')
         options = AllChem.ETKDGv2()
@@ -88,8 +93,8 @@ class FragmentLibrary:
 
         for k, v in self.library.items():
             try:
-                AllChem.EmbedMolecule(v, options)
-                AllChem.UFFOptimizeMolecule(v)
+                AllChem.EmbedMolecule(v.mol, options)
+                AllChem.UFFOptimizeMolecule(v.mol)
             except Exception:
                 pass  # don't care if it fails
         rdkit.rdBase.EnableLog('rdApp.*')
