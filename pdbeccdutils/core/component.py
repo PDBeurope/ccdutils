@@ -25,6 +25,7 @@ import rdkit
 import rdkit.Chem.Draw as Draw
 from rdkit.Chem import BRICS
 from rdkit.Chem.Scaffolds import MurckoScaffold
+from rdkit.Chem import Descriptors
 
 import pdbeccdutils.helpers.drawing as drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
@@ -665,3 +666,152 @@ class Properties:
             self._formula = properties.formula
             self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
             self._modified_date: date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+        self._logP = None
+        self._heavy_atom_count = None
+        self._numH_acceptors = None
+        self._numH_donors = None
+        self._num_rotable_bonds = None
+        self._ring_count = None
+        self._TPSA = None
+        self._molwt = None
+
+
+    @property
+    def logP(self) -> float:  #
+
+        """
+        Calculates Wildman-Crippen LogP value for a given CCD component
+
+        :return:
+            MolLogP value float (upto 3 decimals)
+        """
+        try:
+         if self._logP is None:
+            self._logP = round(Descriptors.MolLogP(self.mol), 3)
+            return self._logP
+        except ValueError:
+            self._logP = None
+
+    @property
+    def heavy_atom_count(self) -> int:
+
+        """
+        Calculates heavy atom count for a given CCD component
+
+        :return:
+            Number of heavy atoms (int)
+        """
+
+        try:
+            if self._heavy_atom_count is None:
+                self._heavy_atom_count = Descriptors.HeavyAtomCount(self.mol)
+                return self._heavy_atom_count
+        except ValueError:
+            self._heavy_atom_count = None
+
+    @property
+    def numH_acceptors(self) -> int:
+
+        """
+        Calculates Number of Hydrogen Bond Acceptors for a given CCD component
+
+        :return:
+            Number of H bond acceptors (int)
+
+        """
+
+        try:
+            if self._numH_acceptors is None:
+                self._numH_acceptors = Descriptors.NumHAcceptors(self.mol)
+                return self._numH_acceptors
+        except ValueError:
+            self._numH_acceptors = None
+
+    @property
+    def numH_donors(self) -> int:
+
+        """
+        Calculates Number of Hydrogen Bond Donors for a given CCD component
+
+        :return:
+            Number of H bond donors (int)
+
+        """
+
+        try:
+            if self._numH_donors is None:
+                self._numH_donors = Descriptors.NumHDonors(self.mol)
+                return self._numH_donors
+        except ValueError:
+            self._numH_donors = None
+
+    @property
+    def num_rotable_bonds(self) -> int:
+
+        """
+        Calculates Number of rotatable bonds for a given CCD component
+
+        :return:
+            number of rotatable bond (int)
+        """
+
+        try:
+            if self._num_rotable_bonds is None:
+                self._num_rotable_bonds = Descriptors.NumRotatableBonds(self.mol)
+                return self._num_rotable_bonds
+        except ValueError:
+            self._num_rotable_bonds = None
+
+    @property
+    def ring_count(self) -> int:
+
+        """
+        Calculates Number of ring for a given CCD component
+
+        :return:
+            Number of rings (int)
+        """
+
+        try:
+            if self._ring_count is None:
+                self._ring_count = Descriptors.RingCount(self.mol)
+                return self._ring_count
+        except ValueError:
+            self._ring_count = None
+
+    @property
+    def TPSA(self) -> float:
+
+        """
+        Calculates topological surface area for a given CCD component
+
+        :return:
+            TPSA (float)
+        """
+
+        try:
+            if self._TPSA is None:
+                self._TPSA = round(Descriptors.TPSA(self.mol), 3)
+                return self._TPSA
+        except ValueError:
+            self._TPSA = None
+
+    @property
+    def molwt(self) -> float:
+
+        """
+        Calculates molecular weight for a given CCD component
+
+        :return:
+            mol wt (float)
+        """
+
+        try:
+            if self._molwt is None:
+                self._molwt = round(Descriptors.MolWt(self.mol), 3)
+                return self._molwt
+        except ValueError:
+            self._molwt = None
+
+
+    # endregion properties
