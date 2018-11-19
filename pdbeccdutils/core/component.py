@@ -23,16 +23,16 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
 import rdkit.Chem.Draw as Draw
-from rdkit.Chem import BRICS
+from rdkit.Chem import BRICS, Descriptors
 from rdkit.Chem.Scaffolds import MurckoScaffold
-from rdkit.Chem import Descriptors
 
 import pdbeccdutils.helpers.drawing as drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
-                                      ReleaseStatus, ScaffoldingMethod, FragmentHit)
+                                      FragmentHit, ReleaseStatus,
+                                      ScaffoldingMethod)
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -163,7 +163,7 @@ class Component:
     @property
     def inchi_from_rdkit(self) -> str:
         """
-        provides the InChI worked out by rkdit
+        Provides the InChI worked out by RDKit.
 
         Returns:
             str: the InChI or emptry '' if there was an error finding it.
@@ -178,7 +178,7 @@ class Component:
     @property
     def inchikey_from_rdkit(self) -> str:
         """
-        provides the InChIKey worked out by rdkit
+        Provides the InChIKey worked out by RDKit.
 
         Returns:
             str: the InChIKey or '' if there was an error finding it.
@@ -195,8 +195,11 @@ class Component:
 
     @property
     def released(self) -> bool:
-        """ returns True if PDB-CCD has been released.
-        Tests pdbx_release_status is REL"""
+        """Tests pdbx_release_status is REL.
+
+        Returns:
+            bool: True if PDB-CCD has been released.
+        """
         return self.properties._pdbx_release_status == ReleaseStatus.REL
 
     @property
@@ -675,143 +678,148 @@ class Properties:
         self._TPSA = None
         self._molwt = None
 
-
+    #region properties
     @property
-    def logP(self) -> float:  #
-
+    def logP(self) -> Optional[float]:
         """
-        Calculates Wildman-Crippen LogP value for a given CCD component
+        Wildman-Crippen LogP value defined by RDKit.
 
-        :return:
-            MolLogP value float (upto 3 decimals)
+        Returns:
+            Optional[float]: Wildman-Crippen LogP, or None if the
+            calculation fails.
         """
         try:
-         if self._logP is None:
-            self._logP = round(Descriptors.MolLogP(self.mol), 3)
-            return self._logP
+            if self._logP is None:
+                self._logP = Descriptors.MolLogP(self.mol)
         except ValueError:
             self._logP = None
 
+        return self._logP
+
     @property
-    def heavy_atom_count(self) -> int:
-
+    def heavy_atom_count(self) -> Optional[int]:
         """
-        Calculates heavy atom count for a given CCD component
+        Heavy atom count for defined by RDKit.
 
-        :return:
-            Number of heavy atoms (int)
+        Returns:
+            Optional[int]: Number of heavy atoms, or None if the
+            calculation fails.
         """
 
         try:
             if self._heavy_atom_count is None:
                 self._heavy_atom_count = Descriptors.HeavyAtomCount(self.mol)
-                return self._heavy_atom_count
         except ValueError:
             self._heavy_atom_count = None
 
+        return self._heavy_atom_count
+
     @property
-    def numH_acceptors(self) -> int:
-
+    def numH_acceptors(self) -> Optional[int]:
         """
-        Calculates Number of Hydrogen Bond Acceptors for a given CCD component
+        Number of hydrogen bond acceptors defined by RDKit.
 
-        :return:
-            Number of H bond acceptors (int)
-
+        Returns:
+            Optional[int]: Number of H-bond acceptors, or None if the
+            calculation fails.
         """
 
         try:
             if self._numH_acceptors is None:
                 self._numH_acceptors = Descriptors.NumHAcceptors(self.mol)
-                return self._numH_acceptors
         except ValueError:
             self._numH_acceptors = None
 
+        return self._numH_acceptors
+
     @property
-    def numH_donors(self) -> int:
-
+    def numH_donors(self) -> Optional[int]:
         """
-        Calculates Number of Hydrogen Bond Donors for a given CCD component
+        Number of hydrogen bond donors.
 
-        :return:
-            Number of H bond donors (int)
-
+        Returns:
+            Optional[int]: Number of H-bond donors, or None if the
+            calculation fails.
         """
 
         try:
             if self._numH_donors is None:
                 self._numH_donors = Descriptors.NumHDonors(self.mol)
-                return self._numH_donors
         except ValueError:
             self._numH_donors = None
 
+        return self._numH_donors
+
     @property
-    def num_rotable_bonds(self) -> int:
-
+    def num_rotable_bonds(self) -> Optional[int]:
         """
-        Calculates Number of rotatable bonds for a given CCD component
+        Number of rotatable bonds defined by RDKit.
 
-        :return:
-            number of rotatable bond (int)
+        Returns:
+            Optional[int]: Number of rotatable bonds, or None if the
+            calculation fails.
         """
 
         try:
             if self._num_rotable_bonds is None:
                 self._num_rotable_bonds = Descriptors.NumRotatableBonds(self.mol)
-                return self._num_rotable_bonds
         except ValueError:
             self._num_rotable_bonds = None
 
+        return self._num_rotable_bonds
+
     @property
-    def ring_count(self) -> int:
-
+    def ring_count(self) -> Optional[int]:
         """
-        Calculates Number of ring for a given CCD component
+        Number of rings defined by RDKit.
 
-        :return:
-            Number of rings (int)
+        Returns:
+            Optional[int]: Number of rings, or None if the calculation
+            fails.
         """
 
         try:
             if self._ring_count is None:
                 self._ring_count = Descriptors.RingCount(self.mol)
-                return self._ring_count
         except ValueError:
             self._ring_count = None
 
+        return self._ring_count
+
     @property
-    def TPSA(self) -> float:
-
+    def TPSA(self) -> Optional[float]:
         """
-        Calculates topological surface area for a given CCD component
+        Topological surface area defined by RDKit.
 
-        :return:
-            TPSA (float)
+        Returns:
+            Optional[float]: Topological surface area in A^2, or None if
+            the calculation fails.
         """
 
         try:
             if self._TPSA is None:
                 self._TPSA = round(Descriptors.TPSA(self.mol), 3)
-                return self._TPSA
         except ValueError:
             self._TPSA = None
 
+        return self._TPSA
+
     @property
-    def molwt(self) -> float:
-
+    def molwt(self) -> Optional[float]:
         """
-        Calculates molecular weight for a given CCD component
+        Molecular weight defined by RDKit.
 
-        :return:
-            mol wt (float)
+        Returns:
+            Optional[float]: Molecular weight, or None if the calculation
+            fails.
         """
 
         try:
             if self._molwt is None:
                 self._molwt = round(Descriptors.MolWt(self.mol), 3)
-                return self._molwt
         except ValueError:
             self._molwt = None
 
+        return self._molwt
 
     # endregion properties
