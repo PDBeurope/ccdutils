@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
 import rdkit.Chem.Draw as Draw
-from rdkit.Chem import BRICS
+from rdkit.Chem import BRICS, Descriptors
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 import pdbeccdutils.helpers.drawing as drawing
@@ -31,7 +31,8 @@ from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
-                                      ReleaseStatus, ScaffoldingMethod, FragmentHit)
+                                      FragmentHit, ReleaseStatus,
+                                      ScaffoldingMethod)
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -162,7 +163,7 @@ class Component:
     @property
     def inchi_from_rdkit(self) -> str:
         """
-        provides the InChI worked out by rkdit
+        Provides the InChI worked out by RDKit.
 
         Returns:
             str: the InChI or emptry '' if there was an error finding it.
@@ -177,7 +178,7 @@ class Component:
     @property
     def inchikey_from_rdkit(self) -> str:
         """
-        provides the InChIKey worked out by rdkit
+        Provides the InChIKey worked out by RDKit.
 
         Returns:
             str: the InChIKey or '' if there was an error finding it.
@@ -194,8 +195,11 @@ class Component:
 
     @property
     def released(self) -> bool:
-        """ returns True if PDB-CCD has been released.
-        Tests pdbx_release_status is REL"""
+        """Tests pdbx_release_status is REL.
+
+        Returns:
+            bool: True if PDB-CCD has been released.
+        """
         return self.properties._pdbx_release_status == ReleaseStatus.REL
 
     @property
@@ -665,3 +669,157 @@ class Properties:
             self._formula = properties.formula
             self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
             self._modified_date: date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+        self._logP = None
+        self._heavy_atom_count = None
+        self._numH_acceptors = None
+        self._numH_donors = None
+        self._num_rotable_bonds = None
+        self._ring_count = None
+        self._TPSA = None
+        self._molwt = None
+
+    #region properties
+    @property
+    def logP(self) -> Optional[float]:
+        """
+        Wildman-Crippen LogP value defined by RDKit.
+
+        Returns:
+            Optional[float]: Wildman-Crippen LogP, or None if the
+            calculation fails.
+        """
+        try:
+            if self._logP is None:
+                self._logP = Descriptors.MolLogP(self.mol)
+        except ValueError:
+            self._logP = None
+
+        return self._logP
+
+    @property
+    def heavy_atom_count(self) -> Optional[int]:
+        """
+        Heavy atom count for defined by RDKit.
+
+        Returns:
+            Optional[int]: Number of heavy atoms, or None if the
+            calculation fails.
+        """
+
+        try:
+            if self._heavy_atom_count is None:
+                self._heavy_atom_count = Descriptors.HeavyAtomCount(self.mol)
+        except ValueError:
+            self._heavy_atom_count = None
+
+        return self._heavy_atom_count
+
+    @property
+    def numH_acceptors(self) -> Optional[int]:
+        """
+        Number of hydrogen bond acceptors defined by RDKit.
+
+        Returns:
+            Optional[int]: Number of H-bond acceptors, or None if the
+            calculation fails.
+        """
+
+        try:
+            if self._numH_acceptors is None:
+                self._numH_acceptors = Descriptors.NumHAcceptors(self.mol)
+        except ValueError:
+            self._numH_acceptors = None
+
+        return self._numH_acceptors
+
+    @property
+    def numH_donors(self) -> Optional[int]:
+        """
+        Number of hydrogen bond donors.
+
+        Returns:
+            Optional[int]: Number of H-bond donors, or None if the
+            calculation fails.
+        """
+
+        try:
+            if self._numH_donors is None:
+                self._numH_donors = Descriptors.NumHDonors(self.mol)
+        except ValueError:
+            self._numH_donors = None
+
+        return self._numH_donors
+
+    @property
+    def num_rotable_bonds(self) -> Optional[int]:
+        """
+        Number of rotatable bonds defined by RDKit.
+
+        Returns:
+            Optional[int]: Number of rotatable bonds, or None if the
+            calculation fails.
+        """
+
+        try:
+            if self._num_rotable_bonds is None:
+                self._num_rotable_bonds = Descriptors.NumRotatableBonds(self.mol)
+        except ValueError:
+            self._num_rotable_bonds = None
+
+        return self._num_rotable_bonds
+
+    @property
+    def ring_count(self) -> Optional[int]:
+        """
+        Number of rings defined by RDKit.
+
+        Returns:
+            Optional[int]: Number of rings, or None if the calculation
+            fails.
+        """
+
+        try:
+            if self._ring_count is None:
+                self._ring_count = Descriptors.RingCount(self.mol)
+        except ValueError:
+            self._ring_count = None
+
+        return self._ring_count
+
+    @property
+    def TPSA(self) -> Optional[float]:
+        """
+        Topological surface area defined by RDKit.
+
+        Returns:
+            Optional[float]: Topological surface area in A^2, or None if
+            the calculation fails.
+        """
+
+        try:
+            if self._TPSA is None:
+                self._TPSA = round(Descriptors.TPSA(self.mol), 3)
+        except ValueError:
+            self._TPSA = None
+
+        return self._TPSA
+
+    @property
+    def molwt(self) -> Optional[float]:
+        """
+        Molecular weight defined by RDKit.
+
+        Returns:
+            Optional[float]: Molecular weight, or None if the calculation
+            fails.
+        """
+
+        try:
+            if self._molwt is None:
+                self._molwt = round(Descriptors.MolWt(self.mol), 3)
+        except ValueError:
+            self._molwt = None
+
+        return self._molwt
+
+    # endregion properties
