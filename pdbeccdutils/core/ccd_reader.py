@@ -161,8 +161,7 @@ def _parse_pdb_atoms(mol, atoms):
             element = 'H'
             isotope = 2
         elif element == 'X':
-            element = 'O'
-            isotope = 14
+            element = '*'            
 
         atom = rdkit.Chem.Atom(element)
         atom.SetProp('name', atoms['atom_id'][i])
