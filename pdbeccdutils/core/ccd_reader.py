@@ -128,6 +128,7 @@ def _parse_pdb_mmcif(cif_dict):
     _parse_pdb_atoms(mol, atoms_dict)
     _parse_pdb_conformers(mol, atoms_dict)
     _parse_pdb_bonds(mol, bonds_dict, atoms_dict, errors)
+    _handle_implicit_hydrogens(mol)
 
     descriptors = _parse_pdb_descriptors(descriptors_dict, 'descriptor')
     descriptors += _parse_pdb_descriptors(identifiers_dict, 'identifier')
@@ -161,7 +162,7 @@ def _parse_pdb_atoms(mol, atoms):
             element = 'H'
             isotope = 2
         elif element == 'X':
-            element = '*'            
+            element = '*'
 
         atom = rdkit.Chem.Atom(element)
         atom.SetProp('name', atoms['atom_id'][i])
@@ -242,6 +243,27 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
             errors.append('Problem with the {}-th bond in the _chem_comp_bond group'.format(i + 1))
 
         mol.AddBond(atom_1, atom_2, bond_order)
+
+
+def _handle_implicit_hydrogens(mol):
+    """Forbid atoms which does not have explicit Hydrogen partner to get
+    implicit hydrogen.
+
+    Args:
+        mol (rkit.Chem.rdchem.Mol): Mol to be modified
+    """
+    for atom in mol.GetAtoms():
+        if atom.GetAtomicNum() == 1:
+            continue
+
+        no_Hs = True
+        for bond in atom.GetBonds():
+            other = bond.GetOtherAtom(atom)
+            if other.GetAtomicNum() == 1:
+                no_Hs = False
+                break
+
+        atom.SetNoImplicit(no_Hs)
 
 
 def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
