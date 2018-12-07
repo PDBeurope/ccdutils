@@ -87,7 +87,7 @@ def _png_no_image(path_to_image, width):
 
 
 def _svg_no_image(width=200):
-    """[summary]
+    """Get svg representation
         width (int, optional): Defaults to 200. width of the image
 
     Returns:
@@ -95,18 +95,18 @@ def _svg_no_image(width=200):
     """
 
     svg = """<?xml version='1.0' encoding='iso-8859-1'?>
-              <svg:svg version='1.1' baseProfile='full'
-              xmlns:svg='http://www.w3.org/2000/svg'
+<svg version='1.1' baseProfile='full'
+              xmlns='http://www.w3.org/2000/svg'
                       xmlns:rdkit='http://www.rdkit.org/xml'
                       xmlns:xlink='http://www.w3.org/1999/xlink'
                   xml:space='preserve' width='{width}px' height='{width}px' >
-            <svg:rect style='opacity:1.0;fill:#FFFFFF;stroke:none' width='{width}' height='{width}' x='0' y='0'> </svg:rect>
-            <svg:text alignment-baseline="middle" text-anchor="middle" x="25%" y="25%" style='font-size:{font}px;font-family:sans-serif;text-anchor:start;fill:#000000'>
+            <rect style='opacity:1.0;fill:#FFFFFF;stroke:none' width='{width}' height='{width}' x='0' y='0'> </rect>
+            <text alignment-baseline="middle" text-anchor="middle" x="25%" y="25%" style='font-size:{font}px;font-family:sans-serif;text-anchor:start;fill:#000000'>
                 Image not
-            </svg:text>
-            <svg:text alignment-baseline="middle" text-anchor="middle" x="30%" y="50%" style='font-size:{font}px;font-family:sans-serif;text-anchor:start;fill:#000000'>
+            </text>
+            <text alignment-baseline="middle" text-anchor="middle" x="30%" y="50%" style='font-size:{font}px;font-family:sans-serif;text-anchor:start;fill:#000000'>
                 available
-            </svg:text>
-            </svg:svg>
+            </text>
+            </svg>
           """
     return svg.format(width=width, font=width / 8)
