@@ -30,6 +30,7 @@ from xml.dom import minidom
 import rdkit
 
 import pdbeccdutils
+import arpeggio
 from pdbeccdutils.computations.interactions import ProtLigInteractions
 from pdbeccdutils.core.exceptions import CCDUtilsError
 
@@ -213,16 +214,20 @@ def _process_single_structure(args, pdb):
         i += 1
         logger.debug(f'Running arpeggio (bm{i}) for: {str(bm)}')
 
-        contacts = interactions.get_interaction(bm.to_arpeggio_format())
-        contacts_filtered = list(filter(lambda l:
-                                        l['interacting_entities'] in ('INTER', 'INTRA_SELECTION', 'SELECTION_WATER'),
-                                        contacts))
+        try:
+            contacts = interactions.get_interaction(bm.to_arpeggio_format())
+            contacts_filtered = list(filter(lambda l:
+                                            l['interacting_entities'] in ('INTER', 'INTRA_SELECTION', 'SELECTION_WATER'),
+                                            contacts))
+            result_bag['boundMolecules'].append({
+                'id': f'bm{i}',
+                'contacts': contacts_filtered,
+                'composition': bm.to_dict()
+            })
 
-        result_bag['boundMolecules'].append({
-            'id': f'bm{i}',
-            'contacts': contacts_filtered,
-            'composition': bm.to_dict()
-        })
+        except arpeggio.core.SelectionError as e:
+            if str(e) != 'entity not found':
+                raise e
 
     with open(os.path.join(wd, 'contacts.json'), 'w') as f:
         json.dump(result_bag, f, sort_keys=True, indent=4)
