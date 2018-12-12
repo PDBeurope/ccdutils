@@ -72,10 +72,12 @@ class BoundMoleculeContainer:
 
             for e in edges:
                 visited_connections.add(e)
-                self.connections.remove(e)
+                self.connections.remove(e)                            
                 other_node = e.get_other(processed_node)
-                stack.add(other_node)
-                self.residues.remove(other_node)
+
+                if other_node not in visited_residues:
+                    stack.add(other_node)
+                    self.residues.discard(other_node)
 
         return BoundMoleculeContainer(visited_residues, visited_connections)
 
