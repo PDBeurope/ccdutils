@@ -34,7 +34,7 @@ class DepictionManager:
     PubCshem templates can be downloaded using PubChemDownloader class.
     """
 
-    def __init__(self, pubchem_templates_path: str ='', general_templates_path: str = config.general_templates)-> None:
+    def __init__(self, pubchem_templates_path: str = '', general_templates_path: str = config.general_templates)-> None:
         """
         Initialize component which does the ligand depiction.
         If Nones is provided as parameters just the defalt RDKit

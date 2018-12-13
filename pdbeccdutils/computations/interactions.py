@@ -72,7 +72,7 @@ class BoundMoleculeContainer:
 
             for e in edges:
                 visited_connections.add(e)
-                self.connections.remove(e)                            
+                self.connections.remove(e)
                 other_node = e.get_other(processed_node)
 
                 if other_node not in visited_residues:
@@ -313,13 +313,13 @@ class ProtLigInteractions:
         def __add_connections(struct_conn, bms):
             for i in range(len(struct_conn['id'])):
                 ptnr1 = list(filter(lambda l:
-                                    l.name == struct_conn['ptnr1_label_comp_id'][i] and
-                                    l.res_id == struct_conn['ptnr1_auth_seq_id'][i] and
-                                    l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr1_PDB_ins_code'][i]), bms.residues))
+                                    l.name == struct_conn['ptnr1_label_comp_id'][i]
+                                    and l.res_id == struct_conn['ptnr1_auth_seq_id'][i]
+                                    and l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr1_PDB_ins_code'][i]), bms.residues))
                 ptnr2 = list(filter(lambda l:
-                                    l.name == struct_conn['ptnr2_label_comp_id'][i] and
-                                    l.res_id == struct_conn['ptnr2_auth_seq_id'][i] and
-                                    l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr2_PDB_ins_code'][i]), bms.residues))
+                                    l.name == struct_conn['ptnr2_label_comp_id'][i]
+                                    and l.res_id == struct_conn['ptnr2_auth_seq_id'][i]
+                                    and l.ins_code == __get_ins_code(struct_conn['pdbx_ptnr2_PDB_ins_code'][i]), bms.residues))
 
                 for x in ptnr1:
                     for y in ptnr2:
