@@ -7,8 +7,7 @@
   for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd)
 * The tools use:
   * [RDKit](http://www.rdkit.org/) for chemistry
-  * [PDBeCIF](https://gitlab.com/glenveegee/PDBeCIF.git) cif parser.
-  * [Arpeggio](https://github.com/lpravda/arpeggio) for protein-ligand interactions
+  * [PDBeCIF](https://gitlab.com/glenveegee/PDBeCIF.git) cif parser.  
 * Please note that the project is under active development.
 
 ## Installation instructions
@@ -28,6 +27,26 @@
   pip install git+https://gitlab.ebi.ac.uk/pdbe/ccdutils.git
   ```
 
+## Features
+
+* mmCIF CCD read/write.
+* Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
+* Generation of 3D conformations.
+* Fragment library search.
+* Chemical scaffolds (Murcko scaffold, Murcko general, BRICS).
+* Lightweight implementation of parity method by Jon Tyczak.
+* Generate some basic molecular properties per component.
+
+## TODO list
+
+* Port rest of the important functionality implemented by Oliver
+* Add more unit/regression tests to get at least 100% code coverage.
+* Further improvement of the documentation.
+
+## Notes
+
+* Protein-ligand interaction has been extracted [here](https://gitlab.ebi.ac.uk/pdbe/release/interactions). This was because of the fact that at the end of the day it was not using any of the pdbeccdutils functionality and introduced additional dependencies on the package.
+
 ## Documentation
 
 The documentation depends on the following packages:
@@ -40,7 +59,7 @@ The documentation depends on the following packages:
 Note that `sphinx` needs to be a part of the virtual environmnent, if you want to generate documentation by yourself.
 Otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
 
-* Generate *.rst files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
+* Generate *.rst* files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
 * Alternativelly, use the `recommonmark` package along with the proper configuration to get the Markdown working.
   
  Use the following to generate initial markup files to be used by sphinx.  This needs to be used when adding another subpackages.
@@ -54,18 +73,3 @@ Use this to re-generate the documentation from the doc/ directory:
 ```console
 make html
 ```
-
-## Features
-
-* Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
-* Generation of 3D conformations.
-* Protein-ligand interaction detection
-* Fragment library search.
-* Chemical scaffolds (Murcko scaffold, Murcko general, BRICS).
-* Lightweight implementation of parity method by Jon Tyczak.
-
-## TODO list
-
-* Port rest of the important functionality implemented by Oliver
-* Add more unit/regression tests to get at least 100% code coverage.
-* Further improvement of the documentation
