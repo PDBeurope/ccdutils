@@ -112,20 +112,12 @@ def _log_settings(args):
 
     Args:
         args (argparse.Namespace): Application arguments.
-
-    Returns:
-        str: initial application message.
     """
+    logger = logging.getLogger(__name__)
 
-    settings = 'Settings:\n'
-    settings += '{:29s}{:25s}{}\n'.format('', 'components_cif', args.components_cif)
-    settings += '{:29s}{:25s}{}\n'.format('', 'output_dir', args.output_dir)
-    settings += '{:29s}{:25s}{}\n'.format('', 'general_templates', args.general_templates)
-    settings += '{:29s}{:25s}{}\n'.format('', 'pubchem_templates', args.pubchem_templates)
-    settings += '{:29s}{:25s}{}\n'.format('', 'library', args.library)
-    settings += '{:29s}{:25s}{}'.format('', 'DEBUG', ('ON' if args.debug else 'OFF'))
-
-    return settings
+    logger.info('Settings:')
+    for k, v in vars(args).items():
+        logger.info(f'{"":5s}{k:25s}{v}')
 # endregion
 
 
@@ -141,8 +133,7 @@ def pdbechem_pipeline(args):
     # set up logging
     _set_up_logger(args)
     logger = logging.getLogger(__name__)
-    settings = _log_settings(args)
-    logger.debug(settings)
+    _log_settings(args)
 
     # set up pipeline helpers
     depictions = DepictionManager(args.pubchem_templates, args.general_templates)
@@ -199,24 +190,23 @@ def process_single_component(args, ccd_reader_result, library,
     json_output = {'het_code': ccd_id}
 
     # check parsing and conformer degeneration
-    issues = check_component_parsing(ccd_reader_result)
-    structure_check = check_component_structure(ccd_reader_result.component)
-    if len(structure_check) == 1:
+    check_component_parsing(ccd_reader_result)
+    ideal_regenerated = check_ideal_structure(ccd_reader_result.component)
+    if ideal_regenerated:
         ideal_conformer = ConformerType.Computed
-    issues += structure_check
 
     # download templates if the user wants them.
     if pubchem_templates is not None:
-        issues += download_template(pubchem_templates, component)
+        download_template(pubchem_templates, component)
 
     # search fragment library
-    issues += search_fragment_library(component, library, json_output)
+    search_fragment_library(component, library, json_output)
 
     # get scaffolds
-    issues += compute_component_scaffolds(component, json_output)
+    compute_component_scaffolds(component, json_output)
     # write out files
-    issues += generate_depictions(component, depictions, parent_dir)
-    issues += export_structure_formats(component, parent_dir, ideal_conformer)
+    generate_depictions(component, depictions, parent_dir)
+    export_structure_formats(component, parent_dir, ideal_conformer)
 
     # get xml representation
     xml_repr = ccd_writer.to_xml_xml(ccd_reader_result.component)
@@ -224,10 +214,6 @@ def process_single_component(args, ccd_reader_result, library,
 
     with open(os.path.join(parent_dir, f'{ccd_id}_substructures.json'), 'w') as f:
         json.dump(json_output, f, sort_keys=True, indent=4)
-
-    # write log
-    logger = logging.getLogger(__name__)
-    [logger.debug(f'{ccd_id} | {msg}') for msg in issues]
 
 
 def check_component_parsing(ccd_reader_result):
@@ -239,46 +225,43 @@ def check_component_parsing(ccd_reader_result):
     Args:
         ccd_reader_result (CCDReaderResult):
             Output of the parsing process.
-
-    Returns:
-        (list of str): possible issues encountered.
     """
-    issues = []
+    logger = logging.getLogger(__name__)
 
     if len(ccd_reader_result.warnings) > 0:
-        issues.append(f'warnings: {";".join(ccd_reader_result.warnings)}')
+        logger.debug(f'warnings: {";".join(ccd_reader_result.warnings)}')
 
     if len(ccd_reader_result.errors) > 0:
-        issues.append(f'errors: {";".join(ccd_reader_result.errors)}')
+        logger.debug(f'errors: {";".join(ccd_reader_result.errors)}')
 
     if not ccd_reader_result.component.sanitized:
-        issues.append('sanitization issue.')
+        logger.debug('sanitization issue.')
 
     if not ccd_reader_result.component.inchikey_from_rdkit_matches_ccd():
-        issues.append('inchikey mismatch.')
-
-    return issues
+        logger.debug('inchikey mismatch.')
 
 
-def check_component_structure(component: Component):
+def check_ideal_structure(component: Component):
     """Checks whether or not the component has degenerated ideal
     coordinates. If so, new conformer is attempted to be generated.
 
     Args:
         component (Component): Component to be
             processed.
-
-    Returns:
-        list of str: possible issues encountered.
+    Return:
+        bool: Whether the ideal coordinates have been succesfully
+        recalculated, false otherwise.
     """
-    issues = []
+    logger = logging.getLogger(__name__)
     if component.has_degenerated_conformer(ConformerType.Ideal):
-        issues.append('has degenerated ideal coordinates.')
+        logger.debug('has degenerated ideal coordinates.')
         result = component.compute_3d()
         if not result:
-            issues.append('error in generating 3D conformation.')
+            logger.debug('error in generating 3D conformation.')
 
-    return issues
+        return result
+
+    return False
 
 
 def download_template(pubchem_templates: PubChemDownloader, component: Component):
@@ -288,16 +271,11 @@ def download_template(pubchem_templates: PubChemDownloader, component: Component
         pubchem_templates (PubChemDownloader):
             Pubchem downloader instance.
         component (Component): Component to be used.
-
-    Returns:
-        (list of str): information whether or not the new template has
-            been downloaded.
     """
+    logger = logging.getLogger(__name__)
     component_downloaded = pubchem_templates.process_template(component)
     if component_downloaded:
-        return ['downloaded new pubchem template.']
-
-    return []
+        logger.debug('downloaded new pubchem template.')
 
 
 def generate_depictions(component: Component, depictions: DepictionManager, parent_dir: str):
@@ -310,26 +288,21 @@ def generate_depictions(component: Component, depictions: DepictionManager, pare
         depictions (DepictionManager): Helper class
             to carry out depiction process.
         parent_dir (str): Where the depiction should be stored
-
-    Returns:
-        list of str: Possible issues encountered.
     """
-    issues = []
+    logger = logging.getLogger(__name__)
     depiction_result = component.compute_2d(depictions)
     ccd_id = component.id
 
     if depiction_result.source == DepictionSource.Failed:
-        issues.append('failed to generate 2D image.')
+        logger.debug('failed to generate 2D image.')
     else:
         if depiction_result.score > 0.99:
-            issues.append('collision free image could not be generated.')
-        issues.append(f'2D generated using {depiction_result.source.name} with score {depiction_result.score}.')
+            logger.debug('collision free image could not be generated.')
+        logger.debug(f'2D generated using {depiction_result.source.name} with score {depiction_result.score}.')
 
     for i in range(100, 600, 100):
         component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_{i}.svg'), width=i)
         component.export_2d_svg(os.path.join(parent_dir, f'{ccd_id}_{i}_names.svg'), width=i, names=True)
-
-    return issues
 
 
 def search_fragment_library(component: Component, library: FragmentLibrary, json_output: Dict[str, Any]):
@@ -340,10 +313,9 @@ def search_fragment_library(component: Component, library: FragmentLibrary, json
         library (FragmentLibrary): Fragment library to be used.
         json_output (Dict[str, Any]): dictionary like structure with the
             results to be stored.
-
-    Returns:
-        list of str: info msg.
     """
+    logger = logging.getLogger(__name__)
+
     json_output['fragments'] = []
     matches = component.library_search(library)
 
@@ -356,9 +328,7 @@ def search_fragment_library(component: Component, library: FragmentLibrary, json
         })
 
     if matches > 0:
-        return [f'{matches} matches found in the library `{library.name}`.']
-    else:
-        return []
+        logger.debug(f'{matches} matches found in the library `{library.name}`.')
 
 
 def compute_component_scaffolds(component: Component, json_output: Dict[str, Any]):
@@ -368,14 +338,15 @@ def compute_component_scaffolds(component: Component, json_output: Dict[str, Any
         component (Component): Component to be processed
         json_output (Dict[str, Any]): dictionary like structure with the
             results to be stored.
-
-    Returns:
-        list of str: logging information.
     """
+    logger = logging.getLogger(__name__)
+
     try:
         scaffolds = component.get_scaffolds()
     except CCDUtilsError as e:
-        return [str(e)]
+        logger.error(str(e))
+
+        return
 
     json_output['scaffolds'] = []
     for scaffold in scaffolds:
@@ -389,7 +360,7 @@ def compute_component_scaffolds(component: Component, json_output: Dict[str, Any
             'mapping': scaffold_atom_names
         })
 
-    return [f'{len(scaffolds)} scaffold(s) were found.']
+    logger.debug(f'{len(scaffolds)} scaffold(s) were found.')
 
 
 def export_structure_formats(component, parent_dir, ideal_conformer):
@@ -401,22 +372,16 @@ def export_structure_formats(component, parent_dir, ideal_conformer):
         parent_dir (str): Working directory.
         ideal_conformer (ConformerType): ConformerType
             to be used for ideal coordinates.
-
-    Returns:
-        list of str: Encountered issues.
     """
-    issues = []
 
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_model.sdf'), component, False, ConformerType.Model)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.sdf'), component, False, ideal_conformer)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal_alt.pdb'), component, True, ideal_conformer)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_model_alt.pdb'), component, True, ConformerType.Model)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ideal_conformer)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}_model.pdb'), component, False, ConformerType.Model)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}.cml'), component, False, ConformerType.Model)
-    issues += write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.Model)
-
-    return issues
+    write_molecule(os.path.join(parent_dir, f'{component.id}_model.sdf'), component, False, ConformerType.Model)
+    write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.sdf'), component, False, ideal_conformer)
+    write_molecule(os.path.join(parent_dir, f'{component.id}_ideal_alt.pdb'), component, True, ideal_conformer)
+    write_molecule(os.path.join(parent_dir, f'{component.id}_model_alt.pdb'), component, True, ConformerType.Model)
+    write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ideal_conformer)
+    write_molecule(os.path.join(parent_dir, f'{component.id}_model.pdb'), component, False, ConformerType.Model)
+    write_molecule(os.path.join(parent_dir, f'{component.id}.cml'), component, False, ConformerType.Model)
+    write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.Model)
 
 
 def write_molecule(path, component, alt_names, conformer_type):
@@ -428,18 +393,16 @@ def write_molecule(path, component, alt_names, conformer_type):
         alt_names (bool): Whether or not molecule will be written with
             alternate names.
         conformer_type (Component): Conformer to be written.
-
-    Returns:
-        list of str: encountered issues
     """
     try:
         ccd_writer.write_molecule(path, component, remove_hs=False, alt_names=alt_names,
                                   conf_type=conformer_type)
-        return []
     except Exception:
+        logger = logging.getLogger(__name__)
+        logger.error(f'error writing {path}.')
+
         with open(path, 'w') as f:
             f.write('')
-        return [f'error writing {path}.']
 
 
 def write_components_xml(args, chem_comp_xml):
