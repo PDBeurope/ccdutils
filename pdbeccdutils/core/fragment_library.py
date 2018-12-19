@@ -71,18 +71,30 @@ class FragmentLibrary:
 
         rdkit.rdBase.EnableLog('rdApp.*')
 
-    def to_image(self, path):
+    def to_image(self, path, source=''):
         """Export image with all fragments.
 
         Args:
             path (str): Destination of the image
-        """
-        mols = [v.mol for k, v in self.library.items()]
-        names = [v.name for k, v in self.library.items()]
-        img = Chem.Draw.MolsToGridImage(mols, legends=names, molsPerRow=10, useSVG=True)
+            source (str): Select a source which fragments are going to
+                be drawn.
 
-        with open(path, 'w') as f:
-            f.write(img)
+        """
+        use_svg = path[-3:].lower() == 'svg'
+        if source:
+            temp = {k: v for k, v in self.library.items() if v.source == source}
+        else:
+            temp = self.library
+
+        mols = [v.mol for k, v in temp.items()]
+        names = [v.name for k, v in temp.items()]
+        img = Chem.Draw.MolsToGridImage(mols, legends=names, molsPerRow=10, useSVG=use_svg)
+
+        if use_svg:
+            with open(path, 'w') as f:
+                f.write(img)
+        else:
+            img.save(path)
 
     def generate_conformers(self):
         """Generate 3D coordinates for the fragment library.
