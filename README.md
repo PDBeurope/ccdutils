@@ -13,7 +13,7 @@
 ## Installation instructions
 
 * `pdbeccdutils` requires RDKit to be installed.
-  The official RDKit documentation has [installation instructions for a  ariety of platforms](http://www.rdkit.org/docs/Install.html).
+  The official RDKit documentation has [installation instructions for a variety of platforms](http://www.rdkit.org/docs/Install.html).
   For linux/mac OS this is most easily done using the anaconda python with commands similar to:
 
   ```console
