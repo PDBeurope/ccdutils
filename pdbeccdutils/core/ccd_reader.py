@@ -36,7 +36,6 @@ from pdbeccdutils.helpers import str_conversions
 from pdbeccdutils.helpers import collection_ext
 from pdbeccdutils.core.models import Descriptor, CCDProperties
 
-
 class CCDReaderResult(NamedTuple):
     """
     NamedTuple for the result of reading an individual PDB chemical

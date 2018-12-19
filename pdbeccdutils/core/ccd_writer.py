@@ -388,7 +388,7 @@ def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.I
     conformer = mol_to_save.GetConformer(conf_id)
     rdkit.Chem.Kekulize(mol_to_save)
     rdkit.Chem.WedgeMolBonds(mol_to_save, conformer)
-
+    
     for atom in mol_to_save.GetAtoms():
         atom_dict = {}
 
