@@ -33,7 +33,7 @@ class FragmentLibrary:
     """
 
     def __init__(self, path: str = config.fragment_library, header: bool = True,
-                 delimiter: str='\t', quotechar: str='"') -> None:
+                 delimiter: str = '\t', quotechar: str = '"') -> None:
         self.library: Dict[str, FragmentEntry] = {}
         self.name = os.path.basename(path).split('.')[0]
         self._read_in_library(path, header, delimiter, quotechar)

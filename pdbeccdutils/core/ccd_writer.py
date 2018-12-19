@@ -39,7 +39,8 @@ from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
 
 
-def write_molecule(path, component: Component, remove_hs: bool=True, alt_names: bool=False, conf_type: ConformerType=ConformerType.Ideal):
+def write_molecule(path, component: Component, remove_hs: bool = True, alt_names: bool = False,
+                   conf_type: ConformerType = ConformerType.Ideal):
     """Export molecule in a specified format. Presently supported formats
     are: PDB CCD CIF (*.cif); Mol file (*.sdf); Chemical Markup language
     (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml).
@@ -85,8 +86,8 @@ def write_molecule(path, component: Component, remove_hs: bool=True, alt_names: 
         f.write(str_representation)
 
 
-def to_pdb_str(component: Component, remove_hs: bool=True, alt_names: bool=False,
-               conf_type: ConformerType=ConformerType.Ideal):
+def to_pdb_str(component: Component, remove_hs: bool = True, alt_names: bool = False,
+               conf_type: ConformerType = ConformerType.Ideal):
     """Converts structure to the PDB format.
 
     Args:
@@ -132,8 +133,8 @@ def to_pdb_str(component: Component, remove_hs: bool=True, alt_names: bool=False
     return pdb_string
 
 
-def to_sdf_str(component: Component, remove_hs: bool=True,
-               conf_type: ConformerType=ConformerType.Ideal):
+def to_sdf_str(component: Component, remove_hs: bool = True,
+               conf_type: ConformerType = ConformerType.Ideal):
     """Converts structure to the SDF format.
 
     Args:
@@ -387,7 +388,7 @@ def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.I
     conformer = mol_to_save.GetConformer(conf_id)
     rdkit.Chem.Kekulize(mol_to_save)
     rdkit.Chem.WedgeMolBonds(mol_to_save, conformer)
-
+    
     for atom in mol_to_save.GetAtoms():
         atom_dict = {}
 

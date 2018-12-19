@@ -4,7 +4,7 @@ from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
 from pdbeccdutils.core import ccd_reader
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
-sample_ccd_with_inchi_problems = ['7OM', 'ASX', 'CDL']
+sample_ccd_with_inchi_problems = ['7OM', 'ASX', 'CDL', '0OD']
 
 
 class TestIn:
