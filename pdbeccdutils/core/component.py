@@ -51,6 +51,7 @@ class Component:
                  properties: CCDProperties=None, descriptors: List[Descriptor]=None) -> None:
 
         self.mol = mol
+        self._mol_no_h = None
         self.ccd_cif_dict = ccd_cif_dict
         self._fragments: Dict[str, FragmentHit] = {}
         self._2dmol = None
@@ -204,9 +205,12 @@ class Component:
 
     @property
     def mol_no_h(self) -> rdkit.Chem.rdchem.Mol:
-        no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
-        rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
-        return no_h
+        if self._mol_no_h is None:
+            no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
+            rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
+            self._mol_no_h = no_h
+        
+        return self._mol_no_h
 
     @property
     def number_atoms(self) -> int:
@@ -485,7 +489,7 @@ class Component:
         matches_found = 0
         for k, v in fragment_library.library.items():
             try:
-                matches = self.mol.GetSubstructMatches(v.mol)
+                matches = self.mol_no_h.GetSubstructMatches(v.mol)
                 matches_found += len(matches)
 
                 if len(matches) > 0:
