@@ -340,15 +340,15 @@ def compute_component_scaffolds(component: Component, json_output: Dict[str, Any
             results to be stored.
     """
     logger = logging.getLogger(__name__)
-
+    json_output['scaffolds'] = []
+    
     try:
         scaffolds = component.get_scaffolds()
     except CCDUtilsError as e:
         logger.error(str(e))
 
         return
-
-    json_output['scaffolds'] = []
+    
     for scaffold in scaffolds:
         atom_names = component.locate_fragment(scaffold)
         scaffold_atom_names = []

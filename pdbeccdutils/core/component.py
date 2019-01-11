@@ -522,7 +522,7 @@ class Component:
                 scaffold = BRICS.BRICSDecompose(self.mol)
                 scaffold = list(map(lambda l: rdkit.Chem.MolFromSmiles(l), scaffold))
             return scaffold
-        except RuntimeError:
+        except (RuntimeError, ValueError):
             raise CCDUtilsError(f'Computing scaffolds using method {scaffolding_method.name} failed.')
 
     def _fix_molecule(self, rwmol: rdkit.Chem.rdchem.RWMol):
