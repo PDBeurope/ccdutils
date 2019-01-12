@@ -15,9 +15,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""Module helper providing drawinf functionality based on RDKit
+"""
+
 import os
+import re
 from sys import platform
 
+import rdkit
+import xml.etree.ElementTree as ET
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -95,7 +101,7 @@ def _svg_no_image(width=200):
     """
 
     svg = """<?xml version='1.0' encoding='iso-8859-1'?>
-<svg version='1.1' baseProfile='full'
+            <svg version='1.1' baseProfile='full'
               xmlns='http://www.w3.org/2000/svg'
                       xmlns:rdkit='http://www.rdkit.org/xml'
                       xmlns:xlink='http://www.w3.org/1999/xlink'
@@ -110,3 +116,130 @@ def _svg_no_image(width=200):
             </svg>
           """
     return svg.format(width=width, font=width / 8)
+
+
+def draw_molecule(mol, drawer, file_name, width, atom_highlight, bond_highlight):
+    """Draw SVG image from the RDKit molecule.
+
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): Rdkit mol object to be depicted.
+        drawer ([type]): [description]
+        file_name (str): Path where the depiction will be saved.
+        width (int): Size of the image. Final image will be in NxN
+            resolution.
+        atom_highlight (`obj`: Dict): Dictionary with atom id and RGB
+            mapping color mapping.
+        bond_highlight (`obj`: Dict): Dictionary with mapping of atom
+            ids and RGB colors.
+    """
+    try:
+        copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=True,
+                                                                kekulize=True, addChiralHs=True)
+    except (RuntimeError, ValueError):
+        copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,
+                                                                kekulize=True, addChiralHs=True)
+
+    if bond_highlight is None:
+        drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
+                            highlightAtomColors=atom_highlight)
+    else:
+        drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
+                            highlightAtomColors=atom_highlight,
+                            highlightBonds=bond_highlight.keys(), highlightBondColors=bond_highlight)
+    drawer.FinishDrawing()
+
+    with open(file_name, 'w') as f:
+        svg = drawer.GetDrawingText()
+
+        if width < 201:
+            svg = re.sub('stroke-width:2px', 'stroke-width:1px', svg)
+        f.write(svg)
+
+
+def get_drawing_scale(mol):
+    """Calculate molecule resolution given 50points per Angstroom
+
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): Rdkit mol object.
+
+    Returns:
+        [:obj:`tuple` of :obj:`int`]: Dimension of the depictions.
+    """
+    cnf = mol.GetConformer()
+
+    a = rdkit.Geometry.Point2D(0, 0)
+    b = rdkit.Geometry.Point2D(0, 0)
+    a.x = b.x = cnf.GetAtomPosition(0).x
+    a.y = b.y = cnf.GetAtomPosition(0).y
+
+    for i in range(1, cnf.GetNumAtoms()):
+        a.x = min(a.x, cnf.GetAtomPosition(i).x)
+        a.y = min(a.y, cnf.GetAtomPosition(i).y)
+        b.x = max(b.x, cnf.GetAtomPosition(i).x)
+        b.y = max(b.y, cnf.GetAtomPosition(i).y)
+
+    w = 50 * (b.x - a.x) + 1
+    h = 50 * (b.y - a.y) + 1
+
+    return (int(w), int(h))
+
+
+def parse_svg(svg_string, mol: rdkit.Chem.Mol):
+    """Parse information from SVG depiction into object.
+
+    Args:
+        svg_string (str): SVG as string.
+        mol (rdkit.Chem.Mol): RDKit mol object used for depiction.
+
+    Returns:
+        :obj:`dict` of :obj:`dict`: object with all the details for
+        json serialization.
+    """
+    svg_string = _fix_svg(svg_string)
+    depiction = {}
+
+    svg = ET.fromstring(svg_string)
+    atoms_svg = svg.findall('{http://www.rdkit.org/xml}atom')
+    bonds_svg = svg.findall('{http://www.w3.org/2000/svg}path')
+    dimensions_svg = svg.find('{http://www.w3.org/2000/svg}rect')
+    labels_svg = svg.findall('{http://www.w3.org/2000/svg}text')
+
+    depiction['atoms'] = list(map(lambda atom_svg:
+                                  {'name': mol.GetAtomWithIdx(int(atom_svg.attrib.get('idx')) - 1).GetProp('name'),
+                                   'x': atom_svg.attrib.get('x'),
+                                   'y': atom_svg.attrib.get('y')
+                                   }, atoms_svg))
+
+    depiction['bonds'] = list(map(lambda bond_svg:
+                                  {'coords': bond_svg.attrib.get('d'),
+                                   'style': bond_svg.attrib.get('style')
+                                   }, bonds_svg))
+
+    depiction['labels'] = list(map(lambda label_svg:
+                                   {
+                                       'x': label_svg.attrib.get('x'),
+                                       'y': label_svg.attrib.get('y'),
+                                       'style': label_svg.attrib.get('style'),
+                                       'tspans': [{
+                                           'value': tspan.text,
+                                           'style': '' if tspan.attrib.get('style') is None else tspan.attrib.get('style')
+                                       }
+                                           for tspan in filter(lambda x: x.text is not None, label_svg.findall('{http://www.w3.org/2000/svg}tspan'))]
+                                   }, labels_svg))
+
+    depiction['dimensions'] = {
+        'x': dimensions_svg.attrib.get('width'),
+        'y': dimensions_svg.attrib.get('height')
+    }
+
+    return depiction
+
+
+def _fix_svg(svg_string):
+    
+    svg_string = re.sub('<sub>', '&lt;sub&gt;', svg_string)
+    svg_string = re.sub('</sub>', '&lt;/sub&gt;', svg_string)
+    svg_string = re.sub('<sup>', '&lt;sup&gt;', svg_string)
+    svg_string = re.sub('</sup>', '&lt;/sup&gt;', svg_string)
+    
+    return svg_string

@@ -215,6 +215,8 @@ def process_single_component(args, ccd_reader_result, library,
     with open(os.path.join(parent_dir, f'{ccd_id}_substructures.json'), 'w') as f:
         json.dump(json_output, f, sort_keys=True, indent=4)
 
+    component.export_2d_annotation(os.path.join(parent_dir, f'{ccd_id}_annotation.json'))
+
 
 def check_component_parsing(ccd_reader_result):
     """Checks components parsing and highlights issues encountered with
@@ -341,14 +343,14 @@ def compute_component_scaffolds(component: Component, json_output: Dict[str, Any
     """
     logger = logging.getLogger(__name__)
     json_output['scaffolds'] = []
-    
+
     try:
         scaffolds = component.get_scaffolds()
     except CCDUtilsError as e:
         logger.error(str(e))
 
         return
-    
+
     for scaffold in scaffolds:
         atom_names = component.locate_fragment(scaffold)
         scaffold_atom_names = []
