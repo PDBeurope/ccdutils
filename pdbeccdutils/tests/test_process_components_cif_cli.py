@@ -97,7 +97,7 @@ class TestCutDownComponentsCif:
     def test_all_files_created(pipeline_wd, chem_comp_id):
         path = os.path.join(pipeline_wd, chem_comp_id[0], chem_comp_id)
         files = os.listdir(path)
-        assert len(files) == 19
+        assert len(files) == 20
 
         for f in files:
             assert os.path.getsize(os.path.join(path, f)) > 0
