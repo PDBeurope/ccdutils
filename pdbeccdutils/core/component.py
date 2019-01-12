@@ -14,7 +14,7 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+import json
 import re
 import sys
 from datetime import date
@@ -47,10 +47,11 @@ class Component:
         Component: instance object
     """
 
-    def __init__(self, mol: rdkit.Chem.rdchem.Mol, ccd_cif_dict: Dict[str, Any]=None,
-                 properties: CCDProperties=None, descriptors: List[Descriptor]=None) -> None:
+    def __init__(self, mol: rdkit.Chem.rdchem.Mol, ccd_cif_dict: Dict[str, Any] = None,
+                 properties: CCDProperties = None, descriptors: List[Descriptor] = None) -> None:
 
         self.mol = mol
+        self._mol_no_h = None
         self.ccd_cif_dict = ccd_cif_dict
         self._fragments: Dict[str, FragmentHit] = {}
         self._2dmol = None
@@ -204,9 +205,12 @@ class Component:
 
     @property
     def mol_no_h(self) -> rdkit.Chem.rdchem.Mol:
-        no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
-        rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
-        return no_h
+        if self._mol_no_h is None:
+            no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
+            rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
+            self._mol_no_h = no_h
+
+        return self._mol_no_h
 
     @property
     def number_atoms(self) -> int:
@@ -268,7 +272,7 @@ class Component:
 
     # endregion properties
 
-    def inchikey_from_rdkit_matches_ccd(self, connectivity_only: bool=False) -> bool:
+    def inchikey_from_rdkit_matches_ccd(self, connectivity_only: bool = False) -> bool:
         """
         Checks whether inchikey matches between ccd and rdkit
 
@@ -289,7 +293,7 @@ class Component:
             return False
         return True
 
-    def compute_2d(self, manager: DepictionManager, remove_hs: bool=True) -> DepictionResult:
+    def compute_2d(self, manager: DepictionManager, remove_hs: bool = True) -> DepictionResult:
         """Compute 2d depiction of the component using DepictionManager
         instance.
 
@@ -312,9 +316,9 @@ class Component:
 
         return result_log
 
-    def export_2d_svg(self, file_name: str, width: int=500, names: bool=False,
+    def export_2d_svg(self, file_name: str, width: int = 500, names: bool = False,
                       atom_highlight: Dict[Any, Tuple] = None,
-                      bond_highlight: Dict[Tuple, Tuple]=None):
+                      bond_highlight: Dict[Tuple, Tuple] = None):
         """
         Save 2d depiction of the component as an SVG file.
 
@@ -365,7 +369,31 @@ class Component:
                 options.atomLabels[i] = atom_name
                 a.SetProp('molFileAlias', atom_name)
 
-        self._draw_molecule(drawer, file_name, width, atom_highlight, bond_highlight)
+        drawing.draw_molecule(self._2dmol, drawer, file_name, width, atom_highlight, bond_highlight)
+
+    def export_2d_annotation(self, file_name: str) -> None:
+        """Generates 2D depiction in JSON format with annotation of
+        bonds and atoms to be redrawn in the interactions component.
+
+        Args:
+            file_name (str): Path to the file
+        """
+        w, h = drawing.get_drawing_scale(self._2dmol)
+        drawer = Draw.MolDraw2DSVG(w, h)
+        drawer.drawOptions().includeAtomTags = True
+        try:
+            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self._2dmol, wedgeBonds=True,
+                                                       kekulize=True, addChiralHs=False)
+        except (RuntimeError, ValueError):
+            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self._2dmol, wedgeBonds=False,
+                                                       kekulize=True, addChiralHs=False)
+        drawer.DrawMolecule(tmp)
+        drawer.FinishDrawing()
+        svg = drawer.GetDrawingText()
+        json_repr = drawing.parse_svg(svg, self._2dmol)
+
+        with open(file_name, 'w') as fp:
+            json.dump(json_repr, fp, indent=4, sort_keys=True)
 
     def compute_3d(self) -> bool:
         """
@@ -387,7 +415,7 @@ class Component:
         except ValueError:
             return False  # sanitization issue here
 
-    def _sanitize(self, fast: bool=False) -> bool:
+    def _sanitize(self, fast: bool = False) -> bool:
         """
         Attempts to sanitize mol in place. RDKit's standard error can be
         processed in order to find out what went wrong with sanitization
@@ -485,7 +513,7 @@ class Component:
         matches_found = 0
         for k, v in fragment_library.library.items():
             try:
-                matches = self.mol.GetSubstructMatches(v.mol)
+                matches = self.mol_no_h.GetSubstructMatches(v.mol)
                 matches_found += len(matches)
 
                 if len(matches) > 0:
@@ -518,7 +546,7 @@ class Component:
                 scaffold = BRICS.BRICSDecompose(self.mol)
                 scaffold = list(map(lambda l: rdkit.Chem.MolFromSmiles(l), scaffold))
             return scaffold
-        except RuntimeError:
+        except (RuntimeError, ValueError):
             raise CCDUtilsError(f'Computing scaffolds using method {scaffolding_method.name} failed.')
 
     def _fix_molecule(self, rwmol: rdkit.Chem.rdchem.RWMol):
@@ -607,30 +635,6 @@ class Component:
 
         return sanitization_result == 0
 
-    def _draw_molecule(self, drawer, file_name, width, atom_highlight, bond_highlight):
-        try:
-            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=True,
-                                                                    kekulize=True, addChiralHs=True)
-        except (RuntimeError, ValueError):
-            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(self._2dmol, wedgeBonds=False,
-                                                                    kekulize=True, addChiralHs=True)
-
-        if bond_highlight is None:
-            drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
-                                highlightAtomColors=atom_highlight)
-        else:
-            drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
-                                highlightAtomColors=atom_highlight,
-                                highlightBonds=bond_highlight.keys(), highlightBondColors=bond_highlight)
-        drawer.FinishDrawing()
-
-        with open(file_name, 'w') as f:
-            svg = drawer.GetDrawingText()
-
-            if width < 201:
-                svg = re.sub('stroke-width:2px', 'stroke-width:1px', svg)
-            f.write(svg)
-
     def _get_atom_name(self, atom: rdkit.Chem.rdchem.Atom):
         """Supplies atom_id obrained from `_chem_comp_atom.atom_id`, see:
 
@@ -649,8 +653,8 @@ class Component:
 
 
 class Properties:
-    """Properties of the CCD component. Some of them are extracted from the input CCD
-    others are computed by RDKit.
+    """Properties of the CCD component. Some of them are extracted from
+    the input CCD others are computed by RDKit.
     """
 
     def __init__(self, mol: rdkit.Chem.rdchem.Mol, properties: Optional[CCDProperties]) -> None:
@@ -678,7 +682,7 @@ class Properties:
         self._TPSA = None
         self._molwt = None
 
-    #region properties
+    # region properties
     @property
     def logP(self) -> Optional[float]:
         """
