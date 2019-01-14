@@ -141,13 +141,13 @@ def pdbechem_pipeline(args):
     fragment_library = FragmentLibrary(args.library)
 
     logger.debug(f'Reading in {args.components_cif} file...')
-    ccd_reader_result = ccd_reader.read_pdb_components_file(args.components_cif)
-    counter = len(ccd_reader_result) if args.test_first is None else args.test_first
+    ccd_reader_results = ccd_reader.read_pdb_components_file(args.components_cif)
+    counter = len(ccd_reader_results) if args.test_first is None else args.test_first
+    ids = sorted(list(ccd_reader_results.keys())[:counter])
 
     chem_comp_xml = ET.Element('chemCompList')
-    ids = sorted(list(ccd_reader_result.keys())[:counter])
 
-    for key, ccd_reader_result in ccd_reader_result.items():
+    for key, ccd_reader_result in ccd_reader_results.items():
         try:
             logger.info(f'{key} | processing...')
             process_single_component(args, ccd_reader_result, fragment_library, chem_comp_xml,
@@ -156,6 +156,8 @@ def pdbechem_pipeline(args):
             logger.error(f'{key} | FAILURE {str(e)}.')
         counter -= 1
 
+        ccd_reader_results[key] = None
+
         if counter == 0:
             break
 
@@ -163,6 +165,8 @@ def pdbechem_pipeline(args):
     write_components_xml(args, chem_comp_xml)
     with open(os.path.join(args.output_dir, 'chem_comp.list'), 'w') as f:
         f.write("\n".join(ids))
+
+    logger.debug(f'All is done!')
 
 
 def process_single_component(args, ccd_reader_result, library,
