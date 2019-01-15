@@ -54,7 +54,7 @@ class Component:
         self._mol_no_h = None
         self.ccd_cif_dict = ccd_cif_dict
         self._fragments: Dict[str, FragmentHit] = {}
-        self._2dmol = None
+        self.mol2D = None
         self._descriptors: List[Descriptor] = []
         self._inchi_from_rdkit = ''
         self._inchikey_from_rdkit = ''
@@ -169,7 +169,7 @@ class Component:
         Returns:
             str: the InChI or emptry '' if there was an error finding it.
         """
-        if len(self._inchi_from_rdkit) == 0:
+        if not self._inchi_from_rdkit:
             try:
                 self._inchi_from_rdkit = rdkit.Chem.inchi.MolToInchi(self.mol)
             except ValueError:
@@ -184,7 +184,7 @@ class Component:
         Returns:
             str: the InChIKey or '' if there was an error finding it.
         """
-        if len(self._inchikey_from_rdkit) == 0:
+        if not self._inchikey_from_rdkit:
             inchi = self.inchi_from_rdkit
             if inchi != 'ERROR':
                 self._inchikey_from_rdkit = rdkit.Chem.inchi.InchiToInchiKey(inchi)
@@ -312,7 +312,7 @@ class Component:
             rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
 
         result_log = manager.depict_molecule(self.id, mol_copy)
-        self._2dmol = result_log.mol
+        self.mol2D = result_log.mol
 
         return result_log
 
@@ -337,12 +337,12 @@ class Component:
         Raises:
             CCDUtilsError: If bond or atom does not exist.
         """
-        if self._2dmol is None:
+        if self.mol2D is None:
             drawing.save_no_image(file_name, width=width)
             return
 
         drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
-        atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self._2dmol.GetAtoms())}
+        atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self.mol2D.GetAtoms())}
 
         atom_highlight = {} if atom_highlight is None else atom_highlight
         bond_highlight = {} if bond_highlight is None else bond_highlight
@@ -352,11 +352,11 @@ class Component:
         else:
             atom_highlight = {}
 
-        if len(bond_highlight) > 0:
+        if bond_highlight:
             if all(isinstance(i[0], str) and isinstance(i[1], str) for i in bond_highlight.keys()):
                 temp_highlight = {}
                 for k, v in bond_highlight.items():
-                    bond = self._2dmol.GetBondBetweenAtoms(atom_mapping[k[0]], atom_mapping[k[1]])
+                    bond = self.mol2D.GetBondBetweenAtoms(atom_mapping[k[0]], atom_mapping[k[1]])
                     if bond is None:
                         raise CCDUtilsError('Bond between {} and {} does not exist'.format(k[0], k[1]))
                     temp_highlight[bond.GetIdx()] = v
@@ -364,12 +364,12 @@ class Component:
 
         if names:
             options = drawer.drawOptions()
-            for i, a in enumerate(self._2dmol.GetAtoms()):
+            for i, a in enumerate(self.mol2D.GetAtoms()):
                 atom_name = self._get_atom_name(a)
                 options.atomLabels[i] = atom_name
                 a.SetProp('molFileAlias', atom_name)
 
-        drawing.draw_molecule(self._2dmol, drawer, file_name, width, atom_highlight, bond_highlight)
+        drawing.draw_molecule(self.mol2D, drawer, file_name, width, atom_highlight, bond_highlight)
 
     def export_2d_annotation(self, file_name: str) -> None:
         """Generates 2D depiction in JSON format with annotation of
@@ -378,19 +378,19 @@ class Component:
         Args:
             file_name (str): Path to the file
         """
-        w, h = drawing.get_drawing_scale(self._2dmol)
+        w, h = drawing.get_drawing_scale(self.mol2D)
         drawer = Draw.MolDraw2DSVG(w, h)
         drawer.drawOptions().includeAtomTags = True
         try:
-            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self._2dmol, wedgeBonds=True,
+            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self.mol2D, wedgeBonds=True,
                                                        kekulize=True, addChiralHs=False)
         except (RuntimeError, ValueError):
-            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self._2dmol, wedgeBonds=False,
+            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self.mol2D, wedgeBonds=False,
                                                        kekulize=True, addChiralHs=False)
         drawer.DrawMolecule(tmp)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText()
-        json_repr = drawing.parse_svg(svg, self._2dmol)
+        json_repr = drawing.parse_svg(svg, self.mol2D)
 
         with open(file_name, 'w') as fp:
             json.dump(json_repr, fp, indent=4, sort_keys=True)
@@ -446,7 +446,7 @@ class Component:
 
         return success
 
-    def has_degenerated_conformer(self, type: ConformerType) -> bool:
+    def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
         """
         Determine if given conformer has missing coordinates. This can
         be used to determine, whether or not the coordinates should be
@@ -462,7 +462,7 @@ class Component:
         Returns:
             bool: true if more then 1 atom has coordinates [0, 0, 0]
         """
-        conformer = self.mol.GetConformer(self.conformers_mapping[type])
+        conformer = self.mol.GetConformer(self.conformers_mapping[c_type])
         empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
         counter = 0
 
@@ -495,7 +495,7 @@ class Component:
         matches = self.mol.GetSubstructMatches(mol)
 
         for m in matches:
-            result.append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx), m)))
+            result.append([self.mol.GetAtomWithIdx(idx) for idx in m])
 
         return result
 
@@ -516,7 +516,7 @@ class Component:
                 matches = self.mol_no_h.GetSubstructMatches(v.mol)
                 matches_found += len(matches)
 
-                if len(matches) > 0:
+                if matches:
                     self._fragments[k] = FragmentHit(matches, v.source)
             except Exception:
                 pass
@@ -544,7 +544,7 @@ class Component:
 
             elif scaffolding_method == ScaffoldingMethod.Brics:
                 scaffold = BRICS.BRICSDecompose(self.mol)
-                scaffold = list(map(lambda l: rdkit.Chem.MolFromSmiles(l), scaffold))
+                scaffold = [rdkit.Chem.MolFromSmiles(i) for i in scaffold]
             return scaffold
         except (RuntimeError, ValueError):
             raise CCDUtilsError(f'Computing scaffolds using method {scaffolding_method.name} failed.')
@@ -575,7 +575,7 @@ class Component:
                 return True
 
             sanitization_failure = re.findall('[a-zA-Z]{1,2}, \\d+', log.getvalue())
-            if len(sanitization_failure) == 0:
+            if not sanitization_failure:
                 sys.stderr = saved_std_err
                 return False
 

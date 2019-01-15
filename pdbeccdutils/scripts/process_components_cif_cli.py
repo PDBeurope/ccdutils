@@ -234,10 +234,10 @@ def check_component_parsing(ccd_reader_result):
     """
     logger = logging.getLogger(__name__)
 
-    if len(ccd_reader_result.warnings) > 0:
+    if ccd_reader_result.warnings:
         logger.debug(f'warnings: {";".join(ccd_reader_result.warnings)}')
 
-    if len(ccd_reader_result.errors) > 0:
+    if ccd_reader_result.errors:
         logger.debug(f'errors: {";".join(ccd_reader_result.errors)}')
 
     if not ccd_reader_result.component.sanitized:

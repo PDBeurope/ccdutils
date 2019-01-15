@@ -26,9 +26,9 @@ import copy
 import json
 import math
 import xml.etree.ElementTree as ET
+from xml.dom import minidom
 from collections import OrderedDict
 from typing import List
-from xml.dom import minidom
 
 import mmCif.mmcifIO as mmcif
 import rdkit
@@ -269,7 +269,7 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
         component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
     """
-    if type(component.ccd_cif_dict) is not dict:
+    if not isinstance(component.ccd_cif_dict, dict):
         component.ccd_cif_dict = _to_pdb_ccd_cif_dict(component)
 
     cif_copy = copy.deepcopy(component.ccd_cif_dict)
@@ -388,7 +388,7 @@ def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.I
     conformer = mol_to_save.GetConformer(conf_id)
     rdkit.Chem.Kekulize(mol_to_save)
     rdkit.Chem.WedgeMolBonds(mol_to_save, conformer)
-    
+
     for atom in mol_to_save.GetAtoms():
         atom_dict = {}
 
@@ -509,7 +509,7 @@ def _write_pdb_ccd_cif_info(cif_dict, component):
     cif_dict[label]['id'] = component.id
     cif_dict[label]['type'] = 'NON-POLYMER'
     cif_dict[label]['pdbx_type'] = 'HETAIN'
-    cif_dict[label]['formula'] = component.formula if len(component.formula) > 0 else calc_formula
+    cif_dict[label]['formula'] = component.formula if component.formula else calc_formula
     cif_dict[label]['formula_weight'] = '{:.3f}'.format(calc_weight)
     cif_dict[label]['three_letter_code'] = component.id
     cif_dict[label]['pdbx_type'] = 'HETAIN'
@@ -638,7 +638,7 @@ def _write_pdb_ccd_cif_descriptor(cif_dict, component):
             exported.
     """
 
-    if len(component.descriptors) < 1:
+    if not component.descriptors:
         return
 
     label = '_pdbx_chem_comp_descriptor'

@@ -80,7 +80,7 @@ def read_component_cif(args):
         args (argparse.Namespace): Parsed arguments.
     """
     dictionary = ccd_reader.read_pdb_components_file(args.components_cif)
-    for k, v in dictionary.items():
+    for v in dictionary.values():
         yield v.component
 
 

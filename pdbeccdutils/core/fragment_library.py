@@ -17,15 +17,14 @@
 
 import csv
 import os
+from typing import Dict
 
 import rdkit
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem import rdCoordGen
+from rdkit.Chem import AllChem, rdCoordGen
 
 import pdbeccdutils.utils.config as config
 from pdbeccdutils.core.models import FragmentEntry
-from typing import Dict
 
 
 class FragmentLibrary:
@@ -103,7 +102,7 @@ class FragmentLibrary:
         options = AllChem.ETKDGv2()
         options.clearConfs = False
 
-        for k, v in self.library.items():
+        for v in self.library.values():
             try:
                 AllChem.EmbedMolecule(v.mol, options)
                 AllChem.UFFOptimizeMolecule(v.mol)
