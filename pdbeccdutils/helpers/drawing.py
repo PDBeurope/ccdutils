@@ -20,10 +20,10 @@
 
 import os
 import re
+import xml.etree.ElementTree as ET
 from sys import platform
 
 import rdkit
-import xml.etree.ElementTree as ET
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -236,10 +236,20 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
 
 
 def _fix_svg(svg_string):
-    
+    """RDKit presently produces invalid XML when some metadata are
+    being exported. This method fixes all the standing issues so the XML
+    can be processed.
+
+    Args:
+        svg_string (str): XML in str representation to be fixed.
+
+    Returns:
+        str: Fixed XML representation as a string.
+    """
+
     svg_string = re.sub('<sub>', '&lt;sub&gt;', svg_string)
     svg_string = re.sub('</sub>', '&lt;/sub&gt;', svg_string)
     svg_string = re.sub('<sup>', '&lt;sup&gt;', svg_string)
     svg_string = re.sub('</sup>', '&lt;/sup&gt;', svg_string)
-    
+
     return svg_string

@@ -15,6 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""Module housing some of the dataclasses used throuhout the
+pdbeccdutils application.
+"""
+
 from enum import IntEnum
 from typing import Any, List, NamedTuple
 

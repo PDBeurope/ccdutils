@@ -450,15 +450,17 @@ def write_substructures_xml(data, path):
             'smiles': frag['smiles'],
             'source': frag['smiles']
         })
-
-        [_atom_mapping_as_xml_element(fragment, l) for l in frag['mapping']]
+        
+        for l in frag['mapping']:
+            _atom_mapping_as_xml_element(fragment, l)
 
     for sc in data['scaffolds']:
         scaffold = ET.SubElement(scaffolds, 'scaffold', {
             'smiles': sc['smiles']
         })
 
-        [_atom_mapping_as_xml_element(scaffold, l) for l in sc['mapping']]
+        for l in sc['mapping']:
+            _atom_mapping_as_xml_element(scaffold, l)
 
     write_xml_file(root, path)
 
