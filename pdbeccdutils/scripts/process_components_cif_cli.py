@@ -101,8 +101,8 @@ def _set_up_logger(args):
 
     logger = logging.getLogger(__name__)
     level = logging.DEBUG if args.debug else logging.ERROR
-    format = '[%(asctime)-15s]  %(message)s'
-    logging.basicConfig(level=level, format=format, datefmt='%a, %d %b %Y %H:%M:%S')
+    frm = '[%(asctime)-15s]  %(message)s'
+    logging.basicConfig(level=level, format=frm, datefmt='%a, %d %b %Y %H:%M:%S')
     logger.info(f'PDBeChem pipeline using:')
     logger.info(f'pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}')
 
@@ -162,11 +162,11 @@ def pdbechem_pipeline(args):
             break
 
     # write components.cif wide data
-    write_components_xml(args, chem_comp_xml)
+    write_xml_file(chem_comp_xml, os.path.join(args.output_dir, "chem_comp_list.xml"))
     with open(os.path.join(args.output_dir, 'chem_comp.list'), 'w') as f:
         f.write("\n".join(ids))
 
-    logger.debug(f'All is done!')
+    logger.debug('All is done!')
 
 
 def process_single_component(args, ccd_reader_result, library,
@@ -216,8 +216,11 @@ def process_single_component(args, ccd_reader_result, library,
     xml_repr = ccd_writer.to_xml_xml(ccd_reader_result.component)
     chem_comp_xml.append(xml_repr)
 
+    # write fragments and scaffolds
     with open(os.path.join(parent_dir, f'{ccd_id}_substructures.json'), 'w') as f:
         json.dump(json_output, f, sort_keys=True, indent=4)
+
+    write_substructures_xml(json_output, os.path.join(parent_dir, f'{ccd_id}_substructures.xml'))
 
     component.export_2d_annotation(os.path.join(parent_dir, f'{ccd_id}_annotation.json'))
 
@@ -234,10 +237,10 @@ def check_component_parsing(ccd_reader_result):
     """
     logger = logging.getLogger(__name__)
 
-    if len(ccd_reader_result.warnings) > 0:
+    if ccd_reader_result.warnings:
         logger.debug(f'warnings: {";".join(ccd_reader_result.warnings)}')
 
-    if len(ccd_reader_result.errors) > 0:
+    if ccd_reader_result.errors:
         logger.debug(f'errors: {";".join(ccd_reader_result.errors)}')
 
     if not ccd_reader_result.component.sanitized:
@@ -411,19 +414,69 @@ def write_molecule(path, component, alt_names, conformer_type):
             f.write('')
 
 
-def write_components_xml(args, chem_comp_xml):
+def write_xml_file(chem_comp_xml, path):
     """Write out XML representation of the components.cif file
 
     Args:
-        args (ArgumentParser): Application arguments
         chem_comp_xml (xml.etree.ElementTree.Element): xml object with
             the data.
+        path (str): Path where the XML file is going to be saved.
     """
     xml_str = ET.tostring(chem_comp_xml, encoding='utf-8', method='xml')
     pretty = minidom.parseString(xml_str)
 
-    with open(os.path.join(args.output_dir, "chem_comp_list.xml"), 'w') as f:
+    with open(path, 'w') as f:
         f.write(pretty.toprettyxml(indent="  "))
+
+
+def write_substructures_xml(data, path):
+    """Write XML infromation for scaffolds and fragments so that they
+    are easily loaded into PDBe database
+
+    Args:
+        data (dict): Data to be serialized
+        path (str): Path where the XML is going to be stored
+    """
+
+    root = ET.Element('entry')
+    root.set('id', data['het_code'])
+
+    fragments = ET.SubElement(root, 'fragments')
+    scaffolds = ET.SubElement(root, 'scaffolds')
+
+    for frag in data['fragments']:
+        fragment = ET.SubElement(fragments, 'fragment', {
+            'name': frag['name'],
+            'smiles': frag['smiles'],
+            'source': frag['smiles']
+        })
+        
+        for l in frag['mapping']:
+            _atom_mapping_as_xml_element(fragment, l)
+
+    for sc in data['scaffolds']:
+        scaffold = ET.SubElement(scaffolds, 'scaffold', {
+            'smiles': sc['smiles']
+        })
+
+        for l in sc['mapping']:
+            _atom_mapping_as_xml_element(scaffold, l)
+
+    write_xml_file(root, path)
+
+
+def _atom_mapping_as_xml_element(element, mapping):
+    """Append atom mapping to a specified element.
+
+    Args:
+        element ([type]): Element to apend children with atom mapping.
+        mapping (list of `str`): List with atom names
+    """
+    map_element = ET.SubElement(element, 'mapping')
+
+    for at_name in mapping:
+        tmp = ET.SubElement(map_element, 'atom')
+        tmp.text = at_name
 
 
 def main():

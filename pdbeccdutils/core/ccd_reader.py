@@ -36,6 +36,7 @@ from pdbeccdutils.helpers import str_conversions
 from pdbeccdutils.helpers import collection_ext
 from pdbeccdutils.core.models import Descriptor, CCDProperties
 
+
 class CCDReaderResult(NamedTuple):
     """
     NamedTuple for the result of reading an individual PDB chemical
@@ -149,7 +150,7 @@ def _parse_pdb_atoms(mol, atoms):
         atoms (dict): MMCIF dictionary with parsed _chem_comp_atom
             category.
     """
-    if len(atoms) == 0:
+    if not atoms:
         return
 
     for i in range(len(atoms['atom_id'])):
@@ -183,7 +184,7 @@ def _parse_pdb_conformers(mol, atoms):
             representation.
         atoms (dict): mmcif category with atom info category.
     """
-    if len(atoms) == 0:
+    if not atoms:
         return
 
     ideal = _setup_pdb_conformer(atoms, 'pdbx_model_Cartn_{}_ideal')
@@ -204,7 +205,7 @@ def _setup_pdb_conformer(atoms, label):
     Returns:
         rdkit.Chem.rdchem.Conformer: Conformer of the component.
     """
-    if len(atoms) == 0:
+    if not atoms:
         return
 
     conformer = rdkit.Chem.Conformer(len(atoms['atom_id']))
@@ -230,7 +231,7 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
         atoms (dict): mmcif category with the atom info.
         errors (list): Issues encountered while parsing.
     """
-    if len(bonds) == 0:
+    if not bonds:
         return
 
     for i in range(len(bonds['atom_id_1'])):
@@ -280,7 +281,7 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
     """
     descriptors = list()
 
-    if len(pdbx_chem_comp_descriptors) == 0:
+    if not pdbx_chem_comp_descriptors:
         return descriptors
 
     for i in range(len(pdbx_chem_comp_descriptors[label])):
@@ -303,7 +304,7 @@ def _parse_pdb_properties(chem_comp):
         Properties: namedtuple with the property info
     """
     properties = None
-    if len(chem_comp) > 0:
+    if chem_comp:
         properties = CCDProperties(id=chem_comp['id'][0],
                                    name=chem_comp['name'][0],
                                    formula=chem_comp['formula'][0],
@@ -333,7 +334,7 @@ def _preprocess_pdb_parser_output(dictionary, label, warnings):
 
     check_element = list(dictionary[label].keys())[0]
     values = (dictionary[label]
-              if type(dictionary[label][check_element]) is list
+              if isinstance(dictionary[label][check_element], list)
               else {k: [v] for k, v in dictionary[label].items()})
     return values
 

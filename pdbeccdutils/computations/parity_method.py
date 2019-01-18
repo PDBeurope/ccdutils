@@ -2,9 +2,10 @@
 Jon Tyczak to Abhik to be used by the cofactors pipeline.
 """
 
+from typing import NamedTuple
+
 from rdkit import Chem
 from rdkit.Chem import rdFMCS
-from typing import NamedTuple
 
 
 class ParityResult(NamedTuple):

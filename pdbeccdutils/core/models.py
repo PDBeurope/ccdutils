@@ -15,9 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import rdkit
+"""Module housing some of the dataclasses used throuhout the
+pdbeccdutils application.
+"""
+
 from enum import IntEnum
-from typing import Any, NamedTuple, List
+from typing import Any, List, NamedTuple
+
+import rdkit
 
 
 class DepictionSource(IntEnum):
@@ -100,10 +105,10 @@ class DepictionResult(NamedTuple):
 CCDProperties = NamedTuple('CCDProperties',
                            [('id', str),
                             ('name', str),
-                               ('formula', str),
-                               ('modified_date', str),
-                               ('pdbx_release_status', str),
-                               ('weight', str)])
+                            ('formula', str),
+                            ('modified_date', str),
+                            ('pdbx_release_status', str),
+                            ('weight', str)])
 
 CCDProperties.__doc__ = """
             Properties of the component comming from _chem_comp namespace.

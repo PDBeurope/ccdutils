@@ -16,6 +16,7 @@
 # under the License.
 
 import os
+import sys
 from typing import Dict
 
 import rdkit
@@ -85,8 +86,8 @@ class DepictionManager:
         rdkitMol = Chem.RWMol(temp_mol).GetMol()
         results = []
 
-        pubchem_res = self._get_2D_by_pubchem(het_id, pubchemMol) if len(self.pubchem_templates) > 0 else None
-        template_res = self._get_2D_by_template(templateMol) if len(self.templates) > 0 else []
+        pubchem_res = self._get_2D_by_pubchem(het_id, pubchemMol) if self.pubchem_templates else None
+        template_res = self._get_2D_by_template(templateMol) if self.templates else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
         if pubchem_res is not None:
@@ -98,7 +99,7 @@ class DepictionManager:
 
         results.sort(key=lambda l: (l.score, l.source))
 
-        if len(results) > 0:
+        if results:
             return results[0]
         else:
             return DepictionResult(source=DepictionSource.Failed, template_name='', mol=None, score=1000)
@@ -165,28 +166,28 @@ class DepictionManager:
         except Exception:
             return DepictionResult(source=DepictionSource.Failed, template_name=None, mol=None, score=1000)
 
-    def _get_2D_by_pubchem(self, id, mol):
+    def _get_2D_by_pubchem(self, code, mol):
         """
         Depict ligand using Pubchem templates.
 
         Args:
-            id (str): of molecule to be processed
+            code (str): id of the molecule to be processed
             mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
 
         Returns:
             DepictionResult: Depiction with some usefull metadata
         """
         try:
-            template_path = self._get_pubchem_template_path(id)
-            if len(template_path) > 0:
+            template_path = self._get_pubchem_template_path(code)
+            if template_path:
                 template = self._load_template(template_path)
 
                 if mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(mol, template)
                     flaws = DepictionValidator(mol).depiction_score()
-                    return DepictionResult(source=DepictionSource.PubChem, template_name=id, mol=mol, score=flaws)
+                    return DepictionResult(source=DepictionSource.PubChem, template_name=code, mol=mol, score=flaws)
         except Exception as e:
-            print(str(e))
+            print(str(e), file=sys.stderr)
 
         return DepictionResult(source=DepictionSource.Failed, template_name=None, mol=None, score=1000)
 
