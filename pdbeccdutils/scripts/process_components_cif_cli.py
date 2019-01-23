@@ -443,40 +443,47 @@ def write_substructures_xml(data, path):
 
     fragments = ET.SubElement(root, 'fragments')
     scaffolds = ET.SubElement(root, 'scaffolds')
+    fragment_counter = 0
+    scaffold_counter = 0
 
     for frag in data['fragments']:
+        fragment_counter += 1
         fragment = ET.SubElement(fragments, 'fragment', {
+            'id': str(fragment_counter),
             'name': frag['name'],
             'smiles': frag['smiles'],
             'source': frag['smiles']
         })
-        
+        mapping_id = 0
         for l in frag['mapping']:
-            _atom_mapping_as_xml_element(fragment, l)
+            mapping_id += 1
+            _atom_mapping_as_xml_element(fragment, l, mapping_id)
 
     for sc in data['scaffolds']:
+        scaffold_counter += 1
         scaffold = ET.SubElement(scaffolds, 'scaffold', {
+            'id': str(scaffold_counter),
             'smiles': sc['smiles']
         })
 
         for l in sc['mapping']:
-            _atom_mapping_as_xml_element(scaffold, l)
+            _atom_mapping_as_xml_element(scaffold, l, 1)
 
     write_xml_file(root, path)
 
 
-def _atom_mapping_as_xml_element(element, mapping):
+def _atom_mapping_as_xml_element(element, mapping, mapping_id):
     """Append atom mapping to a specified element.
 
     Args:
         element ([type]): Element to apend children with atom mapping.
         mapping (list of `str`): List with atom names
+        mapping_id (int): Id of the mappping for db loading.
     """
-    map_element = ET.SubElement(element, 'mapping')
+    map_element = ET.SubElement(element, 'mapping', {'id': str(mapping_id)})
 
     for at_name in mapping:
-        tmp = ET.SubElement(map_element, 'atom')
-        tmp.text = at_name
+        ET.SubElement(map_element, 'atom', {'name': at_name})
 
 
 def main():
