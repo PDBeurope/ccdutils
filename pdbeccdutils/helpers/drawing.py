@@ -210,10 +210,15 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
                                    'y': atom_svg.attrib.get('y')
                                    }, atoms_svg))
 
-    depiction['bonds'] = list(map(lambda bond_svg:
-                                  {'coords': bond_svg.attrib.get('d'),
-                                   'style': bond_svg.attrib.get('style')
-                                   }, bonds_svg))
+    depiction['depiction'] = list(map(lambda bond_svg:
+                                    {'coords': bond_svg.attrib.get('d'),
+                                     'style': bond_svg.attrib.get('style')
+                                     }, bonds_svg))
+
+    depiction['bonds'] = list(map(lambda bond: {
+        'bgn': bond.GetBeginAtom().GetProp('name'),
+        'end': bond.GetEndAtom().GetProp('name'),
+    }, mol.GetBonds()))
 
     depiction['labels'] = list(map(lambda label_svg:
                                    {
