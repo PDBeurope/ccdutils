@@ -452,7 +452,7 @@ def write_substructures_xml(data, path):
             'id': str(fragment_counter),
             'name': frag['name'],
             'smiles': frag['smiles'],
-            'source': frag['smiles']
+            'source': frag['source']
         })
         mapping_id = 0
         for l in frag['mapping']:
