@@ -316,7 +316,8 @@ class Component:
 
         return result_log
 
-    def export_2d_svg(self, file_name: str, width: int = 500, names: bool = False,
+    def export_2d_svg(self, file_name: str, width: int = 500,
+                      names: bool = False, wedge_bonds: bool = True,
                       atom_highlight: Dict[Any, Tuple] = None,
                       bond_highlight: Dict[Tuple, Tuple] = None):
         """
@@ -327,6 +328,8 @@ class Component:
             width (int, optional): Defaults to 500. Width of a frame in pixels.
             names (bool, optional): Defaults to False. Whether or not to
                 include atom names in depiction. If atom name is not set, element symbol is used instead.
+            wedge_bonds (bool, optional): Defaults to True. Whether or not
+                the molecule should be depicted with bond wedging.
             atomHighlight (:obj:`dict` of :obj:`tuple` of :obj:`float`, optional):
                 Defaults to None. Atoms names to be highlighted along
                 with colors in RGB. e.g. {'CA': (0.5, 0.5, 0.5)} or {0: (0.5, 0.5, 0.5)}
@@ -369,9 +372,9 @@ class Component:
                 options.atomLabels[i] = atom_name
                 a.SetProp('molFileAlias', atom_name)
 
-        drawing.draw_molecule(self.mol2D, drawer, file_name, width, atom_highlight, bond_highlight)
+        drawing.draw_molecule(self.mol2D, drawer, file_name, width, wedge_bonds, atom_highlight, bond_highlight)
 
-    def export_2d_annotation(self, file_name: str) -> None:
+    def export_2d_annotation(self, file_name: str, wedge_bonds: bool = True) -> None:
         """Generates 2D depiction in JSON format with annotation of
         bonds and atoms to be redrawn in the interactions component.
 
@@ -382,7 +385,7 @@ class Component:
         drawer = Draw.MolDraw2DSVG(w, h)
         drawer.drawOptions().includeAtomTags = True
         try:
-            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self.mol2D, wedgeBonds=True,
+            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self.mol2D, wedgeBonds=wedge_bonds,
                                                        kekulize=True, addChiralHs=False)
         except (RuntimeError, ValueError):
             tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self.mol2D, wedgeBonds=False,

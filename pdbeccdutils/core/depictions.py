@@ -15,6 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
+
+"""Module to aid generation of 2D depictions and evaluation of their
+quality
+
+"""
 import os
 import sys
 from typing import Dict
@@ -24,7 +29,7 @@ from rdkit import Chem, Geometry
 from rdkit.Chem import AllChem, rdCoordGen
 from scipy.spatial import KDTree
 
-import pdbeccdutils.utils.config as config
+from pdbeccdutils.utils import config
 from pdbeccdutils.core.models import DepictionResult, DepictionSource
 
 

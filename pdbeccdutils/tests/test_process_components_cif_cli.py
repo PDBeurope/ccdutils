@@ -11,9 +11,7 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-from pdbeccdutils.scripts.process_components_cif_cli import (check_args,
-                                                             create_parser,
-                                                             pdbechem_pipeline)
+from pdbeccdutils.scripts.process_components_cif_cli import check_args, create_parser, PDBeChemManager
 from pdbeccdutils.tests.tst_utilities import (cif_filename,
                                               file_name_in_tsts_out,
                                               test_cut_down_components_cif)
@@ -49,7 +47,9 @@ class TestRegressionTest:
             shutil.rmtree(test_output_dir)
         parser = create_parser()
         args = parser.parse_args([cif_file, '-o', test_output_dir])
-        pdbechem_pipeline(args)
+        m = PDBeChemManager()
+        m.run_pipeline(args)
+
         assert os.path.isdir(test_output_dir), \
             'output directory  {} must be created'.format(test_output_dir)
 
@@ -78,7 +78,8 @@ class TestCutDownComponentsCif:
         args = parser.parse_args(['-o', str(wd), test_cut_down_components_cif])
 
         check_args(args)
-        pdbechem_pipeline(args)
+        m = PDBeChemManager()
+        m.run_pipeline(args)
 
         return str(wd)
 
