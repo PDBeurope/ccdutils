@@ -22,11 +22,10 @@ from io import StringIO
 from typing import Any, Dict, List, Optional, Tuple
 
 import rdkit
-import rdkit.Chem.Draw as Draw
-from rdkit.Chem import BRICS, Descriptors
+from rdkit.Chem import BRICS, Descriptors, Draw
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
-import pdbeccdutils.helpers.drawing as drawing
+from pdbeccdutils.helpers import drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
@@ -74,8 +73,7 @@ class Component:
     # region properties
     @property
     def id(self) -> str:
-        """
-        Supply the unique identifier for the PDB-CCD,
+        """Supply the unique identifier for the PDB-CCD,
         for example 'ATP'.
         Obtained from CCD's _chem_comp.id:
 
@@ -90,8 +88,7 @@ class Component:
 
     @property
     def name(self) -> str:
-        """
-        Supply the 'full name' of the PDB-CCD, for example 'ETHANOL'.
+        """Supply the 'full name' of the PDB-CCD, for example 'ETHANOL'.
         Obtained from PDB-CCD's _chem_comp.name:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.name.html
@@ -105,8 +102,7 @@ class Component:
 
     @property
     def formula(self) -> str:
-        """
-        Supply the chemical formula for the PDB-CCD,
+        """Supply the chemical formula for the PDB-CCD,
         for example 'C2 H6 O'.
         Obtained from PDB-CCD's _chem_comp.formula:
 
@@ -121,8 +117,7 @@ class Component:
 
     @property
     def pdbx_release_status(self) -> ReleaseStatus:
-        """
-        Supply the pdbx_release_status for the PDB-CCD.
+        """Supply the pdbx_release_status for the PDB-CCD.
         Obtained from PDB-CCD's _chem_comp.pdbx_rel_status:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_chem_comp.pdbx_release_status.html
@@ -135,16 +130,31 @@ class Component:
 
     @property
     def modified_date(self) -> Optional[date]:
+        """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
+        Obtained from PDB-CCD's _pdbx_chem_comp_descriptor:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html
+
+        Returns:
+            Optional[date]: Date of the last entrie's modification.
+        """
         return self.properties._modified_date
 
     @property
     def descriptors(self) -> List[Descriptor]:
+        """Supply the pdbx_modified_date for the PDB-CCD
+        Obtained from PDB-CCD's _chem_comp.pdbx_modified_date:
+
+        http://mmcif.rcsb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.program_version.html
+
+        Returns:
+            List[Descriptor]: List of descriptors for a given entry.
+        """
         return self._descriptors
 
     @property
     def inchikey(self) -> str:
-        """
-        Supply the InChIKey for the PDB-CCD.
+        """Supply the InChIKey for the PDB-CCD.
         Obtained from `PDB-CCD's _pdbx_chem_comp_descriptor` table line
         with `_pdbx_chem_comp_descriptor.type=InChIKey`, see:
 
@@ -159,12 +169,22 @@ class Component:
 
     @property
     def inchi(self) -> str:
+        """Supply the InChI for the PDB-CCD.
+        Obtained from `PDB-CCD's _pdbx_chem_comp_descriptor` table line
+        with `_pdbx_chem_comp_descriptor.type=InChI`, see:
+
+        http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.type.html
+
+        If not defined then the empty string '' will be returned.
+
+        Returns:
+            str: the InChI or ''.
+        """
         return next((x.value for x in self._descriptors if x.type == 'InChI'), '')
 
     @property
     def inchi_from_rdkit(self) -> str:
-        """
-        Provides the InChI worked out by RDKit.
+        """Provides the InChI worked out by RDKit.
 
         Returns:
             str: the InChI or emptry '' if there was an error finding it.
@@ -178,8 +198,7 @@ class Component:
 
     @property
     def inchikey_from_rdkit(self) -> str:
-        """
-        Provides the InChIKey worked out by RDKit.
+        """Provides the InChIKey worked out by RDKit.
 
         Returns:
             str: the InChIKey or '' if there was an error finding it.
@@ -205,6 +224,11 @@ class Component:
 
     @property
     def mol_no_h(self) -> rdkit.Chem.rdchem.Mol:
+        """RDKit mol object without hydrogens
+
+        Returns:
+            rdkit.Chem.rdchem.Mol: RDKit mol object with stripped Hs.
+        """
         if self._mol_no_h is None:
             no_h = rdkit.Chem.RemoveHs(self.mol, sanitize=False)
             rdkit.Chem.SanitizeMol(no_h, catchErrors=True)
@@ -214,8 +238,7 @@ class Component:
 
     @property
     def number_atoms(self) -> int:
-        """
-        Supplies the number of atoms in the _chem_comp_atom table
+        """Supplies the number of atoms in the _chem_comp_atom table
 
         Returns:
             int: the number of atoms in the PDB-CCD
@@ -244,8 +267,7 @@ class Component:
 
     @property
     def atoms_ids(self) -> Tuple[Any, ...]:
-        """
-        Supplies a list of the atom_ids obtained from
+        """Supplies a list of the atom_ids obtained from
         `_chem_comp_atom.atom_id`, see:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Categories/chem_comp_atom.html
@@ -263,7 +285,7 @@ class Component:
 
     @property
     def sanitized(self):
-        """Check whether sanitization process succeeded.
+        """Checks whether sanitization process succeeded.
 
         Returns:
             bool: Whether or not the sanitization process has been succesfull
@@ -273,8 +295,7 @@ class Component:
     # endregion properties
 
     def inchikey_from_rdkit_matches_ccd(self, connectivity_only: bool = False) -> bool:
-        """
-        Checks whether inchikey matches between ccd and rdkit
+        """Checks whether inchikey matches between ccd and rdkit
 
         Args:
             connectivity_only (bool): restrict to the first 14 character - the connectivity information.
@@ -320,8 +341,7 @@ class Component:
                       names: bool = False, wedge_bonds: bool = True,
                       atom_highlight: Dict[Any, Tuple] = None,
                       bond_highlight: Dict[Tuple, Tuple] = None):
-        """
-        Save 2d depiction of the component as an SVG file.
+        """Save 2d depiction of the component as an SVG file.
 
         Args:
             file_name (str): path to store 2d depiction
