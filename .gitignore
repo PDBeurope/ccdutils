@@ -103,3 +103,5 @@ pdbeccdutils/tests/out
 doc/_build/
 
 .metrics
+
+.DS_Store
