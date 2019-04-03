@@ -365,10 +365,14 @@ class Component:
             return
 
         drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
+        options = drawer.drawOptions()
         atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self.mol2D.GetAtoms())}
 
         atom_highlight = {} if atom_highlight is None else atom_highlight
         bond_highlight = {} if bond_highlight is None else bond_highlight
+
+        if width < 201:
+            options.bondLineWidth = 1            
 
         if all(isinstance(i, str) for i in atom_highlight.keys()):
             atom_highlight = {atom_mapping[k]: v for k, v in atom_highlight.items()}
@@ -385,8 +389,7 @@ class Component:
                     temp_highlight[bond.GetIdx()] = v
                 bond_highlight = temp_highlight
 
-        if names:
-            options = drawer.drawOptions()
+        if names:            
             for i, a in enumerate(self.mol2D.GetAtoms()):
                 atom_name = self._get_atom_name(a)
                 options.atomLabels[i] = atom_name

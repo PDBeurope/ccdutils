@@ -66,7 +66,7 @@ def draw_molecule(mol, drawer, file_name, width, wedge_bonds, atom_highlight, bo
     except (RuntimeError, ValueError):
         copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,
                                                                 kekulize=True, addChiralHs=True)
-
+    
     if bond_highlight is None:
         drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
                             highlightAtomColors=atom_highlight)
@@ -78,9 +78,6 @@ def draw_molecule(mol, drawer, file_name, width, wedge_bonds, atom_highlight, bo
 
     with open(file_name, 'w') as f:
         svg = drawer.GetDrawingText()
-
-        if width < 201:
-            svg = re.sub('stroke-width:2px', 'stroke-width:1px', svg)
         f.write(svg)
 
 
