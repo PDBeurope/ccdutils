@@ -20,6 +20,7 @@
 quality
 
 """
+import math
 import os
 import sys
 from typing import Dict
@@ -29,8 +30,8 @@ from rdkit import Chem, Geometry
 from rdkit.Chem import AllChem, rdCoordGen
 from scipy.spatial import KDTree
 
-from pdbeccdutils.utils import config
 from pdbeccdutils.core.models import DepictionResult, DepictionSource
+from pdbeccdutils.utils import config
 
 
 class DepictionManager:
@@ -53,7 +54,7 @@ class DepictionManager:
             general_templates_path (str, optional): Defaults to
                 config.general_templates (supplied with the pdbeccdutils).
                 Path to the library with general templates to be used
-                for depicting ligand e.g. porphyring rings.
+                for depicting ligand e.g. porphyrin rings.
 
         """
         self.coordgen_params = rdCoordGen.CoordGenParams()
@@ -131,7 +132,7 @@ class DepictionManager:
                 or *.pdb format
 
         Raises:
-            ValueError: if unsuported format is used: sdf|pdb
+            ValueError: if unsupported format is used: sdf|pdb
 
         Returns:
             rdkit.Chem.rdchem.Mol: RDKit representation of the template
@@ -217,7 +218,7 @@ class DepictionManager:
                     results.append(DepictionResult(source=DepictionSource.Template,
                                                    template_name=key, mol=temp_mol, score=flaws))
         except Exception:
-            pass  # if it fails it fails, but genuinelly it wont
+            pass  # if it fails it fails, but generally it wont
 
         return results
 
@@ -251,27 +252,38 @@ class DepictionValidator:
         Returns:
             bool: true if bonds share collide, false otherwise.
         """
-        atomA = self.conformer.GetAtomPosition(bondA.GetBeginAtomIdx())
-        atomB = self.conformer.GetAtomPosition(bondA.GetEndAtomIdx())
-        atomC = self.conformer.GetAtomPosition(bondB.GetBeginAtomIdx())
-        atomD = self.conformer.GetAtomPosition(bondB.GetEndAtomIdx())
+        atoms = [bondA.GetBeginAtom(), bondA.GetEndAtom(), bondB.GetBeginAtom(), bondB.GetEndAtom()]
+        points = [self.conformer.GetAtomPosition(a.GetIdx()) for a in atoms]
 
-        vecA = Geometry.Point2D(atomB.x - atomA.x, atomB.y - atomA.y)
-        vecB = Geometry.Point2D(atomD.x - atomC.x, atomD.y - atomC.y)
+        vecA = Geometry.Point2D(points[1].x - points[0].x, points[1].y - points[0].y)
+        vecB = Geometry.Point2D(points[3].x - points[2].x, points[3].y - points[2].y)
 
-        # Cramer rule to identify intersection
+        # we need to set up directions of the vectors properly in case
+        # there is a common atom. So we identify angles correctly
+        # e.g. A -> B; B -> C and not A -> B; C -> B.
+        if atoms[0].GetProp('name') != atoms[2].GetProp('name'):
+            points[2], points[3] = points[3], points[2] # swap elements
+            vecB = vecB * -1
+
+        # Cramer's rule to identify intersection
         det = vecA.x * -vecB.y + vecA.y * vecB.x
         if round(det, 2) == 0.00:
             return False
 
-        a = atomC.x - atomA.x
-        b = atomC.y - atomA.y
+        a = points[2].x - points[0].x
+        b = points[2].y - points[0].y
 
         detP = (a * -vecB.y) - (b * -vecB.x)
         p = round(detP / det, 3)
 
-        if (p <= 0 or p >= 1):
+        if (p < 0 or p > 1):
             return False
+
+        if (p == 0 or p == 1):
+            radians = vecA.AngleTo(vecB)
+            angle = 180 / math.pi * radians
+
+            return angle < 5.0
 
         detR = (vecA.x * b) - (vecA.y * a)
         r = round(detR / det, 3)
@@ -336,7 +348,7 @@ class DepictionValidator:
         the depiction is.
 
         Returns:
-            int: numer of bond collisions per molecule
+            int: number of bond collisions per molecule
         """
 
         errors = 0
