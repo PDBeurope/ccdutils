@@ -2,7 +2,7 @@ image: continuumio/miniconda
 
 before_script:
   - apt-get update && apt-get install make
-  - conda create -c rdkit -n rdkit-doc rdkit python=3.6.5
+  - conda create -c rdkit -n rdkit-doc rdkit python=3.7
   - source activate rdkit-doc
   - pip install -e .
   - pip install pytest-cov sphinx sphinx_rtd_theme recommonmark sphinx-autodoc-typehints sphinx-markdown-tables
