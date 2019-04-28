@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # software from PDBe: Protein Data Bank in Europe; https://pdbe.org
 #
-# Copyright 2018 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import json
 import re
 import sys
@@ -25,17 +26,16 @@ import rdkit
 from rdkit.Chem import BRICS, Descriptors, Draw
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
-from pdbeccdutils.helpers import drawing
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
-                                      FragmentHit, ReleaseStatus,
-                                      ScaffoldingMethod)
+                                      ReleaseStatus, ScaffoldingMethod,
+                                      SubstructureMapping)
+from pdbeccdutils.helpers import drawing, conversions
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
-
 
 class Component:
     """
@@ -51,9 +51,10 @@ class Component:
 
         self.mol = mol
         self._mol_no_h = None
-        self.ccd_cif_dict = ccd_cif_dict
-        self._fragments: Dict[str, FragmentHit] = {}
         self.mol2D = None
+        self.ccd_cif_dict = ccd_cif_dict
+        self._fragments: Dict[str, SubstructureMapping] = {}
+        self._scaffolds: Dict[str, SubstructureMapping] = {}
         self._descriptors: List[Descriptor] = []
         self._inchi_from_rdkit = ''
         self._inchikey_from_rdkit = ''
@@ -187,7 +188,7 @@ class Component:
         """Provides the InChI worked out by RDKit.
 
         Returns:
-            str: the InChI or emptry '' if there was an error finding it.
+            str: the InChI or empty '' if there was an error finding it.
         """
         if not self._inchi_from_rdkit:
             try:
@@ -246,24 +247,24 @@ class Component:
         return self.mol.GetNumAtoms()
 
     @property
-    def fragments(self) -> Dict[str, FragmentHit]:
+    def fragments(self) -> List[SubstructureMapping]:
         """Lists matched fragments and atom names.
 
         Returns:
-            Dict[str, List[List[str]]]: Dictionary with fragment names
-            and matched atoms.
-
+            list of `SubstructureMapping`: Substructure mapping for
+                all discovered fragments.
         """
-        res: Dict[str, FragmentHit] = {}
+        return self._id_to_name_mapping(self._fragments)
 
-        for k, v in self._fragments.items():
-            mappings = []
+    @property
+    def scaffolds(self) -> Dict[str, SubstructureMapping]:
+        """Lists matched scaffolds and atom names
 
-            for m in v.mappings:
-                mappings.append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx).GetProp('name'), m)))
-            res[k] = FragmentHit(mappings, v.source)
-
-        return res
+        Returns:
+            Dict[str, SubstructureMapping]: Dictionary with scaffold names
+            and matched atoms.
+        """
+        return self._id_to_name_mapping(self._scaffolds)
 
     @property
     def atoms_ids(self) -> Tuple[Any, ...]:
@@ -288,7 +289,7 @@ class Component:
         """Checks whether sanitization process succeeded.
 
         Returns:
-            bool: Whether or not the sanitization process has been succesfull
+            bool: Whether or not the sanitization process has been successfull
         """
         return self._sanitization_issues
 
@@ -372,7 +373,7 @@ class Component:
         bond_highlight = {} if bond_highlight is None else bond_highlight
 
         if width < 201:
-            options.bondLineWidth = 1            
+            options.bondLineWidth = 1
 
         if all(isinstance(i, str) for i in atom_highlight.keys()):
             atom_highlight = {atom_mapping[k]: v for k, v in atom_highlight.items()}
@@ -389,7 +390,7 @@ class Component:
                     temp_highlight[bond.GetIdx()] = v
                 bond_highlight = temp_highlight
 
-        if names:            
+        if names:
             for i, a in enumerate(self.mol2D.GetAtoms()):
                 atom_name = self._get_atom_name(a)
                 options.atomLabels[i] = atom_name
@@ -479,7 +480,7 @@ class Component:
         regenerated.
 
         Args:
-            type (ConformerType): type of coformer
+            type (ConformerType): type of conformer
                 to be inspected.
 
         Raises:
@@ -525,29 +526,33 @@ class Component:
 
         return result
 
-    def library_search(self, fragment_library: FragmentLibrary) -> int:
+    def library_search(self, fragment_library: FragmentLibrary) -> List[SubstructureMapping]:
         """Identify fragments from the fragment library in this component
 
         Args:
-            fragment_library (FragmentLibrary):
-                Fragment library.
+            fragment_library (FragmentLibrary): Fragment library.
 
         Returns:
-            int: number of matches found
+            list of `SubstructureMapping`: Matches found in this run
         """
-
-        matches_found = 0
-        for k, v in fragment_library.library.items():
+        temp = {}
+        for v in fragment_library.library.values():
             try:
                 matches = self.mol_no_h.GetSubstructMatches(v.mol)
-                matches_found += len(matches)
 
-                if matches:
-                    self._fragments[k] = FragmentHit(matches, v.source)
+                if not matches:
+                    continue
+
+                key = f'{fragment_library.name}_{v.name}'
+                if key not in self._fragments:
+                    temp[key] = SubstructureMapping(v.name, rdkit.Chem.MolToSmiles(v.mol), v.source, matches)
+
             except Exception:
                 pass
 
-        return matches_found
+        self._fragments.update(temp)
+
+        return list(temp.values())
 
     def get_scaffolds(self, scaffolding_method=ScaffoldingMethod.MurckoScaffold):
         """Compute deemed scaffolds for a given compound.
@@ -560,18 +565,49 @@ class Component:
             :obj:`list` of :obj:`rdkit.Chem.rdchem.Mol`: Scaffolds found in the component.
         """
         try:
-            scaffold = None
+            scaffolds = []
 
             if scaffolding_method == ScaffoldingMethod.MurckoScaffold:
-                scaffold = [(MurckoScaffold.GetScaffoldForMol(self.mol))]
+                scaffolds = [(MurckoScaffold.GetScaffoldForMol(self.mol_no_h))]
 
             elif scaffolding_method == ScaffoldingMethod.MurckoGeneric:
-                scaffold = [(MurckoScaffold.MakeScaffoldGeneric(self.mol))]
+                scaffolds = [(MurckoScaffold.MakeScaffoldGeneric(self.mol_no_h))]
 
             elif scaffolding_method == ScaffoldingMethod.Brics:
-                scaffold = BRICS.BRICSDecompose(self.mol)
-                scaffold = [rdkit.Chem.MolFromSmiles(i) for i in scaffold]
-            return scaffold
+                scaffolds = BRICS.BRICSDecompose(self.mol_no_h)
+                brics_smiles = [re.sub(r"(\[[0-9]*\*\])", "[H]", i) for i in scaffolds]  # replace dummy atoms with H's to get matches https://sourceforge.net/p/rdkit/mailman/message/35261974/
+                brics_mols = [rdkit.Chem.MolFromSmiles(x) for x in brics_smiles]
+
+                for mol in brics_mols:
+                    rdkit.Chem.RemoveHs(mol)
+
+                brics_hits = [self.mol_no_h.GetSubstructMatches(i) for i in brics_mols]
+
+                for index, brics_hit in enumerate(brics_hits):
+                    smiles = rdkit.Chem.MolToSmiles(brics_mols[index])
+                    name = scaffolding_method.name
+                    source = 'RDKit scaffolds'
+                    key = f'{name}_{smiles}'
+                    brics_hit = conversions.listit(brics_hit)
+
+                    if key not in self._scaffolds:
+                        self._scaffolds[key] = SubstructureMapping(name, smiles, source, brics_hit)
+
+                return brics_mols
+
+            for s in scaffolds:
+                mapping = [atom.GetIdx() for atom in s.GetAtoms()]
+                smiles = rdkit.Chem.MolToSmiles(s)
+                name = scaffolding_method.name
+                source = 'RDKit scaffolds'
+
+                if name in self._scaffolds:
+                    self._scaffolds[name].mappings.append(mapping)
+                else:
+                    self._scaffolds[name] = SubstructureMapping(name, smiles, source, [mapping])
+
+            return scaffolds
+
         except (RuntimeError, ValueError):
             raise CCDUtilsError(f'Computing scaffolds using method {scaffolding_method.name} failed.')
 
@@ -677,6 +713,28 @@ class Component:
         """
         return atom.GetProp('name') if atom.HasProp('name') else atom.GetSymbol() + str(atom.GetIdx())
 
+    def _id_to_name_mapping(self, struct_mapping):
+        """Lists matched scaffolds and atom names
+
+        Args:
+            struct_mapping (Dict[str, SubstructureMapping]): Basic mapping
+                for fragments/scaffolds.
+
+        Returns:
+            Dict[str, SubstructureMapping]: Dictionary with scaffold names
+            and matched atoms.
+        """
+        res = []
+
+        for v in struct_mapping.values():
+            mappings = []
+
+            for m in v.mappings:
+                mappings.append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx).GetProp('name'), m)))
+            res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
+
+        return res
+
 
 class Properties:
     """Properties of the CCD component. Some of them are extracted from
@@ -698,7 +756,7 @@ class Properties:
             self._name = properties.name
             self._formula = properties.formula
             self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
-            self._modified_date: date = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+            self._modified_date: date = date(1970, 1, 1) if mod_date[0] == '?' else date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
         self._logP = None
         self._heavy_atom_count = None
         self._numH_acceptors = None

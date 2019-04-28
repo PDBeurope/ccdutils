@@ -3,20 +3,13 @@ import csv
 import logging
 import os
 import sys
-from typing import List, NamedTuple
+from functools import reduce
 
 import rdkit
-from rdkit import Chem
 
 import pdbeccdutils
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.models import ScaffoldingMethod
-
-MurckoResults = NamedTuple('MurckoResults',
-                           [('het_code', str),
-                            ('smiles', List[str]),
-                            ('atom_mapping', List[str]),
-                            ('generic_smiles', str)])
 
 
 def _create_parser():
@@ -44,13 +37,19 @@ def _check_args(args):
     Args:
         args (argparse.Namespace): Parsed arguments.
     """
-    print
+
     if not os.path.isfile(args.components_cif):
         print(f'{args.components_cif} does not exist', file=sys.stderr)
         sys.exit(os.EX_NOINPUT)
 
     if not os.path.isdir(args.output_dir):
         os.makedirs(args.output_dir, exist_ok=True)
+
+    log = logging.getLogger(__name__)
+
+    log.info('Settings:')
+    for k, v in vars(args).items():
+        log.info(f'{"":5s}{k:25s}{v}')
 
 
 def _set_up_logger(args):
@@ -66,8 +65,8 @@ def _set_up_logger(args):
     logger = logging.getLogger(__name__)
 
     level = logging.DEBUG if args.debug else logging.WARNING
-    format = '[%(asctime)-15s]  %(message)s'
-    logging.basicConfig(level=level, format=format, datefmt='%a, %d %b %Y %H:%M:%S')
+    fmt = '[%(asctime)-15s]  %(message)s'
+    logging.basicConfig(level=level, format=fmt, datefmt='%a, %d %b %Y %H:%M:%S')
 
     logger.debug(f'PDBe Murcko scaffold pipeline using:')
     logger.debug(f'pdbeccdutils core v. {pdbeccdutils.__version__} RDKit v. {rdkit.__version__}')
@@ -84,19 +83,28 @@ def read_component_cif(args):
         yield v.component
 
 
-def write_csv(data, filename):
+def write_csv(scaffolds, filename):
     """Write scaffolds in the CSV format.
 
     Args:
-        data (MurckoResults): All the calculated scaffolds
+        scaffolds (dict of str: SubstructureMapping): All the calculated scaffolds.
         filename (str): Path to the CSV file destination.
     """
     # we need header of the csv file
     with open(filename, "w") as f:
         fileWriter = csv.writer(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-        fileWriter.writerow(['het_id', 'murcko_smiles', 'murcko_atom_mapping', 'murcko_generic_smiles'])
-        for row in data:
-            fileWriter.writerow(row)
+        fileWriter.writerow(['het_id', 'murcko_smiles', 'murcko_atom_mapping', 'murcko_generic_smiles', 'murcko_generic_atom_mapping'])
+        for k, v in scaffolds.items():
+            murcko = [i for i in v if i.name == 'MurckoScaffold']
+            generic = [i for i in v if i.name == 'MurckoGeneric']            
+            
+            murcko_smiles = murcko[0].smiles if murcko else ''
+            murcko_mapping = reduce(lambda l, m: f"{str(l)};{str(m)}", murcko[0].mappings)
+            
+            generic_smiles = generic[0].smiles if generic else ''
+            generic_mapping = reduce(lambda l,m: f"{str(l)};{str(m)}", generic[0].mappings)
+
+            fileWriter.writerow([k, murcko_smiles, murcko_mapping, generic_smiles, generic_mapping])
 
 
 def calculate_scaffold(args):
@@ -107,29 +115,28 @@ def calculate_scaffold(args):
         args (argparse.Namespace): Parsed arguments.
     """
     logger = logging.getLogger(__name__)
-    murcko_scaffolds = []
+    murcko_scaffolds = {}
     component_generator = read_component_cif(args)
 
     for component in component_generator:
         try:
-            list_of_scaffolds = component.get_scaffolds()
-            temp = component.locate_fragment(list_of_scaffolds[0])  # get the atoms of the scaffolds
-            murcko_atom_names = list(map(lambda l: l.GetProp('name'), temp[0]))  # get the names of the atoms
-            scaffold_generic = component.get_scaffolds(ScaffoldingMethod.MurckoGeneric)  # get generic scaffold smiles
+            component.get_scaffolds(ScaffoldingMethod.MurckoScaffold)
+            component.get_scaffolds(ScaffoldingMethod.MurckoGeneric)
+
+            scaffolds = component.scaffolds
 
         except Exception as e:
             logger.error(f'{component.id} | FAILED with {str(e)}.')
-            pass
+            continue
 
-        murcko_data = MurckoResults(het_code=component.id,
-                                    smiles=[Chem.MolToSmiles(x) for x in list_of_scaffolds if x.GetNumAtoms() > 0],
-                                    atom_mapping=murcko_atom_names,
-                                    generic_smiles=[Chem.MolToSmiles(x) for x in scaffold_generic if x.GetNumAtoms() > 0])
-        murcko_scaffolds.append(murcko_data)
+        murcko_scaffolds[component.id] = scaffolds
+
+        murcko_scaffolds_count = sum(i.name == ScaffoldingMethod.MurckoScaffold.name for i in scaffolds)
+        murcko_generic_scaffolds_count = sum(i.name == ScaffoldingMethod.MurckoGeneric.name for i in scaffolds)
 
         logger.info((f'{component.id} | '
-                     f'Murcko: {len(murcko_data.smiles)}, '
-                     f'Murcko Generic: {len(murcko_data.generic_smiles)}'))
+                     f'Murcko scaffolds: {murcko_scaffolds_count}, '
+                     f'Murcko generic scaffolds: {murcko_generic_scaffolds_count}'))
 
     write_csv(murcko_scaffolds, os.path.join(args.output_dir, 'scaffold_murcko_ccd.csv'))
 
@@ -139,8 +146,7 @@ def main():
     """
     parser = _create_parser()
     args = parser.parse_args()
-    print('Hi!')
-    print(args)
+
     _set_up_logger(args)
     _check_args(args)
 

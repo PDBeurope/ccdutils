@@ -15,9 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""A set of methods for reading in data and creating internal representation
-of molecules. The basic use can be as easy as this::
-
+"""
+A set of methods for reading in data and creating internal representation
+of molecules. The basic use can be as easy as this:
 
     from pdbeccdutils.core import ccd_reader
 
@@ -32,8 +32,7 @@ import rdkit
 
 from mmCif.mmcifIO import MMCIF2Dict
 from pdbeccdutils.core.component import Component
-from pdbeccdutils.helpers import str_conversions
-from pdbeccdutils.helpers import collection_ext
+from pdbeccdutils.helpers import conversions, collection_ext
 from pdbeccdutils.core.models import Descriptor, CCDProperties
 
 
@@ -167,7 +166,7 @@ def _parse_pdb_atoms(mol, atoms):
         atom = rdkit.Chem.Atom(element)
         atom.SetProp('name', atoms['atom_id'][i])
         atom.SetProp('alt_name', atoms['alt_atom_id'][i])
-        atom.SetFormalCharge(str_conversions.str_to_int(atoms['charge'][i]))
+        atom.SetFormalCharge(conversions.str_to_int(atoms['charge'][i]))
 
         if isotope is not None:
             atom.SetIsotope(isotope)
@@ -211,9 +210,9 @@ def _setup_pdb_conformer(atoms, label):
     conformer = rdkit.Chem.Conformer(len(atoms['atom_id']))
 
     for i in range(len(atoms['atom_id'])):
-        x = str_conversions.str_to_float(atoms[label.format(('x'))][i])
-        y = str_conversions.str_to_float(atoms[label.format(('y'))][i])
-        z = str_conversions.str_to_float(atoms[label.format(('z'))][i])
+        x = conversions.str_to_float(atoms[label.format(('x'))][i])
+        y = conversions.str_to_float(atoms[label.format(('y'))][i])
+        z = conversions.str_to_float(atoms[label.format(('z'))][i])
 
         atom_position = rdkit.Chem.rdGeometry.Point3D(x, y, z)
         conformer.SetAtomPosition(i, atom_position)

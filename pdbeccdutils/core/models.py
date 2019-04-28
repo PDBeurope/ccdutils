@@ -15,9 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Module housing some of the dataclasses used throuhout the
+"""Module housing some of the dataclasses used throughout the
 pdbeccdutils application.
 """
+
+from dataclasses import dataclass
 
 from enum import IntEnum
 from typing import Any, List, NamedTuple
@@ -138,28 +140,33 @@ class Descriptor(NamedTuple):
     value: str
 
 
-class FragmentEntry(NamedTuple):
+@dataclass
+class FragmentEntry:
     """Fragment entry in the fragment library
 
     Args:
-        name (str): Name or id of the fragment
-        smiles (str): Smiles representation of the fragment
-        mol (rdkit.Chem.rdchem.Mol): rdkit mol object with the fragment.
+        name (str): Name or id of the fragment.
         source (str): where does this fragment come from.
+        mol (rdkit.Chem.rdchem.Mol): rdkit mol object with the fragment.
+    """
+
+    name: str
+    source: str
+    mol: rdkit.Chem.rdchem.Mol
+
+
+@dataclass
+class SubstructureMapping:
+    """Represents a fragment hit in the component
+
+    Args:
+        name (str): Name of the substructure.
+        smiles (str): SMILES representation of the substructure
+        source (str): Where does this fragment come from.
+        mapping (List[List[Any]]): Mappings with atom names or indices.
     """
 
     name: str
     smiles: str
-    mol: rdkit.Chem.rdchem.Mol
     source: str
-
-
-class FragmentHit(NamedTuple):
-    """Represents a fragment hit in the component
-
-    Args:
-        mapping (list(list(Any))): Mappings with atom names or indices.
-        source (str): Where does this fragment come from.
-    """
     mappings: List[List[Any]]
-    source: str
