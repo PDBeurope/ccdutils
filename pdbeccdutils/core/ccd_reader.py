@@ -165,6 +165,7 @@ def _parse_pdb_atoms(mol, atoms):
             element = '*'
 
         atom = rdkit.Chem.Atom(element)
+        atom.SetChiralTag(_atom_chiral_tag(atoms['pdbx_stereo_config'][i]))
         atom.SetProp('name', atoms['atom_id'][i])
         atom.SetProp('alt_name', atoms['alt_atom_id'][i])
         atom.SetFormalCharge(conversions.str_to_int(atoms['charge'][i]))
@@ -357,10 +358,20 @@ def _bond_pdb_order(value_order):
     """
     if value_order == 'SING':
         return rdkit.Chem.rdchem.BondType(1)
-    elif value_order == 'DOUB':
+    if value_order == 'DOUB':
         return rdkit.Chem.rdchem.BondType(2)
-    elif value_order == 'TRIP':
+    if value_order == 'TRIP':
         return rdkit.Chem.rdchem.BondType(3)
-    else:
-        return None
+    
+    return None
+
+def _atom_chiral_tag(tag):
+    if tag == 'N':
+        return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
+    if tag == 'S':
+        return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CCW
+    if tag == 'R':
+        return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CW
+
+    return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
 # endregion parse mmcif

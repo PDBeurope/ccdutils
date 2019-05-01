@@ -524,7 +524,7 @@ class Component:
                 return False
 
             rdkit.Chem.Kekulize(rwmol)
-            rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol)
+            #rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol)
             rdkit.Chem.rdmolops.AssignStereochemistry(rwmol)
             self.mol = rwmol.GetMol()
         except Exception as e:
