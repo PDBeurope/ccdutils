@@ -34,6 +34,7 @@ from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
                                       ReleaseStatus, ScaffoldingMethod,
                                       SubstructureMapping)
 from pdbeccdutils.helpers import conversions, drawing
+from pdbeccdutils.utils import web_services
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -61,14 +62,14 @@ class Component:
         self._inchi_from_rdkit = ''
         self._inchikey_from_rdkit = ''
         self._sanitization_issues = self._sanitize()
+        self._physchem_properties: Dict[str, Any] = {}
+        self._external_mapping: Dict[str, List[str]] = {}
 
         self.conformers_mapping = \
             {ConformerType.AllConformers: - 1,
              ConformerType.Ideal: 0,
              ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
              ConformerType.Computed: 2000}
-
-        self._physchem_properties: Dict[str, Any] = {}
 
         if descriptors is not None:
             self._descriptors = descriptors
@@ -309,12 +310,50 @@ class Component:
             try:
                 properties = Properties()
                 self._physchem_properties = {n: v for n, v in zip(properties.GetPropertyNames(), properties.ComputeProperties(self.mol))}
-                self._physchem_properties['NumHeavyAtoms'] = self.mol.GetNumHeavyAtoms()
+                self._physchem_properties['NumHeavyAtoms'] = float(self.mol.GetNumHeavyAtoms())
             except Exception:
                 raise CCDUtilsError('Physicochemical properties could not be calculated.')
 
         return self._physchem_properties
+
+    @property
+    def external_mappings(self):
+        """List external mappings provided by UniChem. get_external_mappings()
+        was not called before only agreed mapping is retrieved.
+
+        Returns:
+            dict of str: [str]: UniChem mappings
+        """
+
+        return self._external_mapping
+
+    @external_mappings.setter
+    def external_mappings(self, value):
+        """Set mapping for this component obtained with a different mean
+        but internal use of UniChem.
+
+        Args:
+            value (dict of str: [str]): UniChem mappings
+        """
+        self._external_mapping = value
+
     # endregion properties
+
+    def fetch_external_mappings(self, all_mappings=False):
+        """Retrieve external mapping through UniChem based on the InChi Key.
+
+        Args:
+            all_mappings (bool, optional): Get UniChem mappings. Defaults to False.
+
+        Returns:
+            dict of str: [str]: Return resource ids pairing established by UniChem.
+        """
+        if all_mappings:
+            self._external_mapping = web_services.get_all_unichem_mapping(self.inchikey)
+        else:
+            self._external_mapping = web_services.get_agreed_unichem_mapping(self.inchikey)
+
+        return self._external_mapping
 
     def inchikey_from_rdkit_matches_ccd(self, connectivity_only: bool = False) -> bool:
         """Checks whether inchikey matches between ccd and rdkit
