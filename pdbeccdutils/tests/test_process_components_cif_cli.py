@@ -72,7 +72,7 @@ class TestCutDownComponentsCif:
     @pytest.fixture(scope='class')
     def pipeline_wd(self, tmpdir_factory):
         wd = tmpdir_factory.mktemp('pdbechem_test')
-        print('PdbeChem working directory is {}'.format(wd))
+        print('PDBeChem working directory is {}'.format(wd))
 
         parser = create_parser()
         args = parser.parse_args(['-o', str(wd), test_cut_down_components_cif])

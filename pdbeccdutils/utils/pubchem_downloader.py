@@ -41,7 +41,7 @@ class PubChemDownloader:
         self.pubchem_templates = pubchem_templates
 
     def update_ccd_dir(self, components: str):
-        """Update 2D images of pdbechem components which are available
+        """Update 2D images of PDBeChem components which are available
         in the pubchem database
 
         Args:
@@ -62,12 +62,12 @@ class PubChemDownloader:
         """
         components = ccd_reader.read_pdb_components_file(ccd)
 
-        for k, v in components.items():
-            self.process_template(v.component)
+        for i in components.values():
+            self.process_template(i.component)
 
     def process_template(self, component):
         """Process template for a given component. First the component
-        is attempted to be downloaded and rescaled. Since the RDKit
+        is attempted to be downloaded and re-scaled. Since the RDKit
         default depiction has 1.5A single bond size whereas templates
         from pubchem are 1.0A.
 
@@ -95,7 +95,7 @@ class PubChemDownloader:
             inchikey (str): CCD's INCHIKey
 
         Returns:
-            bool: If the download was succesfull or no.
+            bool: If the download was successful or no.
         """
         pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
 

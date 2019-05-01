@@ -38,7 +38,7 @@ class DepictionManager:
     """
     Toolkit for depicting ligand's structure using RDKit.
     One can supply either templates or 2D depictions by pubchem.
-    PubCshem templates can be downloaded using PubChemDownloader class.
+    PubChem templates can be downloaded using PubChemDownloader class.
     """
 
     def __init__(self, pubchem_templates_path: str = '', general_templates_path: str = config.general_templates)-> None:
@@ -107,8 +107,8 @@ class DepictionManager:
 
         if results:
             return results[0]
-        else:
-            return DepictionResult(source=DepictionSource.Failed, template_name='', mol=None, score=1000)
+
+        return DepictionResult(source=DepictionSource.Failed, template_name='', mol=None, score=1000)
 
     def _get_pubchem_template_path(self, het_id):
         """Get path to the PubChem template if it exists.
