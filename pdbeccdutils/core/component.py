@@ -37,6 +37,7 @@ from pdbeccdutils.helpers import drawing, conversions
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
 
+
 class Component:
     """
     Wrapper for the rdkit.Chem.Mol object enabling some of its
@@ -257,7 +258,7 @@ class Component:
         return self._id_to_name_mapping(self._fragments)
 
     @property
-    def scaffolds(self) -> Dict[str, SubstructureMapping]:
+    def scaffolds(self) -> List[SubstructureMapping]:
         """Lists matched scaffolds and atom names
 
         Returns:
@@ -590,6 +591,9 @@ class Component:
                     key = f'{name}_{smiles}'
                     brics_hit = conversions.listit(brics_hit)
 
+                    if not smiles:
+                        continue
+
                     if key not in self._scaffolds:
                         self._scaffolds[key] = SubstructureMapping(name, smiles, source, brics_hit)
 
@@ -600,6 +604,9 @@ class Component:
                 smiles = rdkit.Chem.MolToSmiles(s)
                 name = scaffolding_method.name
                 source = 'RDKit scaffolds'
+
+                if not smiles:
+                    continue
 
                 if name in self._scaffolds:
                     self._scaffolds[name].mappings.append(mapping)
