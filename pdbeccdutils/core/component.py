@@ -20,10 +20,11 @@ import re
 import sys
 from datetime import date
 from io import StringIO
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import rdkit
-from rdkit.Chem import BRICS, Descriptors, Draw
+from rdkit.Chem import BRICS, Draw
+from rdkit.Chem.rdMolDescriptors import Properties
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
@@ -32,7 +33,7 @@ from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
                                       ReleaseStatus, ScaffoldingMethod,
                                       SubstructureMapping)
-from pdbeccdutils.helpers import drawing, conversions
+from pdbeccdutils.helpers import conversions, drawing
 
 METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
                'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
@@ -67,10 +68,13 @@ class Component:
              ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
              ConformerType.Computed: 2000}
 
-        self.properties: Properties = Properties(self.mol, properties)
+        self._physchem_properties: Dict[str, Any] = {}
 
         if descriptors is not None:
             self._descriptors = descriptors
+
+        if properties is not None:
+            self._cif_properties = properties
 
     # region properties
     @property
@@ -86,7 +90,7 @@ class Component:
         Returns:
             str: the _chem_comp.id or ''.
         """
-        return self.properties._id
+        return self._cif_properties.id
 
     @property
     def name(self) -> str:
@@ -100,7 +104,7 @@ class Component:
         Returns:
             str: the _chem_comp.name or ''.
         """
-        return self.properties._name
+        return self._cif_properties.name
 
     @property
     def formula(self) -> str:
@@ -115,7 +119,7 @@ class Component:
         Returns:
             str: the _chem_comp.formula or ''.
         """
-        return self.properties._formula
+        return self._cif_properties.formula
 
     @property
     def pdbx_release_status(self) -> ReleaseStatus:
@@ -128,19 +132,19 @@ class Component:
             pdbeccdutils.core.enums.ReleaseStatus: enum of the release
             status (this includes NOT_SET if no value is defined).
         """
-        return self.properties._pdbx_release_status
+        return self._cif_properties.pdbx_release_status
 
     @property
-    def modified_date(self) -> Optional[date]:
+    def modified_date(self) -> date:
         """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
         Obtained from PDB-CCD's _pdbx_chem_comp_descriptor:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html
 
         Returns:
-            Optional[date]: Date of the last entrie's modification.
+            date: Date of the last entrie's modification.
         """
-        return self.properties._modified_date
+        return self._cif_properties.modified_date
 
     @property
     def descriptors(self) -> List[Descriptor]:
@@ -222,7 +226,7 @@ class Component:
         Returns:
             bool: True if PDB-CCD has been released.
         """
-        return self.properties._pdbx_release_status == ReleaseStatus.REL
+        return self._cif_properties.pdbx_release_status == ReleaseStatus.REL
 
     @property
     def mol_no_h(self) -> rdkit.Chem.rdchem.Mol:
@@ -294,6 +298,22 @@ class Component:
         """
         return self._sanitization_issues
 
+    @property
+    def physchem_properties(self):
+        """RDKit calculated properties related to the CCD compound
+
+        Returns:
+            dict of str: float: A list of RDKit calculated properties
+        """
+        if not self._physchem_properties:
+            try:
+                properties = Properties()
+                self._physchem_properties = {n: v for n, v in zip(properties.GetPropertyNames(), properties.ComputeProperties(self.mol))}
+                self._physchem_properties['NumHeavyAtoms'] = self.mol.GetNumHeavyAtoms()
+            except Exception:
+                raise CCDUtilsError('Physicochemical properties could not be calculated.')
+
+        return self._physchem_properties
     # endregion properties
 
     def inchikey_from_rdkit_matches_ccd(self, connectivity_only: bool = False) -> bool:
@@ -741,180 +761,3 @@ class Component:
             res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
 
         return res
-
-
-class Properties:
-    """Properties of the CCD component. Some of them are extracted from
-    the input CCD others are computed by RDKit.
-    """
-
-    def __init__(self, mol: rdkit.Chem.rdchem.Mol, properties: Optional[CCDProperties]) -> None:
-        self.mol = mol
-
-        self._pdbx_release_status = ReleaseStatus.NOT_SET
-        self._id = ''
-        self._name = ''
-        self._formula = ''
-        self._modified_date = None
-
-        if properties is not None:
-            mod_date = properties.modified_date.split('-')
-            self._id = properties.id
-            self._name = properties.name
-            self._formula = properties.formula
-            self._pdbx_release_status = ReleaseStatus[properties.pdbx_release_status]
-            self._modified_date: date = date(1970, 1, 1) if mod_date[0] == '?' else date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
-        self._logP = None
-        self._heavy_atom_count = None
-        self._numH_acceptors = None
-        self._numH_donors = None
-        self._num_rotable_bonds = None
-        self._ring_count = None
-        self._TPSA = None
-        self._molwt = None
-
-    # region properties
-    @property
-    def logP(self) -> Optional[float]:
-        """
-        Wildman-Crippen LogP value defined by RDKit.
-
-        Returns:
-            Optional[float]: Wildman-Crippen LogP, or None if the
-            calculation fails.
-        """
-        try:
-            if self._logP is None:
-                self._logP = Descriptors.MolLogP(self.mol)
-        except ValueError:
-            self._logP = None
-
-        return self._logP
-
-    @property
-    def heavy_atom_count(self) -> Optional[int]:
-        """
-        Heavy atom count for defined by RDKit.
-
-        Returns:
-            Optional[int]: Number of heavy atoms, or None if the
-            calculation fails.
-        """
-
-        try:
-            if self._heavy_atom_count is None:
-                self._heavy_atom_count = Descriptors.HeavyAtomCount(self.mol)
-        except ValueError:
-            self._heavy_atom_count = None
-
-        return self._heavy_atom_count
-
-    @property
-    def numH_acceptors(self) -> Optional[int]:
-        """
-        Number of hydrogen bond acceptors defined by RDKit.
-
-        Returns:
-            Optional[int]: Number of H-bond acceptors, or None if the
-            calculation fails.
-        """
-
-        try:
-            if self._numH_acceptors is None:
-                self._numH_acceptors = Descriptors.NumHAcceptors(self.mol)
-        except ValueError:
-            self._numH_acceptors = None
-
-        return self._numH_acceptors
-
-    @property
-    def numH_donors(self) -> Optional[int]:
-        """
-        Number of hydrogen bond donors.
-
-        Returns:
-            Optional[int]: Number of H-bond donors, or None if the
-            calculation fails.
-        """
-
-        try:
-            if self._numH_donors is None:
-                self._numH_donors = Descriptors.NumHDonors(self.mol)
-        except ValueError:
-            self._numH_donors = None
-
-        return self._numH_donors
-
-    @property
-    def num_rotable_bonds(self) -> Optional[int]:
-        """
-        Number of rotatable bonds defined by RDKit.
-
-        Returns:
-            Optional[int]: Number of rotatable bonds, or None if the
-            calculation fails.
-        """
-
-        try:
-            if self._num_rotable_bonds is None:
-                self._num_rotable_bonds = Descriptors.NumRotatableBonds(self.mol)
-        except ValueError:
-            self._num_rotable_bonds = None
-
-        return self._num_rotable_bonds
-
-    @property
-    def ring_count(self) -> Optional[int]:
-        """
-        Number of rings defined by RDKit.
-
-        Returns:
-            Optional[int]: Number of rings, or None if the calculation
-            fails.
-        """
-
-        try:
-            if self._ring_count is None:
-                self._ring_count = Descriptors.RingCount(self.mol)
-        except ValueError:
-            self._ring_count = None
-
-        return self._ring_count
-
-    @property
-    def TPSA(self) -> Optional[float]:
-        """
-        Topological surface area defined by RDKit.
-
-        Returns:
-            Optional[float]: Topological surface area in A^2, or None if
-            the calculation fails.
-        """
-
-        try:
-            if self._TPSA is None:
-                self._TPSA = round(Descriptors.TPSA(self.mol), 3)
-        except ValueError:
-            self._TPSA = None
-
-        return self._TPSA
-
-    @property
-    def molwt(self) -> Optional[float]:
-        """
-        Molecular weight defined by RDKit.
-
-        Returns:
-            Optional[float]: Molecular weight, or None if the calculation
-            fails.
-        """
-
-        try:
-            if self._molwt is None:
-                self._molwt = round(Descriptors.MolWt(self.mol), 3)
-        except ValueError:
-            self._molwt = None
-
-        return self._molwt
-
-    # endregion properties

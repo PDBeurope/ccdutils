@@ -26,14 +26,15 @@ of molecules. The basic use can be as easy as this:
 """
 
 import os
+from datetime import date
 from typing import Dict, List, NamedTuple
 
 import rdkit
-
 from mmCif.mmcifIO import MMCIF2Dict
+
 from pdbeccdutils.core.component import Component
-from pdbeccdutils.helpers import conversions, collection_ext
-from pdbeccdutils.core.models import Descriptor, CCDProperties
+from pdbeccdutils.core.models import CCDProperties, Descriptor, ReleaseStatus
+from pdbeccdutils.helpers import collection_ext, conversions
 
 
 class CCDReaderResult(NamedTuple):
@@ -58,7 +59,7 @@ class CCDReaderResult(NamedTuple):
 
 def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
     """
-    Read in single wwpdb cif component and create its internal
+    Read in single wwPDB CCD CIF component and create its internal
     representation.
 
     Args:
@@ -81,7 +82,7 @@ def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
 
 def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
     """
-    Process multiple compounds stored in the wwpdb CCD
+    Process multiple compounds stored in the wwPDB CCD
     `components.cif` file.
 
     Args:
@@ -93,7 +94,7 @@ def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
 
     Returns:
         dict(str, CCDReaderResult): Internal representation of all
-        the compponents in the `components.cif` file.
+        the components in the `components.cif` file.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
@@ -267,7 +268,7 @@ def _handle_implicit_hydrogens(mol):
 
 def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
     """
-    Parse useful informations from _pdbx_chem_comp_* category
+    Parse useful information from _pdbx_chem_comp_* category
 
     Args:
         pdbx_chem_comp_descriptors (dict): mmcif category with the
@@ -294,22 +295,28 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
 
 def _parse_pdb_properties(chem_comp):
     """
-    Parse useful informations from _chem_comp category
+    Parse useful information from _chem_comp category
 
     Args:
-        chem_comp (dict): the mmcif category with rdkit.Chem_comp info.
+        chem_comp (dict): the mmcif category with _chem_comp info
 
     Returns:
-        Properties: namedtuple with the property info
+        Properties: dataclass with the CCD properties.
     """
     properties = None
     if chem_comp:
+        mod_date = chem_comp['pdbx_modified_date'][0].split('-')
+        d = date(1970, 1, 1) if mod_date[0] == '?' else date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+
+        rel_status = chem_comp['pdbx_release_status'][0]
+        rel_status = ReleaseStatus.from_str(chem_comp['pdbx_release_status'][0])
+
         properties = CCDProperties(id=chem_comp['id'][0],
                                    name=chem_comp['name'][0],
                                    formula=chem_comp['formula'][0],
-                                   modified_date=chem_comp['pdbx_modified_date'][0],
-                                   pdbx_release_status=chem_comp['pdbx_release_status'][0],
-                                   weight=chem_comp['formula_weight'][0])
+                                   modified_date=d,
+                                   pdbx_release_status=rel_status,
+                                   weight=0.0 if chem_comp['formula_weight'][0] == '?' else float(chem_comp['formula_weight'][0]))
     return properties
 
 
