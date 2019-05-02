@@ -146,6 +146,24 @@ class Descriptor(NamedTuple):
 
 
 @dataclass
+class ParityResult:
+    """
+    NamedTuple for the result of parity method along with the details
+    necessary for calculating the similarity score.
+
+    Attributes:
+        template_atoms (int): Number of template atoms.
+        query_atoms (int): Number of query molecule atoms.
+        match_count (int): Size o the common subgraph match.
+        similarity_score (float): Calculate similarity score.
+    """
+    template_atoms: int
+    query_atoms: int
+    match_count: int
+    similarity_score: float
+
+
+@dataclass
 class CCDProperties:
     """
     Properties of the component comming from _chem_comp namespace.
