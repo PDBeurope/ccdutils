@@ -26,6 +26,7 @@ of molecules. The basic use can be as easy as this:
 """
 
 import os
+import sys
 from datetime import date
 from typing import Dict, List, NamedTuple
 
@@ -33,6 +34,7 @@ import rdkit
 from mmCif.mmcifIO import MMCIF2Dict
 
 from pdbeccdutils.core.component import Component
+from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import CCDProperties, Descriptor, ReleaseStatus
 from pdbeccdutils.helpers import collection_ext, conversions
 
@@ -99,8 +101,15 @@ def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
     if not os.path.isfile(path_to_cif):
         raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
 
-    return {k: _parse_pdb_mmcif(v)
-            for k, v in MMCIF2Dict().parse(path_to_cif).items()}
+    result_bag = {}
+
+    for k, v in MMCIF2Dict().parse(path_to_cif).items():
+        try:
+            result_bag[k] = _parse_pdb_mmcif(v)
+        except CCDUtilsError as e:
+            print(f'ERROR: Data block {k} not processed. Reason: ({str(e)}).', file=sys.stderr)
+
+    return result_bag
 
 
 # region parse mmcif
@@ -243,7 +252,10 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
         if any(a is None for a in [atom_1, atom_2, bond_order]):
             errors.append('Problem with the {}-th bond in the _chem_comp_bond group'.format(i + 1))
 
-        mol.AddBond(atom_1, atom_2, bond_order)
+        try:
+            mol.AddBond(atom_1, atom_2, bond_order)
+        except RuntimeError:
+            errors.append(f'Duplicit bond {bonds["atom_id_1"][i]}-{bonds["atom_id_2"][i]}')
 
 
 def _handle_implicit_hydrogens(mol):
@@ -362,15 +374,16 @@ def _bond_pdb_order(value_order):
         return rdkit.Chem.rdchem.BondType(2)
     if value_order == 'TRIP':
         return rdkit.Chem.rdchem.BondType(3)
-    
+
     return None
+
 
 def _atom_chiral_tag(tag):
     """Parse _chem_comp.pdbx_stereo.config from chem_comp
-    
+
     Args:
         tag (str): R/S/N identification of chiral center.
-    
+
     Returns:
         rdkit.Chem.ChiralType: Chiral center in RDKit language.
     """
