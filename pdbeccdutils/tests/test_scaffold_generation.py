@@ -15,7 +15,7 @@ test_inputs = [
     ('NAG', 'C1CCOCC1'),
     ('VIA', 'O=c1[nH]c(-c2cccc(S(=O)(=O)N3CCNCC3)c2)nc2cn[nH]c12'),
     ('007', 'c1ccc(C2CCCC2)cc1'),
-    ('BCD', 'C1C[C@@H]2OC[C@H]1O[C@@H]1CC[C@@H](CO1)O[C@@H]1CC[C@@H](CO1)O[C@@H]1CC[C@@H](CO1)O[C@@H]1CC[C@@H](CO1)O[C@@H]1CC[C@@H](CO1)O[C@@H]1CC[C@@H](CO1)O2'),
+    ('BCD', 'C1C[C@H]2OC[C@H]1O[C@H]1CC[C@@H](CO1)O[C@H]1CC[C@@H](CO1)O[C@H]1CC[C@@H](CO1)O[C@H]1CC[C@@H](CO1)O[C@H]1CC[C@@H](CO1)O[C@H]1CC[C@@H](CO1)O2'),
     ('DMS', ''),
     ('EOH', '')
 ]
