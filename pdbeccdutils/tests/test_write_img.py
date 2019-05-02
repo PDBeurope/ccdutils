@@ -7,13 +7,13 @@ import os
 import pytest
 
 from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.tests.tst_utilities import cif_filename
 
 
 def load_molecule(id):
     depiction = DepictionManager()
-    c = ccd_reader.read_pdb_cif_file(cif_filename(id)).component    
+    c = ccd_reader.read_pdb_cif_file(cif_filename(id)).component
     c.compute_2d(depiction)
     return c
 

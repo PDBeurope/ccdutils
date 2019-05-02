@@ -2,9 +2,10 @@
 load EOH.cif from file and test important cif item.
 """
 import pytest
-from pdbeccdutils.tests.tst_utilities import cif_filename
+
 from pdbeccdutils.core import ccd_reader, ccd_writer
-from pdbeccdutils.core.models import ReleaseStatus, ConformerType
+from pdbeccdutils.core.models import ConformerType, ReleaseStatus
+from pdbeccdutils.tests.tst_utilities import cif_filename
 
 
 class TestLoadEOH:

@@ -1,10 +1,8 @@
 import pytest
-
 from rdkit import Chem
 
-from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.core import ccd_reader
-
+from pdbeccdutils.tests.tst_utilities import cif_filename
 
 """
 Test of the Scaffolding generation

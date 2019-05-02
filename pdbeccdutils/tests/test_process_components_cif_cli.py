@@ -11,7 +11,9 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-from pdbeccdutils.scripts.process_components_cif_cli import check_args, create_parser, PDBeChemManager
+from pdbeccdutils.scripts.process_components_cif_cli import (PDBeChemManager,
+                                                             check_args,
+                                                             create_parser)
 from pdbeccdutils.tests.tst_utilities import (cif_filename,
                                               file_name_in_tsts_out,
                                               test_cut_down_components_cif)
