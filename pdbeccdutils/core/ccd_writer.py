@@ -20,15 +20,15 @@
 
 Raises:
     CCDUtilsError: If deemed format is not supported or an unrecoverable
-        error occures.
+        error occurres.
 """
 import copy
 import json
 import math
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
 from collections import OrderedDict
 from typing import List
+from xml.dom import minidom
 
 import mmCif.mmcifIO as mmcif
 import rdkit
@@ -274,6 +274,12 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
 
     cif_copy = copy.deepcopy(component.ccd_cif_dict)
 
+    _add_sw_info_cif(cif_copy)
+    _add_2d_depiction_cif(component, cif_copy)
+    _add_fragments_and_scaffolds_cif(component, cif_copy)
+    _add_rdkit_properties_cif(component, cif_copy)
+    __add_unichem_mapping(component, cif_copy)
+
     if remove_hs:
         h_indices: List[int] = [i for i, x in enumerate(cif_copy['_chem_comp_atom']['type_symbol']) if x == "H"]
         h_names: List[str] = [cif_copy['_chem_comp_atom']['atom_id'][i] for i in h_indices]
@@ -381,7 +387,7 @@ def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.I
         :obj:`dict` of :obj:`str`: dictionary representation of the component
     """
     if conf_type == ConformerType.AllConformers:
-        raise AttributeError('All conformer export is not suppoted for json export')
+        raise AttributeError('All conformer export is not supported for json export')
 
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
     result = {'atoms': [], 'bonds': []}
@@ -454,7 +460,7 @@ def _prepate_structure(component, remove_hs, conf_type):
         to be exported.
     """
     conf_id = 0 if conf_type == ConformerType.Depiction else component.conformers_mapping[conf_type]
-    mol_to_save = component._2dmol if conf_type == ConformerType.Depiction else component.mol
+    mol_to_save = component.mol2D if conf_type == ConformerType.Depiction else component.mol
 
     if remove_hs:
         mol_to_save = rdkit.Chem.RemoveHs(mol_to_save, sanitize=False)
@@ -793,7 +799,7 @@ def _get_atom_coord(component, at_id, conformer_type):
 # region fallbacks
 
 
-def _to_sdf_str_fallback(mol, id, mappings):
+def _to_sdf_str_fallback(mol, ccd_id, mappings):
     """Fallback method to generate SDF file in case the default one in
     RDKit fails.
 
@@ -816,7 +822,7 @@ def _to_sdf_str_fallback(mol, id, mappings):
         atom_count = mol.GetNumAtoms()
         bond_count = mol.GetNumBonds()
 
-        content.append('{} - {} conformer\n    RDKit   3D\n'.format(id, k))
+        content.append('{} - {} conformer\n    RDKit   3D\n'.format(ccd_id, k))
         content.append('{:>3}{:3}  0  0  0  0  0  0  0  0999 V2000'.format(atom_count, bond_count))
 
         for i in range(0, atom_count):
@@ -825,7 +831,7 @@ def _to_sdf_str_fallback(mol, id, mappings):
                 rdkit_conformer.GetAtomPosition(i).y,
                 rdkit_conformer.GetAtomPosition(i).z,
                 mol.GetAtomWithIdx(i).GetSymbol(),
-                _charge_to_sdf(mol.GetAtomWithIdx(i).GetFormalCharge()),
+                __charge_to_sdf(mol.GetAtomWithIdx(i).GetFormalCharge()),
             ))
 
         for i in range(0, bond_count):
@@ -833,8 +839,8 @@ def _to_sdf_str_fallback(mol, id, mappings):
             content.append('{:>3}{:>3}{:>3}{:>3}  0  0  0'.format(
                 bond.GetBeginAtom().GetIdx() + 1,
                 bond.GetEndAtom().GetIdx() + 1,
-                _bond_type_to_sdf(bond),
-                _bond_stereo_to_sdf(bond)
+                __bond_type_to_sdf(bond),
+                __bond_stereo_to_sdf(bond)
             ))
         content.append('M  END')
         content.append('$$$$')
@@ -846,8 +852,8 @@ def _to_pdb_str_fallback(mol, conf_id):
     RDKit fails.
 
     Args:
-        mol (rdkit.Chem.rdchem.Mol): Molecule to be writter.
-        conf_id (int): conformer id to be writen.
+        mol (rdkit.Chem.rdchem.Mol): Molecule to be written.
+        conf_id (int): conformer id to be written.
 
     Returns:
         str: String representation the component in the PDB format.
@@ -905,8 +911,11 @@ def _to_pdb_str_fallback(mol, conf_id):
 
     return "\n".join(content)
 
+# endregion fallbacks
 
-def _charge_to_sdf(charge):
+
+# region helpers
+def __charge_to_sdf(charge):
     """Translate RDkit charge to the SDF language.
 
     Args:
@@ -933,7 +942,7 @@ def _charge_to_sdf(charge):
         return "0"
 
 
-def _bond_stereo_to_sdf(bond):
+def __bond_stereo_to_sdf(bond):
     """Translate bond stereo information to the sdf language. Needs to
     be checked.
 
@@ -947,15 +956,14 @@ def _bond_stereo_to_sdf(bond):
 
     if stereo == rdkit.Chem.rdchem.BondStereo.STEREONONE:
         return '0'
-    elif stereo == rdkit.Chem.rdchem.BondStereo.STEREOANY:
+    if stereo == rdkit.Chem.rdchem.BondStereo.STEREOANY:
         return '4'
-    elif stereo in (rdkit.Chem.rdchem.BondStereo.STEREOCIS, rdkit.Chem.rdchem.BondStereo.STEREOTRANS):
+    if stereo in (rdkit.Chem.rdchem.BondStereo.STEREOCIS, rdkit.Chem.rdchem.BondStereo.STEREOTRANS):
         return '3'
-    else:
-        return '0'
+    return '0'
 
 
-def _bond_type_to_sdf(bond):
+def __bond_type_to_sdf(bond):
     """Get bond type in sdf language. Based on:
     http://www.nonlinear.com/progenesis/sdf-studio/v0.9/faq/sdf-file-format-guidance.aspx
 
@@ -979,4 +987,195 @@ def _bond_type_to_sdf(bond):
         return '0'
 
 
-# endregion fallbacks
+def __post_process_cif_category(cif_copy, category_name):
+    """Single value category needs to be string rather than array
+    with a single value. Also if the category contains nothing, it should
+    be removed.
+
+    Args:
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+        category_name (str): Category name to be accounted for
+    """
+    if not cif_copy[category_name]:  # nothing in the category => should be removed
+        cif_copy.pop(category_name)
+        return
+
+    for k, v in cif_copy[category_name].items():
+        if isinstance(v, list):
+            if len(v) == 1:
+                cif_copy[category_name][k] = v[0]
+
+            if not v:
+                cif_copy.pop(category_name)
+                return
+
+
+# endregion helpers
+
+
+# region cif-export addition
+def _add_sw_info_cif(cif_copy):
+    """Add information to the cif file about software versions used
+    to generate this information
+
+    Args:
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    category = '_software'
+
+    cif_copy[category] = {}
+    cif_copy[category]['name'] = ['rdkit', 'pdbeccdutils']
+    cif_copy[category]['version'] = [rdkit.__version__, pdbeccdutils.__version__]
+
+
+def _add_2d_depiction_cif(component, cif_copy):
+    """Add 2D coordinates of the component depiction
+
+    Args:
+        component (Component): pdbeccdutils component.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    if component.mol2D is None:
+        return
+
+    category = '_chem_comp_pdbe_depiction'
+
+    cif_copy[category] = {}
+    conformer = component.mol2D.GetConformer()
+
+    cif_copy[category]['comp_id'] = [component.id for i in range(0, conformer.GetNumAtoms())]
+    cif_copy[category]['atom_id'] = [atom.GetProp('name') for atom in component.mol2D.GetAtoms()]
+    cif_copy[category]['element'] = [atom.GetSymbol() for atom in component.mol2D.GetAtoms()]
+    cif_copy[category]['model_Cartn_x'] = [f'{conformer.GetAtomPosition(i).x:.3f}' for i in range(0, conformer.GetNumAtoms())]
+    cif_copy[category]['model_Cartn_y'] = [f'{conformer.GetAtomPosition(i).y:.3f}' for i in range(0, conformer.GetNumAtoms())]
+    cif_copy[category]['pdbx_ordinal'] = [i + 1 for i in range(0, conformer.GetNumAtoms())]
+
+    __post_process_cif_category(cif_copy, "_chem_comp_pdbe_depiction")
+
+
+def _add_fragments_and_scaffolds_cif(component, cif_copy):
+    """Add fragments and scaffolds information to the CIF export
+
+    Args:
+        component (Component): Component to be exported.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    substructure_category = '_chem_comp_pdbe_substructure'
+    mapping_category = '_chem_comp_pdbe_substructure_mapping'
+
+    ids = [f'S{i+1}' for i in range(0, len(component.scaffolds))]
+    ids += [f'F{i+1}' for i in range(0, len(component.fragments))]
+
+    types = [f'scaffold' for i in range(0, len(component.scaffolds))]
+    types += [f'fragment' for i in range(0, len(component.fragments))]
+
+    names = [i.name for i in component.scaffolds]
+    names += [i.name for i in component.fragments]
+
+    smiles = [i.smiles for i in component.scaffolds]
+    smiles += [i.smiles for i in component.fragments]
+
+    # general information about all substructures
+    cif_copy[substructure_category] = {}
+    cif_copy[mapping_category] = {}
+
+    cif_copy[substructure_category]['comp_id'] = [component.id] * len(ids)
+    cif_copy[substructure_category]['substructure_name'] = names
+    cif_copy[substructure_category]['substructure_id'] = ids
+    cif_copy[substructure_category]['substructure_type'] = types
+    cif_copy[substructure_category]['substructure_smiles'] = smiles
+
+    __post_process_cif_category(cif_copy, substructure_category)
+
+    cif_copy[mapping_category]['comp_id'] = []
+    cif_copy[mapping_category]['atom_id'] = []
+    cif_copy[mapping_category]['substructure_id'] = []
+    cif_copy[mapping_category]['substructure_ordinal'] = []    
+
+    _add_scaffold_cif(component, cif_copy[mapping_category])
+    _add_fragments_cif(component, cif_copy[mapping_category])
+
+    __post_process_cif_category(cif_copy, mapping_category)
+
+
+def _add_fragments_cif(component, cif_copy):
+    """Add fragment information to the CIF export.
+
+    Args:
+        component (Component): pdbeccdutils component.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the _chem_comp_pdbe_substructure_mapping category.
+    """
+    for i, scaffold in enumerate(component.scaffolds):
+        for a, mapping in enumerate(scaffold.mappings):
+            for atom_name in mapping:
+                cif_copy['comp_id'].append(component.id)
+                cif_copy['atom_id'].append(atom_name)
+                cif_copy['substructure_id'].append(f'S{i+1}')
+                cif_copy['substructure_ordinal'].append(f'{a+1}')
+
+
+def _add_scaffold_cif(component, cif_copy):
+    """Add scaffold information to the cif export.
+
+    Args:
+        component (Component): pdbeccdutils component.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    for i, fragment in enumerate(component.fragments):
+        for a, mapping in enumerate(fragment.mappings):
+            for atom_name in mapping:
+                cif_copy['comp_id'].append(component.id)
+                cif_copy['atom_id'].append(atom_name)
+                cif_copy['substructure_id'].append(f'F{i+1}')
+                cif_copy['substructure_ordinal'].append(f'{a+1}')
+
+
+def _add_rdkit_properties_cif(component, cif_copy):
+    """Add properties calculated by the rdkit to the dictionary
+
+    Args:
+        component (Component): pdbeccdutils component.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    category = '_chem_comp_rdkit_properties'
+
+    cif_copy[category] = {}
+    cif_copy[category]['comp_id'] = component.id
+
+    for k, v in component.physchem_properties.items():
+        cif_copy[category][k] = f'{v:.0f}' if v.is_integer() else f'{v:.3f}'
+
+    __post_process_cif_category(cif_copy, category)
+
+
+def __add_unichem_mapping(component, cif_copy):
+    """Add UniChem mapping to CCD CIF.
+
+    Args:
+        component (Component): pdbeccdutils component.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    category = '_chem_comp_external_mappings'
+    cif_copy[category] = {}
+
+    cif_copy[category]['comp_id'] = []
+    cif_copy[category]['resource'] = []
+    cif_copy[category]['resource_id'] = []
+
+    for k, mappings in component.external_mappings.items():
+        for m in mappings:
+            cif_copy[category]['comp_id'].append(component.id)
+            cif_copy[category]['resource'].append(k)
+            cif_copy[category]['resource_id'].append(m)
+
+    __post_process_cif_category(cif_copy, category)
+
+# endregion

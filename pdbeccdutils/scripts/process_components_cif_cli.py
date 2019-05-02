@@ -92,15 +92,15 @@ class PDBeChemManager:
         Args:
             logger (logging.Logger, optional): Defaults to None. Application log
         """
-        self.compounds: List[ccd_reader.CCDReaderResult] = []                                        # processed compounds
-        self.ligands_to_process: int = 0                                                             # no. ligands to process
-        self.output_dir: str = ''                                                                    # where the results will be written
-        self.depictions: DepictionManager = None                                                     # helper class to get nice depictions
-        self.pubchem: PubChemDownloader = None                                                       # helper class to download templates if needed
-        self.fragment_library: FragmentLibrary = None                                                # Fragments library to get substructure amtches
-        self.logger: logging.Logger = logger if logger is not None else logging.getLogger(__name__)  # log of the application
-        self.ids: List[str] = []                                                                     # list of processed ids for `chem_comp.list` file
-        self.chem_comp_xml: ET.Element = ET.Element('chemCompList')                                  # XML representation of the compounds metadata
+        self.compounds: List[ccd_reader.CCDReaderResult] = []                        # processed compounds
+        self.ligands_to_process: int = 0                                             # no. ligands to process
+        self.output_dir: str = ''                                                    # where the results will be written
+        self.depictions: DepictionManager = None                                     # helper class to get nice depictions
+        self.pubchem: PubChemDownloader = None                                       # helper class to download templates if needed
+        self.fragment_library: FragmentLibrary = None                                # Fragments library to get substructure matches
+        self.logger = logger if logger is not None else logging.getLogger(__name__)  # log of the application
+        self.ids: List[str] = []                                                     # list of processed ids for `chem_comp.list` file
+        self.chem_comp_xml: ET.Element = ET.Element('chemCompList')                  # XML representation of the compounds metadata
 
     def run_pipeline(self, args):
         """Run PDBeChem pipeline
@@ -261,16 +261,16 @@ class PDBeChemManager:
         json_output['fragments'] = []
         matches = component.library_search(self.fragment_library)
 
-        for k, v in component.fragments.items():
+        for i in component.fragments:
             json_output['fragments'].append({
-                'name': k,
-                'smiles': self.fragment_library.library[k].smiles,
-                'mapping': v.mappings,
-                'source': v.source
+                'name': i.name,
+                'smiles': i.smiles,
+                'mapping': i.mappings,
+                'source': i.source
             })
 
-        if matches > 0:
-            self.logger.debug(f'{matches} matches found in the library `{self.fragment_library.name}`.')
+        if matches:
+            self.logger.debug(f'{len(matches)} matches found in the library `{self.fragment_library.name}`.')
 
     def _compute_component_scaffolds(self, component: Component, json_output: Dict[str, Any]):
         """Compute scaffolds for a given component.
@@ -283,24 +283,19 @@ class PDBeChemManager:
         json_output['scaffolds'] = []
 
         try:
-            scaffolds = component.get_scaffolds()
+            component.get_scaffolds()
         except CCDUtilsError as e:
             self.logger.error(str(e))
 
             return
 
-        for scaffold in scaffolds:
-            atom_names = component.locate_fragment(scaffold)
-            scaffold_atom_names = []
-            for match in atom_names:
-                scaffold_atom_names.append([i.GetProp('name') for i in match])
-
+        for scaffold in component.scaffolds:
             json_output['scaffolds'].append({
-                'smiles': rdkit.Chem.MolToSmiles(scaffold),
-                'mapping': scaffold_atom_names
+                'smiles': scaffold.smiles,
+                'mapping': scaffold.mappings[0]
             })
 
-        self.logger.debug(f'{len(scaffolds)} scaffold(s) were found.')
+        self.logger.debug(f'{len(component.scaffolds)} scaffold(s) were found.')
 
     def _generate_depictions(self, component: Component):
         """Generate nice 2D depictions for the component. Presently depictions
@@ -354,7 +349,7 @@ class PDBeChemManager:
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.Model)
 
     def _write_substructures_xml(self, data, path):
-        """Write XML infromation for scaffolds and fragments so that they
+        """Write XML information for scaffolds and fragments so that they
         are easily loaded into PDBe database
 
         Args:

@@ -366,6 +366,14 @@ def _bond_pdb_order(value_order):
     return None
 
 def _atom_chiral_tag(tag):
+    """Parse _chem_comp.pdbx_stereo.config from chem_comp
+    
+    Args:
+        tag (str): R/S/N identification of chiral center.
+    
+    Returns:
+        rdkit.Chem.ChiralType: Chiral center in RDKit language.
+    """
     if tag == 'N':
         return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
     if tag == 'S':
