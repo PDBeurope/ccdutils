@@ -236,14 +236,15 @@ class PDBeChemManager:
             component (Component): Component to be
                 processed.
         Return:
-            bool: Whether the ideal coordinates have been succesfully
+            bool: Whether the ideal coordinates have been successfully
             recalculated, false otherwise.
         """
         if component.has_degenerated_conformer(ConformerType.Ideal):
             self.logger.debug('has degenerated ideal coordinates.')
-            result = component.compute_3d()
-            if not result:
-                self.logger.debug('error in generating 3D conformation.')
+
+        result = component.compute_3d()
+        if not result:
+            self.logger.debug('error in generating 3D conformation.')
 
             return result
 
@@ -340,13 +341,13 @@ class PDBeChemManager:
         parent_dir = os.path.join(self.output_dir, component.id[0], component.id)
 
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}_model.sdf'), component, False, ConformerType.Model)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.sdf'), component, False, ideal_conformer)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal_alt.pdb'), component, True, ideal_conformer)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.sdf'), component, False, ConformerType.Ideal)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal_alt.pdb'), component, True, ConformerType.Ideal)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}_model_alt.pdb'), component, True, ConformerType.Model)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ideal_conformer)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ConformerType.Ideal)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}_model.pdb'), component, False, ConformerType.Model)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cml'), component, False, ConformerType.Model)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.Model)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.AllConformers)
 
     def _write_substructures_xml(self, data, path):
         """Write XML information for scaffolds and fragments so that they
