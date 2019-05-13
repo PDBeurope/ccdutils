@@ -177,6 +177,7 @@ def _parse_pdb_atoms(mol, atoms):
         atom.SetChiralTag(_atom_chiral_tag(atoms['pdbx_stereo_config'][i]))
         atom.SetProp('name', atoms['atom_id'][i])
         atom.SetProp('alt_name', atoms['alt_atom_id'][i])
+        atom.SetBoolProp('leaving_atom', atoms['pdbx_leaving_atom_flag'][i] == "Y")
         atom.SetFormalCharge(conversions.str_to_int(atoms['charge'][i]))
 
         if isotope is not None:
