@@ -505,11 +505,6 @@ def _write_pdb_ccd_cif_info(cif_dict, component):
     calc_weight = rdkit.Chem.rdMolDescriptors.CalcExactMolWt(component.mol)
     mod_date = "{}-{:02d}-{:02d}".format(component.modified_date.year, component.modified_date.month, component.modified_date.day)
 
-    cif_dict['pdbeccdutils'] = OrderedDict([])
-
-    cif_dict['pdbeccdutils']['rdkit_version'] = rdkit.__version__
-    cif_dict['pdbeccdutils']['core_version'] = pdbeccdutils.__version__
-
     label = '_chem_comp'
     cif_dict[label] = OrderedDict([])
     cif_dict[label]['id'] = component.id
@@ -521,9 +516,6 @@ def _write_pdb_ccd_cif_info(cif_dict, component):
     cif_dict[label]['pdbx_type'] = 'HETAIN'
     cif_dict[label]['pdbx_modified_date'] = mod_date
     cif_dict[label]['pdbx_release_status'] = component.pdbx_release_status.name
-
-    cif_dict['pdbeccdutils']['rdkit_version'] = rdkit.__version__
-    cif_dict['pdbeccdutils']['core_version'] = pdbeccdutils.__version__
 
 
 def _write_pdb_ccd_cif_atoms(cif_dict, component):
@@ -1041,19 +1033,8 @@ def _add_2d_depiction_cif(component, cif_copy):
     if component.mol2D is None:
         return
 
-    category = '_chem_comp_pdbe_depiction'
-
-    cif_copy[category] = {}
-    conformer = component.mol2D.GetConformer()
-
-    cif_copy[category]['comp_id'] = [component.id for i in range(0, conformer.GetNumAtoms())]
-    cif_copy[category]['atom_id'] = [atom.GetProp('name') for atom in component.mol2D.GetAtoms()]
-    cif_copy[category]['element'] = [atom.GetSymbol() for atom in component.mol2D.GetAtoms()]
-    cif_copy[category]['model_Cartn_x'] = [f'{conformer.GetAtomPosition(i).x:.3f}' for i in range(0, conformer.GetNumAtoms())]
-    cif_copy[category]['model_Cartn_y'] = [f'{conformer.GetAtomPosition(i).y:.3f}' for i in range(0, conformer.GetNumAtoms())]
-    cif_copy[category]['pdbx_ordinal'] = [i + 1 for i in range(0, conformer.GetNumAtoms())]
-
-    __post_process_cif_category(cif_copy, "_chem_comp_pdbe_depiction")
+    __add_rdkit_2d_atoms_cif(component, cif_copy)
+    __add_rdkit_2d_bonds_cif(component, cif_copy)
 
 
 def _add_fragments_and_scaffolds_cif(component, cif_copy):
@@ -1094,7 +1075,7 @@ def _add_fragments_and_scaffolds_cif(component, cif_copy):
     cif_copy[mapping_category]['comp_id'] = []
     cif_copy[mapping_category]['atom_id'] = []
     cif_copy[mapping_category]['substructure_id'] = []
-    cif_copy[mapping_category]['substructure_ordinal'] = []    
+    cif_copy[mapping_category]['substructure_ordinal'] = []
 
     _add_scaffold_cif(component, cif_copy[mapping_category])
     _add_fragments_cif(component, cif_copy[mapping_category])
@@ -1151,6 +1132,57 @@ def _add_rdkit_properties_cif(component, cif_copy):
 
     for k, v in component.physchem_properties.items():
         cif_copy[category][k] = f'{v:.0f}' if v.is_integer() else f'{v:.3f}'
+
+    __post_process_cif_category(cif_copy, category)
+
+
+def __add_rdkit_2d_atoms_cif(component, cif_copy):
+    """Add atom coordinates to the mmCIF file.
+
+    Args:
+        component (Component): pdbeccdutils component.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    category = '_chem_comp_atom_pdbe_depiction'
+
+    cif_copy[category] = {}
+    conformer = component.mol2D.GetConformer()
+
+    cif_copy[category]['comp_id'] = [component.id for i in range(0, conformer.GetNumAtoms())]
+    cif_copy[category]['atom_id'] = [atom.GetProp('name') for atom in component.mol2D.GetAtoms()]
+    cif_copy[category]['element'] = [atom.GetSymbol() for atom in component.mol2D.GetAtoms()]
+    cif_copy[category]['model_Cartn_x'] = [f'{conformer.GetAtomPosition(i).x:.3f}' for i in range(0, conformer.GetNumAtoms())]
+    cif_copy[category]['model_Cartn_y'] = [f'{conformer.GetAtomPosition(i).y:.3f}' for i in range(0, conformer.GetNumAtoms())]
+    cif_copy[category]['pdbx_ordinal'] = [i + 1 for i in range(0, conformer.GetNumAtoms())]
+
+    __post_process_cif_category(cif_copy, category)
+
+
+def __add_rdkit_2d_bonds_cif(component, cif_copy):
+    """Add bond information to the mmCIF file.
+
+    Args:
+        component (Component): pdbeccdutils component.
+        cif_copy (dict of str: dict): Dictionary like structure of
+            the CIF file.
+    """
+    category = '_chem_comp_bond_pdbe_depiction'
+    cif_copy[category] = {}
+
+    try:
+        copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(component.mol2D, wedgeBonds=True,
+                                                                kekulize=True, addChiralHs=True)
+    except (RuntimeError, ValueError):
+        copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,
+                                                                kekulize=True, addChiralHs=True)
+
+    cif_copy[category]['comp_id'] = [component.id] * len(copy.GetAtoms())
+    cif_copy[category]['atom_id_1'] = [b.GetBeginAtom().GetProp('name') for b in copy.GetBonds()]
+    cif_copy[category]['atom_id_2'] = [b.GetEndAtom().GetProp('name') for b in copy.GetBonds()]
+    cif_copy[category]['value_order'] = [b.GetBondType().name for b in copy.GetBonds()]
+    cif_copy[category]['bond_dir'] = [b.GetBondDir().name for b in copy.GetBonds()]
+    cif_copy[category]['pdbx_ordinal'] = list(range(1, len(copy.GetAtoms()) + 1))
 
     __post_process_cif_category(cif_copy, category)
 

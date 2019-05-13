@@ -66,7 +66,7 @@ def draw_molecule(mol, drawer, file_name, width, wedge_bonds, atom_highlight, bo
     except (RuntimeError, ValueError):
         copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,
                                                                 kekulize=True, addChiralHs=True)
-    
+
     if bond_highlight is None:
         drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
                             highlightAtomColors=atom_highlight)
@@ -136,9 +136,9 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
                                    }, atoms_svg))
 
     depiction['depiction'] = list(map(lambda bond_svg:
-                                    {'coords': bond_svg.attrib.get('d'),
-                                     'style': bond_svg.attrib.get('style')
-                                     }, bonds_svg))
+                                      {'coords': bond_svg.attrib.get('d'),
+                                       'style': bond_svg.attrib.get('style')
+                                       }, bonds_svg))
 
     depiction['bonds'] = list(map(lambda bond: {
         'bgn': bond.GetBeginAtom().GetProp('name'),
