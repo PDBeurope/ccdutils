@@ -702,30 +702,32 @@ class Component:
                 sys.stderr = saved_std_err
                 return True
 
-            sanitization_failure = re.findall('[a-zA-Z]{1,2}, \\d+', log.getvalue())
-            if not sanitization_failure:
+            sanitization_failures = re.findall('[a-zA-Z]{1,2}, \\d+', log.getvalue())
+            if not sanitization_failures:
                 sys.stderr = saved_std_err
                 return False
 
-            split_object = sanitization_failure[0].split(',')  # [0] element [1] valency
-            element = split_object[0]
-            valency = int(split_object[1].strip())
+            for sanitization_failure in sanitization_failures:
 
-            smarts_metal_check = rdkit.Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
-            metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-            rdkit.Chem.SanitizeMol(rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP)
+                split_object = sanitization_failure.split(',')  # [0] element [1] valency
+                element = split_object[0]
+                valency = int(split_object[1].strip())
 
-            for (metal_index, atom_index) in metal_atom_bonds:
-                metal_atom = rwmol.GetAtomWithIdx(metal_index)
-                erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
+                smarts_metal_check = rdkit.Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
+                metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
+                rdkit.Chem.SanitizeMol(rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP)
 
-                # change the bond type to dative
-                bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-                bond.SetBondType(rdkit.Chem.BondType.SINGLE)
+                for (metal_index, atom_index) in metal_atom_bonds:
+                    metal_atom = rwmol.GetAtomWithIdx(metal_index)
+                    erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
 
-                if erroneous_atom.GetExplicitValence() == valency:
-                    erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
-                    metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
+                    # change the bond type to dative
+                    bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
+                    bond.SetBondType(rdkit.Chem.BondType.SINGLE)
+
+                    if erroneous_atom.GetExplicitValence() == valency:
+                        erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
+                        metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
 
             attempts -= 1
 
