@@ -134,7 +134,6 @@ class PDBeChemManager:
         """
         for key, ccd_reader_result in self.compounds.items():
             try:
-                self.logger.info(f'{key} | processing...')
                 self.process_single_component(ccd_reader_result)
             except Exception as e:
                 self.logger.error(f'{key} | FAILURE {str(e)}.')
@@ -151,7 +150,9 @@ class PDBeChemManager:
 
         Args:
             ccd_reader_result (CCDReaderResult): pdbeccdutils parser output.
-        """
+        """                
+        self.logger.info(f'{ccd_reader_result.component.id} | processing...')
+
         ccd_id = ccd_reader_result.component.id
         component = ccd_reader_result.component
 
