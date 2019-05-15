@@ -1181,7 +1181,7 @@ def __add_rdkit_2d_bonds_cif(component, cif_copy):
 
     cif_copy[category]['comp_id'] = [component.id] * len(copy.GetAtoms())
     cif_copy[category]['atom_id_1'] = [b.GetBeginAtom().GetProp('name') for b in copy.GetBonds()]
-    cif_copy[category]['atom_id_2'] = [b.GetEndAtom().GetProp('name') for b in copy.GetBonds()]
+    cif_copy[category]['atom_id_2'] = [b.GetEndAtom().GetProp('name') for b in copy.GetBonds() if b.GetEndAtom().GetSymbol() != 'H']
     cif_copy[category]['value_order'] = [b.GetBondType().name for b in copy.GetBonds()]
     cif_copy[category]['bond_dir'] = [b.GetBondDir().name for b in copy.GetBonds()]
     cif_copy[category]['pdbx_ordinal'] = list(range(1, len(copy.GetAtoms()) + 1))
@@ -1205,7 +1205,7 @@ def _add_unichem_mapping(component, cif_copy):
     cif_copy[category]['resource'] = []
     cif_copy[category]['resource_id'] = []
 
-    for i in component.external_mappings:        
+    for i in component.external_mappings:
         cif_copy[category]['comp_id'].append(component.id)
         cif_copy[category]['source'].append('UniChem')
         cif_copy[category]['resource'].append(i[0])
