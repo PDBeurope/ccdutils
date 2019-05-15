@@ -34,16 +34,16 @@ import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
+from typing import Any, Dict, List
 from xml.dom import minidom
-from typing import Dict, Any, List
 
 import rdkit
 
 import pdbeccdutils
 from pdbeccdutils.core import ccd_reader, ccd_writer
-from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import PubChemDownloader, config
@@ -78,7 +78,7 @@ def write_xml_file(xml, path):
 
     with open(path, 'w') as f:
         f.write(pretty.toprettyxml(indent="  "))
-# end region helper methods
+#endregion helper methods
 
 
 class PDBeChemManager:
@@ -99,7 +99,6 @@ class PDBeChemManager:
         self.pubchem: PubChemDownloader = None                                       # helper class to download templates if needed
         self.fragment_library: FragmentLibrary = None                                # Fragments library to get substructure matches
         self.logger = logger if logger is not None else logging.getLogger(__name__)  # log of the application
-        self.chem_comp_xml: ET.Element = ET.Element('chemCompList')                  # XML representation of the compounds metadata
 
     def run_pipeline(self, args):
         """Run PDBeChem pipeline
@@ -108,7 +107,7 @@ class PDBeChemManager:
             args (argparse.Namespace): Verified application arguments
         """
         self._init(args)
-        self._process_data()        
+        self._process_data()
 
     def _init(self, args):
         """Initialize PDBeChem pipeline and necessary objects.
@@ -159,15 +158,11 @@ class PDBeChemManager:
         parent_dir = os.path.join(self.output_dir, ccd_id[0], ccd_id)
         os.makedirs(parent_dir, exist_ok=True)
 
-        ideal_conformer = ConformerType.Ideal
         json_output = {'het_code': ccd_id}
 
         # check parsing and conformer degeneration
         self._check_component_parsing(ccd_reader_result)
-        ideal_regenerated = self._check_ideal_structure(ccd_reader_result.component)
-
-        if ideal_regenerated:
-            ideal_conformer = ConformerType.Computed
+        self._generate_ideal_structure(ccd_reader_result.component)
 
         # download templates if the user wants them.
         if self.pubchem is not None:
@@ -181,11 +176,7 @@ class PDBeChemManager:
 
         # write out files
         self._generate_depictions(component)
-        self._export_structure_formats(component, ideal_conformer)
-
-        # get xml representation
-        xml_repr = ccd_writer.to_xml_xml(ccd_reader_result.component)
-        self.chem_comp_xml.append(xml_repr)
+        self._export_structure_formats(component)
 
         # write fragments and scaffolds
         with open(os.path.join(parent_dir, f'{ccd_id}_substructures.json'), 'w') as f:
@@ -226,7 +217,7 @@ class PDBeChemManager:
         if component_downloaded:
             logger.debug('downloaded new pubchem template.')
 
-    def _check_ideal_structure(self, component: Component):
+    def _generate_ideal_structure(self, component: Component):
         """Checks whether or not the component has degenerated ideal
         coordinates. If so, new conformer is attempted to be generated.
 
@@ -237,16 +228,15 @@ class PDBeChemManager:
             bool: Whether the ideal coordinates have been successfully
             recalculated, false otherwise.
         """
+        result = component.compute_3d()
+
         if component.has_degenerated_conformer(ConformerType.Ideal):
             self.logger.debug('has degenerated ideal coordinates.')
 
-        result = component.compute_3d()
         if not result:
             self.logger.debug('error in generating 3D conformation.')
 
-            return result
-
-        return False
+        return result
 
     def _search_fragment_library(self, component: Component, json_output: Dict[str, Any]):
         """Search fragment library to find hits
@@ -326,7 +316,7 @@ class PDBeChemManager:
 
         component.export_2d_annotation(os.path.join(parent_dir, f'{component.id}_annotation.json'), wedge_bonds=wedge_bonds)
 
-    def _export_structure_formats(self, component: Component, ideal_conformer: ConformerType):
+    def _export_structure_formats(self, component: Component):
         """Writes out component in a different formats as required for the
         PDBeChem FTP area.
 
