@@ -63,7 +63,7 @@ class Component:
         self._inchikey_from_rdkit = ''
         self._sanitization_issues = self._sanitize()
         self._physchem_properties: Dict[str, Any] = {}
-        self._external_mapping: Dict[str, List[str]] = {}
+        self._external_mapping: List[Tuple[str, str]] = []
 
         self.conformers_mapping = \
             {ConformerType.AllConformers: - 1,
@@ -322,7 +322,7 @@ class Component:
         was not called before only agreed mapping is retrieved.
 
         Returns:
-            dict of str: [str]: UniChem mappings
+            list of (str, str): UniChem mappings
         """
 
         return self._external_mapping
@@ -333,7 +333,7 @@ class Component:
         but internal use of UniChem.
 
         Args:
-            value (dict of str: [str]): UniChem mappings
+            list of (str, str): UniChem mappings
         """
         self._external_mapping = value
 

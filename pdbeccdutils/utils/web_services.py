@@ -119,7 +119,7 @@ def _download_unichem_mapping(inchikey, resources):
         dict of str: [str]: Resource mapping. Key is a resource name,
             value is the list of internal identifiers.
     """
-    mapping = {}
+    mapping = []
     url = f'{url_prefix}/{inchikey}'
 
     try:
@@ -135,11 +135,7 @@ def _download_unichem_mapping(inchikey, resources):
 
             resource = resources[entity["src_id"]]
             key = resource[0]
-
-            if key in mapping:
-                mapping[key].append(entity["src_compound_id"])
-            else:
-                mapping[key] = [entity["src_compound_id"]]
+            mapping.append((key, entity["src_compound_id"]))
 
         return mapping
 

@@ -1205,12 +1205,11 @@ def _add_unichem_mapping(component, cif_copy):
     cif_copy[category]['resource'] = []
     cif_copy[category]['resource_id'] = []
 
-    for k, mappings in component.external_mappings.items():
-        for m in mappings:
-            cif_copy[category]['comp_id'].append(component.id)
-            cif_copy[category]['source'].append('UniChem')
-            cif_copy[category]['resource'].append(k)
-            cif_copy[category]['resource_id'].append(m)
+    for i in component.external_mappings:        
+        cif_copy[category]['comp_id'].append(component.id)
+        cif_copy[category]['source'].append('UniChem')
+        cif_copy[category]['resource'].append(i[0])
+        cif_copy[category]['resource_id'].append(i[1])
 
     __post_process_cif_category(cif_copy, category)
 
