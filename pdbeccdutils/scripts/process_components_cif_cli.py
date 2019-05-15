@@ -55,9 +55,9 @@ def atom_mapping_as_xml_element(element, mapping, mapping_id):
     """Append atom mapping to a specified element.
 
     Args:
-        element ([type]): Element to apend children with atom mapping.
+        element (xml.etree.ElementTree.Element): Element to append children with atom mapping.
         mapping (list of `str`): List with atom names
-        mapping_id (int): Id of the mappping for db loading.
+        mapping_id (int): Id of the mapping for db loading.
     """
     map_element = ET.SubElement(element, 'mapping', {'id': str(mapping_id)})
 
@@ -99,7 +99,6 @@ class PDBeChemManager:
         self.pubchem: PubChemDownloader = None                                       # helper class to download templates if needed
         self.fragment_library: FragmentLibrary = None                                # Fragments library to get substructure matches
         self.logger = logger if logger is not None else logging.getLogger(__name__)  # log of the application
-        self.ids: List[str] = []                                                     # list of processed ids for `chem_comp.list` file
         self.chem_comp_xml: ET.Element = ET.Element('chemCompList')                  # XML representation of the compounds metadata
 
     def run_pipeline(self, args):
@@ -109,8 +108,7 @@ class PDBeChemManager:
             args (argparse.Namespace): Verified application arguments
         """
         self._init(args)
-        self._process_data()
-        self._wrap_up()
+        self._process_data()        
 
     def _init(self, args):
         """Initialize PDBeChem pipeline and necessary objects.
@@ -128,7 +126,6 @@ class PDBeChemManager:
         self.logger.debug(f'Reading in {args.components_cif} file...')
         self.compounds = ccd_reader.read_pdb_components_file(args.components_cif)
         self.ligands_to_process = len(self.compounds) if args.test_first is None else args.test_first
-        self.ids = sorted(list(self.compounds.keys())[: self.ligands_to_process])
 
         self.logger.debug('Initialization finished.')
 
@@ -147,6 +144,7 @@ class PDBeChemManager:
             self.compounds[key] = None
 
             if self.ligands_to_process == 0:
+                self.logger.debug('All is done!')
                 break
 
     def process_single_component(self, ccd_reader_result):
@@ -409,16 +407,6 @@ class PDBeChemManager:
 
             with open(path, 'w') as f:
                 f.write('')
-
-    def _wrap_up(self):
-        """Wrap up computation, save PDBeChem-wide related files and quit.
-        """
-        write_xml_file(self.chem_comp_xml, os.path.join(self.output_dir, "chem_comp_list.xml"))
-
-        with open(os.path.join(self.output_dir, 'chem_comp.list'), 'w') as f:
-            f.write("\n".join(self.ids))
-
-        self.logger.debug('All is done!')
 
 
 # region pre-light tasks

@@ -126,28 +126,6 @@ class TestCutDownComponentsCif:
             assert pattern in str_repr
 
     @staticmethod
-    def test_list_file(pipeline_wd):
-        """Test if all the processed ids are a part of the chem_comp.list
-        file.
-        """
-        path = os.path.join(pipeline_wd, 'chem_comp.list')
-        with open(path) as f:
-            lines = f.read().splitlines()
-
-            assert lines == TestCutDownComponentsCif.CHEM_COMP_IDS
-
-    @staticmethod
-    @pytest.mark.parametrize('chem_comp_id', CHEM_COMP_IDS)
-    def test_xml_file(pipeline_wd, chem_comp_id):
-        """Test if the xml file is parseable and contains all the ids
-        """
-        path = os.path.join(pipeline_wd, 'chem_comp_list.xml')
-        xml_root = ET.parse(path).getroot()
-        chem_comps = xml_root.findall('chemComp')
-
-        assert any(l.find('id').text == chem_comp_id for l in chem_comps)
-
-    @staticmethod
     @pytest.mark.parametrize('id,name,alt_name', [
         ('001', 'H021', '1H02'),
         ('002', 'H121', '1H12'),
