@@ -311,8 +311,8 @@ class Component:
                 properties = Properties()
                 self._physchem_properties = {n: v for n, v in zip(properties.GetPropertyNames(), properties.ComputeProperties(self.mol))}
                 self._physchem_properties['NumHeavyAtoms'] = float(self.mol.GetNumHeavyAtoms())
-            except Exception:
-                raise CCDUtilsError('Physicochemical properties could not be calculated.')
+            except RuntimeError:
+                return {}
 
         return self._physchem_properties
 
