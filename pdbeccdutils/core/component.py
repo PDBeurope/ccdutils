@@ -535,7 +535,8 @@ class Component:
 
     def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
         """
-        Determine if given conformer has missing coordinates. This can
+        Determine if given conformer has missing coordinates or is
+        missing completelly from the rdkit.Mol object. This can
         be used to determine, whether or not the coordinates should be
         regenerated.
 
@@ -543,24 +544,24 @@ class Component:
             type (ConformerType): type of conformer
                 to be inspected.
 
-        Raises:
-            ValueError: If given conformer does not exist.
-
         Returns:
             bool: true if more then 1 atom has coordinates [0, 0, 0]
         """
-        conformer = self.mol.GetConformer(self.conformers_mapping[c_type])
-        empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
-        counter = 0
+        try:
+            conformer = self.mol.GetConformer(self.conformers_mapping[c_type])
+            empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
+            counter = 0
 
-        for i in range(conformer.GetNumAtoms()):
-            pos = conformer.GetAtomPosition(i)
-            if pos.Distance(empty_coords) == 0.0:
-                counter += 1
+            for i in range(conformer.GetNumAtoms()):
+                pos = conformer.GetAtomPosition(i)
+                if pos.Distance(empty_coords) == 0.0:
+                    counter += 1
 
-        if counter > 1:
-            return True
-        return False
+            if counter > 1:
+                return True
+            return False
+        except ValueError:  # Conformer does not exist
+            return False
 
     def locate_fragment(self, mol: rdkit.Chem.rdchem.Mol) -> List[List[rdkit.Chem.rdchem.Atom]]:
         """
