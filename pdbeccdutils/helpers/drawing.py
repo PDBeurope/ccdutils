@@ -64,8 +64,12 @@ def draw_molecule(mol, drawer, file_name, width, wedge_bonds, atom_highlight, bo
         copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=wedge_bonds,
                                                                 kekulize=True, addChiralHs=True)
     except (RuntimeError, ValueError):
-        copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,
-                                                                kekulize=True, addChiralHs=True)
+        try:
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,      
+                                                                    kekulize=True, addChiralHs=True)
+        except (RuntimeError, ValueError):
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,      
+                                                                    kekulize=True, addChiralHs=False)
 
     if bond_highlight is None:
         drawer.DrawMolecule(copy, highlightAtoms=atom_highlight.keys(),
