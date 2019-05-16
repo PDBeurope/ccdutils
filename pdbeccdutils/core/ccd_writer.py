@@ -1179,12 +1179,14 @@ def __add_rdkit_2d_bonds_cif(component, cif_copy):
         copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(component.mol2D, wedgeBonds=False,
                                                                 kekulize=True, addChiralHs=True)
 
-    cif_copy[category]['comp_id'] = [component.id] * len(copy.GetAtoms())
-    cif_copy[category]['atom_id_1'] = [b.GetBeginAtom().GetProp('name') for b in copy.GetBonds()]
-    cif_copy[category]['atom_id_2'] = [b.GetEndAtom().GetProp('name') for b in copy.GetBonds() if b.GetEndAtom().GetSymbol() != 'H']
-    cif_copy[category]['value_order'] = [b.GetBondType().name for b in copy.GetBonds()]
-    cif_copy[category]['bond_dir'] = [b.GetBondDir().name for b in copy.GetBonds()]
-    cif_copy[category]['pdbx_ordinal'] = list(range(1, len(copy.GetAtoms()) + 1))
+    bonds = [b for b in copy.GetBonds() if b.GetEndAtom().GetSymbol() != 'H']
+
+    cif_copy[category]['comp_id'] = [component.id] * len(bonds)
+    cif_copy[category]['atom_id_1'] = [b.GetBeginAtom().GetProp('name') for b in bonds]
+    cif_copy[category]['atom_id_2'] = [b.GetEndAtom().GetProp('name') for b in bonds]
+    cif_copy[category]['value_order'] = [b.GetBondType().name for b in bonds]
+    cif_copy[category]['bond_dir'] = [b.GetBondDir().name for b in bonds]
+    cif_copy[category]['pdbx_ordinal'] = list(range(1, len(bonds) + 1))
 
     __post_process_cif_category(cif_copy, category)
 
