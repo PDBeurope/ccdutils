@@ -32,6 +32,7 @@ from scipy.spatial import KDTree
 
 from pdbeccdutils.core.models import DepictionResult, DepictionSource
 from pdbeccdutils.utils import config
+import pdbeccdutils.helpers.collection_ext as ext
 
 
 class DepictionManager:
@@ -41,7 +42,7 @@ class DepictionManager:
     PubChem templates can be downloaded using PubChemDownloader class.
     """
 
-    def __init__(self, pubchem_templates_path: str = '', general_templates_path: str = config.general_templates)-> None:
+    def __init__(self, pubchem_templates_path: str = '', general_templates_path: str = config.general_templates) -> None:
         """
         Initialize component which does the ligand depiction.
         If Nones is provided as parameters just the defalt RDKit
@@ -253,6 +254,7 @@ class DepictionValidator:
             bool: true if bonds share collide, false otherwise.
         """
         atoms = [bondA.GetBeginAtom(), bondA.GetEndAtom(), bondB.GetBeginAtom(), bondB.GetEndAtom()]
+        names = [a.GetProp('name') for a in atoms]
         points = [self.conformer.GetAtomPosition(a.GetIdx()) for a in atoms]
 
         vecA = Geometry.Point2D(points[1].x - points[0].x, points[1].y - points[0].y)
@@ -260,16 +262,19 @@ class DepictionValidator:
 
         # we need to set up directions of the vectors properly in case
         # there is a common atom. So we identify angles correctly
-        # e.g. A -> B; B -> C and not A -> B; C -> B.
-        if atoms[0].GetProp('name') != atoms[2].GetProp('name'):
-            points[2], points[3] = points[3], points[2]  # swap elements
-            atoms[2], atoms[3] = atoms[3], atoms[2] # swap elements
-            vecB = vecB * -1
+        # e.g. B -> A; B -> C and not A -> B; C -> B.
+        if len(set(names)) == 3:
+            pivot = ext.find_element_with_max_occurrence(names)
 
-        if atoms[1].GetProp('name') != atoms[3].GetProp('name'):
-            points[0], points[1] = points[1], points[0]
-            atoms[0], atoms[1] = atoms[1], atoms[0]
-            vecA = vecA * -1
+            if names[0] != pivot:
+                points[0], points[1] = points[1], points[0]  # swap elements
+                atoms[0], atoms[1] = atoms[1], atoms[0]
+                vecA = vecA * -1
+
+            if names[2] != pivot:
+                points[2], points[3] = points[3], points[2]
+                atoms[2], atoms[3] = atoms[3], atoms[2]
+                vecB = vecB * -1
 
         # Cramer's rule to identify intersection
         det = vecA.x * -vecB.y + vecA.y * vecB.x
