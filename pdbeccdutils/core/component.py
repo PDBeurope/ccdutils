@@ -724,7 +724,7 @@ class Component:
 
                     # change the bond type to dative
                     bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-                    bond.SetBondType(rdkit.Chem.BondType.SINGLE)
+                    bond.SetBondType(rdkit.Chem.BondType.DATIVEONE)
 
                     if erroneous_atom.GetExplicitValence() == valency:
                         erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)

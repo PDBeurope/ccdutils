@@ -1176,8 +1176,12 @@ def __add_rdkit_2d_bonds_cif(component, cif_copy):
         copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(component.mol2D, wedgeBonds=True,
                                                                 kekulize=True, addChiralHs=True)
     except (RuntimeError, ValueError):
-        copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(component.mol2D, wedgeBonds=False,
-                                                                kekulize=True, addChiralHs=True)
+        try:
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(component.mol2D, wedgeBonds=False,
+                                                                    kekulize=True, addChiralHs=True)
+        except (RuntimeError, ValueError):
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(component.mol2D, wedgeBonds=False,
+                                                                    kekulize=True, addChiralHs=False)
 
     bonds = [b for b in copy.GetBonds() if b.GetEndAtom().GetSymbol() != 'H']
 
