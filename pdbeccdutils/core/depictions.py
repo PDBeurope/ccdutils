@@ -294,7 +294,7 @@ class DepictionValidator:
             radians = vecA.AngleTo(vecB)
             angle = 180 / math.pi * radians
 
-            return angle < 5.0
+            return angle < 10.0
 
         detR = (vecA.x * b) - (vecA.y * a)
         r = round(detR / det, 3)
