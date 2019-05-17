@@ -262,8 +262,14 @@ class DepictionValidator:
         # there is a common atom. So we identify angles correctly
         # e.g. A -> B; B -> C and not A -> B; C -> B.
         if atoms[0].GetProp('name') != atoms[2].GetProp('name'):
-            points[2], points[3] = points[3], points[2] # swap elements
+            points[2], points[3] = points[3], points[2]  # swap elements
+            atoms[2], atoms[3] = atoms[3], atoms[2] # swap elements
             vecB = vecB * -1
+
+        if atoms[1].GetProp('name') != atoms[3].GetProp('name'):
+            points[0], points[1] = points[1], points[0]
+            atoms[0], atoms[1] = atoms[1], atoms[0]
+            vecA = vecA * -1
 
         # Cramer's rule to identify intersection
         det = vecA.x * -vecB.y + vecA.y * vecB.x
@@ -279,7 +285,7 @@ class DepictionValidator:
         if (p < 0 or p > 1):
             return False
 
-        if (p == 0 or p == 1):
+        if p in (0, 1):
             radians = vecA.AngleTo(vecB)
             angle = 180 / math.pi * radians
 
