@@ -65,10 +65,10 @@ def draw_molecule(mol, drawer, file_name, width, wedge_bonds, atom_highlight, bo
                                                                 kekulize=True, addChiralHs=True)
     except (RuntimeError, ValueError):
         try:
-            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,      
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,
                                                                     kekulize=True, addChiralHs=True)
         except (RuntimeError, ValueError):
-            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,      
+            copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(mol, wedgeBonds=False,
                                                                     kekulize=True, addChiralHs=False)
 
     if bond_highlight is None:
@@ -124,49 +124,66 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
         :obj:`dict` of :obj:`dict`: object with all the details for
         json serialization.
     """
+    result_bag = {}
+    result_bag['atoms'] = []
+    result_bag['bonds'] = []
+    result_bag['depictions'] = []
+    result_bag['labels'] = []
+
     svg_string = _fix_svg(svg_string)
-    depiction = {}
-
     svg = ET.fromstring(svg_string)
-    atoms_svg = svg.findall('{http://www.rdkit.org/xml}atom')
-    bonds_svg = svg.findall('{http://www.w3.org/2000/svg}path')
+
+    atom_elem = svg.findall('{http://www.w3.org/2000/svg}circle')
+    bond_elem = svg.findall('{http://www.w3.org/2000/svg}path')
     dimensions_svg = svg.find('{http://www.w3.org/2000/svg}rect')
-    labels_svg = svg.findall('{http://www.w3.org/2000/svg}text')
+    label_elem = svg.findall('{http://www.w3.org/2000/svg}text')
 
-    depiction['atoms'] = list(map(lambda atom_svg:
-                                  {'name': mol.GetAtomWithIdx(int(atom_svg.attrib.get('idx')) - 1).GetProp('name'),
-                                   'x': atom_svg.attrib.get('x'),
-                                   'y': atom_svg.attrib.get('y')
-                                   }, atoms_svg))
+    for atom_svg in atom_elem:
+        atom_id = int(re.search(r'\d+', atom_svg.attrib.get('class')).group(0))
+        temp = {
+            'name': mol.GetAtomWithIdx(atom_id).GetProp('name'),
+            'x': atom_svg.attrib.get('cx'),
+            'y': atom_svg.attrib.get('cy')
+        }
+        result_bag['atoms'].append(temp)
 
-    depiction['depiction'] = list(map(lambda bond_svg:
-                                      {'coords': bond_svg.attrib.get('d'),
-                                       'style': bond_svg.attrib.get('style')
-                                       }, bonds_svg))
+    for bond_svg in bond_elem:
+        bond_id = int(re.search(r'\d+', bond_svg.attrib.get('class')).group(0))
+        bond = mol.GetBondWithIdx(bond_id)
+        temp = {
+            'bgn': bond.GetBeginAtom().GetProp('name'),
+            'end': bond.GetEndAtom().GetProp('name'),
+            'coords': bond_svg.attrib.get('d'),
+            'style': bond_svg.attrib.get('style')
+        }
+        result_bag['depictions'].append(temp)
 
-    depiction['bonds'] = list(map(lambda bond: {
-        'bgn': bond.GetBeginAtom().GetProp('name'),
-        'end': bond.GetEndAtom().GetProp('name'),
-    }, mol.GetBonds()))
+    for bond in mol.GetBonds():
+        temp = {
+            'bgn': bond.GetBeginAtom().GetProp('name'),
+            'end': bond.GetEndAtom().GetProp('name')
+        }
+        result_bag['bonds'].append(temp)
 
-    depiction['labels'] = list(map(lambda label_svg:
-                                   {
-                                       'x': label_svg.attrib.get('x'),
-                                       'y': label_svg.attrib.get('y'),
-                                       'style': label_svg.attrib.get('style'),
-                                       'tspans': [{
-                                           'value': tspan.text,
-                                           'style': '' if tspan.attrib.get('style') is None else tspan.attrib.get('style')
-                                       }
-                                           for tspan in filter(lambda x: x.text is not None, label_svg.findall('{http://www.w3.org/2000/svg}tspan'))]
-                                   }, labels_svg))
+    for label_svg in label_elem:
+        temp = {
+            'x': label_svg.attrib.get('x'),
+            'y': label_svg.attrib.get('y'),
+            'style': label_svg.attrib.get('style'),
+            'tspans': [{
+                'value': tspan.text,
+                'style': '' if tspan.attrib.get('style') is None else tspan.attrib.get('style')
+            }
+                for tspan in filter(lambda x: x.text is not None, label_svg.findall('{http://www.w3.org/2000/svg}tspan'))]
+        }
+        result_bag['labels'].append(temp)
 
-    depiction['dimensions'] = {
+    result_bag['dimensions'] = {
         'x': dimensions_svg.attrib.get('width'),
         'y': dimensions_svg.attrib.get('height')
     }
 
-    return depiction
+    return result_bag
 
 
 def _fix_svg(svg_string):
