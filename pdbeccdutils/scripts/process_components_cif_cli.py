@@ -19,7 +19,7 @@ Script for PDBeChem backend infrastructure.
 Processes the wwPDB Chemical Components Dictionary file `components.cif`
 producing files for:
 
-http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/
+http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/
 
 To do this components.cif is split into individual PDB chemical component
 definitions cif files, sdf files, pdb files and image files.
