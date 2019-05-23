@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_namespace_packages
 import pdbeccdutils
 
 setup(name='pdbeccdutils',
@@ -12,12 +12,12 @@ setup(name='pdbeccdutils',
       author_email='pdbehelp@ebi.ac.uk',
       license='Apache License 2.0.',
       keywords='PDB CCD wwPDB small molecule',
-      packages=['pdbeccdutils'],
+      packages=find_namespace_packages(),
       scripts=['bin/setup_pubchem_library',
                'bin/process_components_cif',
                'bin/murcko_scaffold_cif'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['Pillow', 'scipy', 'pdbecif'],
+      install_requires=['Pillow', 'scipy', 'numpy', 'pdbecif', 'biopython'],
       tests_require=['pytest']
       )
