@@ -1,28 +1,11 @@
 """Lightweight implementation of the parity method provided by
-Jon Tyczak to Abhik to be used by the cofactors pipeline.
+Jon Tyzack to Abhik to be used by the cofactors pipeline.
 """
-
-from typing import NamedTuple
 
 from rdkit import Chem
 from rdkit.Chem import rdFMCS
 
-
-class ParityResult(NamedTuple):
-    """
-    NamedTuple for the result of parity method along with the details
-    necessary for calculating the similarity score.
-
-    Attributes:
-        template_atoms (int): Number of template atoms.
-        query_atoms (int): Number of query molecule atoms.
-        match_count (int): Size o the common subgaph match.
-        similarity_score (float): Calculate similarity score.
-"""
-    template_atoms: int
-    query_atoms: int
-    match_count: int
-    similarity_score: float
+from pdbeccdutils.core.models import ParityResult
 
 
 def _get_matches(mol, smarts):
@@ -86,35 +69,45 @@ def _generate_sim_score(template, query, smarts):
     return (best_matches, best_sim_score)
 
 
-def compare_molecules(template, query, thresh=0.01):
+def compare_molecules(template, query, thresh=0.01, exact_match=False):
     """Given the two molecules calculates their similarity score.
     If expected similarity score is lower than the threshold nothing
     is calculated.
 
     Args:
-        template(rdkit.Chem.rdchem.Mol): Template molecule
-        query(rdkit.Chem.rdchem.Mol): Query molecule
-        thresh(float, optional): Defaults to 0.01: Threshold score for
-            the match to be considered.
+        template (rdkit.Chem.rdchem.Mol): Template molecule
+        query (rdkit.Chem.rdchem.Mol): Query molecule
+        thresh (float, optional): Threshold score for
+            the match to be considered. Defaults to 0.01.
+        exact_match (bool, optional): Controls whether atom type and
+            bond order should be checked too. Defaults to False.
 
     Returns:
         ParityResult: Result of the PARITY comparison.
     """
-    templ_atoms = template.GetNumAtoms()
+
+    template_atoms = template.GetNumAtoms()
     query_atoms = query.GetNumAtoms()
 
-    min_num_atoms = min(templ_atoms, query_atoms)
-    max_sim_score = float(min_num_atoms) / float(templ_atoms + query_atoms - min_num_atoms)
+    min_num_atoms = min(template_atoms, query_atoms)
+    max_sim_score = float(min_num_atoms) / float(template_atoms + query_atoms - min_num_atoms)
 
     if max_sim_score < thresh:
-        return ParityResult(templ_atoms, query_atoms, 0, 0)
+        return ParityResult(template_atoms, query_atoms, 0, 0.0)
 
-    mcs_graph = rdFMCS.FindMCS([template, query],
-                               bondCompare=rdFMCS.BondCompare.CompareAny,
-                               atomCompare=rdFMCS.AtomCompare.CompareAny,
-                               timeout=40,
-                               completeRingsOnly=True)
+    if not exact_match:
+        mcs_graph = rdFMCS.FindMCS([template, query],
+                                   bondCompare=rdFMCS.BondCompare.CompareAny,
+                                   atomCompare=rdFMCS.AtomCompare.CompareAny,
+                                   timeout=40,
+                                   completeRingsOnly=True)
+    else:
+        mcs_graph = rdFMCS.FindMCS([template, query],
+                                   bondCompare=rdFMCS.BondCompare.CompareOrderExact,
+                                   atomCompare=rdFMCS.AtomCompare.CompareElements,
+                                   timeout=40,
+                                   completeRingsOnly=True)
 
     matches, sim_score = _generate_sim_score(template, query, mcs_graph.smartsString)
 
-    return ParityResult(templ_atoms, query_atoms, matches, sim_score)
+    return ParityResult(template_atoms, query_atoms, matches, sim_score)

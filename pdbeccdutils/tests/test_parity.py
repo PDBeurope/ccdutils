@@ -1,10 +1,11 @@
-import pytest
-from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.tests.tst_utilities import cif_filename
-from pdbeccdutils.computations.parity_method import compare_molecules
-
 """Test of PARITY method
 """
+
+import pytest
+
+from pdbeccdutils.computations.parity_method import compare_molecules
+from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.tests.tst_utilities import cif_filename
 
 
 class TestParity:

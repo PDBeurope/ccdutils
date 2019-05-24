@@ -11,7 +11,9 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-from pdbeccdutils.scripts.process_components_cif_cli import check_args, create_parser, PDBeChemManager
+from pdbeccdutils.scripts.process_components_cif_cli import (PDBeChemManager,
+                                                             check_args,
+                                                             create_parser)
 from pdbeccdutils.tests.tst_utilities import (cif_filename,
                                               file_name_in_tsts_out,
                                               test_cut_down_components_cif)
@@ -72,7 +74,7 @@ class TestCutDownComponentsCif:
     @pytest.fixture(scope='class')
     def pipeline_wd(self, tmpdir_factory):
         wd = tmpdir_factory.mktemp('pdbechem_test')
-        print('PdbeChem working directory is {}'.format(wd))
+        print('PDBeChem working directory is {}'.format(wd))
 
         parser = create_parser()
         args = parser.parse_args(['-o', str(wd), test_cut_down_components_cif])
@@ -122,28 +124,6 @@ class TestCutDownComponentsCif:
             str_repr = f.read()
 
             assert pattern in str_repr
-
-    @staticmethod
-    def test_list_file(pipeline_wd):
-        """Test if all the processed ids are a part of the chem_comp.list
-        file.
-        """
-        path = os.path.join(pipeline_wd, 'chem_comp.list')
-        with open(path) as f:
-            lines = f.read().splitlines()
-
-            assert lines == TestCutDownComponentsCif.CHEM_COMP_IDS
-
-    @staticmethod
-    @pytest.mark.parametrize('chem_comp_id', CHEM_COMP_IDS)
-    def test_xml_file(pipeline_wd, chem_comp_id):
-        """Test if the xml file is parseable and contains all the ids
-        """
-        path = os.path.join(pipeline_wd, 'chem_comp_list.xml')
-        xml_root = ET.parse(path).getroot()
-        chem_comps = xml_root.findall('chemComp')
-
-        assert any(l.find('id').text == chem_comp_id for l in chem_comps)
 
     @staticmethod
     @pytest.mark.parametrize('id,name,alt_name', [

@@ -1,11 +1,12 @@
 import os
-import pytest
 
+import pytest
 from rdkit import Chem
 
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
+
 
 """Test of routine for retrieving 2D layouts of the CCDs.
 """
@@ -20,7 +21,7 @@ class TestPubChemDL:
         dl = PubChemDownloader(tmpdir)
 
         to_download = os.path.join(tmpdir, f'{het_code}.sdf')
-        comp = ccd_reader.read_pdb_cif_file(cif_filename(het_code)).component        
+        comp = ccd_reader.read_pdb_cif_file(cif_filename(het_code)).component
         dl.process_template(comp)
 
         assert os.path.isfile(to_download)

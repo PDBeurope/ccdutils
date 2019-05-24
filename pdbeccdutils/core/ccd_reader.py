@@ -15,9 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""A set of methods for reading in data and creating internal representation
-of molecules. The basic use can be as easy as this::
-
+"""
+A set of methods for reading in data and creating internal representation
+of molecules. The basic use can be as easy as this:
 
     from pdbeccdutils.core import ccd_reader
 
@@ -26,15 +26,17 @@ of molecules. The basic use can be as easy as this::
 """
 
 import os
+import sys
+from datetime import date
 from typing import Dict, List, NamedTuple
 
 import rdkit
-
 from mmCif.mmcifIO import MMCIF2Dict
+
 from pdbeccdutils.core.component import Component
-from pdbeccdutils.helpers import str_conversions
-from pdbeccdutils.helpers import collection_ext
-from pdbeccdutils.core.models import Descriptor, CCDProperties
+from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.core.models import CCDProperties, Descriptor, ReleaseStatus
+from pdbeccdutils.helpers import collection_ext, conversions
 
 
 class CCDReaderResult(NamedTuple):
@@ -59,7 +61,7 @@ class CCDReaderResult(NamedTuple):
 
 def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
     """
-    Read in single wwpdb cif component and create its internal
+    Read in single wwPDB CCD CIF component and create its internal
     representation.
 
     Args:
@@ -82,7 +84,7 @@ def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
 
 def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
     """
-    Process multiple compounds stored in the wwpdb CCD
+    Process multiple compounds stored in the wwPDB CCD
     `components.cif` file.
 
     Args:
@@ -94,13 +96,20 @@ def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
 
     Returns:
         dict(str, CCDReaderResult): Internal representation of all
-        the compponents in the `components.cif` file.
+        the components in the `components.cif` file.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
 
-    return {k: _parse_pdb_mmcif(v)
-            for k, v in MMCIF2Dict().parse(path_to_cif).items()}
+    result_bag = {}
+
+    for k, v in MMCIF2Dict().parse(path_to_cif).items():
+        try:
+            result_bag[k] = _parse_pdb_mmcif(v)
+        except CCDUtilsError as e:
+            print(f'ERROR: Data block {k} not processed. Reason: ({str(e)}).', file=sys.stderr)
+
+    return result_bag
 
 
 # region parse mmcif
@@ -165,9 +174,11 @@ def _parse_pdb_atoms(mol, atoms):
             element = '*'
 
         atom = rdkit.Chem.Atom(element)
+        atom.SetChiralTag(_atom_chiral_tag(atoms['pdbx_stereo_config'][i]))
         atom.SetProp('name', atoms['atom_id'][i])
         atom.SetProp('alt_name', atoms['alt_atom_id'][i])
-        atom.SetFormalCharge(str_conversions.str_to_int(atoms['charge'][i]))
+        atom.SetBoolProp('leaving_atom', atoms['pdbx_leaving_atom_flag'][i] == "Y")
+        atom.SetFormalCharge(conversions.str_to_int(atoms['charge'][i]))
 
         if isotope is not None:
             atom.SetIsotope(isotope)
@@ -211,9 +222,9 @@ def _setup_pdb_conformer(atoms, label):
     conformer = rdkit.Chem.Conformer(len(atoms['atom_id']))
 
     for i in range(len(atoms['atom_id'])):
-        x = str_conversions.str_to_float(atoms[label.format(('x'))][i])
-        y = str_conversions.str_to_float(atoms[label.format(('y'))][i])
-        z = str_conversions.str_to_float(atoms[label.format(('z'))][i])
+        x = conversions.str_to_float(atoms[label.format(('x'))][i])
+        y = conversions.str_to_float(atoms[label.format(('y'))][i])
+        z = conversions.str_to_float(atoms[label.format(('z'))][i])
 
         atom_position = rdkit.Chem.rdGeometry.Point3D(x, y, z)
         conformer.SetAtomPosition(i, atom_position)
@@ -242,7 +253,10 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
         if any(a is None for a in [atom_1, atom_2, bond_order]):
             errors.append('Problem with the {}-th bond in the _chem_comp_bond group'.format(i + 1))
 
-        mol.AddBond(atom_1, atom_2, bond_order)
+        try:
+            mol.AddBond(atom_1, atom_2, bond_order)
+        except RuntimeError:
+            errors.append(f'Duplicit bond {bonds["atom_id_1"][i]}-{bonds["atom_id_2"][i]}')
 
 
 def _handle_implicit_hydrogens(mol):
@@ -268,7 +282,7 @@ def _handle_implicit_hydrogens(mol):
 
 def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
     """
-    Parse useful informations from _pdbx_chem_comp_* category
+    Parse useful information from _pdbx_chem_comp_* category
 
     Args:
         pdbx_chem_comp_descriptors (dict): mmcif category with the
@@ -295,22 +309,28 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
 
 def _parse_pdb_properties(chem_comp):
     """
-    Parse useful informations from _chem_comp category
+    Parse useful information from _chem_comp category
 
     Args:
-        chem_comp (dict): the mmcif category with rdkit.Chem_comp info.
+        chem_comp (dict): the mmcif category with _chem_comp info
 
     Returns:
-        Properties: namedtuple with the property info
+        Properties: dataclass with the CCD properties.
     """
     properties = None
     if chem_comp:
+        mod_date = chem_comp['pdbx_modified_date'][0].split('-')
+        d = date(1970, 1, 1) if mod_date[0] == '?' else date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+
+        rel_status = chem_comp['pdbx_release_status'][0]
+        rel_status = ReleaseStatus.from_str(chem_comp['pdbx_release_status'][0])
+
         properties = CCDProperties(id=chem_comp['id'][0],
                                    name=chem_comp['name'][0],
                                    formula=chem_comp['formula'][0],
-                                   modified_date=chem_comp['pdbx_modified_date'][0],
-                                   pdbx_release_status=chem_comp['pdbx_release_status'][0],
-                                   weight=chem_comp['formula_weight'][0])
+                                   modified_date=d,
+                                   pdbx_release_status=rel_status,
+                                   weight=0.0 if chem_comp['formula_weight'][0] == '?' else float(chem_comp['formula_weight'][0]))
     return properties
 
 
@@ -351,10 +371,29 @@ def _bond_pdb_order(value_order):
     """
     if value_order == 'SING':
         return rdkit.Chem.rdchem.BondType(1)
-    elif value_order == 'DOUB':
+    if value_order == 'DOUB':
         return rdkit.Chem.rdchem.BondType(2)
-    elif value_order == 'TRIP':
+    if value_order == 'TRIP':
         return rdkit.Chem.rdchem.BondType(3)
-    else:
-        return None
+
+    return None
+
+
+def _atom_chiral_tag(tag):
+    """Parse _chem_comp.pdbx_stereo.config from chem_comp
+
+    Args:
+        tag (str): R/S/N identification of chiral center.
+
+    Returns:
+        rdkit.Chem.ChiralType: Chiral center in RDKit language.
+    """
+    if tag == 'N':
+        return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
+    if tag == 'S':
+        return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CCW
+    if tag == 'R':
+        return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CW
+
+    return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
 # endregion parse mmcif

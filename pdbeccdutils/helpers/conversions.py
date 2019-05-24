@@ -46,3 +46,15 @@ def str_to_float(f):
         return float(f)
     except ValueError:
         return 0.0
+
+
+def listit(t):
+    """Format deep tuples into deep list
+
+    Args:
+        t (tuple of tuples): deep tuples
+
+    Returns:
+        list of list: deep list
+    """
+    return list(map(listit, t)) if isinstance(t, (list, tuple)) else t

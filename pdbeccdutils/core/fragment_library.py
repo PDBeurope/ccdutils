@@ -62,11 +62,13 @@ class FragmentLibrary:
                 else:
                     mol = Chem.MolFromSmiles(row[2])
                     if row[1] == 'LIKE':
-                        [bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED) for bond in mol.GetBonds()]
+                        for bond in mol.GetBonds():
+                            bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED)
+
                 Chem.SanitizeMol(mol, catchErrors=True)
                 rdCoordGen.AddCoords(mol)
 
-                self.library[row[0]] = FragmentEntry(row[0], Chem.MolToSmiles(mol), mol, row[6])
+                self.library[row[0]] = FragmentEntry(row[0], row[6], mol)
 
         rdkit.rdBase.EnableLog('rdApp.*')
 

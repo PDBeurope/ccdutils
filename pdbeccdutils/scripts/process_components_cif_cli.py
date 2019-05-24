@@ -19,7 +19,7 @@ Script for PDBeChem backend infrastructure.
 Processes the wwPDB Chemical Components Dictionary file `components.cif`
 producing files for:
 
-http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem/
+http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/
 
 To do this components.cif is split into individual PDB chemical component
 definitions cif files, sdf files, pdb files and image files.
@@ -34,16 +34,16 @@ import logging
 import os
 import sys
 import xml.etree.ElementTree as ET
+from typing import Any, Dict, List
 from xml.dom import minidom
-from typing import Dict, Any, List
 
 import rdkit
 
 import pdbeccdutils
 from pdbeccdutils.core import ccd_reader, ccd_writer
-from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import PubChemDownloader, config
@@ -55,9 +55,9 @@ def atom_mapping_as_xml_element(element, mapping, mapping_id):
     """Append atom mapping to a specified element.
 
     Args:
-        element ([type]): Element to apend children with atom mapping.
+        element (xml.etree.ElementTree.Element): Element to append children with atom mapping.
         mapping (list of `str`): List with atom names
-        mapping_id (int): Id of the mappping for db loading.
+        mapping_id (int): Id of the mapping for db loading.
     """
     map_element = ET.SubElement(element, 'mapping', {'id': str(mapping_id)})
 
@@ -78,7 +78,7 @@ def write_xml_file(xml, path):
 
     with open(path, 'w') as f:
         f.write(pretty.toprettyxml(indent="  "))
-# end region helper methods
+#endregion helper methods
 
 
 class PDBeChemManager:
@@ -92,15 +92,13 @@ class PDBeChemManager:
         Args:
             logger (logging.Logger, optional): Defaults to None. Application log
         """
-        self.compounds: List[ccd_reader.CCDReaderResult] = []                                        # processed compounds
-        self.ligands_to_process: int = 0                                                             # no. ligands to process
-        self.output_dir: str = ''                                                                    # where the results will be written
-        self.depictions: DepictionManager = None                                                     # helper class to get nice depictions
-        self.pubchem: PubChemDownloader = None                                                       # helper class to download templates if needed
-        self.fragment_library: FragmentLibrary = None                                                # Fragments library to get substructure amtches
-        self.logger: logging.Logger = logger if logger is not None else logging.getLogger(__name__)  # log of the application
-        self.ids: List[str] = []                                                                     # list of processed ids for `chem_comp.list` file
-        self.chem_comp_xml: ET.Element = ET.Element('chemCompList')                                  # XML representation of the compounds metadata
+        self.compounds: List[ccd_reader.CCDReaderResult] = []                        # processed compounds
+        self.ligands_to_process: int = 0                                             # no. ligands to process
+        self.output_dir: str = ''                                                    # where the results will be written
+        self.depictions: DepictionManager = None                                     # helper class to get nice depictions
+        self.pubchem: PubChemDownloader = None                                       # helper class to download templates if needed
+        self.fragment_library: FragmentLibrary = None                                # Fragments library to get substructure matches
+        self.logger = logger if logger is not None else logging.getLogger(__name__)  # log of the application
 
     def run_pipeline(self, args):
         """Run PDBeChem pipeline
@@ -110,7 +108,6 @@ class PDBeChemManager:
         """
         self._init(args)
         self._process_data()
-        self._wrap_up()
 
     def _init(self, args):
         """Initialize PDBeChem pipeline and necessary objects.
@@ -128,7 +125,6 @@ class PDBeChemManager:
         self.logger.debug(f'Reading in {args.components_cif} file...')
         self.compounds = ccd_reader.read_pdb_components_file(args.components_cif)
         self.ligands_to_process = len(self.compounds) if args.test_first is None else args.test_first
-        self.ids = sorted(list(self.compounds.keys())[: self.ligands_to_process])
 
         self.logger.debug('Initialization finished.')
 
@@ -138,7 +134,6 @@ class PDBeChemManager:
         """
         for key, ccd_reader_result in self.compounds.items():
             try:
-                self.logger.info(f'{key} | processing...')
                 self.process_single_component(ccd_reader_result)
             except Exception as e:
                 self.logger.error(f'{key} | FAILURE {str(e)}.')
@@ -147,6 +142,7 @@ class PDBeChemManager:
             self.compounds[key] = None
 
             if self.ligands_to_process == 0:
+                self.logger.debug('All is done!')
                 break
 
     def process_single_component(self, ccd_reader_result):
@@ -154,22 +150,20 @@ class PDBeChemManager:
 
         Args:
             ccd_reader_result (CCDReaderResult): pdbeccdutils parser output.
-        """
+        """                
+        self.logger.info(f'{ccd_reader_result.component.id} | processing...')
+
         ccd_id = ccd_reader_result.component.id
         component = ccd_reader_result.component
 
         parent_dir = os.path.join(self.output_dir, ccd_id[0], ccd_id)
         os.makedirs(parent_dir, exist_ok=True)
 
-        ideal_conformer = ConformerType.Ideal
         json_output = {'het_code': ccd_id}
 
         # check parsing and conformer degeneration
         self._check_component_parsing(ccd_reader_result)
-        ideal_regenerated = self._check_ideal_structure(ccd_reader_result.component)
-
-        if ideal_regenerated:
-            ideal_conformer = ConformerType.Computed
+        self._generate_ideal_structure(ccd_reader_result.component)
 
         # download templates if the user wants them.
         if self.pubchem is not None:
@@ -183,11 +177,7 @@ class PDBeChemManager:
 
         # write out files
         self._generate_depictions(component)
-        self._export_structure_formats(component, ideal_conformer)
-
-        # get xml representation
-        xml_repr = ccd_writer.to_xml_xml(ccd_reader_result.component)
-        self.chem_comp_xml.append(xml_repr)
+        self._export_structure_formats(component)
 
         # write fragments and scaffolds
         with open(os.path.join(parent_dir, f'{ccd_id}_substructures.json'), 'w') as f:
@@ -228,7 +218,7 @@ class PDBeChemManager:
         if component_downloaded:
             logger.debug('downloaded new pubchem template.')
 
-    def _check_ideal_structure(self, component: Component):
+    def _generate_ideal_structure(self, component: Component):
         """Checks whether or not the component has degenerated ideal
         coordinates. If so, new conformer is attempted to be generated.
 
@@ -236,18 +226,18 @@ class PDBeChemManager:
             component (Component): Component to be
                 processed.
         Return:
-            bool: Whether the ideal coordinates have been succesfully
+            bool: Whether the ideal coordinates have been successfully
             recalculated, false otherwise.
         """
+        result = component.compute_3d()
+
         if component.has_degenerated_conformer(ConformerType.Ideal):
             self.logger.debug('has degenerated ideal coordinates.')
-            result = component.compute_3d()
-            if not result:
-                self.logger.debug('error in generating 3D conformation.')
 
-            return result
+        if not result:
+            self.logger.debug('error in generating 3D conformation.')
 
-        return False
+        return result
 
     def _search_fragment_library(self, component: Component, json_output: Dict[str, Any]):
         """Search fragment library to find hits
@@ -261,16 +251,16 @@ class PDBeChemManager:
         json_output['fragments'] = []
         matches = component.library_search(self.fragment_library)
 
-        for k, v in component.fragments.items():
+        for i in component.fragments:
             json_output['fragments'].append({
-                'name': k,
-                'smiles': self.fragment_library.library[k].smiles,
-                'mapping': v.mappings,
-                'source': v.source
+                'name': i.name,
+                'smiles': i.smiles,
+                'mapping': i.mappings,
+                'source': i.source
             })
 
-        if matches > 0:
-            self.logger.debug(f'{matches} matches found in the library `{self.fragment_library.name}`.')
+        if matches:
+            self.logger.debug(f'{len(matches)} matches found in the library `{self.fragment_library.name}`.')
 
     def _compute_component_scaffolds(self, component: Component, json_output: Dict[str, Any]):
         """Compute scaffolds for a given component.
@@ -283,24 +273,19 @@ class PDBeChemManager:
         json_output['scaffolds'] = []
 
         try:
-            scaffolds = component.get_scaffolds()
+            component.get_scaffolds()
         except CCDUtilsError as e:
             self.logger.error(str(e))
 
             return
 
-        for scaffold in scaffolds:
-            atom_names = component.locate_fragment(scaffold)
-            scaffold_atom_names = []
-            for match in atom_names:
-                scaffold_atom_names.append([i.GetProp('name') for i in match])
-
+        for scaffold in component.scaffolds:
             json_output['scaffolds'].append({
-                'smiles': rdkit.Chem.MolToSmiles(scaffold),
-                'mapping': scaffold_atom_names
+                'smiles': scaffold.smiles,
+                'mapping': scaffold.mappings[0]
             })
 
-        self.logger.debug(f'{len(scaffolds)} scaffold(s) were found.')
+        self.logger.debug(f'{len(component.scaffolds)} scaffold(s) were found.')
 
     def _generate_depictions(self, component: Component):
         """Generate nice 2D depictions for the component. Presently depictions
@@ -332,7 +317,7 @@ class PDBeChemManager:
 
         component.export_2d_annotation(os.path.join(parent_dir, f'{component.id}_annotation.json'), wedge_bonds=wedge_bonds)
 
-    def _export_structure_formats(self, component: Component, ideal_conformer: ConformerType):
+    def _export_structure_formats(self, component: Component):
         """Writes out component in a different formats as required for the
         PDBeChem FTP area.
 
@@ -345,16 +330,16 @@ class PDBeChemManager:
         parent_dir = os.path.join(self.output_dir, component.id[0], component.id)
 
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}_model.sdf'), component, False, ConformerType.Model)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.sdf'), component, False, ideal_conformer)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal_alt.pdb'), component, True, ideal_conformer)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.sdf'), component, False, ConformerType.Ideal)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal_alt.pdb'), component, True, ConformerType.Ideal)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}_model_alt.pdb'), component, True, ConformerType.Model)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ideal_conformer)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}_ideal.pdb'), component, False, ConformerType.Ideal)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}_model.pdb'), component, False, ConformerType.Model)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cml'), component, False, ConformerType.Model)
-        self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.Model)
+        self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.AllConformers)
 
     def _write_substructures_xml(self, data, path):
-        """Write XML infromation for scaffolds and fragments so that they
+        """Write XML information for scaffolds and fragments so that they
         are easily loaded into PDBe database
 
         Args:
@@ -413,16 +398,6 @@ class PDBeChemManager:
 
             with open(path, 'w') as f:
                 f.write('')
-
-    def _wrap_up(self):
-        """Wrap up computation, save PDBeChem-wide related files and quit.
-        """
-        write_xml_file(self.chem_comp_xml, os.path.join(self.output_dir, "chem_comp_list.xml"))
-
-        with open(os.path.join(self.output_dir, 'chem_comp.list'), 'w') as f:
-            f.write("\n".join(self.ids))
-
-        self.logger.debug('All is done!')
 
 
 # region pre-light tasks

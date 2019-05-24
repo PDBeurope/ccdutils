@@ -1,5 +1,16 @@
 # Changelog
 
+## RELEASE 0.5 - May 15, 2019
+
+### Features
+
+* Add support for UniChem mapping.
+* Add bond information to the SVG decomposition.
+* Allow PARITY method to be atom/bond specific.
+* Improve and extend physchem properties.
+* Enhanced CIF export (physchem, scaffolds, fragments, 2D, mapping).
+* Few improvements to match newest RDKit version (**breaking changes**).
+
 ## RELEASE 0.4 - January 12, 2019
 
 ### Features
@@ -7,7 +18,7 @@
 * Add SVG decomposition in the SVG format.
 * Protein-ligand interaction pipeline moved to separate [repository](https://gitlab.ebi.ac.uk/pdbe/release/interactions).
 * Add basic properties calculation (Abhik).
-* Extension and improvements  of the Fragment library.
+* Extension and improvements of the Fragment library.
 
 ## RELEASE 0.3 - October 12, 2018
 

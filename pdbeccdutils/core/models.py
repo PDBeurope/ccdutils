@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # software from PDBe: Protein Data Bank in Europe; https://pdbe.org
 #
-# Copyright 2018 EMBL - European Bioinformatics Institute
+# Copyright 2019 EMBL - European Bioinformatics Institute
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,10 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Module housing some of the dataclasses used throuhout the
+"""Module housing some of the dataclasses used throughout the
 pdbeccdutils application.
 """
 
+from dataclasses import dataclass
+from datetime import date
 from enum import IntEnum
 from typing import Any, List, NamedTuple
 
@@ -74,6 +76,32 @@ class ReleaseStatus(IntEnum):
     REF_ONLY = 5
     REL = 6
 
+    @staticmethod
+    def from_str(s):
+        """Convert wwPDB CIF CCD representation to enum
+
+        Args:
+            s (str): str representation of the release status
+
+        Returns:
+            ReleaseStatus: Component release status
+        """
+
+        if s.upper() == 'DEL':
+            return ReleaseStatus.DEL
+        if s.upper() == 'HOLD':
+            return ReleaseStatus.HOLD
+        if s.upper() == 'HPUB':
+            return ReleaseStatus.HPUB
+        if s.upper() == 'OBS':
+            return ReleaseStatus.OBS
+        if s.upper() == 'REF_ONLY':
+            return ReleaseStatus.REF_ONLY
+        if s.upper() == 'REL':
+            return ReleaseStatus.REL
+
+        return ReleaseStatus.NOT_SET
+
 
 class ScaffoldingMethod(IntEnum):
     """
@@ -102,27 +130,6 @@ class DepictionResult(NamedTuple):
     score: float
 
 
-CCDProperties = NamedTuple('CCDProperties',
-                           [('id', str),
-                            ('name', str),
-                            ('formula', str),
-                            ('modified_date', str),
-                            ('pdbx_release_status', str),
-                            ('weight', str)])
-
-CCDProperties.__doc__ = """
-            Properties of the component comming from _chem_comp namespace.
-
-            Args:
-                id (str): _chem_comp.id
-                name (str): _chem_comp.name
-                formula (str): _chem_comp.formula
-                modified_date (str): _chem_comp.pdbx_modified_date
-                pdbx_release_status (str): _chem_comp.pdbx_release_status
-                weight (str): _chem_comp.formula_weight
-            """
-
-
 class Descriptor(NamedTuple):
     """
     Descriptor obtained from the cif file. This is essentially
@@ -138,28 +145,72 @@ class Descriptor(NamedTuple):
     value: str
 
 
-class FragmentEntry(NamedTuple):
+@dataclass
+class ParityResult:
+    """
+    NamedTuple for the result of parity method along with the details
+    necessary for calculating the similarity score.
+
+    Attributes:
+        template_atoms (int): Number of template atoms.
+        query_atoms (int): Number of query molecule atoms.
+        match_count (int): Size o the common subgraph match.
+        similarity_score (float): Calculate similarity score.
+    """
+    template_atoms: int
+    query_atoms: int
+    match_count: int
+    similarity_score: float
+
+
+@dataclass
+class CCDProperties:
+    """
+    Properties of the component comming from _chem_comp namespace.
+
+    Args:
+        id (str): _chem_comp.id
+        name (str): _chem_comp.name
+        formula (str): _chem_comp.formula
+        modified_date (date): _chem_comp.pdbx_modified_date
+        pdbx_release_status (str): _chem_comp.pdbx_release_status
+        weight (str): _chem_comp.formula_weight
+    """
+    id: str
+    name: str
+    formula: str
+    modified_date: date
+    pdbx_release_status: ReleaseStatus
+    weight: float
+
+
+@dataclass
+class FragmentEntry:
     """Fragment entry in the fragment library
 
     Args:
-        name (str): Name or id of the fragment
-        smiles (str): Smiles representation of the fragment
-        mol (rdkit.Chem.rdchem.Mol): rdkit mol object with the fragment.
+        name (str): Name or id of the fragment.
         source (str): where does this fragment come from.
+        mol (rdkit.Chem.rdchem.Mol): rdkit mol object with the fragment.
+    """
+
+    name: str
+    source: str
+    mol: rdkit.Chem.rdchem.Mol
+
+
+@dataclass
+class SubstructureMapping:
+    """Represents a fragment hit in the component
+
+    Args:
+        name (str): Name of the substructure.
+        smiles (str): SMILES representation of the substructure
+        source (str): Where does this fragment come from.
+        mapping (List[List[Any]]): Mappings with atom names or indices.
     """
 
     name: str
     smiles: str
-    mol: rdkit.Chem.rdchem.Mol
     source: str
-
-
-class FragmentHit(NamedTuple):
-    """Represents a fragment hit in the component
-
-    Args:
-        mapping (list(list(Any))): Mappings with atom names or indices.
-        source (str): Where does this fragment come from.
-    """
     mappings: List[List[Any]]
-    source: str

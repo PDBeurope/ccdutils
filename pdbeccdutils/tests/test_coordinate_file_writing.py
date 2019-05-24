@@ -1,9 +1,11 @@
 import os
+
 import pytest
-from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs, file_name_in_tsts_out
+
 from pdbeccdutils.core import ccd_reader, ccd_writer
 from pdbeccdutils.core.models import ConformerType
-
+from pdbeccdutils.tests.tst_utilities import (file_name_in_tsts_out,
+                                              supply_list_of_sample_cifs)
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
 

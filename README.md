@@ -5,9 +5,13 @@
 
 * A set of python tools to deal with PDB chemical components definitions
   for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd)
+
 * The tools use:
   * [RDKit](http://www.rdkit.org/) for chemistry
-  * [PDBeCIF](https://gitlab.com/glenveegee/PDBeCIF.git) cif parser.  
+  * [PDBeCIF](https://gitlab.com/glenveegee/PDBeCIF.git) cif parser.
+  * [scipy](https://www.scipy.org/) for depiction quality check.
+  * [numpy](https://www.numpy.org/) for molecular scaling.
+
 * Please note that the project is under active development.
 
 ## Installation instructions
@@ -17,7 +21,7 @@
   For linux/mac OS this is most easily done using the anaconda python with commands similar to:
 
   ```console
-  conda create -c rdkit -n rdkit-env rdkit python=3.6
+  conda create -c rdkit -n rdkit-env rdkit python=3.7
   conda activate rdkit-env
   ```
 
@@ -35,7 +39,9 @@
 * Fragment library search.
 * Chemical scaffolds (Murcko scaffold, Murcko general, BRICS).
 * Lightweight implementation of parity method by Jon Tyczak.
-* Generate some basic molecular properties per component.
+* RDKit molecular properties per component.
+* UniChem mapping.
+
 
 ## TODO list
 
@@ -56,13 +62,13 @@ The documentation depends on the following packages:
 * `recommonmark`
 * `sphinx-autodoc-typehints`
 
-Note that `sphinx` needs to be a part of the virtual environmnent, if you want to generate documentation by yourself.
+Note that `sphinx` needs to be a part of the virtual environment, if you want to generate documentation by yourself.
 Otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
 
 * Generate *.rst* files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
 * Alternativelly, use the `recommonmark` package along with the proper configuration to get the Markdown working.
   
- Use the following to generate initial markup files to be used by sphinx.  This needs to be used when adding another subpackages.
+ Use the following to generate initial markup files to be used by sphinx.  This needs to be used when adding another sub-packages.
 
 ```console
 sphinx-apidoc -f -o /path/to/output/dir ../pdbeccdutils/

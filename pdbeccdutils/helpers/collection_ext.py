@@ -15,6 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+"""Set of extension methods for collections
+"""
+
 
 def find_element_in_list(array, element):
     """
@@ -32,3 +35,28 @@ def find_element_in_list(array, element):
         return index
     except ValueError:
         return None
+
+
+def find_element_with_max_occurrence(array):
+    """Find element with most occurrences in the list
+
+    Args:
+        array (list of str): Array to be searched
+
+    Returns:
+        str: Value with most occurrences in the list
+    """
+    temp = {}
+    for i in array:
+        if i in temp:
+            temp[i] += 1
+        else:
+            temp[i] = 1
+
+    max_occur = max(temp.values())
+
+    for k, v in temp.items():
+        if v == max_occur:
+            return k
+
+    return ''
