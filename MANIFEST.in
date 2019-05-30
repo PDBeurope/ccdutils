@@ -1,3 +1,3 @@
-include pdbeccdutils/data/generic_templates/*
+include pdbeccdutils/data/general_templates/*
 include pdbeccdutils/data/coordgen_templates/*
-include pdbeccdutils/fragment_library.tsv
+include pdbeccdutils/data/fragment_library.tsv

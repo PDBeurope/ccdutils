@@ -66,7 +66,7 @@ Note that `sphinx` needs to be a part of the virtual environment, if you want to
 Otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
 
 * Generate *.rst* files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
-* Alternativelly, use the `recommonmark` package along with the proper configuration to get the Markdown working.
+* Alternatively, use the `recommonmark` package along with the proper configuration to get the Markdown working.
   
  Use the following to generate initial markup files to be used by sphinx.  This needs to be used when adding another sub-packages.
 
