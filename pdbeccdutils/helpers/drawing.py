@@ -148,6 +148,9 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
         result_bag['atoms'].append(temp)
 
     for bond_svg in bond_elem:
+        if not bond_svg.find('class'):
+            continue
+        
         bond_id = int(re.search(r'\d+', bond_svg.attrib.get('class')).group(0))
         bond = mol.GetBondWithIdx(bond_id)
         temp = {

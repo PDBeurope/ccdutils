@@ -33,6 +33,7 @@ import json
 import logging
 import os
 import sys
+import traceback
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List
 from xml.dom import minidom
@@ -48,7 +49,7 @@ from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import PubChemDownloader, config
 
-#region helper methods
+# region helper methods
 
 
 def atom_mapping_as_xml_element(element, mapping, mapping_id):
@@ -78,7 +79,7 @@ def write_xml_file(xml, path):
 
     with open(path, 'w') as f:
         f.write(pretty.toprettyxml(indent="  "))
-#endregion helper methods
+# endregion helper methods
 
 
 class PDBeChemManager:
@@ -136,7 +137,7 @@ class PDBeChemManager:
             try:
                 self.process_single_component(ccd_reader_result)
             except Exception as e:
-                self.logger.error(f'{key} | FAILURE {str(e)}.')
+                self.logger.error(f'{key} | FAILURE {traceback.format_exc()}.')
             self.ligands_to_process -= 1
 
             self.compounds[key] = None
@@ -150,7 +151,7 @@ class PDBeChemManager:
 
         Args:
             ccd_reader_result (CCDReaderResult): pdbeccdutils parser output.
-        """                
+        """
         self.logger.info(f'{ccd_reader_result.component.id} | processing...')
 
         ccd_id = ccd_reader_result.component.id

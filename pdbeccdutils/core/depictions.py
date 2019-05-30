@@ -264,17 +264,8 @@ class DepictionValidator:
         # there is a common atom. So we identify angles correctly
         # e.g. B -> A; B -> C and not A -> B; C -> B.
         if len(set(names)) == 3:
-            pivot = ext.find_element_with_max_occurrence(names)
-
-            if names[0] != pivot:
-                points[0], points[1] = points[1], points[0]  # swap elements
-                atoms[0], atoms[1] = atoms[1], atoms[0]
-                vecA = vecA * -1
-
-            if names[2] != pivot:
-                points[2], points[3] = points[3], points[2]
-                atoms[2], atoms[3] = atoms[3], atoms[2]
-                vecB = vecB * -1
+            angle = self.__get_angle(names, vecA, vecB)
+            return angle < 10.0
 
         # Cramer's rule to identify intersection
         det = vecA.x * -vecB.y + vecA.y * vecB.x
@@ -290,12 +281,6 @@ class DepictionValidator:
         if (p < 0 or p > 1):
             return False
 
-        if p in (0, 1):
-            radians = vecA.AngleTo(vecB)
-            angle = 180 / math.pi * radians
-
-            return angle < 10.0
-
         detR = (vecA.x * b) - (vecA.y * a)
         r = round(detR / det, 3)
 
@@ -303,6 +288,32 @@ class DepictionValidator:
             return True
 
         return False
+
+    def __get_angle(self, names, vecA, vecB):
+        """Get the size of the angle formed by two bonds which share
+        common atom.
+
+        Args:
+            names (list of str): List of atom names forming bonds 
+                [A, B, C, D] for AB and CD.
+            vecA (Geometry.Point2D): Vector representing AB bond.
+            vecB (Geometry.Point2D): Vector representing CD bond.
+
+        Returns:
+            float: Size of the angle in degrees.
+        """
+        pivot = ext.find_element_with_max_occurrence(names)
+
+        if names[0] != pivot:  # Atoms needs to be order to pick vectors correctly
+            vecA = vecA * -1
+
+        if names[2] != pivot:
+            vecB = vecB * -1
+
+        radians = vecA.AngleTo(vecB)
+        angle = 180 / math.pi * radians
+
+        return angle
 
     def has_degenerated_atom_positions(self, threshold):
         """
