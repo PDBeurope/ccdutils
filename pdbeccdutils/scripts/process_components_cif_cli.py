@@ -29,14 +29,11 @@ More detailed description can be found here:
 https://gitlab.ebi.ac.uk/pdbe/release/pdbechem
 """
 import argparse
-import json
 import logging
 import os
 import sys
 import traceback
-import xml.etree.ElementTree as ET
-from typing import Any, Dict, List
-from xml.dom import minidom
+from typing import List
 
 import rdkit
 
@@ -48,38 +45,6 @@ from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import PubChemDownloader, config
-
-# region helper methods
-
-
-def atom_mapping_as_xml_element(element, mapping, mapping_id):
-    """Append atom mapping to a specified element.
-
-    Args:
-        element (xml.etree.ElementTree.Element): Element to append children with atom mapping.
-        mapping (list of `str`): List with atom names
-        mapping_id (int): Id of the mapping for db loading.
-    """
-    map_element = ET.SubElement(element, 'mapping', {'id': str(mapping_id)})
-
-    for at_name in mapping:
-        ET.SubElement(map_element, 'atom', {'name': at_name})
-
-
-def write_xml_file(xml, path):
-    """Write out XML representation of the components.cif file
-
-    Args:
-        chem_comp_xml (xml.etree.ElementTree.Element): xml object with
-            the data.
-        path (str): Path where the XML file is going to be saved.
-    """
-    xml_str = ET.tostring(xml, encoding='utf-8', method='xml')
-    pretty = minidom.parseString(xml_str)
-
-    with open(path, 'w') as f:
-        f.write(pretty.toprettyxml(indent="  "))
-# endregion helper methods
 
 
 class PDBeChemManager:
@@ -136,7 +101,7 @@ class PDBeChemManager:
         for key, ccd_reader_result in self.compounds.items():
             try:
                 self.process_single_component(ccd_reader_result)
-            except Exception as e:
+            except Exception:
                 self.logger.error(f'{key} | FAILURE {traceback.format_exc()}.')
             self.ligands_to_process -= 1
 
@@ -160,8 +125,6 @@ class PDBeChemManager:
         parent_dir = os.path.join(self.output_dir, ccd_id[0], ccd_id)
         os.makedirs(parent_dir, exist_ok=True)
 
-        json_output = {'het_code': ccd_id}
-
         # check parsing and conformer degeneration
         self._check_component_parsing(ccd_reader_result)
         self._generate_ideal_structure(ccd_reader_result.component)
@@ -171,20 +134,14 @@ class PDBeChemManager:
             self._download_template(component)
 
         # search fragment library
-        self._search_fragment_library(component, json_output)
+        self._search_fragment_library(component)
 
         # get scaffolds
-        self._compute_component_scaffolds(component, json_output)
+        self._compute_component_scaffolds(component)
 
         # write out files
         self._generate_depictions(component)
         self._export_structure_formats(component)
-
-        # write fragments and scaffolds
-        with open(os.path.join(parent_dir, f'{ccd_id}_substructures.json'), 'w') as f:
-            json.dump(json_output, f, sort_keys=True, indent=4)
-
-        self._write_substructures_xml(json_output, os.path.join(parent_dir, f'{ccd_id}_substructures.xml'))
 
     def _check_component_parsing(self, ccd_reader_result):
         """Checks components parsing and highlights issues encountered with
@@ -240,38 +197,24 @@ class PDBeChemManager:
 
         return result
 
-    def _search_fragment_library(self, component: Component, json_output: Dict[str, Any]):
+    def _search_fragment_library(self, component: Component):
         """Search fragment library to find hits
 
         Args:
             component (Component): Component to be processed
-            json_output (Dict[str, Any]): dictionary like structure with the
-                results to be stored.
         """
 
-        json_output['fragments'] = []
         matches = component.library_search(self.fragment_library)
-
-        for i in component.fragments:
-            json_output['fragments'].append({
-                'name': i.name,
-                'smiles': i.smiles,
-                'mapping': i.mappings,
-                'source': i.source
-            })
 
         if matches:
             self.logger.debug(f'{len(matches)} matches found in the library `{self.fragment_library.name}`.')
 
-    def _compute_component_scaffolds(self, component: Component, json_output: Dict[str, Any]):
+    def _compute_component_scaffolds(self, component: Component):
         """Compute scaffolds for a given component.
 
         Args:
             component (Component): Component to be processed
-            json_output (Dict[str, Any]): dictionary like structure with the
-                results to be stored.
         """
-        json_output['scaffolds'] = []
 
         try:
             component.get_scaffolds()
@@ -279,12 +222,6 @@ class PDBeChemManager:
             self.logger.error(str(e))
 
             return
-
-        for scaffold in component.scaffolds:
-            json_output['scaffolds'].append({
-                'smiles': scaffold.smiles,
-                'mapping': scaffold.mappings[0]
-            })
 
         self.logger.debug(f'{len(component.scaffolds)} scaffold(s) were found.')
 
@@ -338,48 +275,6 @@ class PDBeChemManager:
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}_model.pdb'), component, False, ConformerType.Model)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cml'), component, False, ConformerType.Model)
         self.__write_molecule(os.path.join(parent_dir, f'{component.id}.cif'), component, False, ConformerType.AllConformers)
-
-    def _write_substructures_xml(self, data, path):
-        """Write XML information for scaffolds and fragments so that they
-        are easily loaded into PDBe database
-
-        Args:
-            data (dict): Data to be serialized
-            path (str): Path where the XML is going to be stored
-        """
-
-        root = ET.Element('entry')
-        root.set('id', data['het_code'])
-
-        fragments = ET.SubElement(root, 'fragments')
-        scaffolds = ET.SubElement(root, 'scaffolds')
-        fragment_counter = 0
-        scaffold_counter = 0
-
-        for frag in data['fragments']:
-            fragment_counter += 1
-            fragment = ET.SubElement(fragments, 'fragment', {
-                'id': str(fragment_counter),
-                'name': frag['name'],
-                'smiles': frag['smiles'],
-                'source': frag['source']
-            })
-            mapping_id = 0
-            for l in frag['mapping']:
-                mapping_id += 1
-                atom_mapping_as_xml_element(fragment, l, mapping_id)
-
-        for sc in data['scaffolds']:
-            scaffold_counter += 1
-            scaffold = ET.SubElement(scaffolds, 'scaffold', {
-                'id': str(scaffold_counter),
-                'smiles': sc['smiles']
-            })
-
-            for l in sc['mapping']:
-                atom_mapping_as_xml_element(scaffold, l, 1)
-
-        write_xml_file(root, path)
 
     def __write_molecule(self, path, component, alt_names, conformer_type):
         """Write out deemed structure.
