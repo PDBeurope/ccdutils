@@ -23,16 +23,16 @@ quality
 import math
 import os
 import sys
+from collections import OrderedDict
 from typing import Dict
 
+import pdbeccdutils.helpers.collection_ext as ext
 import rdkit
+from pdbeccdutils.core.models import DepictionResult, DepictionSource
+from pdbeccdutils.utils import config
 from rdkit import Chem, Geometry
 from rdkit.Chem import AllChem, rdCoordGen
 from scipy.spatial import KDTree
-
-from pdbeccdutils.core.models import DepictionResult, DepictionSource
-from pdbeccdutils.utils import config
-import pdbeccdutils.helpers.collection_ext as ext
 
 
 class DepictionManager:
@@ -63,12 +63,13 @@ class DepictionManager:
         self.coordgen_params.templateFileDir = config.coordgen_templates
 
         self.pubchem_templates = pubchem_templates_path if os.path.isdir(pubchem_templates_path) else ''
-        self.templates: Dict[str, rdkit.Chem.rdchem.Mol] = {}
+        self.templates: Dict[str, rdkit.Chem.rdchem.Mol] = OrderedDict()
 
         if os.path.isdir(general_templates_path):
-            self.templates = {k.split('.')[0]:
-                              self._load_template(os.path.join(general_templates_path, k))
-                              for k in os.listdir(general_templates_path)}
+            for k in sorted(os.listdir(general_templates_path)):
+                template = self._load_template(os.path.join(general_templates_path, k))
+                template_name = k.split('.')[0]
+                self.templates[template_name] = template
 
     def depict_molecule(self, het_id: str, mol: rdkit.Chem.rdchem.Mol) -> DepictionResult:
         """
