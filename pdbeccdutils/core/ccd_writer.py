@@ -1021,7 +1021,7 @@ def _add_sw_info_cif(cif_copy):
     cif_copy[category] = {}
     cif_copy[category]['name'] = ['rdkit', 'pdbeccdutils']
     cif_copy[category]['version'] = [rdkit.__version__, pdbeccdutils.__version__]
-    cif_copy[category]['description'] = ['Computation functionality.', 'Wrapper to provide 2D templates and molecular fragments.']
+    cif_copy[category]['description'] = ['Core functionality.', 'Wrapper to provide 2D templates and molecular fragments.']
 
 
 def _add_2d_depiction_cif(component, cif_copy):
@@ -1047,8 +1047,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_copy):
         cif_copy (dict of str: dict): Dictionary like structure of
             the CIF file.
     """
-    substructure_category = '_chem_comp_pdbe_substructure'
-    mapping_category = '_chem_comp_pdbe_substructure_mapping'
+    substructure_category = '_pdbe_chem_comp_substructure'
+    mapping_category = '_pdbe_chem_comp_substructure_mapping'
 
     ids = [f'S{i+1}' for i in range(0, len(component.scaffolds))]
     ids += [f'F{i+1}' for i in range(0, len(component.fragments))]
@@ -1091,7 +1091,7 @@ def _add_fragments_cif(component, cif_copy):
     Args:
         component (Component): pdbeccdutils component.
         cif_copy (dict of str: dict): Dictionary like structure of
-            the _chem_comp_pdbe_substructure_mapping category.
+            the _pdbe_chem_comp_substructure_mapping category.
     """
     for i, scaffold in enumerate(component.scaffolds):
         for a, mapping in enumerate(scaffold.mappings):
@@ -1127,7 +1127,7 @@ def _add_rdkit_properties_cif(component, cif_copy):
         cif_copy (dict of str: dict): Dictionary like structure of
             the CIF file.
     """
-    category = '_chem_comp_rdkit_properties'
+    category = '_pdbe_chem_comp_rdkit_properties'
 
     cif_copy[category] = {}
     cif_copy[category]['comp_id'] = component.id
@@ -1146,7 +1146,7 @@ def __add_rdkit_2d_atoms_cif(component, cif_copy):
         cif_copy (dict of str: dict): Dictionary like structure of
             the CIF file.
     """
-    category = '_chem_comp_atom_pdbe_depiction'
+    category = '_pdbe_chem_comp_atom_depiction'
 
     cif_copy[category] = {}
     conformer = component.mol2D.GetConformer()
@@ -1169,7 +1169,7 @@ def __add_rdkit_2d_bonds_cif(component, cif_copy):
         cif_copy (dict of str: dict): Dictionary like structure of
             the CIF file.
     """
-    category = '_chem_comp_bond_pdbe_depiction'
+    category = '_pdbe_chem_comp_bond_depiction'
     cif_copy[category] = {}
 
     try:
@@ -1203,7 +1203,7 @@ def _add_unichem_mapping(component, cif_copy):
         cif_copy (dict of str: dict): Dictionary like structure of
             the CIF file.
     """
-    category = '_chem_comp_external_mappings'
+    category = '_pdbe_chem_comp_external_mappings'
     cif_copy[category] = {}
 
     cif_copy[category]['comp_id'] = []
@@ -1233,7 +1233,7 @@ def _add_rdkit_conformer(component, cif_copy, remove_hs):
     except ValueError:
         return  # no conformer nothing to write, we quit
 
-    category = '_chem_comp_pdbe_rdkit_conformer'
+    category = '_pdbe_chem_comp_rdkit_conformer'
     cif_copy[category] = {}
 
     atom_count = sum(1 for atom in component.mol.GetAtoms() if atom.GetSymbol() != 'H') if remove_hs else len(component.mol.GetAtoms())
