@@ -139,7 +139,8 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
     label_elem = svg.findall('{http://www.w3.org/2000/svg}text')
 
     for atom_svg in atom_elem:
-        atom_id = int(re.search(r'\d+', atom_svg.attrib.get('class')).group(0))
+        atom_id_str = re.search(r'\d+', atom_svg.attrib.get('class')).group(0)
+        atom_id = int(atom_id_str)
         temp = {
             'name': mol.GetAtomWithIdx(atom_id).GetProp('name'),
             'x': atom_svg.attrib.get('cx'),
@@ -148,10 +149,10 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
         result_bag['atoms'].append(temp)
 
     for bond_svg in bond_elem:
-        if not bond_svg.find('class'):
+        if 'class' not in bond_svg.attrib:
             continue
-        
-        bond_id = int(re.search(r'\d+', bond_svg.attrib.get('class')).group(0))
+
+        bond_id = int(re.search(r'\d+', bond_svg.attrib['class']).group(0))
         bond = mol.GetBondWithIdx(bond_id)
         temp = {
             'bgn': bond.GetBeginAtom().GetProp('name'),
