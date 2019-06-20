@@ -28,14 +28,15 @@ def tests_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-test_cif_path_name = os.path.join(tests_dir(), 'ccd_mmcif_test_files')
-test_comparison_files_path = os.path.join(tests_dir(), 'comparison_files')
-test_cut_down_components_cif = os.path.join(tests_dir(), 'components_cif',
-                                            'cut_down_components.cif')
+test_cif = os.path.join(tests_dir(), 'ccd_mmcif_test_files', 'random_sample')
+test_depiction = os.path.join(tests_dir(), 'ccd_mmcif_test_files', 'depiction_test')
+test_cut_down_components_cif = os.path.join(tests_dir(), 'components_cif', 'cut_down_components.cif')
 
 
 def cif_filename(code):
-    return os.path.join(test_cif_path_name, code + '.cif')
+    path = os.path.join(test_cif, code + '.cif')
+
+    return path if os.path.isfile(path) else os.path.join(test_depiction, code + '.cif')
 
 
 def supply_list_of_sample_cifs():
@@ -47,5 +48,4 @@ def supply_list_of_sample_cifs():
     Returns:
         list of filenames
     """
-    return sorted(glob.glob(os.path.join(test_cif_path_name, '*.cif')))
-
+    return sorted(glob.glob(os.path.join(test_cif, '*.cif')))

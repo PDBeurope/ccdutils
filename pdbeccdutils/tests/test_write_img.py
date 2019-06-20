@@ -7,8 +7,19 @@ import os
 import pytest
 
 from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.core.depictions import DepictionManager
+from pdbeccdutils.core.depictions import DepictionManager, DepictionSource
 from pdbeccdutils.tests.tst_utilities import cif_filename
+
+collision_free_templates = [
+    ('hem', ['HEM', 'HEA', 'HEB', 'HEC', 'HDD', 'HEG']),
+    ('porphycene', ['HNN', 'HME']),
+    ('ru_complex', ['11R']),
+]
+
+collision_templates = [
+    ('cube', ['SF4', '0KA', '1CL']),
+    ('adamantane', ['ADM', '6KK', 'AXM'])
+]
 
 
 def load_molecule(id_):
@@ -48,3 +59,41 @@ class TestWriteImg:
         with open(path, 'r') as f:
             content = f.readlines()
         assert any(expected in i for i in content)
+
+    @staticmethod
+    @pytest.mark.parametrize("expected_template,names", collision_free_templates)
+    def test_collision_free_template_picked(expected_template, names):
+        """Test if expected templates are picked for certain compounds
+
+        Args:
+            expected_template (str): template name.
+            names (list of str): list of ids matching this template.
+        """
+        d = DepictionManager()
+
+        for ccd_id in names:
+            mol = load_molecule(ccd_id)
+            response = mol.compute_2d(d)
+
+            assert response.source == DepictionSource.Template
+            assert response.score == 0
+            assert response.template_name == expected_template
+
+    @staticmethod
+    @pytest.mark.parametrize("expected_template,names", collision_templates)
+    def test_collision_template_picked(expected_template, names):
+        """Test if expected templates are picked for certain compounds
+
+        Args:
+            expected_template (str): template name.
+            names (list of str): list of ids matching this template.
+        """
+        d = DepictionManager()
+
+        for ccd_id in names:
+            mol = load_molecule(ccd_id)
+            response = mol.compute_2d(d)
+
+            assert response.source == DepictionSource.Template
+            assert response.score > 0
+            assert response.template_name == expected_template
