@@ -21,6 +21,7 @@
 import os
 import re
 import xml.etree.ElementTree as ET
+from collections import OrderedDict
 from sys import platform
 
 import rdkit
@@ -44,7 +45,7 @@ def save_no_image(path_to_image, width=200):
         _png_no_image(path_to_image, width)
 
 
-def draw_molecule(mol, drawer, file_name, width, wedge_bonds, atom_highlight, bond_highlight):
+def draw_molecule(mol, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight):
     """Draw SVG image from the RDKit molecule.
 
     Args:
@@ -52,8 +53,6 @@ def draw_molecule(mol, drawer, file_name, width, wedge_bonds, atom_highlight, bo
         drawer (rdkit.Chem.Draw.MolDrawing.DrawingOptions): RDKit object
             with parameters for drawing depiction.
         file_name (str): Path where the depiction will be saved.
-        width (int): Size of the image. Final image will be in NxN
-            resolution.
         wedge_bonds (bool): Whether or not to wedge bonds.
         atom_highlight (`obj`: Dict): Dictionary with atom id and RGB
             mapping color mapping.
@@ -124,12 +123,13 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
         :obj:`dict` of :obj:`dict`: object with all the details for
         json serialization.
     """
-    result_bag = {}
-    result_bag['atoms'] = []
-    result_bag['bonds'] = []
-    result_bag['depictions'] = []
-    result_bag['labels'] = []
 
+    result_bag = OrderedDict([
+        ('dimensions', {}),
+        ('atoms', []),
+        ('drawing', []),
+        ('labels', [])
+    ])
     svg_string = _fix_svg(svg_string)
     svg = ET.fromstring(svg_string)
 
@@ -160,14 +160,7 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
             'coords': bond_svg.attrib.get('d'),
             'style': bond_svg.attrib.get('style')
         }
-        result_bag['depictions'].append(temp)
-
-    for bond in mol.GetBonds():
-        temp = {
-            'bgn': bond.GetBeginAtom().GetProp('name'),
-            'end': bond.GetEndAtom().GetProp('name')
-        }
-        result_bag['bonds'].append(temp)
+        result_bag['drawing'].append(temp)
 
     for label_svg in label_elem:
         temp = {

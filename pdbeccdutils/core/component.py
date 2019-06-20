@@ -456,7 +456,7 @@ class Component:
                 options.atomLabels[i] = atom_name
                 a.SetProp('molFileAlias', atom_name)
 
-        drawing.draw_molecule(self.mol2D, drawer, file_name, width, wedge_bonds, atom_highlight, bond_highlight)
+        drawing.draw_molecule(self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight)
 
     def export_2d_annotation(self, file_name: str, wedge_bonds: bool = True) -> None:
         """Generates 2D depiction in JSON format with annotation of
