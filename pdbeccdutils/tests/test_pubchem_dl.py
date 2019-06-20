@@ -12,7 +12,7 @@ from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
 """
 
 
-class TestPubChemDL:
+class TestPubChemDownload:
     @staticmethod
     @pytest.mark.parametrize('het_code', [
         'MAN', 'NAG', 'SO4', 'GOL', 'SAC', 'CDL', 'GLU'
@@ -37,6 +37,9 @@ class TestPubChemDL:
 
         to_download = os.path.join(tmpdir, f'{het_code}.sdf')
         dl.update_ccd_file(cif_filename(het_code))
+        mol = Chem.MolFromMolFile(to_download)
 
         assert os.path.isfile(to_download)
         assert os.path.getsize(to_download) > 0
+        assert isinstance(mol, Chem.Mol)
+        assert mol.GetNumAtoms() > 0

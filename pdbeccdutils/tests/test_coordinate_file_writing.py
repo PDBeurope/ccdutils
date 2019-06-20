@@ -4,8 +4,7 @@ import pytest
 
 from pdbeccdutils.core import ccd_reader, ccd_writer
 from pdbeccdutils.core.models import ConformerType
-from pdbeccdutils.tests.tst_utilities import (file_name_in_tsts_out,
-                                              supply_list_of_sample_cifs)
+from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
 
@@ -13,14 +12,15 @@ sample_ccd_cifs = supply_list_of_sample_cifs()
 class TestSDF:
     @staticmethod
     @pytest.mark.parametrize('test_ccd_cif', sample_ccd_cifs)
-    def test_write_sdf(test_ccd_cif):
-        assert os.path.isfile(test_ccd_cif)
+    def test_write_sdf(test_ccd_cif, tmpdir_factory):
+        wd = tmpdir_factory.mktemp('sdf_test')
         reader = ccd_reader.read_pdb_cif_file(test_ccd_cif)
-        assert reader.errors == []
         component = reader.component
+
+        assert reader.errors == []
         for ideal in True, False:
             for remove_hs in True, False:
-                sdf_file = file_name_in_tsts_out(component.id)
+                sdf_file = os.path.join(wd, component.id)
                 if ideal:
                     sdf_file += '_ideal'
                     conf_type = ConformerType.Ideal

@@ -49,24 +49,3 @@ def supply_list_of_sample_cifs():
     """
     return sorted(glob.glob(os.path.join(test_cif_path_name, '*.cif')))
 
-
-def file_name_in_tsts_out(file_name, remove_existing=True):
-    """
-    creates the subdirectory "out" in the "tests" subdirectory (if necessary)
-    and returns the file_name in this directory, If the file already exists it will remove it.
-    (Cannot call method file_name_in_tests_out otherwise nose thinks it is a test)
-
-    Args:
-        file_name (str):  the name for the file
-        remove_existing (bool): remove existing file?
-
-    Returns:
-        str: the filename in the subdirectory tests/out
-    """
-    subdir = os.path.join(tests_dir(), 'out')
-    if not os.path.isdir(subdir):
-        os.mkdir(subdir)
-    out_file_name = os.path.join(subdir, file_name)
-    if remove_existing and os.path.isfile(out_file_name):
-        os.remove(out_file_name)
-    return out_file_name

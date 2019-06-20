@@ -6,16 +6,13 @@ http://dustinrcollins.com/testing-python-command-line-apps
 adapted to use nose then converted to pytest
 """
 import os
-import shutil
 import xml.etree.ElementTree as ET
 
 import pytest
-
 from pdbeccdutils.scripts.process_components_cif_cli import (PDBeChemManager,
                                                              check_args,
                                                              create_parser)
 from pdbeccdutils.tests.tst_utilities import (cif_filename,
-                                              file_name_in_tsts_out,
                                               test_cut_down_components_cif)
 
 
@@ -40,20 +37,19 @@ class TestCommandLineArgs:
 
 class TestRegressionTest:
     @staticmethod
-    def test_with_problematic_cif_7om():
-        """ 7OM caused problems because it lacks an inchikey
-        and this caused a crash """
+    def test_with_problematic_cif_7om(tmpdir):
+        """
+        7OM caused problems because it lacks an inchikey
+        and this used to cause a crash
+        """
         cif_file = cif_filename('7OM')
-        test_output_dir = file_name_in_tsts_out('test_process_components_cif_70M')
-        if os.path.isdir(test_output_dir):
-            shutil.rmtree(test_output_dir)
+        test_output_dir = tmpdir.mkdir('test_process_components_cif_70M')
         parser = create_parser()
-        args = parser.parse_args([cif_file, '-o', test_output_dir])
+        args = parser.parse_args([cif_file, '-o', str(test_output_dir)])
         m = PDBeChemManager()
         m.run_pipeline(args)
 
-        assert os.path.isdir(test_output_dir), \
-            'output directory  {} must be created'.format(test_output_dir)
+        assert os.path.isdir(test_output_dir), f'output directory {str(test_output_dir)} must be created'
 
 
 class TestCutDownComponentsCif:
@@ -74,7 +70,6 @@ class TestCutDownComponentsCif:
     @pytest.fixture(scope='class')
     def pipeline_wd(self, tmpdir_factory):
         wd = tmpdir_factory.mktemp('pdbechem_test')
-        print('PDBeChem working directory is {}'.format(wd))
 
         parser = create_parser()
         args = parser.parse_args(['-o', str(wd), test_cut_down_components_cif])
@@ -106,18 +101,18 @@ class TestCutDownComponentsCif:
             assert os.path.getsize(os.path.join(path, f)) > 0
 
     @staticmethod
-    @pytest.mark.parametrize('id,name', [
+    @pytest.mark.parametrize('id_,name', [
         ("000", 'OA'),
         ("001", 'F11'),
         ("002", 'N3'),
         ("003", 'C17'),
         ("004", 'OXT')
     ])
-    def test_images_with_names_created(pipeline_wd, id, name):
+    def test_images_with_names_created(pipeline_wd, id_, name):
         """Test if the depictions with names contain certain atom labels
         as expected.
         """
-        path = os.path.join(pipeline_wd, id[0], id, '{}_100_names.svg'.format(id))
+        path = os.path.join(pipeline_wd, id_[0], id_, '{}_100_names.svg'.format(id_))
         pattern = '<tspan>{}</tspan>'.format(name)
 
         with open(path) as f:
@@ -126,20 +121,20 @@ class TestCutDownComponentsCif:
             assert pattern in str_repr
 
     @staticmethod
-    @pytest.mark.parametrize('id,name,alt_name', [
+    @pytest.mark.parametrize('id_,name,alt_name', [
         ('001', 'H021', '1H02'),
         ('002', 'H121', '1H12'),
         ('003', 'H121', '1H12')
     ])
-    def test_correct_atom_naming_in_files(pipeline_wd, id, name, alt_name):
+    def test_correct_atom_naming_in_files(pipeline_wd, id_, name, alt_name):
         """Test if alternate names are used for exported model/ideal
         pdb files.
         """
-        alts = [os.path.join(pipeline_wd, id[0], id, '{}_ideal_alt.pdb'.format(id)),
-                os.path.join(pipeline_wd, id[0], id, '{}_model_alt.pdb'.format(id))]
+        alts = [os.path.join(pipeline_wd, id_[0], id_, '{}_ideal_alt.pdb'.format(id_)),
+                os.path.join(pipeline_wd, id_[0], id_, '{}_model_alt.pdb'.format(id_))]
         regular = [
-            os.path.join(pipeline_wd, id[0], id, '{}_ideal.pdb'.format(id)),
-            os.path.join(pipeline_wd, id[0], id, '{}_model.pdb'.format(id))
+            os.path.join(pipeline_wd, id_[0], id_, '{}_ideal.pdb'.format(id_)),
+            os.path.join(pipeline_wd, id_[0], id_, '{}_model.pdb'.format(id_))
         ]
 
         for i in alts:

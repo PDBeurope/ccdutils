@@ -11,10 +11,11 @@ from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.tests.tst_utilities import cif_filename
 
 
-def load_molecule(id):
+def load_molecule(id_):
     depiction = DepictionManager()
-    c = ccd_reader.read_pdb_cif_file(cif_filename(id)).component
+    c = ccd_reader.read_pdb_cif_file(cif_filename(id_)).component
     c.compute_2d(depiction)
+
     return c
 
 
@@ -29,7 +30,7 @@ class TestWriteImg:
         assert os.path.isfile(path)
 
     @staticmethod
-    @pytest.mark.parametrize("id,expected,names", [
+    @pytest.mark.parametrize("ccd_id,expected,names", [
         ("NAG", 'C8', True),
         ("ATP", 'C5&apos;', True),
         ("08T", 'BE', True),
@@ -39,9 +40,9 @@ class TestWriteImg:
         ("10R", '<rect', False),
         ("0OD", '<rect', False),
     ])
-    def test_image_generation_with_names(tmpdir, id, expected, names):
-        mol = load_molecule(id)
-        path = str(tmpdir.join('{}_{}.svg'.format(id, 'names' if names else 'no_names')))
+    def test_image_generation_with_names(tmpdir, ccd_id, expected, names):
+        mol = load_molecule(ccd_id)
+        path = str(tmpdir.join('{}_{}.svg'.format(ccd_id, 'names' if names else 'no_names')))
         mol.export_2d_svg(path, names=names)
 
         with open(path, 'r') as f:
