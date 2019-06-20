@@ -1,0 +1,275 @@
+data_6KK
+# 
+_chem_comp.id                                    6KK 
+_chem_comp.name                                  "(3R,3aS,6aR)-hexahydrofuro[2,3-b]furan-3-yl {(2S,3R)-3-hydroxy-4-{[(4-methoxyphenyl)sulfonyl](2-methylpropyl)amino}-1-[(3R,5R,7R)-tricyclo[3.3.1.1~3,7~]decan-1-yl]butan-2-yl}carbamate" 
+_chem_comp.type                                  NON-POLYMER 
+_chem_comp.pdbx_type                             HETAIN 
+_chem_comp.formula                               "C32 H48 N2 O8 S" 
+_chem_comp.mon_nstd_parent_comp_id               ? 
+_chem_comp.pdbx_synonyms                         ? 
+_chem_comp.pdbx_formal_charge                    0 
+_chem_comp.pdbx_initial_date                     2016-04-22 
+_chem_comp.pdbx_modified_date                    2016-09-16 
+_chem_comp.pdbx_ambiguous_flag                   N 
+_chem_comp.pdbx_release_status                   REL 
+_chem_comp.pdbx_replaced_by                      ? 
+_chem_comp.pdbx_replaces                         ? 
+_chem_comp.formula_weight                        620.797 
+_chem_comp.one_letter_code                       ? 
+_chem_comp.three_letter_code                     6KK 
+_chem_comp.pdbx_model_coordinates_details        ? 
+_chem_comp.pdbx_model_coordinates_missing_flag   N 
+_chem_comp.pdbx_ideal_coordinates_details        Corina 
+_chem_comp.pdbx_ideal_coordinates_missing_flag   N 
+_chem_comp.pdbx_model_coordinates_db_code        5JFP 
+_chem_comp.pdbx_subcomponent_list                ? 
+_chem_comp.pdbx_processing_site                  RCSB 
+# 
+loop_
+_chem_comp_atom.comp_id 
+_chem_comp_atom.atom_id 
+_chem_comp_atom.alt_atom_id 
+_chem_comp_atom.type_symbol 
+_chem_comp_atom.charge 
+_chem_comp_atom.pdbx_align 
+_chem_comp_atom.pdbx_aromatic_flag 
+_chem_comp_atom.pdbx_leaving_atom_flag 
+_chem_comp_atom.pdbx_stereo_config 
+_chem_comp_atom.model_Cartn_x 
+_chem_comp_atom.model_Cartn_y 
+_chem_comp_atom.model_Cartn_z 
+_chem_comp_atom.pdbx_model_Cartn_x_ideal 
+_chem_comp_atom.pdbx_model_Cartn_y_ideal 
+_chem_comp_atom.pdbx_model_Cartn_z_ideal 
+_chem_comp_atom.pdbx_component_atom_id 
+_chem_comp_atom.pdbx_component_comp_id 
+_chem_comp_atom.pdbx_ordinal 
+6KK C2  C1  C 0 1 Y N N 20.772 27.606 14.726 -7.067  -0.273 1.905  C2  6KK 1  
+6KK C3  C2  C 0 1 Y N N 19.458 27.504 14.314 -7.206  -0.931 0.692  C3  6KK 2  
+6KK C4  C3  C 0 1 Y N N 18.679 26.375 14.574 -6.094  -1.450 0.058  C4  6KK 3  
+6KK C5  C4  C 0 1 Y N N 19.291 25.339 15.280 -4.843  -1.314 0.631  C5  6KK 4  
+6KK C6  C5  C 0 1 Y N N 20.603 25.438 15.679 -4.702  -0.659 1.841  C6  6KK 5  
+6KK C7  C6  C 0 1 Y N N 21.399 26.544 15.380 -5.811  -0.138 2.479  C7  6KK 6  
+6KK S8  S1  S 0 1 N N N 18.280 23.961 15.717 -3.426  -1.977 -0.180 S8  6KK 7  
+6KK O9  O1  O 0 1 N N N 17.216 23.881 14.683 -2.449  -2.191 0.829  O9  6KK 8  
+6KK O10 O2  O 0 1 N N N 19.128 22.735 15.824 -3.900  -3.009 -1.035 O10 6KK 9  
+6KK N11 N1  N 0 1 N N N 17.595 24.154 17.201 -2.826  -0.791 -1.167 N11 6KK 10 
+6KK C12 C7  C 0 1 N N N 18.521 24.582 18.237 -3.363  -0.623 -2.520 C12 6KK 11 
+6KK C13 C8  C 0 1 N N N 18.183 23.989 19.609 -4.029  0.750  -2.638 C13 6KK 12 
+6KK C14 C9  C 0 1 N N N 18.112 22.455 19.548 -4.493  0.969  -4.079 C14 6KK 13 
+6KK C15 C10 C 0 1 N N N 19.174 24.395 20.699 -5.235  0.814  -1.698 C15 6KK 14 
+6KK C16 C11 C 0 1 N N N 16.290 24.784 17.269 -1.759  0.091  -0.688 C16 6KK 15 
+6KK C17 C12 C 0 1 N N R 15.221 23.860 17.873 -0.404  -0.459 -1.135 C17 6KK 16 
+6KK O18 O3  O 0 1 N N N 14.052 24.619 18.200 -0.319  -0.414 -2.561 O18 6KK 17 
+6KK C19 C13 C 0 1 N N S 14.834 22.724 16.924 0.716   0.391  -0.531 C19 6KK 18 
+6KK N20 N2  N 0 1 N N N 13.865 21.847 17.616 2.013   -0.204 -0.861 N20 6KK 19 
+6KK C21 C14 C 0 1 N N N 14.192 20.620 18.053 2.828   -0.633 0.124  C21 6KK 20 
+6KK O22 O4  O 0 1 N N N 15.321 20.157 17.894 2.466   -0.572 1.282  O22 6KK 21 
+6KK O23 O5  O 0 1 N N N 13.161 20.000 18.664 4.043   -1.130 -0.176 O23 6KK 22 
+6KK C24 C15 C 0 1 N N R 13.393 18.620 19.044 4.866   -1.574 0.935  C24 6KK 23 
+6KK C25 C16 C 0 1 N N N 12.852 18.470 20.479 4.629   -3.069 1.214  C25 6KK 24 
+6KK O26 O6  O 0 1 N N N 11.432 18.518 20.300 5.859   -3.756 0.942  O26 6KK 25 
+6KK C27 C17 C 0 1 N N R 11.130 17.811 19.098 6.938   -2.818 1.113  C27 6KK 26 
+6KK O28 O7  O 0 1 N N N 10.147 18.531 18.363 8.004   -3.173 0.221  O28 6KK 27 
+6KK C29 C18 C 0 1 N N N 10.747 19.115 17.214 7.818   -2.547 -1.052 C29 6KK 28 
+6KK C30 C19 C 0 1 N N N 12.015 18.305 16.906 6.533   -1.696 -0.972 C30 6KK 29 
+6KK C31 C20 C 0 1 N N S 12.399 17.771 18.263 6.361   -1.475 0.568  C31 6KK 30 
+6KK C32 C21 C 0 1 N N N 14.074 23.175 15.671 0.646   1.809  -1.102 C32 6KK 31 
+6KK C51 C22 C 0 1 N N N 13.794 22.234 14.486 1.606   2.717  -0.333 C51 6KK 32 
+6KK C52 C23 C 0 1 N N N 12.521 21.457 14.767 1.565   4.125  -0.930 C52 6KK 33 
+6KK C53 C24 C 0 1 N N N 12.195 20.529 13.595 2.526   5.034  -0.160 C53 6KK 34 
+6KK C54 C25 C 0 1 N N N 13.354 19.573 13.358 3.947   4.477  -0.263 C54 6KK 35 
+6KK C55 C26 C 0 1 N N N 14.637 20.363 13.096 3.988   3.069  0.334  C55 6KK 36 
+6KK C56 C27 C 0 1 N N N 14.435 21.180 11.808 3.569   3.126  1.804  C56 6KK 37 
+6KK C57 C28 C 0 1 N N N 13.273 22.153 12.015 2.147   3.683  1.908  C57 6KK 38 
+6KK C58 C29 C 0 1 N N N 13.609 23.060 13.207 1.186   2.774  1.138  C58 6KK 39 
+6KK C59 C30 C 0 1 N N N 14.977 21.282 14.263 3.028   2.161  -0.436 C59 6KK 40 
+6KK C60 C31 C 0 1 N N N 11.964 21.410 12.353 2.106   5.091  1.310  C60 6KK 41 
+6KK O39 O8  O 0 1 N N N 21.427 28.770 14.479 -8.158  0.243  2.528  O39 6KK 42 
+6KK C40 C32 C 0 1 N N N 22.805 28.677 14.843 -9.420  0.066  1.880  C40 6KK 43 
+6KK H1  H1  H 0 1 N N N 19.017 28.327 13.771 -8.182  -1.038 0.244  H1  6KK 44 
+6KK H2  H2  H 0 1 N N N 17.653 26.307 14.245 -6.201  -1.963 -0.886 H2  6KK 45 
+6KK H3  H3  H 0 1 N N N 21.035 24.627 16.247 -3.724  -0.554 2.287  H3  6KK 46 
+6KK H4  H4  H 0 1 N N N 22.446 26.577 15.641 -5.700  0.375  3.423  H4  6KK 47 
+6KK H5  H5  H 0 1 N N N 19.536 24.264 17.956 -2.552  -0.696 -3.244 H5  6KK 48 
+6KK H6  H6  H 0 1 N N N 18.487 25.679 18.309 -4.099  -1.402 -2.718 H6  6KK 49 
+6KK H7  H7  H 0 1 N N N 17.189 24.360 19.901 -3.313  1.525  -2.365 H7  6KK 50 
+6KK H8  H8  H 0 1 N N N 17.868 22.059 20.545 -5.209  0.193  -4.352 H8  6KK 51 
+6KK H9  H9  H 0 1 N N N 17.333 22.152 18.833 -4.968  1.947  -4.163 H9  6KK 52 
+6KK H10 H10 H 0 1 N N N 19.084 22.056 19.222 -3.634  0.923  -4.749 H10 6KK 53 
+6KK H11 H11 H 0 1 N N N 18.876 23.939 21.655 -4.894  0.748  -0.665 H11 6KK 54 
+6KK H12 H12 H 0 1 N N N 20.182 24.049 20.426 -5.762  1.756  -1.848 H12 6KK 55 
+6KK H13 H13 H 0 1 N N N 19.178 25.490 20.801 -5.907  -0.017 -1.913 H13 6KK 56 
+6KK H14 H14 H 0 1 N N N 16.367 25.688 17.891 -1.901  1.090  -1.100 H14 6KK 57 
+6KK H15 H15 H 0 1 N N N 15.980 25.064 16.251 -1.790  0.140  0.401  H15 6KK 58 
+6KK H16 H16 H 0 1 N N N 15.635 23.414 18.789 -0.300  -1.490 -0.797 H16 6KK 59 
+6KK H17 H17 H 0 1 N N N 14.287 25.326 18.789 -0.403  0.475  -2.932 H17 6KK 60 
+6KK H18 H18 H 0 1 N N N 15.731 22.157 16.633 0.599   0.430  0.552  H18 6KK 61 
+6KK H19 H19 H 0 1 N N N 12.933 22.179 17.764 2.286   -0.290 -1.788 H19 6KK 62 
+6KK H20 H20 H 0 1 N N N 14.435 18.283 18.937 4.652   -0.982 1.825  H20 6KK 63 
+6KK H21 H21 H 0 1 N N N 13.162 17.511 20.919 4.349   -3.210 2.258  H21 6KK 64 
+6KK H22 H22 H 0 1 N N N 13.197 19.295 21.119 3.840   -3.447 0.565  H22 6KK 65 
+6KK H23 H23 H 0 1 N N N 10.794 16.786 19.314 7.268   -2.744 2.149  H23 6KK 66 
+6KK H24 H24 H 0 1 N N N 11.009 20.164 17.417 8.671   -1.908 -1.278 H24 6KK 67 
+6KK H25 H25 H 0 1 N N N 10.053 19.069 16.361 7.711   -3.307 -1.826 H25 6KK 68 
+6KK H26 H26 H 0 1 N N N 11.803 17.487 16.202 6.667   -0.744 -1.486 H26 6KK 69 
+6KK H27 H27 H 0 1 N N N 12.807 18.948 16.493 5.682   -2.241 -1.380 H27 6KK 70 
+6KK H28 H28 H 0 1 N N N 12.766 16.738 18.178 6.846   -0.573 0.941  H28 6KK 71 
+6KK H29 H29 H 0 1 N N N 14.641 24.023 15.259 0.928   1.791  -2.155 H29 6KK 72 
+6KK H30 H30 H 0 1 N N N 13.092 23.526 16.020 -0.371  2.189  -1.005 H30 6KK 73 
+6KK H31 H31 H 0 1 N N N 11.690 22.163 14.913 1.864   4.084  -1.977 H31 6KK 74 
+6KK H32 H32 H 0 1 N N N 12.656 20.856 15.679 0.553   4.522  -0.856 H32 6KK 75 
+6KK H33 H33 H 0 1 N N N 11.281 19.959 13.817 2.497   6.037  -0.585 H33 6KK 76 
+6KK H34 H34 H 0 1 N N N 13.132 18.940 12.487 4.247   4.436  -1.310 H34 6KK 77 
+6KK H35 H35 H 0 1 N N N 13.491 18.939 14.247 4.632   5.124  0.285  H35 6KK 78 
+6KK H36 H36 H 0 1 N N N 15.466 19.657 12.942 5.001   2.672  0.260  H36 6KK 79 
+6KK H37 H37 H 0 1 N N N 14.204 20.502 10.973 3.598   2.123  2.230  H37 6KK 80 
+6KK H38 H38 H 0 1 N N N 15.352 21.743 11.580 4.253   3.773  2.353  H38 6KK 81 
+6KK H39 H39 H 0 1 N N N 13.130 22.763 11.111 1.848   3.723  2.955  H39 6KK 82 
+6KK H40 H40 H 0 1 N N N 14.539 23.606 12.993 0.174   3.171  1.211  H40 6KK 83 
+6KK H41 H41 H 0 1 N N N 12.789 23.777 13.357 1.216   1.771  1.563  H41 6KK 84 
+6KK H42 H42 H 0 1 N N N 15.149 20.684 15.170 3.057   1.157  -0.010 H42 6KK 85 
+6KK H43 H43 H 0 1 N N N 15.882 21.862 14.029 3.327   2.120  -1.483 H43 6KK 86 
+6KK H44 H44 H 0 1 N N N 11.168 22.140 12.562 2.791   5.738  1.859  H44 6KK 87 
+6KK H45 H45 H 0 1 N N N 11.668 20.778 11.502 1.094   5.487  1.384  H45 6KK 88 
+6KK H46 H46 H 0 1 N N N 23.306 29.633 14.631 -10.205 0.525  2.482  H46 6KK 89 
+6KK H47 H47 H 0 1 N N N 22.886 28.451 15.916 -9.393  0.538  0.898  H47 6KK 90 
+6KK H48 H48 H 0 1 N N N 23.284 27.875 14.262 -9.623  -0.998 1.767  H48 6KK 91 
+# 
+loop_
+_chem_comp_bond.comp_id 
+_chem_comp_bond.atom_id_1 
+_chem_comp_bond.atom_id_2 
+_chem_comp_bond.value_order 
+_chem_comp_bond.pdbx_aromatic_flag 
+_chem_comp_bond.pdbx_stereo_config 
+_chem_comp_bond.pdbx_ordinal 
+6KK C56 C57 SING N N 1  
+6KK C56 C55 SING N N 2  
+6KK C57 C60 SING N N 3  
+6KK C57 C58 SING N N 4  
+6KK C60 C53 SING N N 5  
+6KK C55 C54 SING N N 6  
+6KK C55 C59 SING N N 7  
+6KK C58 C51 SING N N 8  
+6KK C54 C53 SING N N 9  
+6KK C53 C52 SING N N 10 
+6KK C59 C51 SING N N 11 
+6KK C3  C4  DOUB Y N 12 
+6KK C3  C2  SING Y N 13 
+6KK O39 C2  SING N N 14 
+6KK O39 C40 SING N N 15 
+6KK C51 C52 SING N N 16 
+6KK C51 C32 SING N N 17 
+6KK C4  C5  SING Y N 18 
+6KK O9  S8  DOUB N N 19 
+6KK C2  C7  DOUB Y N 20 
+6KK C5  C6  DOUB Y N 21 
+6KK C5  S8  SING N N 22 
+6KK C7  C6  SING Y N 23 
+6KK C32 C19 SING N N 24 
+6KK S8  O10 DOUB N N 25 
+6KK S8  N11 SING N N 26 
+6KK C30 C29 SING N N 27 
+6KK C30 C31 SING N N 28 
+6KK C19 N20 SING N N 29 
+6KK C19 C17 SING N N 30 
+6KK N11 C16 SING N N 31 
+6KK N11 C12 SING N N 32 
+6KK C29 O28 SING N N 33 
+6KK C16 C17 SING N N 34 
+6KK N20 C21 SING N N 35 
+6KK C17 O18 SING N N 36 
+6KK O22 C21 DOUB N N 37 
+6KK C21 O23 SING N N 38 
+6KK C12 C13 SING N N 39 
+6KK C31 C24 SING N N 40 
+6KK C31 C27 SING N N 41 
+6KK O28 C27 SING N N 42 
+6KK O23 C24 SING N N 43 
+6KK C24 C25 SING N N 44 
+6KK C27 O26 SING N N 45 
+6KK C14 C13 SING N N 46 
+6KK C13 C15 SING N N 47 
+6KK O26 C25 SING N N 48 
+6KK C3  H1  SING N N 49 
+6KK C4  H2  SING N N 50 
+6KK C6  H3  SING N N 51 
+6KK C7  H4  SING N N 52 
+6KK C12 H5  SING N N 53 
+6KK C12 H6  SING N N 54 
+6KK C13 H7  SING N N 55 
+6KK C14 H8  SING N N 56 
+6KK C14 H9  SING N N 57 
+6KK C14 H10 SING N N 58 
+6KK C15 H11 SING N N 59 
+6KK C15 H12 SING N N 60 
+6KK C15 H13 SING N N 61 
+6KK C16 H14 SING N N 62 
+6KK C16 H15 SING N N 63 
+6KK C17 H16 SING N N 64 
+6KK O18 H17 SING N N 65 
+6KK C19 H18 SING N N 66 
+6KK N20 H19 SING N N 67 
+6KK C24 H20 SING N N 68 
+6KK C25 H21 SING N N 69 
+6KK C25 H22 SING N N 70 
+6KK C27 H23 SING N N 71 
+6KK C29 H24 SING N N 72 
+6KK C29 H25 SING N N 73 
+6KK C30 H26 SING N N 74 
+6KK C30 H27 SING N N 75 
+6KK C31 H28 SING N N 76 
+6KK C32 H29 SING N N 77 
+6KK C32 H30 SING N N 78 
+6KK C52 H31 SING N N 79 
+6KK C52 H32 SING N N 80 
+6KK C53 H33 SING N N 81 
+6KK C54 H34 SING N N 82 
+6KK C54 H35 SING N N 83 
+6KK C55 H36 SING N N 84 
+6KK C56 H37 SING N N 85 
+6KK C56 H38 SING N N 86 
+6KK C57 H39 SING N N 87 
+6KK C58 H40 SING N N 88 
+6KK C58 H41 SING N N 89 
+6KK C59 H42 SING N N 90 
+6KK C59 H43 SING N N 91 
+6KK C60 H44 SING N N 92 
+6KK C60 H45 SING N N 93 
+6KK C40 H46 SING N N 94 
+6KK C40 H47 SING N N 95 
+6KK C40 H48 SING N N 96 
+# 
+loop_
+_pdbx_chem_comp_descriptor.comp_id 
+_pdbx_chem_comp_descriptor.type 
+_pdbx_chem_comp_descriptor.program 
+_pdbx_chem_comp_descriptor.program_version 
+_pdbx_chem_comp_descriptor.descriptor 
+6KK SMILES           ACDLabs              12.01 "c1(ccc(cc1)S(=O)(N(CC(O)C(NC(OC2COC3OCCC23)=O)CC64CC5CC(C4)CC(C5)C6)CC(C)C)=O)OC" 
+6KK InChI            InChI                1.03  
+"InChI=1S/C32H48N2O8S/c1-20(2)17-34(43(37,38)25-6-4-24(39-3)5-7-25)18-28(35)27(16-32-13-21-10-22(14-32)12-23(11-21)15-32)33-31(36)42-29-19-41-30-26(29)8-9-40-30/h4-7,20-23,26-30,35H,8-19H2,1-3H3,(H,33,36)/t21-,22+,23-,26-,27-,28+,29-,30+,32-/m0/s1" 
+6KK InChIKey         InChI                1.03  ZMOFGDZIKIFMEU-JTPLMOPKSA-N 
+6KK SMILES_CANONICAL CACTVS               3.385 "COc1ccc(cc1)[S](=O)(=O)N(CC(C)C)C[C@@H](O)[C@H](CC23CC4CC(CC(C4)C2)C3)NC(=O)O[C@H]5CO[C@H]6OCC[C@@H]56" 
+6KK SMILES           CACTVS               3.385 "COc1ccc(cc1)[S](=O)(=O)N(CC(C)C)C[CH](O)[CH](CC23CC4CC(CC(C4)C2)C3)NC(=O)O[CH]5CO[CH]6OCC[CH]56" 
+6KK SMILES_CANONICAL "OpenEye OEToolkits" 2.0.4 "CC(C)CN(C[C@H]([C@H](CC12CC3CC(C1)CC(C3)C2)NC(=O)O[C@H]4CO[C@@H]5[C@H]4CCO5)O)S(=O)(=O)c6ccc(cc6)OC" 
+6KK SMILES           "OpenEye OEToolkits" 2.0.4 "CC(C)CN(CC(C(CC12CC3CC(C1)CC(C3)C2)NC(=O)OC4COC5C4CCO5)O)S(=O)(=O)c6ccc(cc6)OC" 
+# 
+loop_
+_pdbx_chem_comp_identifier.comp_id 
+_pdbx_chem_comp_identifier.type 
+_pdbx_chem_comp_identifier.program 
+_pdbx_chem_comp_identifier.program_version 
+_pdbx_chem_comp_identifier.identifier 
+6KK "SYSTEMATIC NAME" ACDLabs              12.01 "(3R,3aS,6aR)-hexahydrofuro[2,3-b]furan-3-yl {(2S,3R)-3-hydroxy-4-{[(4-methoxyphenyl)sulfonyl](2-methylpropyl)amino}-1-[(3R,5R,7R)-tricyclo[3.3.1.1~3,7~]decan-1-yl]butan-2-yl}carbamate"                  
+6KK "SYSTEMATIC NAME" "OpenEye OEToolkits" 2.0.4 "[(3~{a}~{S},4~{R},6~{a}~{R})-2,3,3~{a},4,5,6~{a}-hexahydrofuro[2,3-b]furan-4-yl] ~{N}-[(2~{S},3~{R})-1-(1-adamantyl)-4-[(4-methoxyphenyl)sulfonyl-(2-methylpropyl)amino]-3-oxidanyl-butan-2-yl]carbamate" 
+# 
+loop_
+_pdbx_chem_comp_audit.comp_id 
+_pdbx_chem_comp_audit.action_type 
+_pdbx_chem_comp_audit.date 
+_pdbx_chem_comp_audit.processing_site 
+6KK "Create component" 2016-04-22 RCSB 
+6KK "Initial release"  2016-09-21 RCSB 
+# 
