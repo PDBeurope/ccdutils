@@ -303,7 +303,7 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
                 [k for i, k in enumerate(cif_copy['_chem_comp_bond'][key]) if i not in hb_indices])
 
     cfd = mmcif.CifFileWriter(path)
-    cfd.write(cif_copy)
+    cfd.write({component.id: cif_copy})
 
 
 def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ideal):
