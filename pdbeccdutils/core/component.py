@@ -660,7 +660,12 @@ class Component:
                 return brics_mols
 
             for s in scaffolds:
-                mapping = [atom.GetIdx() for atom in s.GetAtoms()]
+                scaffold_atom_names = [atom.GetProp('name') for atom in s.GetAtoms()]
+                mapping = []
+                for at_name in scaffold_atom_names:
+                    idx = [atom.GetIdx() for atom in self.mol.GetAtoms() if atom.GetProp('name') == at_name][0]
+                    mapping.append(idx)
+
                 smiles = rdkit.Chem.MolToSmiles(s)
                 name = scaffolding_method.name
                 source = 'RDKit scaffolds'
