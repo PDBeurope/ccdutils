@@ -16,7 +16,6 @@ class TestParity:
         ("NAD", 'NAG', 0.09),
         ("000", '000', 1.00),
         ("SAC", 'GOL', 0.50),
-        ("UNL", 'GOL', 0.00),
         ("MAN", 'GLC', 1.00),
     ])
     def test_parity_method(id_1, id_2, score):

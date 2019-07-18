@@ -1,7 +1,7 @@
 import pytest
 
 from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.tests.tst_utilities import cif_filename
+from pdbeccdutils.tests.tst_utilities import cif_filename, unl_model
 
 test_inputs = {
     'ATP': {
@@ -42,7 +42,10 @@ class TestPropertyCalculation:
     @staticmethod
     @pytest.mark.parametrize('key', test_inputs)
     def test_valid_properties(key):
-        physchem_props = ccd_reader.read_pdb_cif_file(cif_filename(key)).component.physchem_properties
+        if key == 'UNL':
+            physchem_props = ccd_reader.read_pdb_cif_file(unl_model()).component.physchem_properties
+        else:
+            physchem_props = ccd_reader.read_pdb_cif_file(cif_filename(key)).component.physchem_properties
 
         assert test_inputs[key]['logp'] == round(physchem_props['CrippenClogP'], 3)
         assert test_inputs[key]['heavy_atom_count'] == physchem_props['NumHeavyAtoms']
