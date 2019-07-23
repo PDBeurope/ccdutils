@@ -26,6 +26,7 @@ from sys import platform
 
 import rdkit
 from PIL import Image, ImageDraw, ImageFont
+from scipy.spatial import KDTree
 
 
 def save_no_image(path_to_image, width=200):
@@ -112,7 +113,7 @@ def get_drawing_scale(mol):
     return (int(w), int(h))
 
 
-def parse_svg(svg_string, mol: rdkit.Chem.Mol):
+def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
     """Parse information from SVG depiction into object.
 
     Args:
@@ -125,10 +126,10 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
     """
 
     result_bag = OrderedDict([
-        ('dimensions', {}),
+        ('ccd_id', ccd_id),
+        ('resolution', {}),
         ('atoms', []),
-        ('drawing', []),
-        ('labels', [])
+        ('bonds', [])
     ])
     svg_string = _fix_svg(svg_string)
     svg = ET.fromstring(svg_string)
@@ -137,16 +138,21 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
     bond_elem = svg.findall('{http://www.w3.org/2000/svg}path')
     dimensions_svg = svg.find('{http://www.w3.org/2000/svg}rect')
     label_elem = svg.findall('{http://www.w3.org/2000/svg}text')
+    kd_tree = None
 
     for atom_svg in atom_elem:
         atom_id_str = re.search(r'\d+', atom_svg.attrib.get('class')).group(0)
         atom_id = int(atom_id_str)
         temp = {
             'name': mol.GetAtomWithIdx(atom_id).GetProp('name'),
-            'x': atom_svg.attrib.get('cx'),
-            'y': atom_svg.attrib.get('cy')
+            'label': {},
+            'x': float(atom_svg.attrib.get('cx')),
+            'y': float(atom_svg.attrib.get('cy'))
         }
         result_bag['atoms'].append(temp)
+
+    atom_centers = [[atom['x'], atom['y']] for atom in result_bag['atoms']]
+    kd_tree = KDTree(atom_centers)
 
     for bond_svg in bond_elem:
         if 'class' not in bond_svg.attrib:
@@ -160,12 +166,12 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
             'coords': bond_svg.attrib.get('d'),
             'style': bond_svg.attrib.get('style')
         }
-        result_bag['drawing'].append(temp)
+        result_bag['bonds'].append(temp)
 
     for label_svg in label_elem:
         temp = {
-            'x': label_svg.attrib.get('x'),
-            'y': label_svg.attrib.get('y'),
+            'x': float(label_svg.attrib.get('x')),
+            'y': float(label_svg.attrib.get('y')),
             'style': label_svg.attrib.get('style'),
             'tspans': [{
                 'value': tspan.text,
@@ -173,11 +179,12 @@ def parse_svg(svg_string, mol: rdkit.Chem.Mol):
             }
                 for tspan in filter(lambda x: x.text is not None, label_svg.findall('{http://www.w3.org/2000/svg}tspan'))]
         }
-        result_bag['labels'].append(temp)
+        nearest_index = kd_tree.query([temp['x'], temp['y']])[1]
+        result_bag['atoms'][nearest_index]['label'] = temp
 
-    result_bag['dimensions'] = {
-        'x': dimensions_svg.attrib.get('width'),
-        'y': dimensions_svg.attrib.get('height')
+    result_bag['resolution'] = {
+        'x': float(dimensions_svg.attrib.get('width')),
+        'y': float(dimensions_svg.attrib.get('height'))
     }
 
     return result_bag

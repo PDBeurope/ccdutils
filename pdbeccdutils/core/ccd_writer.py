@@ -78,7 +78,7 @@ def write_molecule(path, component: Component, remove_hs: bool = True, alt_names
     elif extension == 'xyz':
         str_representation = to_xyz_str(component, remove_hs, conf_type)
     elif extension == 'json':
-        str_representation = to_json_dict(component, remove_hs, conf_type)
+        str_representation = json.dumps(to_json_dict(component, remove_hs, conf_type), sort_keys=True, indent=4)
     else:
         raise CCDUtilsError('Unsupported file format: {}'.format(extension))
 
@@ -126,7 +126,7 @@ def to_pdb_str(component: Component, remove_hs: bool = True, alt_names: bool = F
     try:
         pdb_body = rdkit.Chem.MolToPDBBlock(mol_to_save, conf_id)
     except Exception:
-        pdb_body = _to_pdb_str_fallback(mol_to_save, conf_id)
+        pdb_body = _to_pdb_str_fallback(mol_to_save, component.id, conf_id, conf_type.name)
 
     pdb_string = pdb_title + pdb_body
 
@@ -393,8 +393,6 @@ def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.I
     (mol_to_save, conf_id, conf_type) = _prepate_structure(component, remove_hs, conf_type)
     result = {'atoms': [], 'bonds': []}
     conformer = mol_to_save.GetConformer(conf_id)
-    rdkit.Chem.Kekulize(mol_to_save)
-    rdkit.Chem.WedgeMolBonds(mol_to_save, conformer)
 
     for atom in mol_to_save.GetAtoms():
         atom_dict = {}
@@ -417,7 +415,6 @@ def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.I
         bond_dict['from'] = bond.GetBeginAtomIdx()
         bond_dict['to'] = bond.GetEndAtomIdx()
         bond_dict['type'] = bond.GetBondType().name
-        bond_dict['wedge'] = bond.GetBondDir().name
 
         result['bonds'].append(bond_dict)
 
@@ -840,19 +837,26 @@ def _to_sdf_str_fallback(mol, ccd_id, mappings):
     return content
 
 
-def _to_pdb_str_fallback(mol, conf_id):
+def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name='Model'):
     """Fallback method to generate PDB file in case the default one in
     RDKit fails.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule to be written.
+        component_id (str): Component id.
         conf_id (int): conformer id to be written.
+        conf_name (str): conformer name to be written.
 
     Returns:
         str: String representation the component in the PDB format.
     """
     conformer_ids = []
-    content = []
+    content = [
+        f'HEADER    {conf_name} coordinates for PDB-CCD {component_id}',
+        f'COMPND    {component_id}',
+        f'AUTHOR    pdbccdutils {pdbeccdutils.__version__}',
+        f'AUTHOR    RDKit {rdkit.__version__}',
+    ]
 
     if conf_id == -1:
         conformer_ids = [c.GetId() for c in mol.GetConformers()]
@@ -861,25 +865,23 @@ def _to_pdb_str_fallback(mol, conf_id):
 
     for m in conformer_ids:
         rdkit_conformer = mol.GetConformer(m)
-        content.append('MODEL {:>4}'.format(m))
 
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
-            info = atom.GetMonomerInfo()
 
             s = '{:<6}{:>5} {:<4} {:<3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}'\
-                .format('HETATM' if info.GetIsHeteroAtom() else 'ATOM',
-                        info.GetResidueNumber(),
-                        info.GetName(),
-                        info.GetResidueName(),
-                        info.GetChainId(),
-                        info.GetResidueNumber(),
+                .format('HETATM',
+                        i+1,
+                        atom.GetProp('name'),
+                        component_id,
+                        'A',
+                        1,
                         ' ',
                         rdkit_conformer.GetAtomPosition(i).x,
                         rdkit_conformer.GetAtomPosition(i).y,
                         rdkit_conformer.GetAtomPosition(i).z,
-                        info.GetOccupancy(),
-                        info.GetTempFactor(),
+                        1,
+                        20,
                         atom.GetSymbol(),
                         atom.GetFormalCharge())
             content.append(s)
@@ -900,7 +902,7 @@ def _to_pdb_str_fallback(mol, conf_id):
             if len(s) > 11:
                 content.append(s)
 
-        content.append('ENDMDL')
+        content.append('END')
 
     return "\n".join(content)
 

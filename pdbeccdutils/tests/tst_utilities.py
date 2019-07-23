@@ -34,10 +34,12 @@ test_cut_down_components_cif = os.path.join(tests_dir(), 'components_cif', 'cut_
 
 
 def cif_filename(code):
-    path = os.path.join(test_cif, code + '.cif')
+    path = os.path.join(test_cif, f'{code}.cif')
 
-    return path if os.path.isfile(path) else os.path.join(test_depiction, code + '.cif')
+    return path if os.path.isfile(path) else os.path.join(test_depiction, f'{code}.cif')
 
+def unl_model():
+    return os.path.join(tests_dir(), 'ccd_mmcif_test_files', 'UNL.cif')
 
 def supply_list_of_sample_cifs():
     """

@@ -477,7 +477,7 @@ class Component:
         drawer.DrawMolecule(tmp)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText()
-        json_repr = drawing.parse_svg(svg, self.mol2D)
+        json_repr = drawing.convert_svg(svg, self.id, self.mol2D)
 
         with open(file_name, 'w') as fp:
             json.dump(json_repr, fp, indent=4, sort_keys=True)
@@ -502,7 +502,7 @@ class Component:
         except ValueError:
             return False  # sanitization issue here
 
-    def _sanitize(self, fast: bool = False) -> bool:
+    def _sanitize(self) -> bool:
         """
         Attempts to sanitize mol in place. RDKit's standard error can be
         processed in order to find out what went wrong with sanitization
@@ -518,7 +518,7 @@ class Component:
         """
         rwmol = rdkit.Chem.RWMol(self.mol)
         try:
-            success = self._fix_molecule_fast(rwmol) if fast else self._fix_molecule(rwmol)
+            success = self._fix_molecule(rwmol)
 
             if not success:
                 return False
@@ -660,7 +660,12 @@ class Component:
                 return brics_mols
 
             for s in scaffolds:
-                mapping = [atom.GetIdx() for atom in s.GetAtoms()]
+                scaffold_atom_names = [atom.GetProp('name') for atom in s.GetAtoms()]
+                mapping = []
+                for at_name in scaffold_atom_names:
+                    idx = [atom.GetIdx() for atom in self.mol.GetAtoms() if atom.GetProp('name') == at_name][0]
+                    mapping.append(idx)
+
                 smiles = rdkit.Chem.MolToSmiles(s)
                 name = scaffolding_method.name
                 source = 'RDKit scaffolds'
@@ -736,36 +741,6 @@ class Component:
 
         return False
 
-    def _fix_molecule_fast(self, rwmol: rdkit.Chem.rdchem.Mol):
-        """
-        Fast sanitization process. Fixes just metal-N valence issues
-
-        Args:
-            rwmol (rdkit.Chem.rdchem.Mol): rdkit mol to be sanitized
-
-        Returns:
-            bool: Whether or not sanitization succeeded
-        """
-        smarts_metal_check = rdkit.Chem.MolFromSmarts(METALS_SMART + '~[N]')
-        metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-        rdkit.Chem.SanitizeMol(rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP)
-        for (metal_index, atom_index) in metal_atom_bonds:
-            metal_atom = rwmol.GetAtomWithIdx(metal_index)
-            erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
-
-            # change the bond type to dative
-            bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
-            bond.SetBondType(rdkit.Chem.BondType.DATIVE)
-
-            # change the valency
-            if erroneous_atom.GetExplicitValence() == 4:
-                erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
-                metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
-
-        sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
-
-        return sanitization_result == 0
-
     def _get_atom_name(self, atom: rdkit.Chem.rdchem.Atom):
         """Supplies atom_id obrained from `_chem_comp_atom.atom_id`, see:
 
@@ -799,7 +774,8 @@ class Component:
             mappings = []
 
             for m in v.mappings:
-                mappings.append(list(map(lambda idx: self.mol.GetAtomWithIdx(idx).GetProp('name'), m)))
+                atom_names = [self.mol.GetAtomWithIdx(idx).GetProp('name') for idx in m]
+                mappings.append(atom_names)
             res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
 
         return res

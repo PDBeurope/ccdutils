@@ -14,10 +14,9 @@ setup(name='pdbeccdutils',
       keywords='PDB CCD wwPDB small molecule',
       packages=find_namespace_packages(),
       scripts=['bin/setup_pubchem_library',
-               'bin/process_components_cif',
-               'bin/murcko_scaffold_cif'],
+               'bin/process_components_cif'],
       zip_safe=False,
       include_package_data=True,
-      install_requires=['Pillow', 'scipy', 'numpy', 'pdbecif', 'biopython'],
+      install_requires=['Pillow', 'scipy', 'numpy', 'pdbecif'],
       tests_require=['pytest']
       )
