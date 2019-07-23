@@ -477,7 +477,7 @@ class Component:
         drawer.DrawMolecule(tmp)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText()
-        json_repr = drawing.parse_svg(svg, self.mol2D)
+        json_repr = drawing.convert_svg(svg, self.id, self.mol2D)
 
         with open(file_name, 'w') as fp:
             json.dump(json_repr, fp, indent=4, sort_keys=True)
