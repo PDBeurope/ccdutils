@@ -26,7 +26,7 @@ class TestWebServices:
 
         assert os.path.isfile(to_download)
         assert os.path.getsize(to_download) > 0
-        assert comp.mol.HasSubstructMatch(Chem.MolFromMolFile(to_download, sanitize=True))
+        assert comp.mol_no_h.HasSubstructMatch(Chem.MolFromMolFile(to_download, sanitize=True))
 
     @staticmethod
     @pytest.mark.parametrize('het_code', ids_to_test)
