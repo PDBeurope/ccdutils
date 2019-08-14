@@ -27,6 +27,7 @@ agreed_resources = {
     '6': ('KEGG LIGAND', 'KEGG (Kyoto Encyclopedia of Genes and Genomes) Ligand'),
     '7': ('ChEBI', 'ChEBI (Chemical Entities of Biological Interest).'),
     '9': ('ZINC', 'ZINC'),
+    '22': ('Pubchem' 'PubChem Compounds'),
     '24': ('NMRShiftDB', 'NMRShiftDB'),
     '31': ('BindingDb', 'BindingDb'),
     '36': ('MetaboLights', 'MetaboLights'),
