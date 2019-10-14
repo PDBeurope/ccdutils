@@ -34,8 +34,8 @@ def _generate_sim_score(template, query, smarts):
         smarts(str): common subgraph in the SMARTS format.
 
     Returns:
-        (int, int): tuple of size of the common subgraph and the
-        similarity score.
+        (dict of int: int, int): atom id mapping for common subgraph and
+        the similarity score.
     """
 
     if template.GetNumAtoms() == 1:
@@ -43,20 +43,21 @@ def _generate_sim_score(template, query, smarts):
     elif query.GetNumAtoms() == 1:
         smarts = Chem.MolToSmarts(query)
     if smarts is None:
-        best_matches = 0
+        substructure = {}
         best_sim_score = 0.0
     else:
         matches_1 = _get_matches(template, smarts)
         matches_2 = _get_matches(query, smarts)
         best_matches = 0
+        substructure = {}
         size_1 = template.GetNumAtoms()
         size_2 = query.GetNumAtoms()
 
         for match_1 in matches_1:
             for match_2 in matches_2:
                 matches = 0
-                for i in range(0, len(match_1)):
-                    atom_1 = template.GetAtomWithIdx(match_1[i])
+                for i, value in enumerate(match_1):
+                    atom_1 = template.GetAtomWithIdx(value)
                     atom_2 = query.GetAtomWithIdx(match_2[i])
                     symbol_1 = atom_1.GetSymbol()
                     symbol_2 = atom_2.GetSymbol()
@@ -64,9 +65,10 @@ def _generate_sim_score(template, query, smarts):
                         matches += 1
                 if matches > best_matches:
                     best_matches = matches
+                    substructure = dict(zip(match_1, match_2))
         best_sim_score = float(best_matches) / float(size_1 + size_2 - best_matches)
 
-    return (best_matches, best_sim_score)
+    return (substructure, best_sim_score)
 
 
 def compare_molecules(template, query, thresh=0.01, exact_match=False):
@@ -93,7 +95,7 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
     max_sim_score = float(min_num_atoms) / float(template_atoms + query_atoms - min_num_atoms)
 
     if max_sim_score < thresh:
-        return ParityResult(template_atoms, query_atoms, 0, 0.0)
+        return ParityResult({}, 0.0)
 
     if not exact_match:
         mcs_graph = rdFMCS.FindMCS([template, query],
@@ -108,6 +110,6 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
                                    timeout=40,
                                    completeRingsOnly=True)
 
-    matches, sim_score = _generate_sim_score(template, query, mcs_graph.smartsString)
+    substructure, sim_score = _generate_sim_score(template, query, mcs_graph.smartsString)
 
-    return ParityResult(template_atoms, query_atoms, matches, sim_score)
+    return ParityResult(substructure, sim_score)

@@ -22,7 +22,7 @@ pdbeccdutils application.
 from dataclasses import dataclass
 from datetime import date
 from enum import IntEnum
-from typing import Any, List, NamedTuple
+from typing import Any, List, NamedTuple, Dict
 
 import rdkit
 
@@ -152,14 +152,10 @@ class ParityResult:
     necessary for calculating the similarity score.
 
     Attributes:
-        template_atoms (int): Number of template atoms.
-        query_atoms (int): Number of query molecule atoms.
-        match_count (int): Size o the common subgraph match.
+        mapping (dict of str: str): Atom-level mapping template->query.
         similarity_score (float): Calculate similarity score.
-    """
-    template_atoms: int
-    query_atoms: int
-    match_count: int
+   """
+    mapping: Dict[str, str]
     similarity_score: float
 
 
