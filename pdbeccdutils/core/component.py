@@ -52,6 +52,12 @@ class Component:
     def __init__(self, mol: rdkit.Chem.rdchem.Mol, ccd_cif_dict: Dict[str, Any] = None,
                  properties: CCDProperties = None, descriptors: List[Descriptor] = None) -> None:
 
+        self.conformers_mapping = \
+            {ConformerType.AllConformers: - 1,
+             ConformerType.Ideal: 0,
+             ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
+             ConformerType.Computed: 2000}
+
         self.mol = mol
         self._mol_no_h = None
         self.mol2D = None
@@ -64,12 +70,6 @@ class Component:
         self._sanitization_issues = self._sanitize()
         self._physchem_properties: Dict[str, Any] = {}
         self._external_mapping: List[Tuple[str, str]] = []
-
-        self.conformers_mapping = \
-            {ConformerType.AllConformers: - 1,
-             ConformerType.Ideal: 0,
-             ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
-             ConformerType.Computed: 2000}
 
         if descriptors is not None:
             self._descriptors = descriptors
@@ -524,8 +524,13 @@ class Component:
                 return False
 
             rdkit.Chem.Kekulize(rwmol)
-            #rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol)
-            rdkit.Chem.rdmolops.AssignStereochemistry(rwmol)
+            #rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
+
+            if self.has_degenerated_conformer(ConformerType.Ideal):
+                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(rwmol, self.conformers_mapping[ConformerType.Model])
+            else:
+                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(rwmol, self.conformers_mapping[ConformerType.Ideal])
+
             self.mol = rwmol.GetMol()
         except Exception as e:
             print(e, file=sys.stderr)
