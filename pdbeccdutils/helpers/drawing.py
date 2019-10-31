@@ -28,6 +28,8 @@ import rdkit
 from PIL import Image, ImageDraw, ImageFont
 from scipy.spatial import KDTree
 
+MIN_IMG_DIMENSION = 300
+
 
 def save_no_image(path_to_image, width=200):
     """
@@ -107,10 +109,10 @@ def get_drawing_scale(mol):
         b.x = max(b.x, cnf.GetAtomPosition(i).x)
         b.y = max(b.y, cnf.GetAtomPosition(i).y)
 
-    w = 50 * (b.x - a.x) + 1
-    h = 50 * (b.y - a.y) + 1
+    w = int(50 * (b.x - a.x) + 1)
+    h = int(50 * (b.y - a.y) + 1)
 
-    return (int(w), int(h))
+    return (max(w, MIN_IMG_DIMENSION), max(h, MIN_IMG_DIMENSION))
 
 
 def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
