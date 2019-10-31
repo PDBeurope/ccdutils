@@ -23,16 +23,6 @@ test_inputs = {
         'rings_count': 1,
         'TPSA': 119.250,
         'molwt': 221.09
-    },
-    'UNL': {
-        'logp': 0.0,
-        'heavy_atom_count': 0,
-        'numH_acceptors': 0,
-        'numH_donors': 0,
-        'num_rotable_bonds': 0,
-        'rings_count': 0,
-        'TPSA': 0.0,
-        'molwt': 0.0
     }
 }
 
@@ -42,10 +32,7 @@ class TestPropertyCalculation:
     @staticmethod
     @pytest.mark.parametrize('key', test_inputs)
     def test_valid_properties(key):
-        if key == 'UNL':
-            physchem_props = ccd_reader.read_pdb_cif_file(unl_model()).component.physchem_properties
-        else:
-            physchem_props = ccd_reader.read_pdb_cif_file(cif_filename(key)).component.physchem_properties
+        physchem_props = ccd_reader.read_pdb_cif_file(cif_filename(key)).component.physchem_properties
 
         assert test_inputs[key]['logp'] == round(physchem_props['CrippenClogP'], 3)
         assert test_inputs[key]['heavy_atom_count'] == physchem_props['NumHeavyAtoms']
