@@ -24,6 +24,7 @@ import requests
 agreed_resources = {
     '1': ('ChEMBL', 'ChEMBL'),
     '2': ('DrugBank', 'DrugBank'),
+    '4': ('Guide to Pharmacology', 'Guide to Pharmacology'),
     '6': ('KEGG LIGAND', 'KEGG (Kyoto Encyclopedia of Genes and Genomes) Ligand'),
     '7': ('ChEBI', 'ChEBI (Chemical Entities of Biological Interest).'),
     '9': ('ZINC', 'ZINC'),
@@ -55,7 +56,7 @@ all_resource = {
     '18': ('HMDB', 'Human Metabolome Database (HMDB)'),
     '20': ('Selleck', 'Selleck'),
     '21': ('PubChem TPHARMA', 'PubChem ("Thomson Pharma" subset)'),
-    '22': ('Pubchem', 'PubChem Compounds'),
+    '22': ('PubChem', 'PubChem Compounds'),
     '23': ('Mcule', 'Mcule'),
     '24': ('NMRShiftDB', 'NMRShiftDB'),
     '25': ('LINCS', 'Library of Integrated Network-based Cellular Signatures'),
