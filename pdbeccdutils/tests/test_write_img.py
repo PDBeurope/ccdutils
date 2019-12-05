@@ -19,7 +19,7 @@ collision_free_templates = [
 
 collision_templates = [
     ('cube', ['SF4', '0KA', '1CL']),
-    ('adamantane', ['ADM', '6KK', 'AXM'])
+    ('adamantane', ['ADM'])
 ]
 
 depictions = DepictionManager()
