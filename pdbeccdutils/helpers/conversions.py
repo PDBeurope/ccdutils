@@ -18,7 +18,8 @@
 
 def str_to_int(i):
     """
-    Converts the string into integer
+    Converts a string into integer. Returns 0 if a string cannot be
+    converted.
 
     Args:
         i (str): string representation of an integer
@@ -34,7 +35,8 @@ def str_to_int(i):
 
 def str_to_float(f):
     """
-    Converts the string into float
+    Converts a string into float. Returns 0.0 if a string cannot be
+    converted.
 
     Args:
         i (str): string representation of a float
@@ -55,6 +57,6 @@ def listit(t):
         t (tuple of tuples): deep tuples
 
     Returns:
-        list of list: deep list
+        list[list]: deep list
     """
     return list(map(listit, t)) if isinstance(t, (list, tuple)) else t

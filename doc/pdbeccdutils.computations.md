@@ -1,4 +1,4 @@
-# pdbecccdutils.computations
+# computations
 
 ## pdbeccdutils.computations.parity_method
 

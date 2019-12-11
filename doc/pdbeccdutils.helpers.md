@@ -1,10 +1,22 @@
-# pdbeccdutils.helpers
+# helpers
+
+## pdbeccdutils.helpers.collection_ext
 
 ```eval_rst
 .. automodule:: pdbeccdutils.helpers.collection_ext
     :members:
+```
+
+## pdbeccdutils.helpers.drawing
+
+```eval_rst
 .. automodule:: pdbeccdutils.helpers.drawing
     :members:
-.. automodule:: pdbeccdutils.helpers.str_conversions
-    :members:    
+```
+
+## pdbeccdutils.helpers.conversions
+
+```eval_rst
+.. automodule:: pdbeccdutils.helpers.conversions
+    :members:
 ```

@@ -1,4 +1,4 @@
-# pdbeccdutils.core
+# core
 
 ## pdbeccdutils.core.ccd_reader
 
@@ -14,10 +14,17 @@
     :members:
 ```
 
-## pdbeccdutils.core.structure_writer
+## pdbeccdutils.core.ccd_writer
 
 ```eval_rst
 .. automodule:: pdbeccdutils.core.ccd_writer
+    :members:
+```
+
+## pdbeccdutils.core.depictions
+
+```eval_rst
+.. automodule:: pdbeccdutils.core.depictions
     :members:
 ```
 

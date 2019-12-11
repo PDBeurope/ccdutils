@@ -46,10 +46,10 @@ class CCDReaderResult(NamedTuple):
 
     Attributes:
         component (Component): internal representation of the CCD read-in.
-        errors: (:obj:`list` of :obj:`str`): A list of any errors
+        errors (list[str]): A list of any errors
             found while reading the CCD. If no warnings found `errors`
             will be empty.
-        warnings (:obj:`list` of :obj:`str`): A list of any warnings
+        warnings (list[str]): A list of any warnings
             found while reading the CCD. If no warnings found `warnings`
             will be empty.
     """
@@ -95,7 +95,7 @@ def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
         ValueError: if the file does not exist.
 
     Returns:
-        dict(str, CCDReaderResult): Internal representation of all
+        dict[str, CCDReaderResult]: Internal representation of all
         the components in the `components.cif` file.
     """
     if not os.path.isfile(path_to_cif):
@@ -240,7 +240,7 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
         mol (rdkit.Chem.rdchem.Mol): Molecule which receives bonds.
         bonds (dict): mmcif category with the bonds info.
         atoms (dict): mmcif category with the atom info.
-        errors (list): Issues encountered while parsing.
+        errors (list[str]): Issues encountered while parsing.
     """
     if not bonds:
         return

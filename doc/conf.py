@@ -15,10 +15,10 @@
 from recommonmark.parser import CommonMarkParser
 from recommonmark.transform import AutoStructify
 import pdbeccdutils
-# region Project information
 
+# region Project information
 project = 'pdbeccdutils'
-copyright = '2018, Protein Data Bank in Europe'
+copyright = '2020, Protein Data Bank in Europe'
 author = 'Protein Data Bank in Europe'
 
 # The short X.Y version

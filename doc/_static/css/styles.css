@@ -2,6 +2,10 @@
     max-width: none;
 }
 
-.highlight {
+.highlight-console {
+    max-width: 800px;
+}
+
+.highlight-python{
     max-width: 800px;
 }

@@ -1,5 +1,5 @@
-"""Lightweight implementation of the parity method provided by
-Jon Tyzack to Abhik to be used by the cofactors pipeline.
+"""Lightweight implementation of the `parity method <https://doi.org/10.1016/j.str.2018.02.009>`_ provided by
+Jon Tyzack.
 """
 
 from rdkit import Chem
@@ -12,8 +12,8 @@ def _get_matches(mol, smarts):
     """Gets the subgraph match for the parity method.
 
     Args:
-        mol(rdkit.Chem.rdchem.Mol): Molecule to be queried
-        smarts(str): Molecule representation in SMARTS.
+        mol (rdkit.Chem.rdchem.Mol): Molecule to be queried
+        smarts (str): Molecule representation in SMARTS.
 
     Returns:
         int: Molecular subgraph matches.
@@ -29,13 +29,13 @@ def _generate_sim_score(template, query, smarts):
     smarts string returns similarity score.
 
     Args:
-        template(rdkit.Chem.rdchem.Mol): template molecule.
-        query(rdkit.Chem.Mol): query molecule.
-        smarts(str): common subgraph in the SMARTS format.
+        template (rdkit.Chem.rdchem.Mol): template molecule.
+        query (rdkit.Chem.Mol): query molecule.
+        smarts (str): common subgraph in the SMARTS format.
 
     Returns:
-        (dict of int: int, int): atom id mapping for common subgraph and
-        the similarity score.
+        tuple[dict[int, int], float]: atom id mapping for a common
+        subgraph and the similarity score.
     """
 
     if template.GetNumAtoms() == 1:

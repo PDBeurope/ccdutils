@@ -143,7 +143,7 @@ class Component:
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html
 
         Returns:
-            date: Date of the last entrie's modification.
+            datetime.date: Date of the last entrie's modification.
         """
         return self._cif_properties.modified_date
 
@@ -155,7 +155,7 @@ class Component:
         http://mmcif.rcsb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.program_version.html
 
         Returns:
-            List[Descriptor]: List of descriptors for a given entry.
+            list[Descriptor]: List of descriptors for a given entry.
         """
         return self._descriptors
 
@@ -257,8 +257,8 @@ class Component:
         """Lists matched fragments and atom names.
 
         Returns:
-            list of `SubstructureMapping`: Substructure mapping for
-                all discovered fragments.
+            list[SubstructureMapping]: Substructure mapping for
+            all discovered fragments.
         """
         return self._id_to_name_mapping(self._fragments)
 
@@ -267,8 +267,7 @@ class Component:
         """Lists matched scaffolds and atom names
 
         Returns:
-            Dict[str, SubstructureMapping]: Dictionary with scaffold names
-            and matched atoms.
+            list[SubstructureMapping]: List of substructure mappings.
         """
         return self._id_to_name_mapping(self._scaffolds)
 
@@ -285,7 +284,7 @@ class Component:
         acids have main chain atom names 'N CA C O'
 
         Returns:
-            (:obj:`tuple` of :obj:`str`): `atom_id's` for the PDB-CCD
+            tuple[str]: `atom_id's` for the PDB-CCD
         """
         return tuple(atom.GetProp('name') for
                      atom in self.mol.GetAtoms())
@@ -304,12 +303,12 @@ class Component:
         """RDKit calculated properties related to the CCD compound
 
         Returns:
-            dict of str: float: A list of RDKit calculated properties
+            dict[str, float]: A list of RDKit calculated properties
         """
         if not self._physchem_properties:
             try:
                 properties = Properties()
-                self._physchem_properties = {n: v for n, v in zip(properties.GetPropertyNames(), properties.ComputeProperties(self.mol))}
+                self._physchem_properties = dict(zip(properties.GetPropertyNames(), properties.ComputeProperties(self.mol)))
                 self._physchem_properties['NumHeavyAtoms'] = float(self.mol.GetNumHeavyAtoms())
             except (RuntimeError, ValueError):
                 return {}
@@ -318,11 +317,11 @@ class Component:
 
     @property
     def external_mappings(self):
-        """List external mappings provided by UniChem. get_external_mappings()
+        """List external mappings provided by UniChem. fetch_external_mappings()
         was not called before only agreed mapping is retrieved.
 
         Returns:
-            list of (str, str): UniChem mappings
+            list[tuple[str]]: UniChem mappings
         """
 
         return self._external_mapping
@@ -333,7 +332,7 @@ class Component:
         but internal use of UniChem.
 
         Args:
-            list of (str, str): UniChem mappings
+            list[tuple[str]]: UniChem mappings
         """
         self._external_mapping = value
 
@@ -346,7 +345,7 @@ class Component:
             all_mappings (bool, optional): Get UniChem mappings. Defaults to False.
 
         Returns:
-            dict of str: [str]: Return resource ids pairing established by UniChem.
+            dict[str, str]: Return resource ids pairing established by UniChem.
         """
         if all_mappings:
             self._external_mapping = web_services.get_all_unichem_mapping(self.inchikey)
@@ -577,9 +576,8 @@ class Component:
                 structure
 
         Returns:
-            (:obj:`list` of :obj:`list` of :obj:`rdkit.Chem.rdchem.Atom`):
-                list of fragments identified in the component as a list
-                of Atoms.
+            list[list[rdkit.Chem.rdchem.Atom]]: List of fragments
+            identified in the component as a list of atoms.
         """
         result = []
         if mol is None:
@@ -599,7 +597,7 @@ class Component:
             fragment_library (FragmentLibrary): Fragment library.
 
         Returns:
-            list of `SubstructureMapping`: Matches found in this run
+            list[SubstructureMapping]: Matches found in this run
         """
         temp = {}
         for v in fragment_library.library.values():
@@ -628,7 +626,7 @@ class Component:
                 Defaults to MurckoScaffold. Scaffolding method to use
 
         Returns:
-            :obj:`list` of :obj:`rdkit.Chem.rdchem.Mol`: Scaffolds found in the component.
+            list[rdkit.Chem.rdchem.Mol]: Scaffolds found in the component.
         """
         try:
             scaffolds = []
@@ -766,11 +764,11 @@ class Component:
         """Lists matched scaffolds and atom names
 
         Args:
-            struct_mapping (Dict[str, SubstructureMapping]): Basic mapping
+            struct_mapping (dict[str, SubstructureMapping]): Basic mapping
                 for fragments/scaffolds.
 
         Returns:
-            Dict[str, SubstructureMapping]: Dictionary with scaffold names
+            dict[str, SubstructureMapping]: Dictionary with scaffold names
             and matched atoms.
         """
         res = []
