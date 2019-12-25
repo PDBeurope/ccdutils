@@ -401,7 +401,8 @@ class Component:
                       names: bool = False, wedge_bonds: bool = True,
                       atom_highlight: Dict[Any, Tuple] = None,
                       bond_highlight: Dict[Tuple, Tuple] = None):
-        """Save 2d depiction of the component as an SVG file.
+        """Save 2D depiction of the component as an SVG file. Component
+        id is generated in case the image cannot be drawn.
 
         Args:
             file_name (str): path to store 2d depiction
@@ -421,7 +422,7 @@ class Component:
             CCDUtilsError: If bond or atom does not exist.
         """
         if self.mol2D is None:
-            drawing.save_no_image(file_name, width=width)
+            drawing.save_no_image(file_name, self.id, width)
             return
 
         drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)

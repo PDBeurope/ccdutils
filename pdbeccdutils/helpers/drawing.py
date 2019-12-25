@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Module helper providing drawinf functionality based on RDKit
+"""Module helper providing drawing functionality based on RDKit
 """
 
 import os
@@ -31,7 +31,7 @@ from scipy.spatial import KDTree
 MIN_IMG_DIMENSION = 300
 
 
-def save_no_image(path_to_image, width=200):
+def save_no_image(path_to_image, default_msg=None, width=200):
     """
     Generate pretty image with 'No image available' message in case
     the 2D depiction cannot be created.
@@ -41,7 +41,7 @@ def save_no_image(path_to_image, width=200):
         width (int, optional): Defaults to 200. width of the image
     """
     if path_to_image.split('.')[-1] == "svg":
-        svg = _svg_no_image(width)
+        svg = _svg_no_image_with_id(default_msg, width) if default_msg else _svg_no_image(width)
         with open(path_to_image, 'w') as f:
             f.write(svg)
     else:
@@ -247,7 +247,8 @@ def _svg_no_image(width=200):
         str: string representation of an svg image.
     """
 
-    svg = """<?xml version='1.0' encoding='iso-8859-1'?>
+    font = width / 8
+    svg = f"""<?xml version='1.0' encoding='iso-8859-1'?>
             <svg version='1.1' baseProfile='full'
               xmlns='http://www.w3.org/2000/svg'
                       xmlns:rdkit='http://www.rdkit.org/xml'
@@ -262,7 +263,32 @@ def _svg_no_image(width=200):
             </text>
             </svg>
           """
-    return svg.format(width=width, font=width / 8)
+    return svg
+
+
+def _svg_no_image_with_id(name, width=200):
+    """Get svg representation
+        name (str): Name of the component to be displayed, in case
+            the image cannot be generated.
+        width (int, optional): Defaults to 200. width of the image
+
+    Returns:
+        str: string representation of an svg image.
+    """
+    font = width / 8
+    svg = f"""<?xml version='1.0' encoding='iso-8859-1'?>
+            <svg version='1.1' baseProfile='full'
+              xmlns='http://www.w3.org/2000/svg'
+                      xmlns:rdkit='http://www.rdkit.org/xml'
+                      xmlns:xlink='http://www.w3.org/1999/xlink'
+                  xml:space='preserve' width='{width}px' height='{width}px' >
+            <rect style='opacity:1.0;fill:#FFFFFF;stroke:none' width='{width}' height='{width}' x='0' y='0'> </rect>
+            <text  dominant-baseline="middle" text-anchor="middle" x="40%" y="50%" style='font-size:{font}px;font-family:sans-serif;text-anchor:start;fill:#000000'>
+                {name}
+            </text>
+            </svg>
+          """
+    return svg
 
 
 def _supply_font():
