@@ -64,7 +64,7 @@ def write_molecule(path, component: Component, remove_hs: bool = True, alt_names
     extension = path.split('.')[-1].lower()
     str_representation = ''
 
-    if extension == 'sdf':
+    if extension in ('sdf', 'mol'):
         str_representation = to_sdf_str(component, remove_hs, conf_type)
     elif extension == 'pdb':
         str_representation = to_pdb_str(component, remove_hs, alt_names, conf_type)
