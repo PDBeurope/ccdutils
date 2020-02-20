@@ -31,6 +31,7 @@ agreed_resources = {
     '22': ('PubChem', 'PubChem Compounds'),
     '24': ('NMRShiftDB', 'NMRShiftDB'),
     '31': ('BindingDb', 'BindingDb'),
+    '33': ('LipidMaps', 'LipidMaps'),
     '36': ('MetaboLights', 'MetaboLights'),
     '37': ('BRENDA', 'BRENDA'),
     '38': ('Rhea', 'Rhea')
