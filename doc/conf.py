@@ -12,7 +12,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-from recommonmark.parser import CommonMarkParser
 from recommonmark.transform import AutoStructify
 import pdbeccdutils
 
@@ -46,7 +45,8 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.coverage',
     'sphinx.ext.githubpages',
-    'sphinx.ext.intersphinx'
+    'sphinx.ext.intersphinx',
+    'recommonmark'
 ]
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
@@ -55,14 +55,11 @@ intersphinx_mapping = {
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
-# The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
 source_parsers = {
-    '.md': CommonMarkParser
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown'
 }
-source_suffix = ['.rst', '.md']
-# source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
