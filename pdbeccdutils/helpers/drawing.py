@@ -145,6 +145,10 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
     for atom_svg in atom_elem:
         atom_id_str = re.search(r'\d+', atom_svg.attrib.get('class')).group(0)
         atom_id = int(atom_id_str)
+
+        if atom_id >= mol.GetNumAtoms():
+            continue
+
         temp = {
             'name': mol.GetAtomWithIdx(atom_id).GetProp('name'),
             'label': {},
@@ -160,7 +164,11 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
         if 'class' not in bond_svg.attrib:
             continue
 
-        bond_id = int(re.search(r'\d+', bond_svg.attrib['class']).group(0))
+        bond_id_str = re.search(r'\d+', bond_svg.attrib['class']).group(0)
+        bond_id = int(bond_id_str)
+        if bond_id >= mol.GetNumBonds():
+            continue
+
         bond = mol.GetBondWithIdx(bond_id)
         temp = {
             'bgn': bond.GetBeginAtom().GetProp('name'),
