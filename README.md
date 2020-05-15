@@ -1,5 +1,4 @@
-[![pipeline status](https://gitlab.ebi.ac.uk/pdbe/ccdutils/badges/master/pipeline.svg)](https://gitlab.ebi.ac.uk/pdbe/ccdutils/commits/master)
-[![coverage report](https://gitlab.ebi.ac.uk/pdbe/ccdutils/badges/master/coverage.svg)](https://gitlab.ebi.ac.uk/pdbe/ccdutils/commits/master)
+![GitHub](https://img.shields.io/github/license/pdbeurope/ccdutils) ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg)
 
 # pdbeccdutils
 
@@ -28,7 +27,7 @@
 * Once you have installed RDKit, as described above then install pdbeccdutils using pip:
 
   ```console
-  pip install git+https://gitlab.ebi.ac.uk/pdbe/ccdutils.git
+  pip install git+https://github.com/PDBeurope/ccdutils.git
   ```
 
 ## Features
@@ -41,7 +40,6 @@
 * Lightweight implementation of parity method by Jon Tyczak.
 * RDKit molecular properties per component.
 * UniChem mapping.
-
 
 ## TODO list
 
