@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>helpers &mdash; pdbeccdutils 0.5.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/styles.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="utils" href="pdbeccdutils.utils.html" />
+    <link rel="prev" title="core" href="pdbeccdutils.core.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pdbeccdutils
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="guide/intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#installation">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/intro.html#getting-started">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#a-single-component-file">A single component file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#chemical-component-dictionary">Chemical component dictionary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#writing-ccd-files">Writing CCD files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/depictions.html">Depictions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide/fragments.html">Fragments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#basic-use-case">Basic use case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide/pipelines.html">Pipelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#pdbechem">PDBeChem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide/pipelines.html#ftp-area-content">FTP area content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="guide/pipelines.html#data-enrichment-process">Data enrichment process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#cofactors">Cofactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#reactants">Reactants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#similarities">Similarities</a></li>
+</ul>
+</li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.computations.html">computations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.computations.html#pdbeccdutils-computations-parity-method">pdbeccdutils.computations.parity_method</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.core.html">core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-ccd-reader">pdbeccdutils.core.ccd_reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-component">pdbeccdutils.core.component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-ccd-writer">pdbeccdutils.core.ccd_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-depictions">pdbeccdutils.core.depictions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-fragment-library">pdbeccdutils.core.fragment_library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-models">pdbeccdutils.core.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-exceptions">pdbeccdutils.core.exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.helpers.collection_ext">pdbeccdutils.helpers.collection_ext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.helpers.conversions">pdbeccdutils.helpers.conversions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.utils.html">utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.utils.html#pubchem-downloader">pubchem_downloader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.utils.html#web-services">web_services</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.scripts.html">scripts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#pdbechem-pipeline">PDBeChem pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#setup-pubchem-library">Setup PubChem library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pdbeccdutils</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="api.html">API documentation</a> &raquo;</li>
+        
+      <li>helpers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/pdbeccdutils.helpers.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="helpers">
+<h1>helpers<a class="headerlink" href="#helpers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pdbeccdutils.helpers.collection_ext">
+<span id="pdbeccdutils-helpers-collection-ext"></span><h2>pdbeccdutils.helpers.collection_ext<a class="headerlink" href="#module-pdbeccdutils.helpers.collection_ext" title="Permalink to this headline">¶</a></h2>
+<p>Set of extension methods for collections</p>
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.collection_ext.find_element_in_list">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.collection_ext.</code><code class="sig-name descname">find_element_in_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">element</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.collection_ext.find_element_in_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds an element in an array. Does not crash if not found</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list to be searched</p></li>
+<li><p><strong>element</strong> (<em>any</em>) – element to be found</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Index of the element or None if the element is not found.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.collection_ext.find_element_with_max_occurrence">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.collection_ext.</code><code class="sig-name descname">find_element_with_max_occurrence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.collection_ext.find_element_with_max_occurrence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find element with most occurrences in the list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>list of str</em>) – Array to be searched</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value with most occurrences in the list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pdbeccdutils.helpers.drawing">
+<span id="pdbeccdutils-helpers-drawing"></span><h2>pdbeccdutils.helpers.drawing<a class="headerlink" href="#module-pdbeccdutils.helpers.drawing" title="Permalink to this headline">¶</a></h2>
+<p>Module helper providing drawing functionality based on RDKit</p>
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.drawing.convert_svg">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.drawing.</code><code class="sig-name descname">convert_svg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">svg_string</span></em>, <em class="sig-param"><span class="n">ccd_id</span></em>, <em class="sig-param"><span class="n">mol</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.convert_svg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse information from SVG depiction into object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>svg_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – SVG as string.</p></li>
+<li><p><strong>mol</strong> (<em>rdkit.Chem.Mol</em>) – RDKit mol object used for depiction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>object with all the details for
+json serialization.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.drawing.draw_molecule">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.drawing.</code><code class="sig-name descname">draw_molecule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mol</span></em>, <em class="sig-param"><span class="n">drawer</span></em>, <em class="sig-param"><span class="n">file_name</span></em>, <em class="sig-param"><span class="n">wedge_bonds</span></em>, <em class="sig-param"><span class="n">atom_highlight</span></em>, <em class="sig-param"><span class="n">bond_highlight</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.draw_molecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw SVG image from the RDKit molecule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object to be depicted.</p></li>
+<li><p><strong>drawer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.Draw.MolDrawing.html#rdkit.Chem.Draw.MolDrawing.DrawingOptions" title="(in The RDKit v2020.03)"><em>rdkit.Chem.Draw.MolDrawing.DrawingOptions</em></a>) – RDKit object
+with parameters for drawing depiction.</p></li>
+<li><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path where the depiction will be saved.</p></li>
+<li><p><strong>wedge_bonds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether or not to wedge bonds.</p></li>
+<li><p><strong>(</strong><strong>obj</strong> (<em>bond_highlight</em>) – Dict): Dictionary with atom id and RGB
+mapping color mapping.</p></li>
+<li><p><strong>(</strong><strong>obj</strong> – Dict): Dictionary with mapping of atom
+ids and RGB colors.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.drawing.get_drawing_scale">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.drawing.</code><code class="sig-name descname">get_drawing_scale</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mol</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.get_drawing_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate molecule resolution given 50points per Angstroom</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dimension of the depictions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.drawing.save_no_image">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.drawing.</code><code class="sig-name descname">save_no_image</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_image</span></em>, <em class="sig-param"><span class="n">default_msg</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">width</span><span class="o">=</span><span class="default_value">200</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.save_no_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate pretty image with ‘No image available’ message in case
+the 2D depiction cannot be created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_to_image</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to the image</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – Defaults to 200. width of the image</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pdbeccdutils.helpers.conversions">
+<span id="pdbeccdutils-helpers-conversions"></span><h2>pdbeccdutils.helpers.conversions<a class="headerlink" href="#module-pdbeccdutils.helpers.conversions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.conversions.listit">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.conversions.</code><code class="sig-name descname">listit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.conversions.listit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format deep tuples into deep list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>t</strong> (<em>tuple of tuples</em>) – deep tuples</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>deep list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.conversions.str_to_float">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.conversions.</code><code class="sig-name descname">str_to_float</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.conversions.str_to_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string into float. Returns 0.0 if a string cannot be
+converted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – string representation of a float</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>conversion of the string</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.helpers.conversions.str_to_int">
+<code class="sig-prename descclassname">pdbeccdutils.helpers.conversions.</code><code class="sig-name descname">str_to_int</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.conversions.str_to_int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a string into integer. Returns 0 if a string cannot be
+converted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – string representation of an integer</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>conversion of the string</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pdbeccdutils.utils.html" class="btn btn-neutral float-right" title="utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pdbeccdutils.core.html" class="btn btn-neutral float-left" title="core" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Protein Data Bank in Europe
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

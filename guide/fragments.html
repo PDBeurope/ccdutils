@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fragments &mdash; pdbeccdutils 0.5.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/styles.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Pipelines" href="pipelines.html" />
+    <link rel="prev" title="Depictions" href="depictions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pdbeccdutils
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#installation">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#getting-started">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#a-single-component-file">A single component file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#chemical-component-dictionary">Chemical component dictionary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#writing-ccd-files">Writing CCD files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="depictions.html">Depictions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Fragments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-use-case">Basic use case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipelines.html#pdbechem">PDBeChem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pipelines.html#ftp-area-content">FTP area content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pipelines.html#data-enrichment-process">Data enrichment process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pipelines.html#cofactors">Cofactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipelines.html#reactants">Reactants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipelines.html#similarities">Similarities</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.computations.html">computations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.computations.html#pdbeccdutils-computations-parity-method">pdbeccdutils.computations.parity_method</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.core.html">core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-ccd-reader">pdbeccdutils.core.ccd_reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-component">pdbeccdutils.core.component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-ccd-writer">pdbeccdutils.core.ccd_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-depictions">pdbeccdutils.core.depictions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-fragment-library">pdbeccdutils.core.fragment_library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-models">pdbeccdutils.core.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-exceptions">pdbeccdutils.core.exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.helpers.html">helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.collection_ext">pdbeccdutils.helpers.collection_ext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.conversions">pdbeccdutils.helpers.conversions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.utils.html">utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.utils.html#pubchem-downloader">pubchem_downloader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.utils.html#web-services">web_services</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.scripts.html">scripts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.scripts.html#pdbechem-pipeline">PDBeChem pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.scripts.html#setup-pubchem-library">Setup PubChem library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pdbeccdutils</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Fragments</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/guide/fragments.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fragments">
+<span id="id1"></span><h1>Fragments<a class="headerlink" href="#fragments" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> comes with the code to search components using common fragments. Presently, the fragment library contains some ~2k fragments which were manually currated at PDBe and collaborating resources (ENAMINE, DSI). Should you wish to check all the fragments which come with code, please check <code class="docutils literal notranslate"><span class="pre">pdbeccdutils/data/fragment_library.tsv</span></code> file.</p>
+<p>Alternativelly fragments can be supplied in an external library (*.tsv) provided the library is formatted accordingly:</p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>name</th>
+<th>kind</th>
+<th>query</th>
+<th>description</th>
+<th>comment</th>
+<th>url</th>
+<th>source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>acetylurea</td>
+<td>SMILES</td>
+<td>C1C(=O)NC(=O)N1</td>
+<td></td>
+<td>unchecked</td>
+<td></td>
+<td>PDBe</td>
+</tr>
+<tr>
+<td>phenanthrene</td>
+<td>SMARTS</td>
+<td>[#6]1:[#6]:[#6]:[#6]2:<a href=":[#6]:1">#6</a>:[#6]:[#6]:[#6]1:[#6]:2:[#6]:[#6]:[#6]:[#6]:1</td>
+<td></td>
+<td>unchecked</td>
+<td></td>
+<td>PDBe</td>
+</tr>
+</tbody>
+</table><div class="section" id="basic-use-case">
+<h2>Basic use case<a class="headerlink" href="#basic-use-case" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_reader</span>
+<span class="kn">from</span> <span class="nn">pdbeccdutils.core.fragment_library</span> <span class="kn">import</span> <span class="n">FragmentLibrary</span>
+
+<span class="n">component</span> <span class="o">=</span> <span class="n">ccd_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;HEM.cif&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">component</span>
+<span class="n">fragment_library</span> <span class="o">=</span> <span class="n">FragmentLibrary</span><span class="p">()</span>
+
+<span class="n">matches</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">library_search</span><span class="p">(</span><span class="n">library</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Matches found in the fragment library </span><span class="si">{</span><span class="n">matches</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">fragments</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Fragment name </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> from source </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Matches this substructure: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pdbe-supplied-fragments">
+<h2>PDBe supplied fragments<a class="headerlink" href="#pdbe-supplied-fragments" title="Permalink to this headline">¶</a></h2>
+<p>Below you can find actual fragment structures comming with the pdbeccdutil’s <code class="docutils literal notranslate"><span class="pre">FragmentsLibrary</span></code> from the PDBe resource:</p>
+<div align='center'>
+    <img src='../_static/pdbe_fragments.svg' />    
+</div></div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pipelines.html" class="btn btn-neutral float-right" title="Pipelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="depictions.html" class="btn btn-neutral float-left" title="Depictions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Protein Data Bank in Europe
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

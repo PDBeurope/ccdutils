@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Pipelines &mdash; pdbeccdutils 0.5.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/styles.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API documentation" href="../api.html" />
+    <link rel="prev" title="Fragments" href="fragments.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> pdbeccdutils
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#installation">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#getting-started">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#a-single-component-file">A single component file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#chemical-component-dictionary">Chemical component dictionary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#writing-ccd-files">Writing CCD files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="depictions.html">Depictions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fragments.html">Fragments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fragments.html#basic-use-case">Basic use case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fragments.html#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pdbechem">PDBeChem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ftp-area-content">FTP area content</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-enrichment-process">Data enrichment process</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cofactors">Cofactors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reactants">Reactants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#similarities">Similarities</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.computations.html">computations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.computations.html#pdbeccdutils-computations-parity-method">pdbeccdutils.computations.parity_method</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.core.html">core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-ccd-reader">pdbeccdutils.core.ccd_reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-component">pdbeccdutils.core.component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-ccd-writer">pdbeccdutils.core.ccd_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-depictions">pdbeccdutils.core.depictions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-fragment-library">pdbeccdutils.core.fragment_library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-models">pdbeccdutils.core.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-exceptions">pdbeccdutils.core.exceptions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.helpers.html">helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.collection_ext">pdbeccdutils.helpers.collection_ext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.conversions">pdbeccdutils.helpers.conversions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.utils.html">utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.utils.html#pubchem-downloader">pubchem_downloader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.utils.html#web-services">web_services</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.scripts.html">scripts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.scripts.html#pdbechem-pipeline">PDBeChem pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.scripts.html#setup-pubchem-library">Setup PubChem library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pdbeccdutils</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Pipelines</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/guide/pipelines.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pipelines">
+<span id="id1"></span><h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this headline">¶</a></h1>
+<p>Presently there are four pipelines in the production based on the <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> code.</p>
+<div class="section" id="pdbechem">
+<h2>PDBeChem<a class="headerlink" href="#pdbechem" title="Permalink to this headline">¶</a></h2>
+<p>This pipeline generates all the chemistry data consumed on the PDBe pages. It can process standard ligand definitions defined by <a class="reference external" href="http://www.wwpdb.org/data/ccd">CCD</a> or <a class="reference external" href="https://www.wwpdb.org/data/bird">BIRD</a> dictionaries.</p>
+<div class="section" id="ftp-area-content">
+<h3>FTP area content<a class="headerlink" href="#ftp-area-content" title="Permalink to this headline">¶</a></h3>
+<p>Following files are generated in the tree-like structure (A/ATP/…) in our <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/">FTP area</a>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP.cif</span></code> - Standard wwPDB CCD file with the <a class="reference external" href="#data-enrichment-process">data enrichments</a> | <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_ideal.pdb</span></code> - ideal cooordinates | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_ideal_alt.pdb</span></code> - ideal cooordinates with atom alternate names | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_model.pdb</span></code> - model cooordinates | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_model_alt.pdb</span></code> - model cooordinates with atom alternate names | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_N.svg</span></code> - 2D depiction in N x N resolution. Where N is (100,200,300,400,500) pixels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_N_names.svg</span></code> - 2D depiction in N x N resolution with atom names. Where N in (100,200,300,400,500) pixels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_model.sdf</span></code> - model coordinates | <code class="docutils literal notranslate"><span class="pre">MOL</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_ideal.sdf</span></code> - ideal cooordinates | <code class="docutils literal notranslate"><span class="pre">MOL</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP.cml</span></code> - component representation | <code class="docutils literal notranslate"><span class="pre">CML</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP_annotation.json</span></code> - 2D depiction in ‘natural format’ (i.e. 50px per 1Å) with some additional annotation. This file is consumed by the protein-ligand interaction viewer.</p></li>
+</ul>
+<p>On the top of that these files are generated:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">chem_comp.list</span></code> - List of processed ids</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chem_comp_list.xml</span></code> - XML file with some additional metadata per entry.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">components.cif</span></code> - Aggregated files with all the CCD information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pdbechem.tar.gz</span></code> - The archive in the <code class="docutils literal notranslate"><span class="pre">*.tar.gz</span></code> format:</p></li>
+</ul>
+</div>
+<div class="section" id="data-enrichment-process">
+<h3>Data enrichment process<a class="headerlink" href="#data-enrichment-process" title="Permalink to this headline">¶</a></h3>
+<p>Aside from the standard content of the wwPDB CCD files. PDBeChem adds the following information in the <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code> files. See example for <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/A/ATP/ATP.cif">ATP</a>:</p>
+<ul class="simple">
+<li><p>ID mapping to some popular resources like ChEMBL, ChEBI, DrugBank, etc. The curated list is available in the pdbeccdutils package.(<code class="docutils literal notranslate"><span class="pre">pdbeccdutils.utils.web_services.agreed_resources</span></code>).</p></li>
+<li><p>ChEMBL synonyms.</p></li>
+<li><p>DrugBank details - summary, synonyms, international brands, taxonomy, and known targets.</p></li>
+<li><p>2D coordinations of the ligand.</p></li>
+<li><p>RDKit regenerated 3D conformer.</p></li>
+<li><p>Information about scaffold and fragments found in the entry.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="cofactors">
+<h2><a class="reference external" href="https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/cofactors.html">Cofactors</a><a class="headerlink" href="#cofactors" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="reactants">
+<h2><a class="reference external" href="https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/reactants.html">Reactants</a><a class="headerlink" href="#reactants" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="similarities">
+<h2><a class="reference external" href="https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/similarities.html">Similarities</a><a class="headerlink" href="#similarities" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api.html" class="btn btn-neutral float-right" title="API documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="fragments.html" class="btn btn-neutral float-left" title="Fragments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Protein Data Bank in Europe
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
