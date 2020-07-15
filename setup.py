@@ -1,7 +1,6 @@
 from setuptools import setup, find_namespace_packages
 import pdbeccdutils
 
-      install_requires=['Pillow', 'scipy', 'numpy', 'pdbecif'],
 setup(
     name="pdbeccdutils",
     version=pdbeccdutils.__version__,
@@ -17,6 +16,7 @@ setup(
     packages=find_namespace_packages(),
     zip_safe=False,
     include_package_data=True,
+    install_requires=["Pillow", "scipy", "numpy", "pdbecif>=2.0"],
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
