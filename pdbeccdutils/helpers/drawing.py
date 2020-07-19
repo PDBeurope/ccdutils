@@ -182,7 +182,7 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
         x = label_svg.attrib.get('x')
         y = label_svg.attrib.get('y')
 
-        if 'nan' in (x, y):
+        if any('nan' in x for x in [x,y]): # check for broken labels with 'nan' and '-nan'
             continue
         
         temp = {
