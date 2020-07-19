@@ -31,7 +31,7 @@ from datetime import date
 from typing import Dict, List, NamedTuple
 
 import rdkit
-from mmCif.mmcifIO import MMCIF2Dict
+from pdbecif.mmcif_io import MMCIF2Dict
 
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError

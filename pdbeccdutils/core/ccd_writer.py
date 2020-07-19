@@ -30,7 +30,7 @@ from collections import OrderedDict
 from typing import List
 from xml.dom import minidom
 
-import mmCif.mmcifIO as mmcif
+import pdbecif.mmcif_io as mmcif
 import rdkit
 
 import pdbeccdutils

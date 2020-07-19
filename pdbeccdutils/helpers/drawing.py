@@ -179,9 +179,15 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
         result_bag['bonds'].append(temp)
 
     for label_svg in label_elem:
+        x = label_svg.attrib.get('x')
+        y = label_svg.attrib.get('y')
+
+        if 'nan' in (x, y):
+            continue
+        
         temp = {
-            'x': float(label_svg.attrib.get('x')),
-            'y': float(label_svg.attrib.get('y')),
+            'x': float(x),
+            'y': float(y),
             'style': label_svg.attrib.get('style'),
             'tspans': [{
                 'value': tspan.text,
