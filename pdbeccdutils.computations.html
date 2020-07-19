@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,19 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/styles.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,11 +35,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/styles.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="core" href="pdbeccdutils.core.html" />
@@ -51,7 +52,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> pdbeccdutils
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pdbeccdutils
           
 
           
@@ -81,6 +82,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -123,17 +125,17 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="api.html">API documentation</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">computations</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pdbeccdutils-computations-parity-method">pdbeccdutils.computations.parity_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.computations.parity_method">pdbeccdutils.computations.parity_method</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.core.html">core</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-ccd-reader">pdbeccdutils.core.ccd_reader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-component">pdbeccdutils.core.component</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-ccd-writer">pdbeccdutils.core.ccd_writer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-depictions">pdbeccdutils.core.depictions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-fragment-library">pdbeccdutils.core.fragment_library</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-models">pdbeccdutils.core.models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils-core-exceptions">pdbeccdutils.core.exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.ccd_reader">pdbeccdutils.core.ccd_reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.component">pdbeccdutils.core.component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.ccd_writer">pdbeccdutils.core.ccd_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.depictions">pdbeccdutils.core.depictions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.fragment_library">pdbeccdutils.core.fragment_library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.models">pdbeccdutils.core.models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.exceptions">pdbeccdutils.core.exceptions</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.helpers.html">helpers</a><ul>
@@ -143,13 +145,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.utils.html">utils</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.utils.html#pubchem-downloader">pubchem_downloader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.utils.html#web-services">web_services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.utils.html#module-pdbeccdutils.utils.pubchem_downloader">pubchem_downloader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.utils.html#module-pdbeccdutils.utils.web_services">web_services</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.scripts.html">scripts</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#pdbechem-pipeline">PDBeChem pipeline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#setup-pubchem-library">Setup PubChem library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#module-pdbeccdutils.scripts.process_components_cif_cli">PDBeChem pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#module-pdbeccdutils.scripts.setup_pubchem_library_cli">Setup PubChem library</a></li>
 </ul>
 </li>
 </ul>
@@ -159,6 +161,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -197,7 +200,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="api.html">API documentation</a> &raquo;</li>
         
@@ -222,8 +225,36 @@
             
   <div class="section" id="computations">
 <h1>computations<a class="headerlink" href="#computations" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="pdbeccdutils-computations-parity-method">
-<h2>pdbeccdutils.computations.parity_method<a class="headerlink" href="#pdbeccdutils-computations-parity-method" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pdbeccdutils.computations.parity_method">
+<span id="pdbeccdutils-computations-parity-method"></span><h2>pdbeccdutils.computations.parity_method<a class="headerlink" href="#module-pdbeccdutils.computations.parity_method" title="Permalink to this headline">¶</a></h2>
+<p>Lightweight implementation of the <a class="reference external" href="https://doi.org/10.1016/j.str.2018.02.009">parity method</a> provided by
+Jon Tyzack.</p>
+<dl class="py function">
+<dt id="pdbeccdutils.computations.parity_method.compare_molecules">
+<code class="sig-prename descclassname">pdbeccdutils.computations.parity_method.</code><code class="sig-name descname">compare_molecules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template</span></em>, <em class="sig-param"><span class="n">query</span></em>, <em class="sig-param"><span class="n">thresh</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">exact_match</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.computations.parity_method.compare_molecules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the two molecules calculates their similarity score.
+If expected similarity score is lower than the threshold nothing
+is calculated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>template</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Template molecule</p></li>
+<li><p><strong>query</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Query molecule</p></li>
+<li><p><strong>thresh</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><em>optional</em>) – Threshold score for
+the match to be considered. Defaults to 0.01.</p></li>
+<li><p><strong>exact_match</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Controls whether atom type and
+bond order should be checked too. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of the PARITY comparison.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult" title="pdbeccdutils.core.models.ParityResult">ParityResult</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 
@@ -247,11 +278,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Protein Data Bank in Europe
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -262,7 +301,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
