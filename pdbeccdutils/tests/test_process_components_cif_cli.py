@@ -5,10 +5,12 @@ method based on
 http://dustinrcollins.com/testing-python-command-line-apps
 adapted to use nose then converted to pytest
 """
+import json
 import os
 import xml.etree.ElementTree as ET
 
 import pytest
+
 from pdbeccdutils.scripts.process_components_cif_cli import (PDBeChemManager,
                                                              check_args,
                                                              create_parser)
@@ -65,7 +67,7 @@ class TestCutDownComponentsCif:
     for the creation of each directory file that is required in the
     ftp area.
     """
-    CHEM_COMP_IDS = ['000', '001', '002', '003', '004']
+    CHEM_COMP_IDS = ['000', '001', '002', '003', '004', 'ZPN']
 
     @pytest.fixture(scope='class')
     def pipeline_wd(self, tmpdir_factory):
@@ -159,3 +161,21 @@ class TestCutDownComponentsCif:
         atoms = xml_root.find('molecule').find('atomArray').findall('atom')
 
         assert any(a.attrib['elementType'] == 'C' for a in atoms)
+
+    @staticmethod
+    @pytest.mark.parametrize('chem_comp_id', CHEM_COMP_IDS)
+    def test_annotation_file(pipeline_wd, chem_comp_id):
+        """Test if the annotation.jsone is parsable. Each of the tested compounds
+        should contain some data.
+        """
+
+        path = os.path.join(pipeline_wd, chem_comp_id[0], chem_comp_id, f'{chem_comp_id}_annotation.json')
+        assert os.path.isfile(path)
+
+        with open(path, 'r') as fp:
+            data = json.load(fp)
+
+            assert data
+            assert data['atoms']
+            assert data['bonds']
+            assert data['resolution']
