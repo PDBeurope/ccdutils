@@ -16,7 +16,7 @@ setup(
     packages=find_namespace_packages(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=["Pillow", "scipy", "numpy", "pdbecif>=2.0"],
+    install_requires=["Pillow", "scipy", "numpy", "pdbecif>=1.5"],
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
