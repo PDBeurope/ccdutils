@@ -31,7 +31,7 @@ jobs:
       uses: s-weigand/setup-conda@v1
       with:
         activate-conda: true
-        conda-channels: rdkit 
+        conda-channels: conda-forge 
     - run: |
         conda install rdkit
         pip install -e .

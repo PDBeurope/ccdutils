@@ -20,7 +20,7 @@
   For linux/mac OS this is most easily done using the anaconda python with commands similar to:
 
   ```console
-  conda create -c rdkit -n rdkit-env rdkit python=3.7
+  conda create -c conda-forge -n rdkit-env rdkit python=3.7
   conda activate rdkit-env
   ```
 
