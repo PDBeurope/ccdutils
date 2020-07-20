@@ -151,7 +151,7 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
 
         temp = {
             'name': mol.GetAtomWithIdx(atom_id).GetProp('name'),
-            'label': {},
+            'labels': [],
             'x': float(atom_svg.attrib.get('cx')),
             'y': float(atom_svg.attrib.get('cy'))
         }
@@ -196,7 +196,7 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
                 for tspan in filter(lambda x: x.text is not None, label_svg.findall('{http://www.w3.org/2000/svg}tspan'))]
         }
         nearest_index = kd_tree.query([temp['x'], temp['y']])[1]
-        result_bag['atoms'][nearest_index]['label'] = temp
+        result_bag['atoms'][nearest_index]['labels'].append(temp)
 
     result_bag['resolution'] = {
         'x': float(dimensions_svg.attrib.get('width')),

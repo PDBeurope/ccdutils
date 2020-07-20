@@ -124,7 +124,7 @@ class TestWriteImg:
         atom_names = [atom['name'] for atom in json_obj['atoms']]
         assert len(json_obj['atoms']) == component.mol_no_h.GetNumAtoms()
         assert len(json_obj['bonds']) >= component.mol_no_h.GetNumBonds()
-        assert any(atom['label'] for atom in json_obj['atoms'])  # do we have any labels (not all atoms has one)
+        assert any(atom['labels'] for atom in json_obj['atoms'])  # do we have any labels (not all atoms has one)
         assert all(atom['name'] for atom in json_obj['atoms'])  # do we have atom names?
 
         assert all(bond['bgn'] in atom_names and bond['end'] in atom_names for bond in json_obj['bonds'])  # are all the atoms defined?
