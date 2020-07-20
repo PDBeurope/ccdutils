@@ -182,13 +182,15 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
         x = label_svg.attrib.get('x')
         y = label_svg.attrib.get('y')
 
-        if any('nan' in x for x in [x,y]): # check for broken labels with 'nan' and '-nan'
+        if 'nan' in x or 'nan' in y: # check for broken labels with 'nan' and '-nan'
             continue
         
         temp = {
             'x': float(x),
             'y': float(y),
             'style': label_svg.attrib.get('style'),
+            'dominant-baseline': label_svg.attrib.get('dominant-baseline'),
+            'text-anchor': label_svg.attrib.get('text-anchor'),
             'tspans': [{
                 'value': tspan.text,
                 'style': '' if tspan.attrib.get('style') is None else tspan.attrib.get('style')
