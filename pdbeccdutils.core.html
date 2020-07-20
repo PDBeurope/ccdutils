@@ -125,13 +125,13 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="api.html">API documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.computations.html">computations</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.computations.html#pdbeccdutils-computations-parity-method">pdbeccdutils.computations.parity_method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.computations.html#module-pdbeccdutils.computations.parity_method">pdbeccdutils.computations.parity_method</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">core</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pdbeccdutils-core-ccd-reader">pdbeccdutils.core.ccd_reader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pdbeccdutils-core-component">pdbeccdutils.core.component</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pdbeccdutils-core-ccd-writer">pdbeccdutils.core.ccd_writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.core.ccd_reader">pdbeccdutils.core.ccd_reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.core.component">pdbeccdutils.core.component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.core.ccd_writer">pdbeccdutils.core.ccd_writer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.core.depictions">pdbeccdutils.core.depictions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.core.fragment_library">pdbeccdutils.core.fragment_library</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.core.models">pdbeccdutils.core.models</a></li>
@@ -140,7 +140,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.helpers.html">helpers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.collection_ext">pdbeccdutils.helpers.collection_ext</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils-helpers-drawing">pdbeccdutils.helpers.drawing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.conversions">pdbeccdutils.helpers.conversions</a></li>
 </ul>
 </li>
@@ -150,7 +150,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.scripts.html">scripts</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#pdbechem-pipeline">PDBeChem pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#module-pdbeccdutils.scripts.process_components_cif_cli">PDBeChem pipeline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.scripts.html#module-pdbeccdutils.scripts.setup_pubchem_library_cli">Setup PubChem library</a></li>
 </ul>
 </li>
@@ -225,14 +225,861 @@
             
   <div class="section" id="core">
 <h1>core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="pdbeccdutils-core-ccd-reader">
-<h2>pdbeccdutils.core.ccd_reader<a class="headerlink" href="#pdbeccdutils-core-ccd-reader" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pdbeccdutils.core.ccd_reader">
+<span id="pdbeccdutils-core-ccd-reader"></span><h2>pdbeccdutils.core.ccd_reader<a class="headerlink" href="#module-pdbeccdutils.core.ccd_reader" title="Permalink to this headline">¶</a></h2>
+<p>A set of methods for reading in data and creating internal representation
+of molecules. The basic use can be as easy as this:</p>
+<blockquote>
+<div><p>from pdbeccdutils.core import ccd_reader</p>
+<p>ccdutils_component = ccd_reader.read_pdb_cif_file(‘/path/to/cif/ATP.cif’).component
+rdkit_mol = ccdutils_component.mol</p>
+</div></blockquote>
+<dl class="py class">
+<dt id="pdbeccdutils.core.ccd_reader.CCDReaderResult">
+<em class="property">class </em><code class="sig-prename descclassname">pdbeccdutils.core.ccd_reader.</code><code class="sig-name descname">CCDReaderResult</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">warnings</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">errors</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">component</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component">pdbeccdutils.core.component.Component</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>NamedTuple for the result of reading an individual PDB chemical
+component definition (CCD).</p>
+<dl class="py attribute">
+<dt id="pdbeccdutils.core.ccd_reader.CCDReaderResult.component">
+<code class="sig-name descname">component</code><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult.component" title="Permalink to this definition">¶</a></dt>
+<dd><p>internal representation of the CCD read-in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component">Component</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pdbeccdutils.core.ccd_reader.CCDReaderResult.errors">
+<code class="sig-name descname">errors</code><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult.errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of any errors
+found while reading the CCD. If no warnings found <cite>errors</cite>
+will be empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pdbeccdutils.core.ccd_reader.CCDReaderResult.warnings">
+<code class="sig-name descname">warnings</code><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult.warnings" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of any warnings
+found while reading the CCD. If no warnings found <cite>warnings</cite>
+will be empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="id0">
+<em class="property">property </em><code class="sig-name descname">component</code><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="id1">
+<em class="property">property </em><code class="sig-name descname">errors</code><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="id2">
+<em class="property">property </em><code class="sig-name descname">warnings</code><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_reader.read_pdb_cif_file">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_reader.</code><code class="sig-name descname">read_pdb_cif_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_cif</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">pdbeccdutils.core.ccd_reader.CCDReaderResult</a><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.read_pdb_cif_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in single wwPDB CCD CIF component and create its internal
+representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_to_cif</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the cif file</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – if file does not exist</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Results of the parsing altogether with
+the internal representation of the component.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">CCDReaderResult</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_reader.read_pdb_components_file">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_reader.</code><code class="sig-name descname">read_pdb_components_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_cif</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span><a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">pdbeccdutils.core.ccd_reader.CCDReaderResult</a><span class="p">]</span><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.read_pdb_components_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process multiple compounds stored in the wwPDB CCD
+<cite>components.cif</cite> file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_to_cif</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the <cite>components.cif</cite> file with
+multiple ligands in it.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – if the file does not exist.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Internal representation of all
+the components in the <cite>components.cif</cite> file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">CCDReaderResult</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
-<div class="section" id="pdbeccdutils-core-component">
-<h2>pdbeccdutils.core.component<a class="headerlink" href="#pdbeccdutils-core-component" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pdbeccdutils.core.component">
+<span id="pdbeccdutils-core-component"></span><h2>pdbeccdutils.core.component<a class="headerlink" href="#module-pdbeccdutils.core.component" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pdbeccdutils.core.component.Component">
+<em class="property">class </em><code class="sig-prename descclassname">pdbeccdutils.core.component.</code><code class="sig-name descname">Component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mol</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a></span></em>, <em class="sig-param"><span class="n">ccd_cif_dict</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">properties</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.models.CCDProperties" title="pdbeccdutils.core.models.CCDProperties">pdbeccdutils.core.models.CCDProperties</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">descriptors</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#pdbeccdutils.core.models.Descriptor" title="pdbeccdutils.core.models.Descriptor">pdbeccdutils.core.models.Descriptor</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.component.Component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for the rdkit.Chem.Mol object enabling some of its
+functionality and handling possible erroneous situations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>instance object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component">Component</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.atoms_ids">
+<em class="property">property </em><code class="sig-name descname">atoms_ids</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.atoms_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supplies a list of the atom_ids obtained from
+<cite>_chem_comp_atom.atom_id</cite>, see:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Categories/chem_comp_atom.html">http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Categories/chem_comp_atom.html</a></p>
+<p>The order will reflect the order in the input PDB-CCD.</p>
+<p>The atom_id is also also know as ‘atom_name’, standard amino
+acids have main chain atom names ‘N CA C O’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><cite>atom_id’s</cite> for the PDB-CCD</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.compute_2d">
+<code class="sig-name descname">compute_2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">manager</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.depictions.DepictionManager" title="pdbeccdutils.core.depictions.DepictionManager">pdbeccdutils.core.depictions.DepictionManager</a></span></em>, <em class="sig-param"><span class="n">remove_hs</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pdbeccdutils.core.models.DepictionResult" title="pdbeccdutils.core.models.DepictionResult">pdbeccdutils.core.models.DepictionResult</a><a class="headerlink" href="#pdbeccdutils.core.component.Component.compute_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute 2d depiction of the component using DepictionManager
+instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>manager</strong> (<a class="reference internal" href="#pdbeccdutils.core.depictions.DepictionManager" title="pdbeccdutils.core.depictions.DepictionManager"><em>DepictionManager</em></a>) – Instance of the ligand depiction
+class.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True. Remove
+hydrogens prior to depiction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Object with the details about depiction process.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pdbeccdutils.core.models.DepictionResult" title="pdbeccdutils.core.models.DepictionResult">DepictionResult</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.compute_3d">
+<code class="sig-name descname">compute_3d</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><a class="headerlink" href="#pdbeccdutils.core.component.Component.compute_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate 3D coordinates using ETKDGv2 method from RDKit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Result of the structure generation process.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.descriptors">
+<em class="property">property </em><code class="sig-name descname">descriptors</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.descriptors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the pdbx_modified_date for the PDB-CCD
+Obtained from PDB-CCD’s _chem_comp.pdbx_modified_date:</p>
+<p><a class="reference external" href="http://mmcif.rcsb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.program_version.html">http://mmcif.rcsb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.program_version.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of descriptors for a given entry.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference internal" href="#pdbeccdutils.core.models.Descriptor" title="pdbeccdutils.core.models.Descriptor">Descriptor</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.export_2d_annotation">
+<code class="sig-name descname">export_2d_annotation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">wedge_bonds</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a><a class="headerlink" href="#pdbeccdutils.core.component.Component.export_2d_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates 2D depiction in JSON format with annotation of
+bonds and atoms to be redrawn in the interactions component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.export_2d_svg">
+<code class="sig-name descname">export_2d_svg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">width</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">500</span></em>, <em class="sig-param"><span class="n">names</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">wedge_bonds</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">atom_highlight</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>Any<span class="p">, </span>Tuple<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bond_highlight</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>Tuple<span class="p">, </span>Tuple<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.component.Component.export_2d_svg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save 2D depiction of the component as an SVG file. Component
+id is generated in case the image cannot be drawn.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path to store 2d depiction</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a><em>, </em><em>optional</em>) – Defaults to 500. Width of a frame in pixels.</p></li>
+<li><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to False. Whether or not to
+include atom names in depiction. If atom name is not set, element symbol is used instead.</p></li>
+<li><p><strong>wedge_bonds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True. Whether or not
+the molecule should be depicted with bond wedging.</p></li>
+<li><p><strong>atomHighlight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, optional) – Defaults to None. Atoms names to be highlighted along
+with colors in RGB. e.g. {‘CA’: (0.5, 0.5, 0.5)} or {0: (0.5, 0.5, 0.5)}</p></li>
+<li><p><strong>bondHighlight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, optional) – Defaults to None. Bonds to be highlighted along with
+colors in RGB. e.g. {(‘CA’, ‘CB’): (0.5, 0.5, 0.5)} or {(0, 1): (0.5, 0.5, 0.5)}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pdbeccdutils.core.exceptions.CCDUtilsError" title="pdbeccdutils.core.exceptions.CCDUtilsError"><strong>CCDUtilsError</strong></a> – If bond or atom does not exist.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.external_mappings">
+<em class="property">property </em><code class="sig-name descname">external_mappings</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.external_mappings" title="Permalink to this definition">¶</a></dt>
+<dd><p>List external mappings provided by UniChem. fetch_external_mappings()
+was not called before only agreed mapping is retrieved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>UniChem mappings</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.fetch_external_mappings">
+<code class="sig-name descname">fetch_external_mappings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">all_mappings</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.component.Component.fetch_external_mappings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve external mapping through UniChem based on the InChi Key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>all_mappings</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Get UniChem mappings. Defaults to False.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return resource ids pairing established by UniChem.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.formula">
+<em class="property">property </em><code class="sig-name descname">formula</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.formula" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the chemical formula for the PDB-CCD,
+for example ‘C2 H6 O’.
+Obtained from PDB-CCD’s _chem_comp.formula:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.formula.html">http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.formula.html</a></p>
+<p>If not defined then the empty string ‘’ will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the _chem_comp.formula or ‘’.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.fragments">
+<em class="property">property </em><code class="sig-name descname">fragments</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.fragments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists matched fragments and atom names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Substructure mapping for
+all discovered fragments.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference internal" href="#pdbeccdutils.core.models.SubstructureMapping" title="pdbeccdutils.core.models.SubstructureMapping">SubstructureMapping</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.get_scaffolds">
+<code class="sig-name descname">get_scaffolds</code><span class="sig-paren">(</span><em class="sig-param">scaffolding_method=&lt;ScaffoldingMethod.MurckoScaffold: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.component.Component.get_scaffolds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute deemed scaffolds for a given compound.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>scaffolding_method</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ScaffoldingMethod" title="pdbeccdutils.core.models.ScaffoldingMethod"><em>ScaffoldingMethod</em></a><em>, </em><em>optional</em>) – Defaults to MurckoScaffold. Scaffolding method to use</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Scaffolds found in the component.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.has_degenerated_conformer">
+<code class="sig-name descname">has_degenerated_conformer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c_type</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType">pdbeccdutils.core.models.ConformerType</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><a class="headerlink" href="#pdbeccdutils.core.component.Component.has_degenerated_conformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if given conformer has missing coordinates or is
+missing completelly from the rdkit.Mol object. This can
+be used to determine, whether or not the coordinates should be
+regenerated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a>) – type of conformer
+to be inspected.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>true if more then 1 atom has coordinates [0, 0, 0]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.id">
+<em class="property">property </em><code class="sig-name descname">id</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the unique identifier for the PDB-CCD,
+for example ‘ATP’.
+Obtained from CCD’s _chem_comp.id:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.id.html">http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.id.html</a></p>
+<p>If not defined then the empty string ‘’ will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the _chem_comp.id or ‘’.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.inchi">
+<em class="property">property </em><code class="sig-name descname">inchi</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.inchi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the InChI for the PDB-CCD.
+Obtained from <cite>PDB-CCD’s _pdbx_chem_comp_descriptor</cite> table line
+with <cite>_pdbx_chem_comp_descriptor.type=InChI</cite>, see:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.type.html">http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.type.html</a></p>
+<p>If not defined then the empty string ‘’ will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the InChI or ‘’.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.inchi_from_rdkit">
+<em class="property">property </em><code class="sig-name descname">inchi_from_rdkit</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.inchi_from_rdkit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides the InChI worked out by RDKit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the InChI or empty ‘’ if there was an error finding it.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.inchikey">
+<em class="property">property </em><code class="sig-name descname">inchikey</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.inchikey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the InChIKey for the PDB-CCD.
+Obtained from <cite>PDB-CCD’s _pdbx_chem_comp_descriptor</cite> table line
+with <cite>_pdbx_chem_comp_descriptor.type=InChIKey</cite>, see:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.type.html">http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.type.html</a></p>
+<p>If not defined then the empty string ‘’ will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the InChIKey or ‘’.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.inchikey_from_rdkit">
+<em class="property">property </em><code class="sig-name descname">inchikey_from_rdkit</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.inchikey_from_rdkit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides the InChIKey worked out by RDKit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the InChIKey or ‘’ if there was an error finding it.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.inchikey_from_rdkit_matches_ccd">
+<code class="sig-name descname">inchikey_from_rdkit_matches_ccd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">connectivity_only</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><a class="headerlink" href="#pdbeccdutils.core.component.Component.inchikey_from_rdkit_matches_ccd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether inchikey matches between ccd and rdkit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>connectivity_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – restrict to the first 14 character - the connectivity information.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True for match</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.library_search">
+<code class="sig-name descname">library_search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fragment_library</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.fragment_library.FragmentLibrary" title="pdbeccdutils.core.fragment_library.FragmentLibrary">pdbeccdutils.core.fragment_library.FragmentLibrary</a></span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span><a class="reference internal" href="#pdbeccdutils.core.models.SubstructureMapping" title="pdbeccdutils.core.models.SubstructureMapping">pdbeccdutils.core.models.SubstructureMapping</a><span class="p">]</span><a class="headerlink" href="#pdbeccdutils.core.component.Component.library_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify fragments from the fragment library in this component</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fragment_library</strong> (<a class="reference internal" href="#pdbeccdutils.core.fragment_library.FragmentLibrary" title="pdbeccdutils.core.fragment_library.FragmentLibrary"><em>FragmentLibrary</em></a>) – Fragment library.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Matches found in this run</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference internal" href="#pdbeccdutils.core.models.SubstructureMapping" title="pdbeccdutils.core.models.SubstructureMapping">SubstructureMapping</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.locate_fragment">
+<code class="sig-name descname">locate_fragment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mol</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a></span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Atom" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Atom</a><span class="p">]</span><span class="p">]</span><a class="headerlink" href="#pdbeccdutils.core.component.Component.locate_fragment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify substructure match in the component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Fragment to be matched with
+structure</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of fragments
+identified in the component as a list of atoms.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Atom" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Atom</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.modified_date">
+<em class="property">property </em><code class="sig-name descname">modified_date</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.modified_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
+Obtained from PDB-CCD’s _pdbx_chem_comp_descriptor:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html">http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Date of the last entrie’s modification.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.8)">datetime.date</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.mol_no_h">
+<em class="property">property </em><code class="sig-name descname">mol_no_h</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.mol_no_h" title="Permalink to this definition">¶</a></dt>
+<dd><p>RDKit mol object without hydrogens</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RDKit mol object with stripped Hs.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the ‘full name’ of the PDB-CCD, for example ‘ETHANOL’.
+Obtained from PDB-CCD’s _chem_comp.name:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.name.html">http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.name.html</a></p>
+<p>If not defined then the empty string ‘’ will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the _chem_comp.name or ‘’.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.number_atoms">
+<em class="property">property </em><code class="sig-name descname">number_atoms</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.number_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supplies the number of atoms in the _chem_comp_atom table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of atoms in the PDB-CCD</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.pdbx_release_status">
+<em class="property">property </em><code class="sig-name descname">pdbx_release_status</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.pdbx_release_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply the pdbx_release_status for the PDB-CCD.
+Obtained from PDB-CCD’s _chem_comp.pdbx_rel_status:</p>
+<p><a class="reference external" href="http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_chem_comp.pdbx_release_status.html">http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Items/_chem_comp.pdbx_release_status.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>enum of the release
+status (this includes NOT_SET if no value is defined).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pdbeccdutils.core.enums.ReleaseStatus</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.physchem_properties">
+<em class="property">property </em><code class="sig-name descname">physchem_properties</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.physchem_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>RDKit calculated properties related to the CCD compound</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of RDKit calculated properties</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.released">
+<em class="property">property </em><code class="sig-name descname">released</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.released" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests pdbx_release_status is REL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if PDB-CCD has been released.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.sanitized">
+<em class="property">property </em><code class="sig-name descname">sanitized</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.sanitized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether sanitization process succeeded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Whether or not the sanitization process has been successfull</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pdbeccdutils.core.component.Component.scaffolds">
+<em class="property">property </em><code class="sig-name descname">scaffolds</code><a class="headerlink" href="#pdbeccdutils.core.component.Component.scaffolds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists matched scaffolds and atom names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of substructure mappings.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference internal" href="#pdbeccdutils.core.models.SubstructureMapping" title="pdbeccdutils.core.models.SubstructureMapping">SubstructureMapping</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="pdbeccdutils-core-ccd-writer">
-<h2>pdbeccdutils.core.ccd_writer<a class="headerlink" href="#pdbeccdutils-core-ccd-writer" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pdbeccdutils.core.ccd_writer">
+<span id="pdbeccdutils-core-ccd-writer"></span><h2>pdbeccdutils.core.ccd_writer<a class="headerlink" href="#module-pdbeccdutils.core.ccd_writer" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Structure writing module. Presently the following formats are supported:</dt><dd><p>SDF, CIF, PDB, JSON, XYZ, XML, CML.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">raises CCDUtilsError</dt>
+<dd class="field-odd"><p>If deemed format is not supported or an unrecoverable
+    error occurres.</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_cml_str">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_cml_str</code><span class="sig-paren">(</span><em class="sig-param">component: pdbeccdutils.core.component.Component</em>, <em class="sig-param">remove_hs=True</em>, <em class="sig-param">conf_type=&lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_cml_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure to the EBI representation of the molecule in
+CML format: <a class="reference external" href="http://cml.sourceforge.net/schema/cmlCore.xsd">http://cml.sourceforge.net/schema/cmlCore.xsd</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String representation of the component in CML format.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_json_dict">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_json_dict</code><span class="sig-paren">(</span><em class="sig-param">component: pdbeccdutils.core.component.Component</em>, <em class="sig-param">remove_hs=True</em>, <em class="sig-param">conf_type=&lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_json_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns component information in dictionary suitable for json
+formating</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be
+exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AttributeError" title="(in Python v3.8)"><strong>AttributeError</strong></a> – If all conformers are requested. This feature is</p></li>
+<li><p><strong>not supported not is planned.</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dictionary representation of the component</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_json_str">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_json_str</code><span class="sig-paren">(</span><em class="sig-param">component: pdbeccdutils.core.component.Component</em>, <em class="sig-param">remove_hs=True</em>, <em class="sig-param">conf_type=&lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_json_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure into JSON representation. <a class="reference external" href="https://www.json.org/">https://www.json.org/</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>json representation of the component as a string.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_pdb_ccd_cif_file">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_pdb_ccd_cif_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">component</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component">pdbeccdutils.core.component.Component</a></span></em>, <em class="sig-param"><span class="n">remove_hs</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_pdb_ccd_cif_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure to the PDB CIF format. Both model and ideal
+coordinates are stored. In case ideal coordinates are missing, rdkit
+attempts to generate 3D coordinates of the conformer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to save cif file.</p></li>
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_pdb_str">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_pdb_str</code><span class="sig-paren">(</span><em class="sig-param">component: pdbeccdutils.core.component.Component</em>, <em class="sig-param">remove_hs: bool = True</em>, <em class="sig-param">alt_names: bool = False</em>, <em class="sig-param">conf_type: pdbeccdutils.core.models.ConformerType = &lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_pdb_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure to the PDB format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>alt_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to False. Whether or not
+alternate atom names should be exported.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String representation of the component in the PDB format.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_sdf_str">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_sdf_str</code><span class="sig-paren">(</span><em class="sig-param">component: pdbeccdutils.core.component.Component</em>, <em class="sig-param">remove_hs: bool = True</em>, <em class="sig-param">conf_type: pdbeccdutils.core.models.ConformerType = &lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_sdf_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure to the SDF format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pdbeccdutils.core.exceptions.CCDUtilsError" title="pdbeccdutils.core.exceptions.CCDUtilsError"><strong>CCDUtilsError</strong></a> – In case the structure could not be exported.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>String representation of the component in the SDF format</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_xml_str">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_xml_str</code><span class="sig-paren">(</span><em class="sig-param">component: pdbeccdutils.core.component.Component</em>, <em class="sig-param">remove_hs=True</em>, <em class="sig-param">conf_type=&lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_xml_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure to the XML format. Presently just molecule
+metadata are serialized without any coordinates, which is in
+accordance with the content of the PDBeChem area.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String representation of the component in CML format.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_xml_xml">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_xml_xml</code><span class="sig-paren">(</span><em class="sig-param">component</em>, <em class="sig-param">remove_hs=True</em>, <em class="sig-param">conf_type=&lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_xml_xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure to the XML format and returns its XML repr.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>XML object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/xml.etree.elementtree.html#xml.etree.ElementTree.Element" title="(in Python v3.8)">xml.etree.ElementTree.Element</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.to_xyz_str">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">to_xyz_str</code><span class="sig-paren">(</span><em class="sig-param">component</em>, <em class="sig-param">remove_hs=True</em>, <em class="sig-param">conf_type=&lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.to_xyz_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts structure to the XYZ format. Does not yet support
+ConformerType.AllConformers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported.</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String representation of the component in the XYZ format</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pdbeccdutils.core.ccd_writer.write_molecule">
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_writer.</code><code class="sig-name descname">write_molecule</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">component: pdbeccdutils.core.component.Component</em>, <em class="sig-param">remove_hs: bool = True</em>, <em class="sig-param">alt_names: bool = False</em>, <em class="sig-param">conf_type: pdbeccdutils.core.models.ConformerType = &lt;ConformerType.Ideal: 1&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.ccd_writer.write_molecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export molecule in a specified format. Presently supported formats
+are: PDB CCD CIF (<em>.cif); Mol file (</em>.sdf); Chemical Markup language
+(<em>.cml); PDB file (</em>.pdb); XYZ file (<em>.xyz); XML (</em>.xml).
+ConformerType.AllConformers is presently supported only for PDB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the file. Extension determines format to be
+used.</p></li>
+<li><p><strong>component</strong> (<a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component"><em>Component</em></a>) – Component to be exported</p></li>
+<li><p><strong>remove_hs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to True. Whether or not
+hydrogens should be removed.</p></li>
+<li><p><strong>alt_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Defaults to False. Whether or not
+alternate names should be exported.</p></li>
+<li><p><strong>conf_type</strong> (<a class="reference internal" href="#pdbeccdutils.core.models.ConformerType" title="pdbeccdutils.core.models.ConformerType"><em>ConformerType</em></a><em>, </em><em>optional</em>) – Defaults to ConformerType.Ideal. Conformer type to be
+exported.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pdbeccdutils.core.exceptions.CCDUtilsError" title="pdbeccdutils.core.exceptions.CCDUtilsError"><strong>CCDUtilsError</strong></a> – For unsupported format</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-pdbeccdutils.core.depictions">
 <span id="pdbeccdutils-core-depictions"></span><h2>pdbeccdutils.core.depictions<a class="headerlink" href="#module-pdbeccdutils.core.depictions" title="Permalink to this headline">¶</a></h2>
