@@ -116,7 +116,7 @@ def to_pdb_str(
     )
 
     info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
-    info.SetResidueName(component.id)
+    info.SetResidueName(f'{component.id:>3}')
     info.SetTempFactor(20.0)
     info.SetOccupancy(1.0)
     info.SetChainId("A")
@@ -988,7 +988,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
 
-            s = "{:<6}{:>5} {:<4} {:<3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}".format(
+            s = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}".format(
                 "HETATM",
                 i + 1,
                 atom.GetProp("name"),
