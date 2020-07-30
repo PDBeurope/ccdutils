@@ -161,7 +161,7 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
     kd_tree = KDTree(atom_centers)
 
     for bond_svg in bond_elem:
-        if 'class' not in bond_svg.attrib:
+        if 'class' not in bond_svg.attrib or 'bond-selector' in bond_svg.attrib['class']:
             continue
 
         bond_id_str = re.search(r'\d+', bond_svg.attrib['class']).group(0)
