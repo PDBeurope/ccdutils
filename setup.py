@@ -1,10 +1,26 @@
-from setuptools import setup, find_namespace_packages
-import pdbeccdutils
+import os
+
+from setuptools import find_namespace_packages, setup
+
+
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
+
 
 setup(
     name="pdbeccdutils",
-    version=pdbeccdutils.__version__,
+    version=get_version('pdbeccdutils/__init__.py'),
     description="Toolkit to deal with wwPDB chemical components definitions for small molecules.",
+    long_description=read("README.md"),
+    long_description_content_type='text/markdown',
     project_urls={
         "Source code": "https://github.com/PDBeurope/ccdutils",
         "Documentation": "https://pdbeurope.github.io/ccdutils/",
@@ -13,14 +29,16 @@ setup(
     author_email="pdbehelp@ebi.ac.uk",
     license="Apache License 2.0.",
     keywords="PDB CCD wwPDB small molecule",
+    url="http://pypi.python.org/pypi/pdbeccdutils/",
     packages=find_namespace_packages(),
     zip_safe=False,
     include_package_data=True,
+    python_requires='>=3.6',
     install_requires=[
         "Pillow",
         "scipy",
         "numpy",
-        "pdbecif @ git+https://github.com/PDBeurope/pdbecif.git@master#egg=pdbecif",
+        "pdbecif>=1.5",
     ],
     tests_require=["pytest"],
     entry_points={
@@ -29,4 +47,21 @@ setup(
             "setup_pubchem_library=pdbeccdutils.scripts.setup_pubchem_library_cli:main",
         ]
     },
+    classifiers=[
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Operating System :: Unix",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Development Status :: 5 - Production/Stable",
+        
+    ],    
 )
