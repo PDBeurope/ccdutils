@@ -30,14 +30,21 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
-from pdbeccdutils.core.models import (CCDProperties, ConformerType, Descriptor,
-                                      ReleaseStatus, ScaffoldingMethod,
-                                      SubstructureMapping)
+from pdbeccdutils.core.models import (
+    CCDProperties,
+    ConformerType,
+    Descriptor,
+    ReleaseStatus,
+    ScaffoldingMethod,
+    SubstructureMapping,
+)
 from pdbeccdutils.helpers import conversions, drawing
 from pdbeccdutils.utils import web_services
 
-METALS_SMART = '[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,'\
-               'Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]'
+METALS_SMART = (
+    "[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
+    "Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]"
+)
 
 
 class Component:
@@ -49,27 +56,38 @@ class Component:
         Component: instance object
     """
 
-    def __init__(self, mol: rdkit.Chem.rdchem.Mol, ccd_cif_dict: Dict[str, Any] = None,
-                 properties: CCDProperties = None, descriptors: List[Descriptor] = None) -> None:
+    def __init__(
+        self,
+        mol: rdkit.Chem.rdchem.Mol,
+        ccd_cif_dict: Dict[str, Any] = None,
+        properties: CCDProperties = None,
+        descriptors: List[Descriptor] = None,
+        sanitize: bool = True,
+    ) -> None:
 
-        self.conformers_mapping = \
-            {ConformerType.AllConformers: - 1,
-             ConformerType.Ideal: 0,
-             ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
-             ConformerType.Computed: 2000}
+        self.conformers_mapping = {
+            ConformerType.AllConformers: -1,
+            ConformerType.Ideal: 0,
+            ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
+            ConformerType.Computed: 2000,
+        }
 
         self.mol = mol
         self._mol_no_h = None
         self.mol2D = None
+        self._sanitization_issues = False
         self.ccd_cif_dict = ccd_cif_dict
         self._fragments: Dict[str, SubstructureMapping] = {}
         self._scaffolds: Dict[str, SubstructureMapping] = {}
         self._descriptors: List[Descriptor] = []
-        self._inchi_from_rdkit = ''
-        self._inchikey_from_rdkit = ''
-        self._sanitization_issues = self._sanitize()
+        self._inchi_from_rdkit = ""
+        self._inchikey_from_rdkit = ""
         self._physchem_properties: Dict[str, Any] = {}
         self._external_mapping: List[Tuple[str, str]] = []
+
+        if sanitize:
+            self._sanitization_issues = self._sanitize()
+
 
         if descriptors is not None:
             self._descriptors = descriptors
@@ -172,7 +190,7 @@ class Component:
         Returns:
             str: the InChIKey or ''.
         """
-        return next((x.value for x in self._descriptors if x.type == 'InChIKey'), '')
+        return next((x.value for x in self._descriptors if x.type == "InChIKey"), "")
 
     @property
     def inchi(self) -> str:
@@ -187,7 +205,7 @@ class Component:
         Returns:
             str: the InChI or ''.
         """
-        return next((x.value for x in self._descriptors if x.type == 'InChI'), '')
+        return next((x.value for x in self._descriptors if x.type == "InChI"), "")
 
     @property
     def inchi_from_rdkit(self) -> str:
@@ -200,7 +218,7 @@ class Component:
             try:
                 self._inchi_from_rdkit = rdkit.Chem.inchi.MolToInchi(self.mol)
             except ValueError:
-                self._inchi_from_rdkit = ''
+                self._inchi_from_rdkit = ""
         return self._inchi_from_rdkit
 
     @property
@@ -212,12 +230,12 @@ class Component:
         """
         if not self._inchikey_from_rdkit:
             inchi = self.inchi_from_rdkit
-            if inchi != 'ERROR':
+            if inchi != "ERROR":
                 self._inchikey_from_rdkit = rdkit.Chem.inchi.InchiToInchiKey(inchi)
             else:
-                self._inchikey_from_rdkit = ''
+                self._inchikey_from_rdkit = ""
             if self._inchikey_from_rdkit is None:
-                self._inchikey_from_rdkit = ''
+                self._inchikey_from_rdkit = ""
         return self._inchikey_from_rdkit
 
     @property
@@ -286,8 +304,7 @@ class Component:
         Returns:
             tuple[str]: `atom_id's` for the PDB-CCD
         """
-        return tuple(atom.GetProp('name') for
-                     atom in self.mol.GetAtoms())
+        return tuple(atom.GetProp("name") for atom in self.mol.GetAtoms())
 
     @property
     def sanitized(self):
@@ -308,8 +325,15 @@ class Component:
         if not self._physchem_properties:
             try:
                 properties = Properties()
-                self._physchem_properties = dict(zip(properties.GetPropertyNames(), properties.ComputeProperties(self.mol)))
-                self._physchem_properties['NumHeavyAtoms'] = float(self.mol.GetNumHeavyAtoms())
+                self._physchem_properties = dict(
+                    zip(
+                        properties.GetPropertyNames(),
+                        properties.ComputeProperties(self.mol),
+                    )
+                )
+                self._physchem_properties["NumHeavyAtoms"] = float(
+                    self.mol.GetNumHeavyAtoms()
+                )
             except (RuntimeError, ValueError):
                 return {}
 
@@ -350,7 +374,9 @@ class Component:
         if all_mappings:
             self._external_mapping = web_services.get_all_unichem_mapping(self.inchikey)
         else:
-            self._external_mapping = web_services.get_agreed_unichem_mapping(self.inchikey)
+            self._external_mapping = web_services.get_agreed_unichem_mapping(
+                self.inchikey
+            )
 
         return self._external_mapping
 
@@ -363,7 +389,7 @@ class Component:
         Returns:
             bool: True for match
         """
-        if self.inchikey is None or self.inchikey_from_rdkit == 'ERROR':
+        if self.inchikey is None or self.inchikey_from_rdkit == "ERROR":
             return False
         if connectivity_only:
             if len(self.inchikey) < 14 or len(self.inchikey_from_rdkit) < 14:
@@ -374,7 +400,9 @@ class Component:
             return False
         return True
 
-    def compute_2d(self, manager: DepictionManager, remove_hs: bool = True) -> DepictionResult:
+    def compute_2d(
+        self, manager: DepictionManager, remove_hs: bool = True
+    ) -> DepictionResult:
         """Compute 2d depiction of the component using DepictionManager
         instance.
 
@@ -389,18 +417,26 @@ class Component:
         """
         mol_copy = rdkit.Chem.RWMol(self.mol)
         if remove_hs:
-            mol_copy = rdkit.Chem.RemoveHs(mol_copy, updateExplicitCount=True, sanitize=False)
+            mol_copy = rdkit.Chem.RemoveHs(
+                mol_copy, updateExplicitCount=True, sanitize=False
+            )
             rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
 
         result_log = manager.depict_molecule(self.id, mol_copy)
+
         self.mol2D = result_log.mol
 
         return result_log
 
-    def export_2d_svg(self, file_name: str, width: int = 500,
-                      names: bool = False, wedge_bonds: bool = True,
-                      atom_highlight: Dict[Any, Tuple] = None,
-                      bond_highlight: Dict[Tuple, Tuple] = None):
+    def export_2d_svg(
+        self,
+        file_name: str,
+        width: int = 500,
+        names: bool = False,
+        wedge_bonds: bool = True,
+        atom_highlight: Dict[Any, Tuple] = None,
+        bond_highlight: Dict[Tuple, Tuple] = None,
+    ):
         """Save 2D depiction of the component as an SVG file. Component
         id is generated in case the image cannot be drawn.
 
@@ -427,7 +463,9 @@ class Component:
 
         drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
         options = drawer.drawOptions()
-        atom_mapping = {self._get_atom_name(a): i for i, a in enumerate(self.mol2D.GetAtoms())}
+        atom_mapping = {
+            self._get_atom_name(a): i for i, a in enumerate(self.mol2D.GetAtoms())
+        }
 
         atom_highlight = {} if atom_highlight is None else atom_highlight
         bond_highlight = {} if bond_highlight is None else bond_highlight
@@ -441,12 +479,19 @@ class Component:
             atom_highlight = {}
 
         if bond_highlight:
-            if all(isinstance(i[0], str) and isinstance(i[1], str) for i in bond_highlight.keys()):
+            if all(
+                isinstance(i[0], str) and isinstance(i[1], str)
+                for i in bond_highlight.keys()
+            ):
                 temp_highlight = {}
                 for k, v in bond_highlight.items():
-                    bond = self.mol2D.GetBondBetweenAtoms(atom_mapping[k[0]], atom_mapping[k[1]])
+                    bond = self.mol2D.GetBondBetweenAtoms(
+                        atom_mapping[k[0]], atom_mapping[k[1]]
+                    )
                     if bond is None:
-                        raise CCDUtilsError('Bond between {} and {} does not exist'.format(k[0], k[1]))
+                        raise CCDUtilsError(
+                            "Bond between {} and {} does not exist".format(k[0], k[1])
+                        )
                     temp_highlight[bond.GetIdx()] = v
                 bond_highlight = temp_highlight
 
@@ -454,9 +499,11 @@ class Component:
             for i, a in enumerate(self.mol2D.GetAtoms()):
                 atom_name = self._get_atom_name(a)
                 options.atomLabels[i] = atom_name
-                a.SetProp('molFileAlias', atom_name)
+                a.SetProp("molFileAlias", atom_name)
 
-        drawing.draw_molecule(self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight)
+        drawing.draw_molecule(
+            self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight
+        )
 
     def export_2d_annotation(self, file_name: str, wedge_bonds: bool = True) -> None:
         """Generates 2D depiction in JSON format with annotation of
@@ -469,17 +516,19 @@ class Component:
         drawer = Draw.MolDraw2DSVG(w, h)
         drawer.drawOptions().includeAtomTags = True
         try:
-            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self.mol2D, wedgeBonds=wedge_bonds,
-                                                       kekulize=True, addChiralHs=False)
+            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(
+                self.mol2D, wedgeBonds=wedge_bonds, kekulize=True, addChiralHs=False
+            )
         except (RuntimeError, ValueError):
-            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(self.mol2D, wedgeBonds=False,
-                                                       kekulize=True, addChiralHs=False)
+            tmp = rdkit.Chem.Draw.PrepareMolForDrawing(
+                self.mol2D, wedgeBonds=False, kekulize=True, addChiralHs=False
+            )
         drawer.DrawMolecule(tmp)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText()
         json_repr = drawing.convert_svg(svg, self.id, self.mol2D)
 
-        with open(file_name, 'w') as fp:
+        with open(file_name, "w") as fp:
             json.dump(json_repr, fp, indent=4, sort_keys=True)
 
     def compute_3d(self) -> bool:
@@ -494,7 +543,9 @@ class Component:
 
         try:
             conf_id = rdkit.Chem.AllChem.EmbedMolecule(self.mol, options)
-            rdkit.Chem.AllChem.UFFOptimizeMolecule(self.mol, confId=conf_id, maxIters=1000)
+            rdkit.Chem.AllChem.UFFOptimizeMolecule(
+                self.mol, confId=conf_id, maxIters=1000
+            )
             self.conformers_mapping[ConformerType.Computed] = conf_id
             return True
         except RuntimeError:
@@ -524,12 +575,16 @@ class Component:
                 return False
 
             rdkit.Chem.Kekulize(rwmol)
-            #rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
+            # rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
 
             if self.has_degenerated_conformer(ConformerType.Ideal):
-                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(rwmol, self.conformers_mapping[ConformerType.Model])
+                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(
+                    rwmol, self.conformers_mapping[ConformerType.Model]
+                )
             else:
-                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(rwmol, self.conformers_mapping[ConformerType.Ideal])
+                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(
+                    rwmol, self.conformers_mapping[ConformerType.Ideal]
+                )
 
             self.mol = rwmol.GetMol()
         except Exception as e:
@@ -568,7 +623,9 @@ class Component:
         except ValueError:  # Conformer does not exist
             return False
 
-    def locate_fragment(self, mol: rdkit.Chem.rdchem.Mol) -> List[List[rdkit.Chem.rdchem.Atom]]:
+    def locate_fragment(
+        self, mol: rdkit.Chem.rdchem.Mol
+    ) -> List[List[rdkit.Chem.rdchem.Atom]]:
         """
         Identify substructure match in the component.
 
@@ -591,7 +648,9 @@ class Component:
 
         return result
 
-    def library_search(self, fragment_library: FragmentLibrary) -> List[SubstructureMapping]:
+    def library_search(
+        self, fragment_library: FragmentLibrary
+    ) -> List[SubstructureMapping]:
         """Identify fragments from the fragment library in this component
 
         Args:
@@ -608,9 +667,11 @@ class Component:
                 if not matches:
                     continue
 
-                key = f'{fragment_library.name}_{v.name}'
+                key = f"{fragment_library.name}_{v.name}"
                 if key not in self._fragments:
-                    temp[key] = SubstructureMapping(v.name, rdkit.Chem.MolToSmiles(v.mol), v.source, matches)
+                    temp[key] = SubstructureMapping(
+                        v.name, rdkit.Chem.MolToSmiles(v.mol), v.source, matches
+                    )
 
             except Exception:
                 pass
@@ -640,7 +701,9 @@ class Component:
 
             elif scaffolding_method == ScaffoldingMethod.Brics:
                 scaffolds = BRICS.BRICSDecompose(self.mol_no_h)
-                brics_smiles = [re.sub(r"(\[[0-9]*\*\])", "[H]", i) for i in scaffolds]  # replace dummy atoms with H's to get matches https://sourceforge.net/p/rdkit/mailman/message/35261974/
+                brics_smiles = [
+                    re.sub(r"(\[[0-9]*\*\])", "[H]", i) for i in scaffolds
+                ]  # replace dummy atoms with H's to get matches https://sourceforge.net/p/rdkit/mailman/message/35261974/
                 brics_mols = [rdkit.Chem.MolFromSmiles(x) for x in brics_smiles]
 
                 for mol in brics_mols:
@@ -651,28 +714,34 @@ class Component:
                 for index, brics_hit in enumerate(brics_hits):
                     smiles = rdkit.Chem.MolToSmiles(brics_mols[index])
                     name = scaffolding_method.name
-                    source = 'RDKit scaffolds'
-                    key = f'{name}_{smiles}'
+                    source = "RDKit scaffolds"
+                    key = f"{name}_{smiles}"
                     brics_hit = conversions.listit(brics_hit)
 
                     if not smiles:
                         continue
 
                     if key not in self._scaffolds:
-                        self._scaffolds[key] = SubstructureMapping(name, smiles, source, brics_hit)
+                        self._scaffolds[key] = SubstructureMapping(
+                            name, smiles, source, brics_hit
+                        )
 
                 return brics_mols
 
             for s in scaffolds:
-                scaffold_atom_names = [atom.GetProp('name') for atom in s.GetAtoms()]
+                scaffold_atom_names = [atom.GetProp("name") for atom in s.GetAtoms()]
                 mapping = []
                 for at_name in scaffold_atom_names:
-                    idx = [atom.GetIdx() for atom in self.mol.GetAtoms() if atom.GetProp('name') == at_name][0]
+                    idx = [
+                        atom.GetIdx()
+                        for atom in self.mol.GetAtoms()
+                        if atom.GetProp("name") == at_name
+                    ][0]
                     mapping.append(idx)
 
                 smiles = rdkit.Chem.MolToSmiles(s)
                 name = scaffolding_method.name
-                source = 'RDKit scaffolds'
+                source = "RDKit scaffolds"
 
                 if not smiles:
                     continue
@@ -680,12 +749,16 @@ class Component:
                 if name in self._scaffolds:
                     self._scaffolds[name].mappings.append(mapping)
                 else:
-                    self._scaffolds[name] = SubstructureMapping(name, smiles, source, [mapping])
+                    self._scaffolds[name] = SubstructureMapping(
+                        name, smiles, source, [mapping]
+                    )
 
             return scaffolds
 
         except (RuntimeError, ValueError):
-            raise CCDUtilsError(f'Computing scaffolds using method {scaffolding_method.name} failed.')
+            raise CCDUtilsError(
+                f"Computing scaffolds using method {scaffolding_method.name} failed."
+            )
 
     def _fix_molecule(self, rwmol: rdkit.Chem.rdchem.RWMol):
         """
@@ -705,38 +778,48 @@ class Component:
         log = sys.stderr = StringIO()
         rdkit.Chem.WrapLogs()
 
-        while ((not success) and attempts >= 0):
+        while (not success) and attempts >= 0:
             sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
 
             if sanitization_result == 0:
                 sys.stderr = saved_std_err
                 return True
 
-            sanitization_failures = re.findall('[a-zA-Z]{1,2}, \\d+', log.getvalue())
+            sanitization_failures = re.findall("[a-zA-Z]{1,2}, \\d+", log.getvalue())
             if not sanitization_failures:
                 sys.stderr = saved_std_err
                 return False
 
             for sanitization_failure in sanitization_failures:
 
-                split_object = sanitization_failure.split(',')  # [0] element [1] valency
+                split_object = sanitization_failure.split(
+                    ","
+                )  # [0] element [1] valency
                 element = split_object[0]
                 valency = int(split_object[1].strip())
 
-                smarts_metal_check = rdkit.Chem.MolFromSmarts(METALS_SMART + '~[{}]'.format(element))
+                smarts_metal_check = rdkit.Chem.MolFromSmarts(
+                    METALS_SMART + "~[{}]".format(element)
+                )
                 metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-                rdkit.Chem.SanitizeMol(rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP)
+                rdkit.Chem.SanitizeMol(
+                    rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+                )
 
                 for (metal_index, atom_index) in metal_atom_bonds:
                     metal_atom = rwmol.GetAtomWithIdx(metal_index)
                     erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
 
                     # change the bond type to dative
-                    bond = rwmol.GetBondBetweenAtoms(metal_atom.GetIdx(), erroneous_atom.GetIdx())
+                    bond = rwmol.GetBondBetweenAtoms(
+                        metal_atom.GetIdx(), erroneous_atom.GetIdx()
+                    )
                     bond.SetBondType(rdkit.Chem.BondType.SINGLE)
 
                     if erroneous_atom.GetExplicitValence() == valency:
-                        erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
+                        erroneous_atom.SetFormalCharge(
+                            erroneous_atom.GetFormalCharge() + 1
+                        )
                         metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
 
             attempts -= 1
@@ -759,7 +842,11 @@ class Component:
         Returns:
             str: atom name
         """
-        return atom.GetProp('name') if atom.HasProp('name') else atom.GetSymbol() + str(atom.GetIdx())
+        return (
+            atom.GetProp("name")
+            if atom.HasProp("name")
+            else atom.GetSymbol() + str(atom.GetIdx())
+        )
 
     def _id_to_name_mapping(self, struct_mapping):
         """Lists matched scaffolds and atom names
@@ -778,7 +865,7 @@ class Component:
             mappings = []
 
             for m in v.mappings:
-                atom_names = [self.mol.GetAtomWithIdx(idx).GetProp('name') for idx in m]
+                atom_names = [self.mol.GetAtomWithIdx(idx).GetProp("name") for idx in m]
                 mappings.append(atom_names)
             res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
 
