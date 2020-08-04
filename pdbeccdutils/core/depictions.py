@@ -33,6 +33,7 @@ from pdbeccdutils.utils import config
 from rdkit import Chem, Geometry
 from rdkit.Chem import AllChem, rdCoordGen
 from scipy.spatial import KDTree
+from pdbeccdutils.helpers.rdkit_fixtures import fix_conformer
 
 
 class DepictionManager:
@@ -108,7 +109,11 @@ class DepictionManager:
         results.sort(key=lambda l: (l.score, l.source))
 
         if results:
-            return results[0]
+            to_return = results[0]
+            fix_conformer(to_return.mol.GetConformer(0))
+            
+            return to_return
+            
 
         return DepictionResult(source=DepictionSource.Failed, template_name='', mol=None, score=1000)
 
