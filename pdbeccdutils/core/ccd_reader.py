@@ -59,13 +59,14 @@ class CCDReaderResult(NamedTuple):
     component: Component
 
 
-def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
+def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResult:
     """
     Read in single wwPDB CCD CIF component and create its internal
     representation.
 
     Args:
         path_to_cif (str): Path to the cif file
+        sanitize (bool): [Defaults: True]
 
     Raises:
         ValueError: if file does not exist
@@ -79,10 +80,10 @@ def read_pdb_cif_file(path_to_cif: str) -> CCDReaderResult:
 
     cif_dict = list(MMCIF2Dict().parse(path_to_cif).values())[0]
 
-    return _parse_pdb_mmcif(cif_dict)
+    return _parse_pdb_mmcif(cif_dict, sanitize)
 
 
-def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
+def read_pdb_components_file(path_to_cif: str, sanitize: bool = True) -> Dict[str, CCDReaderResult]:
     """
     Process multiple compounds stored in the wwPDB CCD
     `components.cif` file.
@@ -90,6 +91,8 @@ def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
     Args:
         path_to_cif (str): Path to the `components.cif` file with
             multiple ligands in it.
+        sanitize (bool): Whether or not the components should be sanitized
+            Defaults to True.
 
     Raises:
         ValueError: if the file does not exist.
@@ -113,12 +116,14 @@ def read_pdb_components_file(path_to_cif: str) -> Dict[str, CCDReaderResult]:
 
 
 # region parse mmcif
-def _parse_pdb_mmcif(cif_dict):
+def _parse_pdb_mmcif(cif_dict, sanitize=True):
     """
     Create internal representation of the molecule from mmcif format.
 
     Args:
         cif_dict (dict): mmcif category
+        sanitize (bool): Whether or not the rdkit component should
+            be sanitized. Defaults to True.
 
     Returns:
         CCDReaderResult: internal representation with the results
@@ -143,7 +148,7 @@ def _parse_pdb_mmcif(cif_dict):
     descriptors += _parse_pdb_descriptors(identifiers_dict, 'identifier')
     properties = _parse_pdb_properties(properties_dict)
 
-    comp = Component(mol.GetMol(), cif_dict, properties, descriptors)
+    comp = Component(mol.GetMol(), cif_dict, properties, descriptors, sanitize=sanitize)
     reader_result = CCDReaderResult(warnings=warnings, errors=errors, component=comp)
 
     return reader_result
