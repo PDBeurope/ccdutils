@@ -27,7 +27,7 @@
 * Once you have installed RDKit, as described above then install pdbeccdutils using pip:
 
   ```console
-  pip install git+https://github.com/PDBeurope/ccdutils.git
+  pip install pdbeccdutils
   ```
 
 ## Features
