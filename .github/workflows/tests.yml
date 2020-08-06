@@ -1,16 +1,8 @@
-# This workflow will install Python dependencies, run tests and generate ccdutils documentation
+# This workflow will install Python dependencies, run pytests
 
 name: ccdutils tests
 
-on:
-  push:
-    branches: 
-      - master
-      - dev
-  pull_request:
-    branches: 
-      - master
-      - dev
+on: [push, pull_request]
 
 jobs:
   pytest:
@@ -36,4 +28,4 @@ jobs:
         conda install rdkit
         pip install -e .
         pip install pytest-cov
-        pytest --cov=pdbeccdutils
+    - run: pytest --cov=pdbeccdutils
