@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and generate ccdutils documentation
+# This workflow will install Python dependencies, and generate documentation.
 
 name: ccdutils documentation
 
@@ -6,10 +6,12 @@ on:
   push:
     branches: 
       - master
+
   pull_request:
     branches: 
       - master
 
+  
 jobs:
   documentation:
     name: Generate documentation
@@ -25,17 +27,20 @@ jobs:
       with:
         python-version: 3.7
     
-    - name: Set up environment and make documentation
+    - name: Set up environment
       uses: s-weigand/setup-conda@v1
       with:
         activate-conda: true
         conda-channels: conda-forge 
-    - run: |
-        conda install rdkit
-        pip install -e .
-        pip install pytest-cov sphinx sphinx_rtd_theme recommonmark sphinx-autodoc-typehints sphinx-markdown-tables
-        cd doc
-        make html
+        - run: |
+          conda install rdkit
+          pip install -e .
+          pip install pytest-cov sphinx sphinx_rtd_theme recommonmark sphinx-autodoc-typehints sphinx-markdown-tables
+        
+        - run: |
+          cd doc
+          make html
+    
         
     - name: Deploy pages
       uses: peaceiris/actions-gh-pages@v3
