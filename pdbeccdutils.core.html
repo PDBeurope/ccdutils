@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>core &mdash; pdbeccdutils 0.5.4 documentation</title>
+  <title>core &mdash; pdbeccdutils 0.5.6 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.4
+                0.5.6
               </div>
             
           
@@ -276,31 +276,34 @@ will be empty.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="id0">
-<em class="property">property </em><code class="sig-name descname">component</code><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">component</code><em class="property">: <a class="reference internal" href="#pdbeccdutils.core.component.Component" title="pdbeccdutils.core.component.Component">pdbeccdutils.core.component.Component</a></em><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="id1">
-<em class="property">property </em><code class="sig-name descname">errors</code><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">errors</code><em class="property">: List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></em><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="id2">
-<em class="property">property </em><code class="sig-name descname">warnings</code><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">warnings</code><em class="property">: List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">]</span></em><a class="headerlink" href="#id2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt id="pdbeccdutils.core.ccd_reader.read_pdb_cif_file">
-<code class="sig-prename descclassname">pdbeccdutils.core.ccd_reader.</code><code class="sig-name descname">read_pdb_cif_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_cif</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">pdbeccdutils.core.ccd_reader.CCDReaderResult</a><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.read_pdb_cif_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_reader.</code><code class="sig-name descname">read_pdb_cif_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_cif</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">sanitize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">pdbeccdutils.core.ccd_reader.CCDReaderResult</a><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.read_pdb_cif_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read in single wwPDB CCD CIF component and create its internal
 representation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path_to_cif</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the cif file</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_to_cif</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the cif file</p></li>
+<li><p><strong>sanitize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – [Defaults: True]</p></li>
+</ul>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – if file does not exist</p>
@@ -317,13 +320,17 @@ the internal representation of the component.</p>
 
 <dl class="py function">
 <dt id="pdbeccdutils.core.ccd_reader.read_pdb_components_file">
-<code class="sig-prename descclassname">pdbeccdutils.core.ccd_reader.</code><code class="sig-name descname">read_pdb_components_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_cif</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span><a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">pdbeccdutils.core.ccd_reader.CCDReaderResult</a><span class="p">]</span><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.read_pdb_components_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pdbeccdutils.core.ccd_reader.</code><code class="sig-name descname">read_pdb_components_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_to_cif</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span></em>, <em class="sig-param"><span class="n">sanitize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span><a class="reference internal" href="#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult">pdbeccdutils.core.ccd_reader.CCDReaderResult</a><span class="p">]</span><a class="headerlink" href="#pdbeccdutils.core.ccd_reader.read_pdb_components_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process multiple compounds stored in the wwPDB CCD
 <cite>components.cif</cite> file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>path_to_cif</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the <cite>components.cif</cite> file with
-multiple ligands in it.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_to_cif</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the <cite>components.cif</cite> file with
+multiple ligands in it.</p></li>
+<li><p><strong>sanitize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether or not the components should be sanitized
+Defaults to True.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><strong>ValueError</strong></a> – if the file does not exist.</p>
@@ -343,7 +350,7 @@ the components in the <cite>components.cif</cite> file.</p>
 <span id="pdbeccdutils-core-component"></span><h2>pdbeccdutils.core.component<a class="headerlink" href="#module-pdbeccdutils.core.component" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pdbeccdutils.core.component.Component">
-<em class="property">class </em><code class="sig-prename descclassname">pdbeccdutils.core.component.</code><code class="sig-name descname">Component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mol</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a></span></em>, <em class="sig-param"><span class="n">ccd_cif_dict</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">properties</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.models.CCDProperties" title="pdbeccdutils.core.models.CCDProperties">pdbeccdutils.core.models.CCDProperties</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">descriptors</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#pdbeccdutils.core.models.Descriptor" title="pdbeccdutils.core.models.Descriptor">pdbeccdutils.core.models.Descriptor</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.component.Component" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pdbeccdutils.core.component.</code><code class="sig-name descname">Component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mol</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a></span></em>, <em class="sig-param"><span class="n">ccd_cif_dict</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a><span class="p">, </span>Any<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">properties</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pdbeccdutils.core.models.CCDProperties" title="pdbeccdutils.core.models.CCDProperties">pdbeccdutils.core.models.CCDProperties</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">descriptors</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#pdbeccdutils.core.models.Descriptor" title="pdbeccdutils.core.models.Descriptor">pdbeccdutils.core.models.Descriptor</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sanitize</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.core.component.Component" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for the rdkit.Chem.Mol object enabling some of its
 functionality and handling possible erroneous situations.</p>
 <dl class="field-list simple">
@@ -1310,24 +1317,24 @@ pdbeccdutils application.</p>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
+<dl class="py attribute">
 <dt id="pdbeccdutils.core.models.DepictionResult.mol">
-<em class="property">property </em><code class="sig-name descname">mol</code><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.mol" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mol</code><em class="property">: <a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2020.03)">rdkit.Chem.rdchem.Mol</a></em><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.mol" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="pdbeccdutils.core.models.DepictionResult.score">
-<em class="property">property </em><code class="sig-name descname">score</code><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.score" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">score</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></em><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.score" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="pdbeccdutils.core.models.DepictionResult.source">
-<em class="property">property </em><code class="sig-name descname">source</code><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.source" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">source</code><em class="property">: <a class="reference internal" href="#pdbeccdutils.core.models.DepictionSource" title="pdbeccdutils.core.models.DepictionSource">pdbeccdutils.core.models.DepictionSource</a></em><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.source" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="pdbeccdutils.core.models.DepictionResult.template_name">
-<em class="property">property </em><code class="sig-name descname">template_name</code><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.template_name" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">template_name</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></em><a class="headerlink" href="#pdbeccdutils.core.models.DepictionResult.template_name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1372,19 +1379,19 @@ _pdbx_chem_comp_descriptor field.</p>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
+<dl class="py attribute">
 <dt id="pdbeccdutils.core.models.Descriptor.program">
-<em class="property">property </em><code class="sig-name descname">program</code><a class="headerlink" href="#pdbeccdutils.core.models.Descriptor.program" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">program</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></em><a class="headerlink" href="#pdbeccdutils.core.models.Descriptor.program" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="pdbeccdutils.core.models.Descriptor.type">
-<em class="property">property </em><code class="sig-name descname">type</code><a class="headerlink" href="#pdbeccdutils.core.models.Descriptor.type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">type</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></em><a class="headerlink" href="#pdbeccdutils.core.models.Descriptor.type" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt id="pdbeccdutils.core.models.Descriptor.value">
-<em class="property">property </em><code class="sig-name descname">value</code><a class="headerlink" href="#pdbeccdutils.core.models.Descriptor.value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">value</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></em><a class="headerlink" href="#pdbeccdutils.core.models.Descriptor.value" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

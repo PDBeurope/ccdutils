@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; pdbeccdutils 0.5.4 documentation</title>
+  <title>Introduction &mdash; pdbeccdutils 0.5.6 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.4
+                0.5.6
               </div>
             
           
@@ -223,11 +223,15 @@
             
   <div class="section" id="introduction">
 <span id="intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> is presently under development and new functionality is added regularly as well as its functionality is being revised and updated. When properly installed all the code should have documentation. All the <em>public</em> methods do have <a class="reference external" href="http://mypy-lang.org/">static typing</a> introduced in Python 3.5. All the interfaces should be well documented.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> is under development and new functionality is added regularly as well as its functionality is being revised and updated. When properly installed all the code should have documentation. All the <em>public</em> methods do have <a class="reference external" href="http://mypy-lang.org/">static typing</a> introduced in Python 3.5. All the interfaces should be well documented.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> can be presently obtained from the <a class="reference external" href="https://gitlab.ebi.ac.uk/pdbe/ccdutils.git">EBI Gitlab</a> using the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install git+https://gitlab.ebi.ac.uk/pdbe/ccdutils.git</span>
+<p>The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> can be presently obtained from <a class="reference external" href="https://pypi.org/project/pdbeccdutils/">PYPI</a> using the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install pdbeccdutils</span>
+</pre></div>
+</div>
+<p>Alternativelly, you can install the reposotory from <a class="reference external" href="https://github.com/PDBeurope/ccdutils">Github</a> using the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install git+https://github.com/PDBeurope/ccdutils.git@master#egg=pdbeccdutils</span>
 </pre></div>
 </div>
 <p>If you want to contribute to the project please fork it first and then do a pull request.</p>
@@ -235,7 +239,7 @@
 </div>
 <div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<p>The centerpoint of the <code class="docutils literal notranslate"><span class="pre">pdbecccdutils</span></code> package is a <code class="docutils literal notranslate"><span class="pre">Component</span></code> object, which is a wrapper around the default <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> object (object property <code class="docutils literal notranslate"><span class="pre">,mol</span></code>) providing most of the functionality and access to its properties. All the conformers are stored in the <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> with the exception of 2D depiction, as this one does not contain hydrogen atoms. <code class="docutils literal notranslate"><span class="pre">pdbeccdutils.core.modes.ConformerType</span></code> object allows accessing all of them.</p>
+<p>The centerpoint of the <code class="docutils literal notranslate"><span class="pre">pdbecccdutils</span></code> package is a <code class="docutils literal notranslate"><span class="pre">Component</span></code> object, which is a wrapper around the default <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> object (object property <code class="docutils literal notranslate"><span class="pre">mol</span></code>) providing most of the functionality and access to its properties. All the conformers are stored in the <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> with the exception of 2D depiction, as this one does not contain explicit hydrogens. <code class="docutils literal notranslate"><span class="pre">pdbeccdutils.core.modes.ConformerType</span></code> object allows accessing all of them.</p>
 <p>Below you can find a few typical use cases.</p>
 <div class="section" id="reading-ccd-mmcif-files">
 <h2>Reading CCD mmCIF files<a class="headerlink" href="#reading-ccd-mmcif-files" title="Permalink to this headline">¶</a></h2>
