@@ -2,7 +2,15 @@
 
 name: ccdutils tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
 
 jobs:
   pytest:
@@ -26,6 +34,5 @@ jobs:
         conda-channels: conda-forge 
     - run: |
         conda install rdkit
-        pip install -e .
-        pip install pytest-cov
+        pip install -e ".[tests]"
     - run: pytest --cov=pdbeccdutils

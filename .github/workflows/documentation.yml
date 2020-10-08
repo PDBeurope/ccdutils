@@ -34,8 +34,7 @@ jobs:
         conda-channels: conda-forge 
         - run: |
           conda install rdkit
-          pip install -e .
-          pip install pytest-cov sphinx sphinx_rtd_theme recommonmark sphinx-autodoc-typehints sphinx-markdown-tables
+          pip install -e ".[docs]"
         
         - run: |
           cd doc
