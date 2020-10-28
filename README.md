@@ -1,4 +1,6 @@
-![GitHub](https://img.shields.io/github/license/pdbeurope/ccdutils) ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg)
+![GitHub](https://img.shields.io/github/license/pdbeurope/ccdutils) ![PYPi](https://img.shields.io/pypi/v/pdbeccdutils?color=green&style=flat)  ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg)
+
+
 
 # pdbeccdutils
 
