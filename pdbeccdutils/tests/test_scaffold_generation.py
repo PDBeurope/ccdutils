@@ -2,6 +2,7 @@ import pytest
 from rdkit import Chem
 
 from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.core.models import ScaffoldingMethod
 from pdbeccdutils.tests.tst_utilities import cif_filename
 
 test_inputs = [
@@ -41,3 +42,13 @@ class TestScaffold:
 
         assert result[0].GetNumAtoms() == 0
         assert not component.scaffolds
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "scaffold_type", [ScaffoldingMethod.MurckoGeneric, ScaffoldingMethod.Brics]
+    )
+    def test_scaffolds(scaffold_type):
+        c = ccd_reader.read_pdb_cif_file(cif_filename("NAG")).component
+        c.get_scaffolds(scaffold_type)
+
+        assert len(c.scaffolds) > 0

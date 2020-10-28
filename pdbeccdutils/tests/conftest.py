@@ -2,6 +2,7 @@
 """
 import pytest
 from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
@@ -17,3 +18,8 @@ def component(request):
         assert reader.warnings == []
 
     return c
+
+
+@pytest.fixture(scope="session")
+def library():
+    return FragmentLibrary()
