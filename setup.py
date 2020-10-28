@@ -6,9 +6,10 @@ from setuptools import find_namespace_packages, setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
 def get_version(rel_path):
     for line in read(rel_path).splitlines():
-        if line.startswith('__version__'):
+        if line.startswith("__version__"):
             delim = '"' if '"' in line else "'"
             return line.split(delim)[1]
     else:
@@ -17,10 +18,10 @@ def get_version(rel_path):
 
 setup(
     name="pdbeccdutils",
-    version=get_version('pdbeccdutils/__init__.py'),
+    version=get_version("pdbeccdutils/__init__.py"),
     description="Toolkit to deal with wwPDB chemical components definitions for small molecules.",
     long_description=read("README.md"),
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     project_urls={
         "Source code": "https://github.com/PDBeurope/ccdutils",
         "Documentation": "https://pdbeurope.github.io/ccdutils/",
@@ -33,14 +34,18 @@ setup(
     packages=find_namespace_packages(),
     zip_safe=False,
     include_package_data=True,
-    python_requires='>=3.6',
-    install_requires=[
-        "Pillow",
-        "scipy",
-        "numpy",
-        "pdbecif>=1.5",
-    ],
-    tests_require=["pytest"],
+    python_requires=">=3.6",
+    install_requires=["Pillow", "scipy", "numpy", "pdbecif>=1.5",],
+    extras_require={
+        "tests": ["pytest", "pytest-cov"],
+        "docs": [
+            "sphinx",
+            "sphinx_rtd_theme",
+            "recommonmark",
+            "sphinx-autodoc-typehints",
+            "sphinx-markdown-tables",
+        ],
+    },
     entry_points={
         "console_scripts": [
             "process_components_cif=pdbeccdutils.scripts.process_components_cif_cli:main",
@@ -62,6 +67,5 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Development Status :: 5 - Production/Stable",
-        
-    ],    
+    ],
 )

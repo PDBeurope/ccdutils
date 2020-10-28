@@ -43,7 +43,11 @@ class DepictionManager:
     PubChem templates can be downloaded using PubChemDownloader class.
     """
 
-    def __init__(self, pubchem_templates_path: str = '', general_templates_path: str = config.general_templates) -> None:
+    def __init__(
+        self,
+        pubchem_templates_path: str = "",
+        general_templates_path: str = config.general_templates,
+    ) -> None:
         """
         Initialize component which does the ligand depiction.
         If Nones is provided as parameters just the defalt RDKit
@@ -63,16 +67,20 @@ class DepictionManager:
         self.coordgen_params.coordgenScaling = 50 / 1.5
         self.coordgen_params.templateFileDir = config.coordgen_templates
 
-        self.pubchem_templates = pubchem_templates_path if os.path.isdir(pubchem_templates_path) else ''
+        self.pubchem_templates = (
+            pubchem_templates_path if os.path.isdir(pubchem_templates_path) else ""
+        )
         self.templates: Dict[str, rdkit.Chem.rdchem.Mol] = OrderedDict()
 
         if os.path.isdir(general_templates_path):
             for k in sorted(os.listdir(general_templates_path)):
                 template = self._load_template(os.path.join(general_templates_path, k))
-                template_name = k.split('.')[0]
+                template_name = k.split(".")[0]
                 self.templates[template_name] = template
 
-    def depict_molecule(self, het_id: str, mol: rdkit.Chem.rdchem.Mol) -> DepictionResult:
+    def depict_molecule(
+        self, het_id: str, mol: rdkit.Chem.rdchem.Mol
+    ) -> DepictionResult:
         """
         Given input molecule tries to generate its depictions.
 
@@ -95,7 +103,11 @@ class DepictionManager:
         rdkitMol = Chem.RWMol(temp_mol).GetMol()
         results = []
 
-        pubchem_res = self._get_2D_by_pubchem(het_id, pubchemMol) if self.pubchem_templates else None
+        pubchem_res = (
+            self._get_2D_by_pubchem(het_id, pubchemMol)
+            if self.pubchem_templates
+            else None
+        )
         template_res = self._get_2D_by_template(templateMol) if self.templates else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
@@ -111,11 +123,12 @@ class DepictionManager:
         if results:
             to_return = results[0]
             fix_conformer(to_return.mol.GetConformer(0))
-            
-            return to_return
-            
 
-        return DepictionResult(source=DepictionSource.Failed, template_name='', mol=None, score=1000)
+            return to_return
+
+        return DepictionResult(
+            source=DepictionSource.Failed, template_name="", mol=None, score=1000
+        )
 
     def _get_pubchem_template_path(self, het_id):
         """Get path to the PubChem template if it exists.
@@ -126,9 +139,9 @@ class DepictionManager:
         Returns:
             str: Path to the PubChem layout.
         """
-        path = os.path.join(self.pubchem_templates, f'{het_id}.sdf')
+        path = os.path.join(self.pubchem_templates, f"{het_id}.sdf")
 
-        return path if os.path.isfile(path) else ''
+        return path if os.path.isfile(path) else ""
 
     def _load_template(self, path):
         """
@@ -145,14 +158,14 @@ class DepictionManager:
             rdkit.Chem.rdchem.Mol: RDKit representation of the template
         """
         mol = Chem.RWMol()
-        extension = os.path.basename(path).split('.')[1]
+        extension = os.path.basename(path).split(".")[1]
 
-        if extension == 'sdf':
+        if extension == "sdf":
             mol = Chem.MolFromMolFile(path, sanitize=True, removeHs=True)
-        elif extension == 'pdb':
+        elif extension == "pdb":
             mol = Chem.MolFromPDBFile(path, sanitize=True, removeHs=True)
         else:
-            raise ValueError('Unsupported molecule type \'{}\''.format(extension))
+            raise ValueError("Unsupported molecule type '{}'".format(extension))
 
         p = Chem.AdjustQueryParameters()
         p.makeAtomsGeneric = True
@@ -175,9 +188,13 @@ class DepictionManager:
         try:
             rdCoordGen.AddCoords(mol, self.coordgen_params)
             flaws = DepictionValidator(mol).depiction_score()
-            return DepictionResult(source=DepictionSource.RDKit, template_name=None, mol=mol, score=flaws)
+            return DepictionResult(
+                source=DepictionSource.RDKit, template_name=None, mol=mol, score=flaws
+            )
         except Exception:
-            return DepictionResult(source=DepictionSource.Failed, template_name=None, mol=None, score=1000)
+            return DepictionResult(
+                source=DepictionSource.Failed, template_name=None, mol=None, score=1000
+            )
 
     def _get_2D_by_pubchem(self, code, mol):
         """
@@ -198,11 +215,18 @@ class DepictionManager:
                 if mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(mol, template)
                     flaws = DepictionValidator(mol).depiction_score()
-                    return DepictionResult(source=DepictionSource.PubChem, template_name=code, mol=mol, score=flaws)
+                    return DepictionResult(
+                        source=DepictionSource.PubChem,
+                        template_name=code,
+                        mol=mol,
+                        score=flaws,
+                    )
         except Exception as e:
             print(str(e), file=sys.stderr)
 
-        return DepictionResult(source=DepictionSource.Failed, template_name=None, mol=None, score=1000)
+        return DepictionResult(
+            source=DepictionSource.Failed, template_name=None, mol=None, score=1000
+        )
 
     def _get_2D_by_template(self, mol):
         """
@@ -222,8 +246,14 @@ class DepictionManager:
                 if temp_mol.HasSubstructMatch(template):
                     AllChem.GenerateDepictionMatching2DStructure(temp_mol, template)
                     flaws = DepictionValidator(temp_mol).depiction_score()
-                    results.append(DepictionResult(source=DepictionSource.Template,
-                                                   template_name=key, mol=temp_mol, score=flaws))
+                    results.append(
+                        DepictionResult(
+                            source=DepictionSource.Template,
+                            template_name=key,
+                            mol=temp_mol,
+                            score=flaws,
+                        )
+                    )
         except Exception:
             pass  # if it fails it fails, but generally it wont
 
@@ -240,7 +270,10 @@ class DepictionValidator:
         self.conformer = mol.GetConformer()
         self.bonds = self.mol.GetBonds()
 
-        atoms = [self.conformer.GetAtomPosition(i) for i in range(0, self.conformer.GetNumAtoms())]
+        atoms = [
+            self.conformer.GetAtomPosition(i)
+            for i in range(0, self.conformer.GetNumAtoms())
+        ]
         atom_centers = [[atom.x, atom.y, atom.z] for atom in atoms]
 
         self.kd_tree = KDTree(atom_centers)
@@ -259,8 +292,13 @@ class DepictionValidator:
         Returns:
             bool: true if bonds share collide, false otherwise.
         """
-        atoms = [bondA.GetBeginAtom(), bondA.GetEndAtom(), bondB.GetBeginAtom(), bondB.GetEndAtom()]
-        names = [a.GetProp('name') for a in atoms]
+        atoms = [
+            bondA.GetBeginAtom(),
+            bondA.GetEndAtom(),
+            bondB.GetBeginAtom(),
+            bondB.GetEndAtom(),
+        ]
+        names = [a.GetProp("name") for a in atoms]
         points = [self.conformer.GetAtomPosition(a.GetIdx()) for a in atoms]
 
         vecA = Geometry.Point2D(points[1].x - points[0].x, points[1].y - points[0].y)
@@ -284,7 +322,7 @@ class DepictionValidator:
         detP = (a * -vecB.y) - (b * -vecB.x)
         p = round(detP / det, 3)
 
-        if (p < 0 or p > 1):
+        if p < 0 or p > 1:
             return False
 
         detR = (vecA.x * b) - (vecA.y * a)
@@ -300,7 +338,7 @@ class DepictionValidator:
         common atom.
 
         Args:
-            names (list of str): List of atom names forming bonds 
+            names (list of str): List of atom names forming bonds
                 [A, B, C, D] for AB and CD.
             vecA (Geometry.Point2D): Vector representing AB bond.
             vecB (Geometry.Point2D): Vector representing CD bond.
@@ -413,6 +451,9 @@ class DepictionValidator:
         bond_collisions = self.count_bond_collisions()
         degenerated_atoms = self.count_suboptimal_atom_positions(0.0, 0.5)
 
-        score = collision_penalty * bond_collisions + degenerated_penalty * degenerated_atoms
+        score = (
+            collision_penalty * bond_collisions
+            + degenerated_penalty * degenerated_atoms
+        )
 
         return round(score, 1)

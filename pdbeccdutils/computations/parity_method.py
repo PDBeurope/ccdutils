@@ -92,24 +92,32 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
     query_atoms = query.GetNumAtoms()
 
     min_num_atoms = min(template_atoms, query_atoms)
-    max_sim_score = float(min_num_atoms) / float(template_atoms + query_atoms - min_num_atoms)
+    max_sim_score = float(min_num_atoms) / float(
+        template_atoms + query_atoms - min_num_atoms
+    )
 
     if max_sim_score < thresh:
         return ParityResult({}, 0.0)
 
     if not exact_match:
-        mcs_graph = rdFMCS.FindMCS([template, query],
-                                   bondCompare=rdFMCS.BondCompare.CompareAny,
-                                   atomCompare=rdFMCS.AtomCompare.CompareAny,
-                                   timeout=40,
-                                   completeRingsOnly=True)
+        mcs_graph = rdFMCS.FindMCS(
+            [template, query],
+            bondCompare=rdFMCS.BondCompare.CompareAny,
+            atomCompare=rdFMCS.AtomCompare.CompareAny,
+            timeout=40,
+            completeRingsOnly=True,
+        )
     else:
-        mcs_graph = rdFMCS.FindMCS([template, query],
-                                   bondCompare=rdFMCS.BondCompare.CompareOrderExact,
-                                   atomCompare=rdFMCS.AtomCompare.CompareElements,
-                                   timeout=40,
-                                   completeRingsOnly=True)
+        mcs_graph = rdFMCS.FindMCS(
+            [template, query],
+            bondCompare=rdFMCS.BondCompare.CompareOrderExact,
+            atomCompare=rdFMCS.AtomCompare.CompareElements,
+            timeout=40,
+            completeRingsOnly=True,
+        )
 
-    substructure, sim_score = _generate_sim_score(template, query, mcs_graph.smartsString)
+    substructure, sim_score = _generate_sim_score(
+        template, query, mcs_graph.smartsString
+    )
 
     return ParityResult(substructure, sim_score)

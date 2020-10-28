@@ -2,13 +2,14 @@
 """
 import pytest
 from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
-problematic_ids = ['UNL', 'NA', 'SY9', '10R', 'ASX']
+problematic_ids = ["UNL", "NA", "SY9", "10R", "ASX"]
 
 
-@pytest.fixture(scope='session', params=sample_ccd_cifs)
+@pytest.fixture(scope="session", params=sample_ccd_cifs)
 def component(request):
     reader = ccd_reader.read_pdb_cif_file(request.param)
     c = reader.component
@@ -17,3 +18,8 @@ def component(request):
         assert reader.warnings == []
 
     return c
+
+
+@pytest.fixture(scope="session")
+def library():
+    return FragmentLibrary()

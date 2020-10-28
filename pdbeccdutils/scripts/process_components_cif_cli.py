@@ -58,12 +58,20 @@ class PDBeChemManager:
         Args:
             logger (logging.Logger, optional): Defaults to None. Application log
         """
-        self.compounds: Dict[str, ccd_reader.CCDReaderResult] = {}  # processed compounds
+        self.compounds: Dict[
+            str, ccd_reader.CCDReaderResult
+        ] = {}  # processed compounds
         self.ligands_to_process: int = 0  # no. ligands to process
         self.output_dir: str = ""  # where the results will be written
-        self.depictions: Optional[DepictionManager] = None  # helper class to get nice depictions
-        self.pubchem: Optional[PubChemDownloader] = None  # helper class to download templates if needed
-        self.fragment_library: Optional[FragmentLibrary] = None  # Fragments library to get substructure matches
+        self.depictions: Optional[
+            DepictionManager
+        ] = None  # helper class to get nice depictions
+        self.pubchem: Optional[
+            PubChemDownloader
+        ] = None  # helper class to download templates if needed
+        self.fragment_library: Optional[
+            FragmentLibrary
+        ] = None  # Fragments library to get substructure matches
         self.logger = (
             logger if logger is not None else logging.getLogger(__name__)
         )  # log of the application
@@ -105,9 +113,7 @@ class PDBeChemManager:
         self.logger.debug("Initialization finished.")
 
     def _process_data(self):
-        """Main part of the PDBeChem process. Update all the data.
-
-        """
+        """Main part of the PDBeChem process. Update all the data."""
         for key, ccd_reader_result in self.compounds.items():
             try:
                 self.process_single_component(ccd_reader_result)
@@ -462,8 +468,7 @@ def _set_up_logger(args):
 
 
 def main():
-    """Runs the PDBeChem pipeline
-    """
+    """Runs the PDBeChem pipeline"""
     parser = create_parser()
     args = parser.parse_args()
 

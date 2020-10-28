@@ -36,7 +36,7 @@ class PubChemDownloader:
 
     def __init__(self, pubchem_templates: str) -> None:
         if not os.path.isdir(pubchem_templates):
-            raise ValueError(pubchem_templates + ' is not a valid path')
+            raise ValueError(pubchem_templates + " is not a valid path")
 
         self.pubchem_templates = pubchem_templates
 
@@ -78,15 +78,19 @@ class PubChemDownloader:
         Returns:
             bool: whether or not the new template has been processed
         """
-        destination = os.path.join(self.pubchem_templates, f'{component.id}.sdf')
-        downloaded = self.download_template(destination, component.id, component.inchikey)
+        destination = os.path.join(self.pubchem_templates, f"{component.id}.sdf")
+        downloaded = self.download_template(
+            destination, component.id, component.inchikey
+        )
 
         if downloaded:
             self._rescale_molecule(destination, 1.5)
 
         return downloaded
 
-    def download_template(self, destination: str, template_id: str, inchikey: str) -> bool:
+    def download_template(
+        self, destination: str, template_id: str, inchikey: str
+    ) -> bool:
         """Download 2D layout from the PubChem FTP.
 
         Args:
@@ -97,18 +101,18 @@ class PubChemDownloader:
         Returns:
             bool: If the download was successful or no.
         """
-        pubchem_api = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound'
+        pubchem_api = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound"
 
         if os.path.isfile(destination):
             return False
 
         try:
-            inchi_url = f'{pubchem_api}/inchikey/{inchikey}/cids/json'
-            response = urllib.request.urlopen(inchi_url).read().decode('utf-8')
+            inchi_url = f"{pubchem_api}/inchikey/{inchikey}/cids/json"
+            response = urllib.request.urlopen(inchi_url).read().decode("utf-8")
             jsonFile = json.loads(response)
-            cid = jsonFile['IdentifierList']['CID'][0]
+            cid = jsonFile["IdentifierList"]["CID"][0]
 
-            structure_url = f'{pubchem_api}/cid/{cid}/record/SDF/?record_type=2d&response_type=save&response_basename={template_id}.sdf'
+            structure_url = f"{pubchem_api}/cid/{cid}/record/SDF/?record_type=2d&response_type=save&response_basename={template_id}.sdf"
             urllib.request.urlretrieve(structure_url, destination)
 
             return True

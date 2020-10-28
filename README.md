@@ -7,7 +7,7 @@
 
 * The tools use:
   * [RDKit](http://www.rdkit.org/) for chemistry
-  * [PDBeCIF](https://gitlab.com/glenveegee/PDBeCIF.git) cif parser.
+  * [PDBeCIF](https://github.com/PDBeurope/pdbecif) cif parser.
   * [scipy](https://www.scipy.org/) for depiction quality check.
   * [numpy](https://www.numpy.org/) for molecular scaling.
 
@@ -37,15 +37,15 @@
 * Generation of 3D conformations.
 * Fragment library search.
 * Chemical scaffolds (Murcko scaffold, Murcko general, BRICS).
-* Lightweight implementation of parity method by Jon Tyczak.
+* Lightweight implementation of [parity method](https://doi.org/10.1016/j.str.2018.02.009) by Jon Tyczak.
 * RDKit molecular properties per component.
 * UniChem mapping.
 
 ## TODO list
 
 * Port rest of the important functionality implemented by Oliver
-* Add more unit/regression tests to get at least 100% code coverage.
-* Further improvement of the documentation.
+* Add more unit/regression tests to get at least higher code coverage.
+* Further improvements of the documentation.
 
 ## Notes
 

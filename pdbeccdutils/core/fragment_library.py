@@ -28,13 +28,17 @@ from pdbeccdutils.core.models import FragmentEntry
 
 
 class FragmentLibrary:
-    """Implementation of fragment library.
-    """
+    """Implementation of fragment library."""
 
-    def __init__(self, path: str = config.fragment_library, header: bool = True,
-                 delimiter: str = '\t', quotechar: str = '"') -> None:
+    def __init__(
+        self,
+        path: str = config.fragment_library,
+        header: bool = True,
+        delimiter: str = "\t",
+        quotechar: str = '"',
+    ) -> None:
         self.library: Dict[str, FragmentEntry] = {}
-        self.name = os.path.basename(path).split('.')[0]
+        self.name = os.path.basename(path).split(".")[0]
         self._read_in_library(path, header, delimiter, quotechar)
 
     def _read_in_library(self, path, header, delimiter, quotechar):
@@ -46,22 +50,24 @@ class FragmentLibrary:
             delimiter (str): Delimiter symbol.
             quotechar (str): Quotechar symbol.
         """
-        rdkit.rdBase.DisableLog('rdApp.*')
+        rdkit.rdBase.DisableLog("rdApp.*")
         rdCoordGen.SetDefaultTemplateFileDir(config.coordgen_templates)
         rdCoordGen.CoordGenParams.coordgenScaling = 33  # to get single bond length 1.5
 
-        with open(path, 'r') as csvfile:
-            library_reader = csv.reader(csvfile, delimiter=delimiter, quotechar=quotechar)
+        with open(path, "r") as csvfile:
+            library_reader = csv.reader(
+                csvfile, delimiter=delimiter, quotechar=quotechar
+            )
             if header:
                 next(library_reader)
 
             for row in library_reader:
                 mol = None
-                if row[1] == 'SMARTS':
+                if row[1] == "SMARTS":
                     mol = Chem.MolFromSmarts(row[2])
                 else:
                     mol = Chem.MolFromSmiles(row[2])
-                    if row[1] == 'LIKE':
+                    if row[1] == "LIKE":
                         for bond in mol.GetBonds():
                             bond.SetBondType(Chem.rdchem.BondType.UNSPECIFIED)
 
@@ -70,9 +76,9 @@ class FragmentLibrary:
 
                 self.library[row[0]] = FragmentEntry(row[0], row[6], mol)
 
-        rdkit.rdBase.EnableLog('rdApp.*')
+        rdkit.rdBase.EnableLog("rdApp.*")
 
-    def to_image(self, path, source=''):
+    def to_image(self, path, source=""):
         """Export image with all fragments.
 
         Args:
@@ -81,7 +87,7 @@ class FragmentLibrary:
                 be drawn.
 
         """
-        use_svg = path[-3:].lower() == 'svg'
+        use_svg = path[-3:].lower() == "svg"
         if source:
             temp = {k: v for k, v in self.library.items() if v.source == source}
         else:
@@ -89,18 +95,19 @@ class FragmentLibrary:
 
         mols = [v.mol for k, v in temp.items()]
         names = [v.name for k, v in temp.items()]
-        img = Chem.Draw.MolsToGridImage(mols, legends=names, molsPerRow=10, useSVG=use_svg)
+        img = Chem.Draw.MolsToGridImage(
+            mols, legends=names, molsPerRow=10, useSVG=use_svg
+        )
 
         if use_svg:
-            with open(path, 'w') as f:
+            with open(path, "w") as f:
                 f.write(img)
         else:
             img.save(path)
 
     def generate_conformers(self):
-        """Generate 3D coordinates for the fragment library.
-        """
-        rdkit.rdBase.DisableLog('rdApp.*')
+        """Generate 3D coordinates for the fragment library."""
+        rdkit.rdBase.DisableLog("rdApp.*")
         options = AllChem.ETKDGv2()
         options.clearConfs = False
 
@@ -110,4 +117,4 @@ class FragmentLibrary:
                 AllChem.UFFOptimizeMolecule(v.mol)
             except Exception:
                 pass  # don't care if it fails
-        rdkit.rdBase.EnableLog('rdApp.*')
+        rdkit.rdBase.EnableLog("rdApp.*")
