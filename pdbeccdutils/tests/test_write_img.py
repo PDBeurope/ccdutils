@@ -4,10 +4,12 @@
 
 import json
 import os
+import xml.etree.ElementTree as ET
 
 import pytest
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.component import Component
+from pdbeccdutils.helpers.drawing import save_no_image, svg_namespace
 from pdbeccdutils.core.depictions import DepictionManager, DepictionSource
 from pdbeccdutils.tests.tst_utilities import cif_filename
 
@@ -129,8 +131,10 @@ class TestWriteImg:
 
         for atom in json_obj["atoms"]:
             for l in atom["labels"]:
-                for t in l["tspans"]:
-                    assert t['value'] != "H" # we do not have any H labels, because we dont have links to them.
+                h_tspans = sum(1 for x in l["tspans"] if x == "H")
+                assert h_tspans < len(
+                    l["tspans"]
+                )  # we do not have bare H labels, because we dont have links to them.
 
         assert all(
             bond["bgn"] in atom_names and bond["end"] in atom_names
@@ -140,3 +144,23 @@ class TestWriteImg:
             bond["coords"] for bond in json_obj["bonds"]
         )  # do we have coordinates?
         assert all(bond["style"] for bond in json_obj["bonds"])  # and its stylling?
+
+    @staticmethod
+    def test_no_image_svg(tmpdir):
+        value = "foo"
+        svg = str(tmpdir.join("test.svg"))
+
+        save_no_image(svg, default_msg="foo")
+
+        assert os.path.isfile(svg)
+
+        xml = ET.parse(svg)
+        text = xml.find("svg:text", svg_namespace)
+        assert text.text.strip() == value
+
+    @staticmethod
+    def test_no_image_png(tmpdir):
+        png = str(tmpdir.join('test.png'))
+        save_no_image(png)
+
+        assert os.path.join(png)
