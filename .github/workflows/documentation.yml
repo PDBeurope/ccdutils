@@ -27,16 +27,15 @@ jobs:
       with:
         python-version: 3.7
     
-    - name: Set up environment
+    - name: Set up environment and generate docs
       uses: s-weigand/setup-conda@v1
       with:
         activate-conda: true
         conda-channels: conda-forge 
-        - run: |
+    - run: |
           conda install rdkit=2020.03.6
-          pip install -e ".[docs]"
-        
-        - run: |
+          pip install -e ".[docs]"    
+    - run: |
           cd doc
           make html
     
