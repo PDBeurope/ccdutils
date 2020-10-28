@@ -33,6 +33,6 @@ jobs:
         activate-conda: true
         conda-channels: conda-forge 
     - run: |
-        conda install rdkit
+        conda install rdkit=2020.03.6
         pip install -e ".[tests]"
     - run: pytest --cov=pdbeccdutils
