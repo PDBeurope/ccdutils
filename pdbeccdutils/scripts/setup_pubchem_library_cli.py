@@ -10,8 +10,7 @@ from pdbeccdutils.utils import PubChemDownloader
 
 
 def main():
-    """Main method of the whole process.
-    """
+    """Main method of the whole process."""
     parser = argparse.ArgumentParser(
         description="PDBe downloader of pubchem depictions"
     )

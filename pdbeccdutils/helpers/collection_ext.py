@@ -59,4 +59,4 @@ def find_element_with_max_occurrence(array):
         if v == max_occur:
             return k
 
-    return ''
+    return ""

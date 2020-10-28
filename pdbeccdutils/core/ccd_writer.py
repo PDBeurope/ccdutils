@@ -116,7 +116,7 @@ def to_pdb_str(
     )
 
     info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
-    info.SetResidueName(f'{component.id:>3}')
+    info.SetResidueName(f"{component.id:>3}")
     info.SetTempFactor(20.0)
     info.SetOccupancy(1.0)
     info.SetChainId("A")
@@ -929,8 +929,7 @@ def _to_sdf_str_fallback(mol, ccd_id, mappings):
         content += [
             f"{ccd_id} - {k} conformer",
             "    RDKit   3D",
-            "\n"
-            f"{atom_count:>3}{bond_count:3}  0  0  0  0  0  0  0  0999 V2000",
+            "\n" f"{atom_count:>3}{bond_count:3}  0  0  0  0  0  0  0  0999 V2000",
         ]
 
         for i in range(0, atom_count):

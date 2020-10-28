@@ -19,27 +19,31 @@ import os
 
 def tests_dir():
     """
-   directory of the tests directory where this python file is.
+    directory of the tests directory where this python file is.
 
-    Returns:
-        str the name of the directory is
+     Returns:
+         str the name of the directory is
 
     """
     return os.path.dirname(os.path.abspath(__file__))
 
 
-test_cif = os.path.join(tests_dir(), 'ccd_mmcif_test_files', 'random_sample')
-test_depiction = os.path.join(tests_dir(), 'ccd_mmcif_test_files', 'depiction_test')
-test_cut_down_components_cif = os.path.join(tests_dir(), 'components_cif', 'cut_down_components.cif')
+test_cif = os.path.join(tests_dir(), "ccd_mmcif_test_files", "random_sample")
+test_depiction = os.path.join(tests_dir(), "ccd_mmcif_test_files", "depiction_test")
+test_cut_down_components_cif = os.path.join(
+    tests_dir(), "components_cif", "cut_down_components.cif"
+)
 
 
 def cif_filename(code):
-    path = os.path.join(test_cif, f'{code}.cif')
+    path = os.path.join(test_cif, f"{code}.cif")
 
-    return path if os.path.isfile(path) else os.path.join(test_depiction, f'{code}.cif')
+    return path if os.path.isfile(path) else os.path.join(test_depiction, f"{code}.cif")
+
 
 def unl_model():
-    return os.path.join(tests_dir(), 'ccd_mmcif_test_files', 'UNL.cif')
+    return os.path.join(tests_dir(), "ccd_mmcif_test_files", "UNL.cif")
+
 
 def supply_list_of_sample_cifs():
     """
@@ -50,4 +54,4 @@ def supply_list_of_sample_cifs():
     Returns:
         list of filenames
     """
-    return sorted(glob.glob(os.path.join(test_cif, '*.cif')))
+    return sorted(glob.glob(os.path.join(test_cif, "*.cif")))

@@ -76,14 +76,16 @@ def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResul
         the internal representation of the component.
     """
     if not os.path.isfile(path_to_cif):
-        raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
+        raise ValueError("File '{}' does not exists".format(path_to_cif))
 
     cif_dict = list(MMCIF2Dict().parse(path_to_cif).values())[0]
 
     return _parse_pdb_mmcif(cif_dict, sanitize)
 
 
-def read_pdb_components_file(path_to_cif: str, sanitize: bool = True) -> Dict[str, CCDReaderResult]:
+def read_pdb_components_file(
+    path_to_cif: str, sanitize: bool = True
+) -> Dict[str, CCDReaderResult]:
     """
     Process multiple compounds stored in the wwPDB CCD
     `components.cif` file.
@@ -102,7 +104,7 @@ def read_pdb_components_file(path_to_cif: str, sanitize: bool = True) -> Dict[st
         the components in the `components.cif` file.
     """
     if not os.path.isfile(path_to_cif):
-        raise ValueError('File \'{}\' does not exists'.format(path_to_cif))
+        raise ValueError("File '{}' does not exists".format(path_to_cif))
 
     result_bag = {}
 
@@ -110,7 +112,10 @@ def read_pdb_components_file(path_to_cif: str, sanitize: bool = True) -> Dict[st
         try:
             result_bag[k] = _parse_pdb_mmcif(v)
         except CCDUtilsError as e:
-            print(f'ERROR: Data block {k} not processed. Reason: ({str(e)}).', file=sys.stderr)
+            print(
+                f"ERROR: Data block {k} not processed. Reason: ({str(e)}).",
+                file=sys.stderr,
+            )
 
     return result_bag
 
@@ -133,19 +138,23 @@ def _parse_pdb_mmcif(cif_dict, sanitize=True):
     errors = list()
     mol = rdkit.Chem.RWMol()
 
-    atoms_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp_atom', warnings)
-    bonds_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp_bond', warnings)
-    identifiers_dict = _preprocess_pdb_parser_output(cif_dict, '_pdbx_chem_comp_identifier', warnings)
-    descriptors_dict = _preprocess_pdb_parser_output(cif_dict, '_pdbx_chem_comp_descriptor', warnings)
-    properties_dict = _preprocess_pdb_parser_output(cif_dict, '_chem_comp', warnings)
+    atoms_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp_atom", warnings)
+    bonds_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp_bond", warnings)
+    identifiers_dict = _preprocess_pdb_parser_output(
+        cif_dict, "_pdbx_chem_comp_identifier", warnings
+    )
+    descriptors_dict = _preprocess_pdb_parser_output(
+        cif_dict, "_pdbx_chem_comp_descriptor", warnings
+    )
+    properties_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp", warnings)
 
     _parse_pdb_atoms(mol, atoms_dict)
     _parse_pdb_conformers(mol, atoms_dict)
     _parse_pdb_bonds(mol, bonds_dict, atoms_dict, errors)
     _handle_implicit_hydrogens(mol)
 
-    descriptors = _parse_pdb_descriptors(descriptors_dict, 'descriptor')
-    descriptors += _parse_pdb_descriptors(identifiers_dict, 'identifier')
+    descriptors = _parse_pdb_descriptors(descriptors_dict, "descriptor")
+    descriptors += _parse_pdb_descriptors(identifiers_dict, "identifier")
     properties = _parse_pdb_properties(properties_dict)
 
     comp = Component(mol.GetMol(), cif_dict, properties, descriptors, sanitize=sanitize)
@@ -167,23 +176,23 @@ def _parse_pdb_atoms(mol, atoms):
     if not atoms:
         return
 
-    for i in range(len(atoms['atom_id'])):
-        element = atoms['type_symbol'][i]
+    for i in range(len(atoms["atom_id"])):
+        element = atoms["type_symbol"][i]
         element = element if len(element) == 1 else element[0] + element[1].lower()
         isotope = None
 
-        if element == 'D':
-            element = 'H'
+        if element == "D":
+            element = "H"
             isotope = 2
-        elif element == 'X':
-            element = '*'
+        elif element == "X":
+            element = "*"
 
         atom = rdkit.Chem.Atom(element)
-        #atom.SetChiralTag(_atom_chiral_tag(atoms['pdbx_stereo_config'][i]))
-        atom.SetProp('name', atoms['atom_id'][i])
-        atom.SetProp('alt_name', atoms['alt_atom_id'][i])
-        atom.SetBoolProp('leaving_atom', atoms['pdbx_leaving_atom_flag'][i] == "Y")
-        atom.SetFormalCharge(conversions.str_to_int(atoms['charge'][i]))
+        # atom.SetChiralTag(_atom_chiral_tag(atoms['pdbx_stereo_config'][i]))
+        atom.SetProp("name", atoms["atom_id"][i])
+        atom.SetProp("alt_name", atoms["alt_atom_id"][i])
+        atom.SetBoolProp("leaving_atom", atoms["pdbx_leaving_atom_flag"][i] == "Y")
+        atom.SetFormalCharge(conversions.str_to_int(atoms["charge"][i]))
 
         if isotope is not None:
             atom.SetIsotope(isotope)
@@ -203,8 +212,8 @@ def _parse_pdb_conformers(mol, atoms):
     if not atoms:
         return
 
-    ideal = _setup_pdb_conformer(atoms, 'pdbx_model_Cartn_{}_ideal')
-    model = _setup_pdb_conformer(atoms, 'model_Cartn_{}')
+    ideal = _setup_pdb_conformer(atoms, "pdbx_model_Cartn_{}_ideal")
+    model = _setup_pdb_conformer(atoms, "model_Cartn_{}")
 
     mol.AddConformer(ideal, assignId=True)
     mol.AddConformer(model, assignId=True)
@@ -224,12 +233,12 @@ def _setup_pdb_conformer(atoms, label):
     if not atoms:
         return
 
-    conformer = rdkit.Chem.Conformer(len(atoms['atom_id']))
+    conformer = rdkit.Chem.Conformer(len(atoms["atom_id"]))
 
-    for i in range(len(atoms['atom_id'])):
-        x = conversions.str_to_float(atoms[label.format(('x'))][i])
-        y = conversions.str_to_float(atoms[label.format(('y'))][i])
-        z = conversions.str_to_float(atoms[label.format(('z'))][i])
+    for i in range(len(atoms["atom_id"])):
+        x = conversions.str_to_float(atoms[label.format(("x"))][i])
+        y = conversions.str_to_float(atoms[label.format(("y"))][i])
+        z = conversions.str_to_float(atoms[label.format(("z"))][i])
 
         atom_position = rdkit.Chem.rdGeometry.Point3D(x, y, z)
         conformer.SetAtomPosition(i, atom_position)
@@ -250,18 +259,26 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
     if not bonds:
         return
 
-    for i in range(len(bonds['atom_id_1'])):
-        atom_1 = collection_ext.find_element_in_list(atoms['atom_id'], bonds['atom_id_1'][i])
-        atom_2 = collection_ext.find_element_in_list(atoms['atom_id'], bonds['atom_id_2'][i])
-        bond_order = _bond_pdb_order(bonds['value_order'][i])
+    for i in range(len(bonds["atom_id_1"])):
+        atom_1 = collection_ext.find_element_in_list(
+            atoms["atom_id"], bonds["atom_id_1"][i]
+        )
+        atom_2 = collection_ext.find_element_in_list(
+            atoms["atom_id"], bonds["atom_id_2"][i]
+        )
+        bond_order = _bond_pdb_order(bonds["value_order"][i])
 
         if any(a is None for a in [atom_1, atom_2, bond_order]):
-            errors.append('Problem with the {}-th bond in the _chem_comp_bond group'.format(i + 1))
+            errors.append(
+                "Problem with the {}-th bond in the _chem_comp_bond group".format(i + 1)
+            )
 
         try:
             mol.AddBond(atom_1, atom_2, bond_order)
         except RuntimeError:
-            errors.append(f'Duplicit bond {bonds["atom_id_1"][i]}-{bonds["atom_id_2"][i]}')
+            errors.append(
+                f'Duplicit bond {bonds["atom_id_1"][i]}-{bonds["atom_id_2"][i]}'
+            )
 
 
 def _handle_implicit_hydrogens(mol):
@@ -285,7 +302,7 @@ def _handle_implicit_hydrogens(mol):
         atom.SetNoImplicit(no_Hs)
 
 
-def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
+def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label="descriptor"):
     """
     Parse useful information from _pdbx_chem_comp_* category
 
@@ -304,9 +321,11 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label='descriptor'):
         return descriptors
 
     for i in range(len(pdbx_chem_comp_descriptors[label])):
-        d = Descriptor(type=pdbx_chem_comp_descriptors['type'][i],
-                       program=pdbx_chem_comp_descriptors['program'][i],
-                       value=pdbx_chem_comp_descriptors[label][i])
+        d = Descriptor(
+            type=pdbx_chem_comp_descriptors["type"][i],
+            program=pdbx_chem_comp_descriptors["program"][i],
+            value=pdbx_chem_comp_descriptors[label][i],
+        )
         descriptors.append(d)
 
     return descriptors
@@ -324,18 +343,26 @@ def _parse_pdb_properties(chem_comp):
     """
     properties = None
     if chem_comp:
-        mod_date = chem_comp['pdbx_modified_date'][0].split('-')
-        d = date(1970, 1, 1) if mod_date[0] == '?' else date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+        mod_date = chem_comp["pdbx_modified_date"][0].split("-")
+        d = (
+            date(1970, 1, 1)
+            if mod_date[0] == "?"
+            else date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+        )
 
-        rel_status = chem_comp['pdbx_release_status'][0]
-        rel_status = ReleaseStatus.from_str(chem_comp['pdbx_release_status'][0])
+        rel_status = chem_comp["pdbx_release_status"][0]
+        rel_status = ReleaseStatus.from_str(chem_comp["pdbx_release_status"][0])
 
-        properties = CCDProperties(id=chem_comp['id'][0],
-                                   name=chem_comp['name'][0],
-                                   formula=chem_comp['formula'][0],
-                                   modified_date=d,
-                                   pdbx_release_status=rel_status,
-                                   weight=0.0 if chem_comp['formula_weight'][0] == '?' else float(chem_comp['formula_weight'][0]))
+        properties = CCDProperties(
+            id=chem_comp["id"][0],
+            name=chem_comp["name"][0],
+            formula=chem_comp["formula"][0],
+            modified_date=d,
+            pdbx_release_status=rel_status,
+            weight=0.0
+            if chem_comp["formula_weight"][0] == "?"
+            else float(chem_comp["formula_weight"][0]),
+        )
     return properties
 
 
@@ -354,13 +381,15 @@ def _preprocess_pdb_parser_output(dictionary, label, warnings):
         dict: unified dictionary for structure parsing.
     """
     if label not in dictionary:
-        warnings.append('Namespace {} does not exist.'.format(label))
+        warnings.append("Namespace {} does not exist.".format(label))
         return []
 
     check_element = list(dictionary[label].keys())[0]
-    values = (dictionary[label]
-              if isinstance(dictionary[label][check_element], list)
-              else {k: [v] for k, v in dictionary[label].items()})
+    values = (
+        dictionary[label]
+        if isinstance(dictionary[label][check_element], list)
+        else {k: [v] for k, v in dictionary[label].items()}
+    )
     return values
 
 
@@ -374,11 +403,11 @@ def _bond_pdb_order(value_order):
     Returns:
         rdkit.Chem.rdchem.BondType: -- bond type
     """
-    if value_order == 'SING':
+    if value_order == "SING":
         return rdkit.Chem.rdchem.BondType(1)
-    if value_order == 'DOUB':
+    if value_order == "DOUB":
         return rdkit.Chem.rdchem.BondType(2)
-    if value_order == 'TRIP':
+    if value_order == "TRIP":
         return rdkit.Chem.rdchem.BondType(3)
 
     return None
@@ -393,12 +422,14 @@ def _atom_chiral_tag(tag):
     Returns:
         rdkit.Chem.ChiralType: Chiral center in RDKit language.
     """
-    if tag == 'N':
+    if tag == "N":
         return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
-    if tag == 'S':
+    if tag == "S":
         return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CCW
-    if tag == 'R':
+    if tag == "R":
         return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CW
 
     return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
+
+
 # endregion parse mmcif

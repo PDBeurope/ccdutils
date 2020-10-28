@@ -88,7 +88,6 @@ class Component:
         if sanitize:
             self._sanitization_issues = self._sanitize()
 
-
         if descriptors is not None:
             self._descriptors = descriptors
 

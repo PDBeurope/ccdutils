@@ -28,7 +28,7 @@ def fix_conformer(conformer):
 
     Args:
         conformer (rdkit.Chem.rdchem.Conformer): RDKit conformer
-    """    
+    """
     positions = conformer.GetPositions()
 
     for index, pos in enumerate(positions):

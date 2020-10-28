@@ -36,6 +36,7 @@ class DepictionSource(IntEnum):
         RDKit - RDKit functionality using Coordgen.
         Failed - Nothing worked.
     """
+
     PubChem = 1
     Template = 2
     RDKit = 3
@@ -52,6 +53,7 @@ class ConformerType(IntEnum):
         Computed
         AllConformers
     """
+
     Ideal = 1
     Model = 2
     Depiction = 3
@@ -68,6 +70,7 @@ class ReleaseStatus(IntEnum):
         An additional value 'NOT_SET' has been added for case where
         pdbx_release_status has not been set.
     """
+
     NOT_SET = 0
     DEL = 1
     HOLD = 2
@@ -87,17 +90,17 @@ class ReleaseStatus(IntEnum):
             ReleaseStatus: Component release status
         """
 
-        if s.upper() == 'DEL':
+        if s.upper() == "DEL":
             return ReleaseStatus.DEL
-        if s.upper() == 'HOLD':
+        if s.upper() == "HOLD":
             return ReleaseStatus.HOLD
-        if s.upper() == 'HPUB':
+        if s.upper() == "HPUB":
             return ReleaseStatus.HPUB
-        if s.upper() == 'OBS':
+        if s.upper() == "OBS":
             return ReleaseStatus.OBS
-        if s.upper() == 'REF_ONLY':
+        if s.upper() == "REF_ONLY":
             return ReleaseStatus.REF_ONLY
-        if s.upper() == 'REL':
+        if s.upper() == "REL":
             return ReleaseStatus.REL
 
         return ReleaseStatus.NOT_SET
@@ -124,6 +127,7 @@ class DepictionResult(NamedTuple):
         score (float): Quality of the depiction, lower is better.
 
     """
+
     source: DepictionSource
     template_name: str
     mol: rdkit.Chem.rdchem.Mol
@@ -140,6 +144,7 @@ class Descriptor(NamedTuple):
         program (str): `_pdbx_chem_comp_descriptor.program` in CIF language.
         value (str): `_pdbx_chem_comp_descriptor.descriptor` in CIF language.
     """
+
     type: str
     program: str
     value: str
@@ -154,7 +159,8 @@ class ParityResult:
     Attributes:
         mapping (dict of str: str): Atom-level mapping template->query.
         similarity_score (float): Calculate similarity score.
-   """
+    """
+
     mapping: Dict[str, str]
     similarity_score: float
 
@@ -172,6 +178,7 @@ class CCDProperties:
         pdbx_release_status (str): _chem_comp.pdbx_release_status
         weight (str): _chem_comp.formula_weight
     """
+
     id: str
     name: str
     formula: str

@@ -22,62 +22,68 @@ import requests
 
 # these are the resources we agreed on providing as part of the PDBeChem
 agreed_resources = {
-    '1': ('ChEMBL', 'ChEMBL'),
-    '2': ('DrugBank', 'DrugBank'),
-    '4': ('Guide to Pharmacology', 'Guide to Pharmacology'),
-    '6': ('KEGG LIGAND', 'KEGG (Kyoto Encyclopedia of Genes and Genomes) Ligand'),
-    '7': ('ChEBI', 'ChEBI (Chemical Entities of Biological Interest).'),
-    '9': ('ZINC', 'ZINC'),
-    '22': ('PubChem', 'PubChem Compounds'),
-    '24': ('NMRShiftDB', 'NMRShiftDB'),
-    '31': ('BindingDb', 'BindingDb'),
-    '33': ('LipidMaps', 'LipidMaps'),
-    '36': ('MetaboLights', 'MetaboLights'),
-    '37': ('BRENDA', 'BRENDA'),
-    '38': ('Rhea', 'Rhea')
+    "1": ("ChEMBL", "ChEMBL"),
+    "2": ("DrugBank", "DrugBank"),
+    "4": ("Guide to Pharmacology", "Guide to Pharmacology"),
+    "6": ("KEGG LIGAND", "KEGG (Kyoto Encyclopedia of Genes and Genomes) Ligand"),
+    "7": ("ChEBI", "ChEBI (Chemical Entities of Biological Interest)."),
+    "9": ("ZINC", "ZINC"),
+    "22": ("PubChem", "PubChem Compounds"),
+    "24": ("NMRShiftDB", "NMRShiftDB"),
+    "31": ("BindingDb", "BindingDb"),
+    "33": ("LipidMaps", "LipidMaps"),
+    "36": ("MetaboLights", "MetaboLights"),
+    "37": ("BRENDA", "BRENDA"),
+    "38": ("Rhea", "Rhea"),
 }
 
 # list taken from https://www.ebi.ac.uk/unichem/ucquery/listSources
 all_resource = {
-    '1': ('ChEMBL', 'ChEMBL'),
-    '2': ('DrugBank', 'DrugBank'),
-    '3': ('PDBe', 'Protein Data Bank in Europe'),
-    '4': ('Guide to Pharmacology', 'Guide to Pharmacology'),
-    '5': ('PubChem DOTF', 'PubChem ("Drugs of the Future" subset'),
-    '6': ('KEGG LIGAND', 'KEGG (Kyoto Encyclopedia of Genes and Genomes) Ligand'),
-    '7': ('ChEBI', 'ChEBI (Chemical Entities of Biological Interest).'),
-    '8': ('NIH', 'NIH Clinical Collection'),
-    '9': ('ZINC', 'ZINC'),
-    '10': ('eMolecules', 'eMolecules'),
-    '11': ('IBM', 'IBM strategic IP insight platform and the National Institutes of Health'),
-    '12': ('atlas', 'Gene Expression Atlas'),
-    '14': ('fdasrs', 'FDA/USP Substance Registration System (SRS)'),
-    '15': ('SureChEMBL', 'SureChEMBL'),
-    '17': ('PharmGKB', 'PharmGKB'),
-    '18': ('HMDB', 'Human Metabolome Database (HMDB)'),
-    '20': ('Selleck', 'Selleck'),
-    '21': ('PubChem TPHARMA', 'PubChem ("Thomson Pharma" subset)'),
-    '22': ('PubChem', 'PubChem Compounds'),
-    '23': ('Mcule', 'Mcule'),
-    '24': ('NMRShiftDB', 'NMRShiftDB'),
-    '25': ('LINCS', 'Library of Integrated Network-based Cellular Signatures'),
-    '26': ('ACTor', 'ACTor'),
-    '27': ('Recon', 'Recon'),
-    '28': ('MolPort', 'MolPort'),
-    '29': ('Nikkaji', 'Nikkaji'),
-    '31': ('BindingDb', 'BindingDb'),
-    '32': ('EPA CompTox Dashboard', 'EPA (Environmental Protection Agency) CompTox Dashboard'),
-    '33': ('LipidMaps', 'LipidMaps'),
-    '34': ('DrugCentral', 'DrugCentral'),
-    '35': ('Carotenoid Database', 'Carotenoid Database'),
-    '36': ('MetaboLights', 'MetaboLights'),
-    '37': ('BRENDA', 'BRENDA'),
-    '38': ('Rhea', 'Rhea'),
-    '39': ('ChemicalBook', 'ChemicalBook'),
-    '41': ('SwissLipids', 'SwissLipids')
+    "1": ("ChEMBL", "ChEMBL"),
+    "2": ("DrugBank", "DrugBank"),
+    "3": ("PDBe", "Protein Data Bank in Europe"),
+    "4": ("Guide to Pharmacology", "Guide to Pharmacology"),
+    "5": ("PubChem DOTF", 'PubChem ("Drugs of the Future" subset'),
+    "6": ("KEGG LIGAND", "KEGG (Kyoto Encyclopedia of Genes and Genomes) Ligand"),
+    "7": ("ChEBI", "ChEBI (Chemical Entities of Biological Interest)."),
+    "8": ("NIH", "NIH Clinical Collection"),
+    "9": ("ZINC", "ZINC"),
+    "10": ("eMolecules", "eMolecules"),
+    "11": (
+        "IBM",
+        "IBM strategic IP insight platform and the National Institutes of Health",
+    ),
+    "12": ("atlas", "Gene Expression Atlas"),
+    "14": ("fdasrs", "FDA/USP Substance Registration System (SRS)"),
+    "15": ("SureChEMBL", "SureChEMBL"),
+    "17": ("PharmGKB", "PharmGKB"),
+    "18": ("HMDB", "Human Metabolome Database (HMDB)"),
+    "20": ("Selleck", "Selleck"),
+    "21": ("PubChem TPHARMA", 'PubChem ("Thomson Pharma" subset)'),
+    "22": ("PubChem", "PubChem Compounds"),
+    "23": ("Mcule", "Mcule"),
+    "24": ("NMRShiftDB", "NMRShiftDB"),
+    "25": ("LINCS", "Library of Integrated Network-based Cellular Signatures"),
+    "26": ("ACTor", "ACTor"),
+    "27": ("Recon", "Recon"),
+    "28": ("MolPort", "MolPort"),
+    "29": ("Nikkaji", "Nikkaji"),
+    "31": ("BindingDb", "BindingDb"),
+    "32": (
+        "EPA CompTox Dashboard",
+        "EPA (Environmental Protection Agency) CompTox Dashboard",
+    ),
+    "33": ("LipidMaps", "LipidMaps"),
+    "34": ("DrugCentral", "DrugCentral"),
+    "35": ("Carotenoid Database", "Carotenoid Database"),
+    "36": ("MetaboLights", "MetaboLights"),
+    "37": ("BRENDA", "BRENDA"),
+    "38": ("Rhea", "Rhea"),
+    "39": ("ChemicalBook", "ChemicalBook"),
+    "41": ("SwissLipids", "SwissLipids"),
 }
 
-url_prefix = f'https://www.ebi.ac.uk/unichem/rest/inchikey/'
+url_prefix = f"https://www.ebi.ac.uk/unichem/rest/inchikey/"
 
 
 def get_agreed_unichem_mapping(inchikey):
@@ -123,12 +129,10 @@ def _download_unichem_mapping(inchikey, resources):
             value is the list of internal identifiers.
     """
     mapping = []
-    url = f'{url_prefix}/{inchikey}'
+    url = f"{url_prefix}/{inchikey}"
 
     try:
-        headers = {
-            'Content-Type': 'application/json'
-        }
+        headers = {"Content-Type": "application/json"}
         r = requests.get(url, headers)
         jsonFile = r.json()
 

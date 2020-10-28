@@ -1,4 +1,4 @@
-sample_ccd_with_inchi_problems = ['7OM', 'ASX', 'CDL', '0OD']
+sample_ccd_with_inchi_problems = ["7OM", "ASX", "CDL", "0OD"]
 
 
 class TestIn:
