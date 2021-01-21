@@ -18,21 +18,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        persist-credentials: false    
-    
-    - name: Set up python
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    
-    - name: Set up environment and run pytest
-      uses: s-weigand/setup-conda@v1
-      with:
-        activate-conda: true
-        conda-channels: conda-forge 
-    - run: |
-        conda install rdkit=2020.03.6
-        pip install -e ".[tests]"
-    - run: pytest --cov=pdbeccdutils
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Set up python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Set up environment and run pytest
+        uses: s-weigand/setup-conda@v1
+        with:
+          activate-conda: true
+          conda-channels: conda-forge
+      - run: |
+          conda install rdkit=2020.03.6
+          pip install -e ".[tests]"
+      - run: pytest --cov=pdbeccdutils

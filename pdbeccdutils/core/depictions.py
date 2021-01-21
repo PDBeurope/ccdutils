@@ -29,11 +29,12 @@ from typing import Dict
 import pdbeccdutils.helpers.collection_ext as ext
 import rdkit
 from pdbeccdutils.core.models import DepictionResult, DepictionSource
+from pdbeccdutils.helpers.logging import logger
+from pdbeccdutils.helpers.mol_tools import fix_conformer
 from pdbeccdutils.utils import config
 from rdkit import Chem, Geometry
 from rdkit.Chem import AllChem, rdCoordGen
 from scipy.spatial import KDTree
-from pdbeccdutils.helpers.rdkit_fixtures import fix_conformer
 
 
 class DepictionManager:
@@ -255,7 +256,8 @@ class DepictionManager:
                         )
                     )
         except Exception:
-            pass  # if it fails it fails, but generally it wont
+            # if it fails it fails, but generally it wont
+            logger.warning("Depiction generation by template failed")
 
         return results
 

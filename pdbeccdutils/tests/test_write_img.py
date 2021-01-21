@@ -4,7 +4,7 @@
 
 import json
 import os
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 import pytest
 from pdbeccdutils.core import ccd_reader
@@ -17,6 +17,8 @@ collision_free_templates = [
     ("hem", ["HEM", "HEA", "HEB", "HEC", "HDD", "HEG"]),
     ("porphycene", ["HNN", "HME"]),
     ("ru_complex", ["11R"]),
+    ("ru_complex", ["11R"]),
+    ("phorbine", ["G2O"]),
 ]
 
 collision_templates = [("cube", ["SF4", "0KA", "1CL"]), ("adamantane", ["ADM"])]
@@ -56,9 +58,7 @@ class TestWriteImg:
     )
     def test_image_generation_with_names(tmpdir, ccd_id, expected, names):
         mol = load_molecule(ccd_id)
-        path = str(
-            tmpdir.join("{}_{}.svg".format(ccd_id, "names" if names else "no_names"))
-        )
+        path = str(tmpdir.join(f"{ccd_id}_{'names' if names else 'no_names'}.svg"))
         mol.export_2d_svg(path, names=names)
 
         with open(path, "r") as f:
@@ -160,7 +160,7 @@ class TestWriteImg:
 
     @staticmethod
     def test_no_image_png(tmpdir):
-        png = str(tmpdir.join('test.png'))
+        png = str(tmpdir.join("test.png"))
         save_no_image(png)
 
         assert os.path.join(png)

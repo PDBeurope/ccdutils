@@ -1,0 +1,776 @@
+data_G2O
+#
+_chem_comp.id                                        G2O
+_chem_comp.name                                      "Chlorophyll A ester"
+_chem_comp.type                                      non-polymer
+_chem_comp.pdbx_type                                 HETAIN
+_chem_comp.formula                                   "C55 H70 Mg N4 O5"
+_chem_comp.mon_nstd_parent_comp_id                   ?
+_chem_comp.pdbx_synonyms                             ?
+_chem_comp.pdbx_formal_charge                        0
+_chem_comp.pdbx_initial_date                         2020-07-09
+_chem_comp.pdbx_modified_date                        2020-11-20
+_chem_comp.pdbx_ambiguous_flag                       N
+_chem_comp.pdbx_release_status                       REL
+_chem_comp.pdbx_replaced_by                          ?
+_chem_comp.pdbx_replaces                             ?
+_chem_comp.formula_weight                            891.473
+_chem_comp.one_letter_code                           ?
+_chem_comp.three_letter_code                         G2O
+_chem_comp.pdbx_model_coordinates_details            ?
+_chem_comp.pdbx_model_coordinates_missing_flag       N
+_chem_comp.pdbx_ideal_coordinates_details            Corina
+_chem_comp.pdbx_ideal_coordinates_missing_flag       Y
+_chem_comp.pdbx_model_coordinates_db_code            6M32
+_chem_comp.pdbx_subcomponent_list                    ?
+_chem_comp.pdbx_processing_site                      PDBJ
+
+#
+loop_
+_chem_comp_atom.comp_id                        
+_chem_comp_atom.atom_id                        
+_chem_comp_atom.alt_atom_id                    
+_chem_comp_atom.type_symbol                    
+_chem_comp_atom.charge                         
+_chem_comp_atom.pdbx_align                     
+_chem_comp_atom.pdbx_aromatic_flag             
+_chem_comp_atom.pdbx_leaving_atom_flag         
+_chem_comp_atom.pdbx_stereo_config             
+_chem_comp_atom.model_Cartn_x                  
+_chem_comp_atom.model_Cartn_y                  
+_chem_comp_atom.model_Cartn_z                  
+_chem_comp_atom.pdbx_model_Cartn_x_ideal       
+_chem_comp_atom.pdbx_model_Cartn_y_ideal       
+_chem_comp_atom.pdbx_model_Cartn_z_ideal       
+_chem_comp_atom.pdbx_component_atom_id         
+_chem_comp_atom.pdbx_component_comp_id         
+_chem_comp_atom.pdbx_ordinal                   
+G2O  C1  C1  C 0 1 N N N 193.047 217.968 246.028 ? ? ?  C1 G2O   1
+G2O  C2  C2  C 0 1 N N N 192.100 217.947 247.170 ? ? ?  C2 G2O   2
+G2O  C3  C3  C 0 1 N N N 190.919 218.577 247.121 ? ? ?  C3 G2O   3
+G2O  C4  C4  C 0 1 N N N 189.959 218.553 248.259 ? ? ?  C4 G2O   4
+G2O  C5  C5  C 0 1 N N N 190.528 219.323 245.876 ? ? ?  C5 G2O   5
+G2O  C6  C6  C 0 1 N N N 190.279 220.799 246.067 ? ? ?  C6 G2O   6
+G2O  NB  N1  N 0 1 N N N 197.487 210.810 247.313 ? ? ?  NB G2O   7
+G2O  ND  N2  N 0 1 Y N N 200.770 212.591 246.011 ? ? ?  ND G2O   8
+G2O C10  C7  C 0 1 N N N 188.007 221.542 243.922 ? ? ? C10 G2O   9
+G2O C11  C8  C 0 1 N N N 188.357 220.231 243.256 ? ? ? C11 G2O  10
+G2O C12  C9  C 0 1 N N N 187.130 219.399 242.949 ? ? ? C12 G2O  11
+G2O C13 C10  C 0 1 N N R 187.062 218.180 243.693 ? ? ? C13 G2O  12
+G2O C14 C11  C 0 1 N N N 187.096 218.416 245.087 ? ? ? C14 G2O  13
+G2O C15 C12  C 0 1 N N N 188.063 217.243 243.296 ? ? ? C15 G2O  14
+G2O C16 C13  C 0 1 N N N 187.999 215.951 244.085 ? ? ? C16 G2O  15
+G2O C17 C14  C 0 1 N N N 186.741 215.153 243.808 ? ? ? C17 G2O  16
+G2O C18 C15  C 0 1 N N N 186.572 213.985 244.769 ? ? ? C18 G2O  17
+G2O C19 C16  C 0 1 N N N 186.075 214.444 246.125 ? ? ? C19 G2O  18
+G2O C1A C17  C 0 1 N N N 198.803 214.800 246.926 ? ? ? C1A G2O  19
+G2O C1B C18  C 0 1 N N N 196.375 211.423 247.757 ? ? ? C1B G2O  20
+G2O C1C C19  C 0 1 N N N 199.373 208.742 246.345 ? ? ? C1C G2O  21
+G2O C1D C20  C 0 1 Y N N 201.906 212.075 245.416 ? ? ? C1D G2O  22
+G2O C20 C21  C 0 1 N N N 185.621 212.961 244.199 ? ? ? C20 G2O  23
+G2O C2A C22  C 0 1 N N S 197.969 215.818 247.414 ? ? ? C2A G2O  24
+G2O C2B C23  C 0 1 N N N 195.292 210.413 247.952 ? ? ? C2B G2O  25
+G2O C2C C24  C 0 1 N N N 200.285 207.698 245.898 ? ? ? C2C G2O  26
+G2O C2D C25  C 0 1 Y N N 202.744 213.152 245.022 ? ? ? C2D G2O  27
+G2O C3A C26  C 0 1 N N S 196.894 215.125 247.997 ? ? ? C3A G2O  28
+G2O C3B C27  C 0 1 N N N 195.808 209.191 247.614 ? ? ? C3B G2O  29
+G2O C3C C28  C 0 1 N N N 201.422 208.337 245.433 ? ? ? C3C G2O  30
+G2O C3D C29  C 0 1 Y N N 202.055 214.309 245.331 ? ? ? C3D G2O  31
+G2O C4A C30  C 0 1 N N N 197.166 213.778 247.712 ? ? ? C4A G2O  32
+G2O C4B C31  C 0 1 N N N 197.225 209.416 247.207 ? ? ? C4B G2O  33
+G2O C4C C32  C 0 1 N N N 201.213 209.746 245.621 ? ? ? C4C G2O  34
+G2O C4D C33  C 0 1 Y N N 200.862 213.899 245.930 ? ? ? C4D G2O  35
+G2O  C7 C34  C 0 1 N N N 190.214 221.374 244.865 ? ? ?  C7 G2O  36
+G2O  C8 C35  C 0 1 N N R 189.067 222.191 244.615 ? ? ?  C8 G2O  37
+G2O  C9 C36  C 0 1 N N N 188.571 222.802 245.787 ? ? ?  C9 G2O  38
+G2O CAA C37  C 0 1 N N N 197.633 216.701 246.459 ? ? ? CAA G2O  39
+G2O CAB C38  C 0 1 N N N 195.170 207.896 247.649 ? ? ? CAB G2O  40
+G2O CAC C39  C 0 1 N N N 202.641 207.711 244.876 ? ? ? CAC G2O  41
+G2O CAD C40  C 0 1 N N N 201.887 215.679 245.041 ? ? ? CAD G2O  42
+G2O CBA C41  C 0 1 N N N 196.320 216.403 245.772 ? ? ? CBA G2O  43
+G2O CBB C42  C 0 1 N N N 195.141 207.015 246.652 ? ? ? CBB G2O  44
+G2O CBC C43  C 0 1 N N N 203.626 207.333 245.954 ? ? ? CBC G2O  45
+G2O CBD C44  C 0 1 N N R 200.764 216.156 245.883 ? ? ? CBD G2O  46
+G2O CED C45  C 0 1 N N N 202.078 219.090 247.333 ? ? ? CED G2O  47
+G2O CGA C46  C 0 1 N N N 195.381 217.531 246.053 ? ? ? CGA G2O  48
+G2O CGD C47  C 0 1 N N N 201.124 216.957 246.869 ? ? ? CGD G2O  49
+G2O CHA C48  C 0 1 N N N 200.060 214.982 246.303 ? ? ? CHA G2O  50
+G2O CHB C49  C 0 1 N N N 196.220 212.781 248.004 ? ? ? CHB G2O  51
+G2O CHC C50  C 0 1 N N N 198.077 208.505 246.819 ? ? ? CHC G2O  52
+G2O CHD C51  C 0 1 N N N 202.108 210.745 245.251 ? ? ? CHD G2O  53
+G2O CMA C52  C 0 1 N N N 196.821 215.347 249.331 ? ? ? CMA G2O  54
+G2O CMB C53  C 0 1 N N N 193.967 210.758 248.426 ? ? ? CMB G2O  55
+G2O CMC C54  C 0 1 N N N 199.993 206.271 245.925 ? ? ? CMC G2O  56
+G2O CMD C55  C 0 1 N N N 204.040 212.990 244.369 ? ? ? CMD G2O  57
+G2O  NA  N3  N 0 1 N N N 198.292 213.634 247.168 ? ? ?  NA G2O  58
+G2O  NC  N4  N 0 1 N N N 199.943 209.947 246.171 ? ? ?  NC G2O  59
+G2O O1A  O1  O 0 1 N N N 195.600 218.744 246.000 ? ? ? O1A G2O  60
+G2O O1D  O2  O 0 1 N N N 200.779 216.906 248.049 ? ? ? O1D G2O  61
+G2O O2A  O3  O 0 1 N N N 194.130 217.104 246.407 ? ? ? O2A G2O  62
+G2O O2D  O4  O 0 1 N N N 201.960 217.954 246.482 ? ? ? O2D G2O  63
+G2O OBD  O5  O 0 1 N N N 202.490 216.388 244.257 ? ? ? OBD G2O  64
+G2O  MG MG1 MG 0 0 N N N 199.089 211.734 246.671 ? ? ?  MG G2O  65
+G2O  H1  H1  H 0 1 N N N 192.558 217.593 245.117 ? ? ?  H1 G2O  66
+G2O  H2  H2  H 0 1 N N N 193.415 218.990 245.853 ? ? ?  H2 G2O  67
+G2O  H3  H3  H 0 1 N N N 192.371 217.408 248.066 ? ? ?  H3 G2O  68
+G2O  H4  H4  H 0 1 N N N 189.063 219.134 247.996 ? ? ?  H4 G2O  69
+G2O  H5  H5  H 0 1 N N N 189.672 217.513 248.474 ? ? ?  H5 G2O  70
+G2O  H6  H6  H 0 1 N N N 190.433 218.994 249.148 ? ? ?  H6 G2O  71
+G2O  H7  H7  H 0 1 N N N 191.337 219.206 245.140 ? ? ?  H7 G2O  72
+G2O  H8  H8  H 0 1 N N N 189.606 218.870 245.482 ? ? ?  H8 G2O  73
+G2O  H9  H9  H 0 1 N N N 190.172 221.304 247.016 ? ? ?  H9 G2O  74
+G2O H11 H11  H 0 1 N N N 187.643 222.229 243.143 ? ? ? H11 G2O  75
+G2O H12 H12  H 0 1 N N N 187.201 221.348 244.645 ? ? ? H12 G2O  76
+G2O H13 H13  H 0 1 N N N 188.886 220.442 242.315 ? ? ? H13 G2O  77
+G2O H14 H14  H 0 1 N N N 189.015 219.658 243.926 ? ? ? H14 G2O  78
+G2O H15 H15  H 0 1 N N N 186.237 219.998 243.181 ? ? ? H15 G2O  79
+G2O H16 H16  H 0 1 N N N 187.137 219.152 241.877 ? ? ? H16 G2O  80
+G2O H17 H17  H 0 1 N N N 186.088 217.722 243.467 ? ? ? H17 G2O  81
+G2O H18 H18  H 0 1 N N N 187.042 217.457 245.623 ? ? ? H18 G2O  82
+G2O H19 H19  H 0 1 N N N 188.033 218.930 245.349 ? ? ? H19 G2O  83
+G2O H20 H20  H 0 1 N N N 186.240 219.045 245.373 ? ? ? H20 G2O  84
+G2O H21 H21  H 0 1 N N N 187.925 217.011 242.229 ? ? ? H21 G2O  85
+G2O H22 H22  H 0 1 N N N 189.052 217.699 243.447 ? ? ? H22 G2O  86
+G2O H23 H23  H 0 1 N N N 188.871 215.335 243.821 ? ? ? H23 G2O  87
+G2O H24 H24  H 0 1 N N N 188.032 216.193 245.158 ? ? ? H24 G2O  88
+G2O H25 H25  H 0 1 N N N 185.871 215.819 243.905 ? ? ? H25 G2O  89
+G2O H26 H26  H 0 1 N N N 186.790 214.762 242.781 ? ? ? H26 G2O  90
+G2O H27 H27  H 0 1 N N N 187.554 213.508 244.905 ? ? ? H27 G2O  91
+G2O H28 H28  H 0 1 N N N 185.966 213.574 246.790 ? ? ? H28 G2O  92
+G2O H29 H29  H 0 1 N N N 186.798 215.150 246.561 ? ? ? H29 G2O  93
+G2O H30 H30  H 0 1 N N N 185.101 214.942 246.009 ? ? ? H30 G2O  94
+G2O H31 H31  H 0 1 N N N 185.512 212.126 244.907 ? ? ? H31 G2O  95
+G2O H32 H32  H 0 1 N N N 184.639 213.427 244.029 ? ? ? H32 G2O  96
+G2O H33 H33  H 0 1 N N N 186.018 212.583 243.245 ? ? ? H33 G2O  97
+G2O H34 H34  H 0 1 N N N 190.985 221.231 244.122 ? ? ? H34 G2O  98
+G2O H36 H36  H 0 1 N N N 189.409 223.007 243.961 ? ? ? H36 G2O  99
+G2O H37 H37  H 0 1 N N N 189.395 223.302 246.318 ? ? ? H37 G2O 100
+G2O H38 H38  H 0 1 N N N 187.805 223.544 245.517 ? ? ? H38 G2O 101
+G2O H39 H39  H 0 1 N N N 188.126 222.036 246.439 ? ? ? H39 G2O 102
+G2O H40 H40  H 0 1 N N N 197.562 217.697 246.920 ? ? ? H40 G2O 103
+G2O H41 H41  H 0 1 N N N 198.427 216.705 245.698 ? ? ? H41 G2O 104
+G2O H42 H42  H 0 1 N N N 194.672 207.618 248.566 ? ? ? H42 G2O 105
+G2O H43 H43  H 0 1 N N N 202.354 206.804 244.324 ? ? ? H43 G2O 106
+G2O H44 H44  H 0 1 N N N 203.123 208.422 244.188 ? ? ? H44 G2O 107
+G2O H45 H45  H 0 1 N N N 196.479 216.312 244.687 ? ? ? H45 G2O 108
+G2O H46 H46  H 0 1 N N N 195.901 215.463 246.161 ? ? ? H46 G2O 109
+G2O H47 H47  H 0 1 N N N 194.634 206.070 246.781 ? ? ? H47 G2O 110
+G2O H48 H48  H 0 1 N N N 195.624 207.245 245.714 ? ? ? H48 G2O 111
+G2O H49 H49  H 0 1 N N N 204.514 206.873 245.495 ? ? ? H49 G2O 112
+G2O H50 H50  H 0 1 N N N 203.926 208.234 246.509 ? ? ? H50 G2O 113
+G2O H51 H51  H 0 1 N N N 203.157 206.616 246.644 ? ? ? H51 G2O 114
+G2O H52 H52  H 0 1 N N N 200.090 216.711 245.214 ? ? ? H52 G2O 115
+G2O H53 H53  H 0 1 N N N 202.785 219.808 246.891 ? ? ? H53 G2O 116
+G2O H54 H54  H 0 1 N N N 201.093 219.567 247.446 ? ? ? H54 G2O 117
+G2O H55 H55  H 0 1 N N N 202.446 218.772 248.320 ? ? ? H55 G2O 118
+G2O H56 H56  H 0 1 N N N 195.293 213.098 248.459 ? ? ? H56 G2O 119
+G2O H57 H57  H 0 1 N N N 197.752 207.476 246.868 ? ? ? H57 G2O 120
+G2O H58 H58  H 0 1 N N N 203.038 210.436 244.796 ? ? ? H58 G2O 121
+G2O H59 H59  H 0 1 N N N 195.970 214.790 249.750 ? ? ? H59 G2O 122
+G2O H60 H60  H 0 1 N N N 197.752 215.010 249.810 ? ? ? H60 G2O 123
+G2O H61 H61  H 0 1 N N N 196.682 216.422 249.517 ? ? ? H61 G2O 124
+G2O H62 H62  H 0 1 N N N 193.351 209.849 248.487 ? ? ? H62 G2O 125
+G2O H63 H63  H 0 1 N N N 194.042 211.218 249.423 ? ? ? H63 G2O 126
+G2O H64 H64  H 0 1 N N N 193.502 211.470 247.728 ? ? ? H64 G2O 127
+G2O H65 H65  H 0 1 N N N 200.855 205.712 245.531 ? ? ? H65 G2O 128
+G2O H66 H66  H 0 1 N N N 199.795 205.957 246.960 ? ? ? H66 G2O 129
+G2O H67 H67  H 0 1 N N N 199.108 206.066 245.304 ? ? ? H67 G2O 130
+G2O H68 H68  H 0 1 N N N 203.899 212.946 243.279 ? ? ? H68 G2O 131
+G2O H69 H69  H 0 1 N N N 204.687 213.843 244.621 ? ? ? H69 G2O 132
+G2O H70 H70  H 0 1 N N N 204.511 212.058 244.715 ? ? ? H70 G2O 133
+G2O H71 H71  H 0 1 N N N 198.508 216.346 248.214 ? ? ? H71 G2O 134
+G2O H72 H72  H 0 1 N N N 195.955 215.423 247.508 ? ? ? H72 G2O 135
+#
+loop_
+_chem_comp_bond.comp_id                  
+_chem_comp_bond.atom_id_1                
+_chem_comp_bond.atom_id_2                
+_chem_comp_bond.value_order              
+_chem_comp_bond.pdbx_aromatic_flag       
+_chem_comp_bond.pdbx_stereo_config       
+_chem_comp_bond.pdbx_ordinal             
+G2O  C1  C2 SING N N   1
+G2O  C1 O2A SING N N   2
+G2O  C2  C3 DOUB N Z   3
+G2O  C3  C4 SING N N   4
+G2O  C3  C5 SING N N   5
+G2O  C5  C6 SING N N   6
+G2O  C6  C7 DOUB N E   7
+G2O  NB C1B SING N N   8
+G2O  NB C4B SING N N   9
+G2O  NB  MG SING N N  10
+G2O  ND C1D SING Y N  11
+G2O  ND C4D SING Y N  12
+G2O  ND  MG SING N N  13
+G2O C10 C11 SING N N  14
+G2O C10  C8 SING N N  15
+G2O C11 C12 SING N N  16
+G2O C12 C13 SING N N  17
+G2O C13 C14 SING N N  18
+G2O C13 C15 SING N N  19
+G2O C15 C16 SING N N  20
+G2O C16 C17 SING N N  21
+G2O C17 C18 SING N N  22
+G2O C18 C19 SING N N  23
+G2O C18 C20 SING N N  24
+G2O C1A C2A SING N N  25
+G2O C1A CHA DOUB N N  26
+G2O C1A  NA SING N N  27
+G2O C1B C2B SING N N  28
+G2O C1B CHB DOUB N N  29
+G2O C1C C2C SING N N  30
+G2O C1C CHC SING N N  31
+G2O C1C  NC DOUB N N  32
+G2O C1D C2D DOUB Y N  33
+G2O C1D CHD SING N N  34
+G2O C2A C3A SING N N  35
+G2O C2A CAA SING N N  36
+G2O C2B C3B DOUB N N  37
+G2O C2B CMB SING N N  38
+G2O C2C C3C DOUB N N  39
+G2O C2C CMC SING N N  40
+G2O C2D C3D SING Y N  41
+G2O C2D CMD SING N N  42
+G2O C3A C4A SING N N  43
+G2O C3A CMA SING N N  44
+G2O C3B C4B SING N N  45
+G2O C3B CAB SING N N  46
+G2O C3C C4C SING N N  47
+G2O C3C CAC SING N N  48
+G2O C3D C4D DOUB Y N  49
+G2O C3D CAD SING N N  50
+G2O C4A CHB SING N N  51
+G2O C4A  NA DOUB N N  52
+G2O C4B CHC DOUB N N  53
+G2O C4C CHD DOUB N N  54
+G2O C4C  NC SING N N  55
+G2O C4D CHA SING N N  56
+G2O  C7  C8 SING N N  57
+G2O  C8  C9 SING N N  58
+G2O CAA CBA SING N N  59
+G2O CAB CBB DOUB N N  60
+G2O CAC CBC SING N N  61
+G2O CAD CBD SING N N  62
+G2O CAD OBD DOUB N N  63
+G2O CBA CGA SING N N  64
+G2O CBD CGD SING N N  65
+G2O CBD CHA SING N N  66
+G2O CED O2D SING N N  67
+G2O CGA O1A DOUB N N  68
+G2O CGA O2A SING N N  69
+G2O CGD O1D DOUB N N  70
+G2O CGD O2D SING N N  71
+G2O  NA  MG SING N N  72
+G2O  NC  MG SING N N  73
+G2O  C1  H1 SING N N  74
+G2O  C1  H2 SING N N  75
+G2O  C2  H3 SING N N  76
+G2O  C4  H4 SING N N  77
+G2O  C4  H5 SING N N  78
+G2O  C4  H6 SING N N  79
+G2O  C5  H7 SING N N  80
+G2O  C5  H8 SING N N  81
+G2O  C6  H9 SING N N  82
+G2O C10 H11 SING N N  83
+G2O C10 H12 SING N N  84
+G2O C11 H13 SING N N  85
+G2O C11 H14 SING N N  86
+G2O C12 H15 SING N N  87
+G2O C12 H16 SING N N  88
+G2O C13 H17 SING N N  89
+G2O C14 H18 SING N N  90
+G2O C14 H19 SING N N  91
+G2O C14 H20 SING N N  92
+G2O C15 H21 SING N N  93
+G2O C15 H22 SING N N  94
+G2O C16 H23 SING N N  95
+G2O C16 H24 SING N N  96
+G2O C17 H25 SING N N  97
+G2O C17 H26 SING N N  98
+G2O C18 H27 SING N N  99
+G2O C19 H28 SING N N 100
+G2O C19 H29 SING N N 101
+G2O C19 H30 SING N N 102
+G2O C20 H31 SING N N 103
+G2O C20 H32 SING N N 104
+G2O C20 H33 SING N N 105
+G2O  C7 H34 SING N N 106
+G2O  C8 H36 SING N N 107
+G2O  C9 H37 SING N N 108
+G2O  C9 H38 SING N N 109
+G2O  C9 H39 SING N N 110
+G2O CAA H40 SING N N 111
+G2O CAA H41 SING N N 112
+G2O CAB H42 SING N N 113
+G2O CAC H43 SING N N 114
+G2O CAC H44 SING N N 115
+G2O CBA H45 SING N N 116
+G2O CBA H46 SING N N 117
+G2O CBB H47 SING N N 118
+G2O CBB H48 SING N N 119
+G2O CBC H49 SING N N 120
+G2O CBC H50 SING N N 121
+G2O CBC H51 SING N N 122
+G2O CBD H52 SING N N 123
+G2O CED H53 SING N N 124
+G2O CED H54 SING N N 125
+G2O CED H55 SING N N 126
+G2O CHB H56 SING N N 127
+G2O CHC H57 SING N N 128
+G2O CHD H58 SING N N 129
+G2O CMA H59 SING N N 130
+G2O CMA H60 SING N N 131
+G2O CMA H61 SING N N 132
+G2O CMB H62 SING N N 133
+G2O CMB H63 SING N N 134
+G2O CMB H64 SING N N 135
+G2O CMC H65 SING N N 136
+G2O CMC H66 SING N N 137
+G2O CMC H67 SING N N 138
+G2O CMD H68 SING N N 139
+G2O CMD H69 SING N N 140
+G2O CMD H70 SING N N 141
+G2O C2A H71 SING N N 142
+G2O C3A H72 SING N N 143
+#
+loop_
+_pdbx_chem_comp_descriptor.comp_id               
+_pdbx_chem_comp_descriptor.type                  
+_pdbx_chem_comp_descriptor.program               
+_pdbx_chem_comp_descriptor.program_version       
+_pdbx_chem_comp_descriptor.descriptor            
+G2O            InChI                InChI  1.03 InChI=1S/C55H71N4O5.Mg/c1-13-39-35(8)42-28-44-37(10)41(24-25-48(60)64-27-26-34(7)23-17-22-33(6)21-16-20-32(5)19-15-18-31(3)4)52(58-44)50-51(55(62)63-12)54(61)49-38(11)45(59-53(49)50)30-47-40(14-2)36(9)43(57-47)29-46(39)56-42;/h13,17,22,26,28-33,37,41,51H,1,14-16,18-21,23-25,27H2,2-12H3,(H-,56,57,58,59,61);/q-1;+2/p-1/b22-17+,34-26-;/t32-,33-,37+,41+,51-;/m1./s1
+G2O         InChIKey                InChI  1.03                                                                                                                                                                                                                                                                                                                                                 VQHOHZHNXFAELH-DMJPLALWSA-M
+G2O SMILES_CANONICAL               CACTVS 3.385                                                                                                                                                                                                                CCC1=C(C)C2=NC1=Cc3n4[Mg][N@]5C(=CC6=NC(=C7[C@@H](C(=O)OC)C(=O)c(c3C)c47)[C@@H](CCC(=O)OC\C=C(\C)C\C=C\[C@H](C)CCC[C@H](C)CCCC(C)C)[C@@H]6C)C(=C(C=C)C5=C2)C
+G2O           SMILES               CACTVS 3.385                                                                                                                                                                                                                             CCC1=C(C)C2=NC1=Cc3n4[Mg][N]5C(=CC6=NC(=C7[CH](C(=O)OC)C(=O)c(c3C)c47)[CH](CCC(=O)OCC=C(C)CC=C[CH](C)CCC[CH](C)CCCC(C)C)[CH]6C)C(=C(C=C)C5=C2)C
+G2O SMILES_CANONICAL "OpenEye OEToolkits" 2.0.7                                                                                                                                                                                                                CCC1=C(C2=[N]3C1=Cc4c(c5c6n4[Mg]37N8C(=CC9=[N]7C(=C6[C@H](C5=O)C(=O)OC)[C@H]([C@@H]9C)CCC(=O)OC/C=C(/C)\CC=C[C@H](C)CCC[C@H](C)CCCC(C)C)C(=C(C8=C2)C=C)C)C)C
+G2O           SMILES "OpenEye OEToolkits" 2.0.7                                                                                                                                                                                                                                        CCC1=C(C2=[N]3C1=Cc4c(c5c6n4[Mg]37N8C(=CC9=[N]7C(=C6C(C5=O)C(=O)OC)C(C9C)CCC(=O)OCC=C(C)CC=CC(C)CCCC(C)CCCC(C)C)C(=C(C8=C2)C=C)C)C)C
+#
+loop_
+_pdbx_chem_comp_audit.comp_id               
+_pdbx_chem_comp_audit.action_type           
+_pdbx_chem_comp_audit.date                  
+_pdbx_chem_comp_audit.processing_site       
+G2O "Create component" 2020-07-16 PDBJ
+G2O  "Initial release" 2020-11-25 RCSB
+#
+loop_
+_software.name              
+_software.version           
+_software.description       
+       rdkit 2020.03.4                                      "Core functionality."
+pdbeccdutils     0.5.8 "Wrapper to provide 2D templates and molecular fragments."
+#
+loop_
+_pdbe_chem_comp_atom_depiction.comp_id             
+_pdbe_chem_comp_atom_depiction.atom_id             
+_pdbe_chem_comp_atom_depiction.element             
+_pdbe_chem_comp_atom_depiction.model_Cartn_x       
+_pdbe_chem_comp_atom_depiction.model_Cartn_y       
+_pdbe_chem_comp_atom_depiction.pdbx_ordinal        
+G2O  C1  C  -3.317  -2.485  1
+G2O  C2  C  -4.713  -1.936  2
+G2O  C3  C  -5.886  -2.870  3
+G2O  C4  C  -7.282  -2.321  4
+G2O  C5  C  -5.664  -4.353  5
+G2O  C6  C  -6.837  -5.288  6
+G2O  NB  N   7.508   2.029  7
+G2O  ND  N   7.558  -2.079  8
+G2O C10  C  -9.184  -7.156  9
+G2O C11  C -10.358  -8.091 10
+G2O C12  C -11.754  -7.542 11
+G2O C13  C -12.927  -8.476 12
+G2O C14  C -14.323  -7.927 13
+G2O C15  C -12.705  -9.960 14
+G2O C16  C -13.878 -10.894 15
+G2O C17  C -13.656 -12.377 16
+G2O C18  C -14.829 -13.312 17
+G2O C19  C -14.607 -14.795 18
+G2O C1A  C   4.452  -1.178 19
+G2O C1B  C   6.305   2.981 20
+G2O C1C  C  10.662   1.178 21
+G2O C1D  C   8.761  -2.981 22
+G2O C20  C -16.225 -12.763 23
+G2O C2A  C   3.000  -0.776 24
+G2O C2B  C   6.757   4.433 25
+G2O C2C  C  12.116   0.776 26
+G2O C2D  C   8.309  -4.433 27
+G2O C3A  C   3.000   0.726 28
+G2O C3B  C   8.259   4.433 29
+G2O C3C  C  12.116  -0.726 30
+G2O C3D  C   6.807  -4.433 31
+G2O C4A  C   4.452   1.128 32
+G2O C4B  C   8.761   3.031 33
+G2O C4C  C  10.712  -1.128 34
+G2O C4D  C   6.355  -3.031 35
+G2O  C7  C  -6.615  -6.771 36
+G2O  C8  C  -7.788  -7.706 37
+G2O  C9  C  -7.566  -9.189 38
+G2O CAA  C   1.822  -1.714 39
+G2O CAB  C   9.141   5.647 40
+G2O CAC  C  13.331  -1.608 41
+G2O CAD  C   8.277  -1.293 42
+G2O CBA  C   0.426  -1.165 43
+G2O CBB  C   8.531   7.018 44
+G2O CBC  C  14.701  -0.998 45
+G2O CBD  C   7.790  -0.426 46
+G2O CED  C  12.196   5.603 47
+G2O CGA  C  -0.748  -2.099 48
+G2O CGD  C  10.279   3.849 49
+G2O CHA  C   4.904  -2.579 50
+G2O CHB  C   4.853   2.579 51
+G2O CHC  C  10.213   2.579 52
+G2O CHD  C  10.263  -2.579 53
+G2O CMA  C   1.785   1.608 54
+G2O CMB  C   5.848   5.651 55
+G2O CMC  C  13.296   1.716 56
+G2O CMD  C   9.218  -5.651 57
+G2O  NA  N   5.303  -0.025 58
+G2O  NC  N   9.811  -0.025 59
+G2O O1A  O  -0.525  -3.583 60
+G2O O1D  O   9.700   4.918 61
+G2O O2A  O  -2.144  -1.550 62
+G2O O2D  O  11.744   4.173 63
+G2O OBD  O  17.582   1.368 64
+G2O  MG Mg   8.061   0.635 65
+#
+loop_
+_pdbe_chem_comp_bond_depiction.comp_id            
+_pdbe_chem_comp_bond_depiction.atom_id_1          
+_pdbe_chem_comp_bond_depiction.atom_id_2          
+_pdbe_chem_comp_bond_depiction.value_order        
+_pdbe_chem_comp_bond_depiction.bond_dir           
+_pdbe_chem_comp_bond_depiction.pdbx_ordinal       
+G2O  C1  C2 SINGLE   ENDUPRIGHT  1
+G2O  C1 O2A SINGLE         NONE  2
+G2O  C2  C3 DOUBLE         NONE  3
+G2O  C3  C4 SINGLE   ENDUPRIGHT  4
+G2O  C3  C5 SINGLE ENDDOWNRIGHT  5
+G2O  C5  C6 SINGLE   ENDUPRIGHT  6
+G2O  C6  C7 DOUBLE         NONE  7
+G2O  NB C1B SINGLE         NONE  8
+G2O  NB C4B SINGLE         NONE  9
+G2O  NB  MG SINGLE         NONE 10
+G2O  ND C1D SINGLE         NONE 11
+G2O  ND C4D SINGLE         NONE 12
+G2O  ND  MG SINGLE         NONE 13
+G2O C10 C11 SINGLE         NONE 14
+G2O C10  C8 SINGLE         NONE 15
+G2O C11 C12 SINGLE         NONE 16
+G2O C12 C13 SINGLE         NONE 17
+G2O C13 C14 SINGLE   BEGINWEDGE 18
+G2O C13 C15 SINGLE         NONE 19
+G2O C15 C16 SINGLE         NONE 20
+G2O C16 C17 SINGLE         NONE 21
+G2O C17 C18 SINGLE         NONE 22
+G2O C18 C19 SINGLE         NONE 23
+G2O C18 C20 SINGLE         NONE 24
+G2O C1A C2A SINGLE         NONE 25
+G2O C1A CHA DOUBLE         NONE 26
+G2O C1A  NA SINGLE         NONE 27
+G2O C1B C2B SINGLE         NONE 28
+G2O C1B CHB DOUBLE         NONE 29
+G2O C1C C2C SINGLE         NONE 30
+G2O C1C CHC SINGLE         NONE 31
+G2O C1C  NC DOUBLE         NONE 32
+G2O C1D C2D DOUBLE         NONE 33
+G2O C1D CHD SINGLE         NONE 34
+G2O C2A C3A SINGLE         NONE 35
+G2O C2A CAA SINGLE   BEGINWEDGE 36
+G2O C2B C3B DOUBLE         NONE 37
+G2O C2B CMB SINGLE         NONE 38
+G2O C2C C3C DOUBLE         NONE 39
+G2O C2C CMC SINGLE         NONE 40
+G2O C2D C3D SINGLE         NONE 41
+G2O C2D CMD SINGLE         NONE 42
+G2O C3A C4A SINGLE         NONE 43
+G2O C3A CMA SINGLE    BEGINDASH 44
+G2O C3B C4B SINGLE         NONE 45
+G2O C3B CAB SINGLE         NONE 46
+G2O C3C C4C SINGLE         NONE 47
+G2O C3C CAC SINGLE         NONE 48
+G2O C3D C4D DOUBLE         NONE 49
+G2O C3D CAD SINGLE         NONE 50
+G2O C4A CHB SINGLE         NONE 51
+G2O C4A  NA DOUBLE         NONE 52
+G2O C4B CHC DOUBLE         NONE 53
+G2O C4C CHD DOUBLE         NONE 54
+G2O C4C  NC SINGLE         NONE 55
+G2O C4D CHA SINGLE         NONE 56
+G2O  C7  C8 SINGLE   ENDUPRIGHT 57
+G2O  C8  C9 SINGLE    BEGINDASH 58
+G2O CAA CBA SINGLE         NONE 59
+G2O CAB CBB DOUBLE         NONE 60
+G2O CAC CBC SINGLE         NONE 61
+G2O CAD CBD SINGLE         NONE 62
+G2O CAD OBD DOUBLE         NONE 63
+G2O CBA CGA SINGLE         NONE 64
+G2O CBD CGD SINGLE   BEGINWEDGE 65
+G2O CBD CHA SINGLE         NONE 66
+G2O CED O2D SINGLE         NONE 67
+G2O CGA O1A DOUBLE         NONE 68
+G2O CGA O2A SINGLE         NONE 69
+G2O CGD O1D DOUBLE         NONE 70
+G2O CGD O2D SINGLE         NONE 71
+G2O  NA  MG SINGLE         NONE 72
+G2O  NC  MG SINGLE         NONE 73
+#
+loop_
+_pdbe_chem_comp_substructure.comp_id                      
+_pdbe_chem_comp_substructure.substructure_name            
+_pdbe_chem_comp_substructure.id                           
+_pdbe_chem_comp_substructure.substructure_type            
+_pdbe_chem_comp_substructure.substructure_smiles          
+_pdbe_chem_comp_substructure.substructure_inchis          
+_pdbe_chem_comp_substructure.substructure_inchikeys       
+G2O MurckoScaffold S1 scaffold O=C1CC2=C3CCC4=[N+]3[Mg-2]35n6c(cc1c62)C=C1C=CC(=[N+]13)C=c1ccc(n15)=C4 InChI=1S/C22H15N4O.Mg/c27-21-11-18-20-6-5-16(25-20)8-14-2-1-12(23-14)7-13-3-4-15(24-13)9-17-10-19(21)22(18)26-17;/h1-4,7-10H,5-6,11H2,(H-,23,24,25,26,27);/q-1;+2/p-1 JQZXFDVZJQFAHW-UHFFFAOYSA-M
+G2O   porphin-like F1 fragment    C1~C~C2~C~C3~C~C~C(~C~C4~C~C~C(~C~C5~C~C~C(~C~C~1~N~2)~N~5)~N~4)~N~3                                                                                                                                                                     .                           .
+G2O    1-pyrroline F2 fragment                                                                C1=NCCC1                                                                                                                               InChI=1S/C4H7N/c1-2-4-5-3-1/h3H,1-2,4H2 ZVJHJDDKYZXRJI-UHFFFAOYSA-N
+G2O        pyrrole F3 fragment                                                              c1cc[nH]c1                                                                                                                                     InChI=1S/C4H5N/c1-2-4-5-3-1/h1-5H KAESVJOAVNADME-UHFFFAOYSA-N
+#
+loop_
+_pdbe_chem_comp_substructure_mapping.comp_id                    
+_pdbe_chem_comp_substructure_mapping.atom_id                    
+_pdbe_chem_comp_substructure_mapping.substructure_id            
+_pdbe_chem_comp_substructure_mapping.substructure_ordinal       
+G2O C2A F1 1
+G2O C3A F1 1
+G2O C4A F1 1
+G2O CHB F1 1
+G2O C1B F1 1
+G2O  NB F1 1
+G2O C4B F1 1
+G2O C3B F1 1
+G2O C2B F1 1
+G2O CHC F1 1
+G2O C1C F1 1
+G2O  NC F1 1
+G2O C4C F1 1
+G2O CHD F1 1
+G2O C1D F1 1
+G2O  ND F1 1
+G2O C4D F1 1
+G2O CHA F1 1
+G2O C1A F1 1
+G2O  NA F1 1
+G2O C3D F1 1
+G2O C2D F1 1
+G2O C3C F1 1
+G2O C2C F1 1
+G2O C1A F2 1
+G2O  NA F2 1
+G2O C4A F2 1
+G2O C3A F2 1
+G2O C2A F2 1
+G2O C1B F3 1
+G2O C2B F3 1
+G2O C3B F3 1
+G2O C4B F3 1
+G2O  NB F3 1
+G2O C1D F3 2
+G2O C2D F3 2
+G2O C3D F3 2
+G2O C4D F3 2
+G2O  ND F3 2
+G2O  NB S1 1
+G2O  ND S1 1
+G2O C1A S1 1
+G2O C1B S1 1
+G2O C1C S1 1
+G2O C1D S1 1
+G2O C2A S1 1
+G2O C2B S1 1
+G2O C2C S1 1
+G2O C2D S1 1
+G2O C3A S1 1
+G2O C3B S1 1
+G2O C3C S1 1
+G2O C3D S1 1
+G2O C4A S1 1
+G2O C4B S1 1
+G2O C4C S1 1
+G2O C4D S1 1
+G2O CAD S1 1
+G2O CBD S1 1
+G2O CHA S1 1
+G2O CHB S1 1
+G2O CHC S1 1
+G2O CHD S1 1
+G2O  NA S1 1
+G2O  NC S1 1
+G2O OBD S1 1
+G2O  MG S1 1
+#
+_pdbe_chem_comp_rdkit_properties.comp_id                               G2O
+_pdbe_chem_comp_rdkit_properties.exactmw                               890.520
+_pdbe_chem_comp_rdkit_properties.lipinskiHBA                           9
+_pdbe_chem_comp_rdkit_properties.lipinskiHBD                           0
+_pdbe_chem_comp_rdkit_properties.NumRotatableBonds                     30
+_pdbe_chem_comp_rdkit_properties.NumHBD                                0
+_pdbe_chem_comp_rdkit_properties.NumHBA                                7
+_pdbe_chem_comp_rdkit_properties.NumHeteroatoms                        10
+_pdbe_chem_comp_rdkit_properties.NumAmideBonds                         0
+_pdbe_chem_comp_rdkit_properties.FractionCSP3                          0.509
+_pdbe_chem_comp_rdkit_properties.NumRings                              9
+_pdbe_chem_comp_rdkit_properties.NumAromaticRings                      2
+_pdbe_chem_comp_rdkit_properties.NumAliphaticRings                     7
+_pdbe_chem_comp_rdkit_properties.NumSaturatedRings                     0
+_pdbe_chem_comp_rdkit_properties.NumHeterocycles                       8
+_pdbe_chem_comp_rdkit_properties.NumAromaticHeterocycles               2
+_pdbe_chem_comp_rdkit_properties.NumSaturatedHeterocycles              0
+_pdbe_chem_comp_rdkit_properties.NumAliphaticHeterocycles              6
+_pdbe_chem_comp_rdkit_properties.NumSpiroAtoms                         1
+_pdbe_chem_comp_rdkit_properties.NumBridgeheadAtoms                    0
+_pdbe_chem_comp_rdkit_properties.NumAtomStereoCenters                  6
+_pdbe_chem_comp_rdkit_properties.NumUnspecifiedAtomStereoCenters       1
+_pdbe_chem_comp_rdkit_properties.labuteASA                             488.958
+_pdbe_chem_comp_rdkit_properties.tpsa                                  85.550
+_pdbe_chem_comp_rdkit_properties.CrippenClogP                          10.904
+_pdbe_chem_comp_rdkit_properties.CrippenMR                             261.267
+_pdbe_chem_comp_rdkit_properties.NumHeavyAtoms                         65
+
+#
+loop_
+_pdbe_chem_comp_rdkit_conformer.comp_id             
+_pdbe_chem_comp_rdkit_conformer.atom_id             
+_pdbe_chem_comp_rdkit_conformer.Cartn_x_rdkit       
+_pdbe_chem_comp_rdkit_conformer.Cartn_y_rdkit       
+_pdbe_chem_comp_rdkit_conformer.Cartn_z_rdkit       
+_pdbe_chem_comp_rdkit_conformer.rdkit_method        
+_pdbe_chem_comp_rdkit_conformer.rdkit_ordinal       
+G2O  C1   1.862 -2.277  4.100 ETKDGv2   1
+G2O  C2   3.061 -1.637  4.746 ETKDGv2   2
+G2O  C3   3.379 -0.324  4.672 ETKDGv2   3
+G2O  C4   4.650  0.139  5.339 ETKDGv2   4
+G2O  C5   2.536  0.705  3.945 ETKDGv2   5
+G2O  C6   3.234  1.199  2.710 ETKDGv2   6
+G2O  NB  -4.298 -0.203 -2.301 ETKDGv2   7
+G2O  ND  -5.417  2.248  0.223 ETKDGv2   8
+G2O C10   5.607  1.088  0.628 ETKDGv2   9
+G2O C11   6.347 -0.215  1.020 ETKDGv2  10
+G2O C12   7.043 -0.907 -0.174 ETKDGv2  11
+G2O C13   8.555 -0.577 -0.284 ETKDGv2  12
+G2O C14   8.811  0.901 -0.612 ETKDGv2  13
+G2O C15   9.282 -1.525 -1.273 ETKDGv2  14
+G2O C16   8.888 -1.362 -2.761 ETKDGv2  15
+G2O C17   9.939 -0.569 -3.559 ETKDGv2  16
+G2O C18   9.469 -0.225 -4.991 ETKDGv2  17
+G2O C19  10.455  0.751 -5.647 ETKDGv2  18
+G2O C1A  -3.348  0.472  1.836 ETKDGv2  19
+G2O C1B  -3.091 -0.961 -2.298 ETKDGv2  20
+G2O C1C  -7.340 -0.635 -2.048 ETKDGv2  21
+G2O C1D  -6.740  2.655  0.582 ETKDGv2  22
+G2O C20   9.320 -1.480 -5.864 ETKDGv2  23
+G2O C2A  -2.238 -0.266  2.522 ETKDGv2  24
+G2O C2B  -3.014 -1.708 -3.561 ETKDGv2  25
+G2O C2C  -8.803 -0.550 -2.198 ETKDGv2  26
+G2O C2D  -6.701  3.452  1.661 ETKDGv2  27
+G2O C3A  -1.598 -1.018  1.312 ETKDGv2  28
+G2O C3B  -4.215 -1.655 -4.146 ETKDGv2  29
+G2O C3C  -9.246  0.370 -1.335 ETKDGv2  30
+G2O C3D  -5.321  3.411  2.151 ETKDGv2  31
+G2O C4A  -2.610 -0.833  0.210 ETKDGv2  32
+G2O C4B  -5.104 -0.868 -3.270 ETKDGv2  33
+G2O C4C  -8.069  0.842 -0.600 ETKDGv2  34
+G2O C4D  -4.659  2.599  1.368 ETKDGv2  35
+G2O  C7   3.374  0.425  1.623 ETKDGv2  36
+G2O  C8   4.086  0.921  0.386 ETKDGv2  37
+G2O  C9   3.787  0.009 -0.810 ETKDGv2  38
+G2O CAA  -2.810 -1.233  3.591 ETKDGv2  39
+G2O CAB  -4.576 -2.338 -5.408 ETKDGv2  40
+G2O CAC -10.668  0.841 -1.168 ETKDGv2  41
+G2O CAD  -4.834  3.278  3.516 ETKDGv2  42
+G2O CBA  -1.829 -1.508  4.742 ETKDGv2  43
+G2O CBB  -5.542 -1.893 -6.208 ETKDGv2  44
+G2O CBC -11.307  0.189  0.052 ETKDGv2  45
+G2O CBD  -3.719  2.280  3.573 ETKDGv2  46
+G2O CED  -0.290  3.005  5.113 ETKDGv2  47
+G2O CGA  -0.602 -2.245  4.302 ETKDGv2  48
+G2O CGD  -2.399  2.946  3.827 ETKDGv2  49
+G2O CHA  -3.793  1.704  2.179 ETKDGv2  50
+G2O CHB  -2.386 -1.299 -1.192 ETKDGv2  51
+G2O CHC  -6.422 -1.149 -3.109 ETKDGv2  52
+G2O CHD  -7.988  2.016  0.067 ETKDGv2  53
+G2O CMA  -0.248 -0.405  0.923 ETKDGv2  54
+G2O CMB  -1.834 -2.501 -4.044 ETKDGv2  55
+G2O CMC  -9.628 -1.266 -3.227 ETKDGv2  56
+G2O CMD  -7.881  3.887  2.478 ETKDGv2  57
+G2O  NA  -3.618 -0.126  0.585 ETKDGv2  58
+G2O  NC  -6.963  0.048 -1.017 ETKDGv2  59
+G2O O1A  -0.712 -3.335  3.676 ETKDGv2  60
+G2O O1D  -2.030  3.921  3.114 ETKDGv2  61
+G2O O2A   0.658 -1.743  4.640 ETKDGv2  62
+G2O O2D  -1.573  2.456  4.841 ETKDGv2  63
+G2O OBD  -5.318  3.874  4.514 ETKDGv2  64
+G2O  MG  -5.072  0.493 -0.628 ETKDGv2  65
+G2O  H1   1.889 -2.121  3.003 ETKDGv2  66
+G2O  H2   1.899 -3.371  4.294 ETKDGv2  67
+G2O  H3   3.726 -2.301  5.292 ETKDGv2  68
+G2O  H4   5.521 -0.384  4.890 ETKDGv2  69
+G2O  H5   4.795  1.233  5.210 ETKDGv2  70
+G2O  H6   4.609 -0.083  6.426 ETKDGv2  71
+G2O  H7   1.528  0.338  3.678 ETKDGv2  72
+G2O  H8   2.380  1.565  4.629 ETKDGv2  73
+G2O  H9   3.626  2.212  2.707 ETKDGv2  74
+G2O H11   6.065  1.547 -0.273 ETKDGv2  75
+G2O H12   5.749  1.828  1.446 ETKDGv2  76
+G2O H13   5.639 -0.932  1.488 ETKDGv2  77
+G2O H14   7.093  0.018  1.811 ETKDGv2  78
+G2O H15   6.938 -2.004 -0.031 ETKDGv2  79
+G2O H16   6.520 -0.663 -1.120 ETKDGv2  80
+G2O H17   9.011 -0.772  0.712 ETKDGv2  81
+G2O H18   8.289  1.198 -1.545 ETKDGv2  82
+G2O H19   8.457  1.547  0.218 ETKDGv2  83
+G2O H20   9.901  1.083 -0.727 ETKDGv2  84
+G2O H21   9.069 -2.573 -0.965 ETKDGv2  85
+G2O H22  10.381 -1.401 -1.151 ETKDGv2  86
+G2O H23   7.897 -0.879 -2.867 ETKDGv2  87
+G2O H24   8.804 -2.378 -3.203 ETKDGv2  88
+G2O H25  10.156  0.378 -3.023 ETKDGv2  89
+G2O H26  10.886 -1.151 -3.603 ETKDGv2  90
+G2O H27   8.481  0.283 -4.935 ETKDGv2  91
+G2O H28  11.464  0.293 -5.728 ETKDGv2  92
+G2O H29  10.103  1.029 -6.663 ETKDGv2  93
+G2O H30  10.530  1.683 -5.046 ETKDGv2  94
+G2O H31  10.267 -2.062 -5.880 ETKDGv2  95
+G2O H32   9.060 -1.195 -6.906 ETKDGv2  96
+G2O H33   8.502 -2.126 -5.486 ETKDGv2  97
+G2O H34   2.964 -0.580  1.627 ETKDGv2  98
+G2O H36   3.674  1.923  0.134 ETKDGv2  99
+G2O H37   4.113 -1.034 -0.610 ETKDGv2 100
+G2O H38   2.695  0.001 -1.015 ETKDGv2 101
+G2O H39   4.305  0.385 -1.718 ETKDGv2 102
+G2O H40  -3.720 -0.788  4.048 ETKDGv2 103
+G2O H41  -3.141 -2.190  3.130 ETKDGv2 104
+G2O H42  -4.000 -3.198 -5.727 ETKDGv2 105
+G2O H43 -11.272  0.605 -2.069 ETKDGv2 106
+G2O H44 -10.690  1.944 -1.053 ETKDGv2 107
+G2O H45  -2.344 -2.118  5.515 ETKDGv2 108
+G2O H46  -1.537 -0.546  5.218 ETKDGv2 109
+G2O H47  -5.757 -2.410 -7.134 ETKDGv2 110
+G2O H48  -6.109 -1.002 -5.969 ETKDGv2 111
+G2O H49 -11.317 -0.916 -0.065 ETKDGv2 112
+G2O H50 -10.743  0.456  0.971 ETKDGv2 113
+G2O H51 -12.353  0.546  0.160 ETKDGv2 114
+G2O H52  -3.941  1.514  4.346 ETKDGv2 115
+G2O H53   0.191  2.423  5.926 ETKDGv2 116
+G2O H54  -0.391  4.062  5.436 ETKDGv2 117
+G2O H55   0.346  2.950  4.204 ETKDGv2 118
+G2O H56  -1.575 -2.005 -1.313 ETKDGv2 119
+G2O H57  -6.873 -1.824 -3.822 ETKDGv2 120
+G2O H58  -8.910  2.549  0.252 ETKDGv2 121
+G2O H59   0.186 -0.937  0.052 ETKDGv2 122
+G2O H60   0.459 -0.504  1.769 ETKDGv2 123
+G2O H61  -0.360  0.673  0.673 ETKDGv2 124
+G2O H62  -1.751 -2.441 -5.149 ETKDGv2 125
+G2O H63  -1.949 -3.562 -3.739 ETKDGv2 126
+G2O H64  -0.896 -2.096 -3.612 ETKDGv2 127
+G2O H65  -9.137 -2.215 -3.525 ETKDGv2 128
+G2O H66 -10.625 -1.525 -2.816 ETKDGv2 129
+G2O H67  -9.750 -0.620 -4.121 ETKDGv2 130
+G2O H68  -8.281  3.022  3.048 ETKDGv2 131
+G2O H69  -7.576  4.682  3.189 ETKDGv2 132
+G2O H70  -8.673  4.300  1.821 ETKDGv2 133
+G2O H71  -1.523  0.451  2.982 ETKDGv2 134
+G2O H72  -1.461 -2.103  1.506 ETKDGv2 135
+#

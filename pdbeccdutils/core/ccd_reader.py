@@ -26,17 +26,20 @@ of molecules. The basic use can be as easy as this:
 """
 
 import os
-import sys
 from datetime import date
 from typing import Dict, List, NamedTuple
 
 import rdkit
-from pdbecif.mmcif_io import MMCIF2Dict
-
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
-from pdbeccdutils.core.models import CCDProperties, Descriptor, ReleaseStatus
-from pdbeccdutils.helpers import collection_ext, conversions
+from pdbeccdutils.core.models import (
+    CCDProperties,
+    ConformerType,
+    Descriptor,
+    ReleaseStatus,
+)
+from pdbeccdutils.helpers import collection_ext, conversions, mol_tools, logging
+from pdbecif.mmcif_io import MMCIF2Dict
 
 
 class CCDReaderResult(NamedTuple):
@@ -52,11 +55,13 @@ class CCDReaderResult(NamedTuple):
         warnings (list[str]): A list of any warnings
             found while reading the CCD. If no warnings found `warnings`
             will be empty.
+        sanitized (bool): Whether or not the molecule was sanitized
     """
 
     warnings: List[str]
     errors: List[str]
     component: Component
+    sanitized: bool
 
 
 def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResult:
@@ -110,11 +115,10 @@ def read_pdb_components_file(
 
     for k, v in MMCIF2Dict().parse(path_to_cif).items():
         try:
-            result_bag[k] = _parse_pdb_mmcif(v)
+            result_bag[k] = _parse_pdb_mmcif(v, sanitize)
         except CCDUtilsError as e:
-            print(
-                f"ERROR: Data block {k} not processed. Reason: ({str(e)}).",
-                file=sys.stderr,
+            logging.logger.error(
+                f"ERROR: Data block {k} not processed. Reason: ({str(e)})."
             )
 
     return result_bag
@@ -134,8 +138,9 @@ def _parse_pdb_mmcif(cif_dict, sanitize=True):
         CCDReaderResult: internal representation with the results
             of parsing and Mol object.
     """
-    warnings = list()
-    errors = list()
+    warnings = []
+    errors = []
+    sanitized = False
     mol = rdkit.Chem.RWMol()
 
     atoms_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp_atom", warnings)
@@ -153,12 +158,17 @@ def _parse_pdb_mmcif(cif_dict, sanitize=True):
     _parse_pdb_bonds(mol, bonds_dict, atoms_dict, errors)
     _handle_implicit_hydrogens(mol)
 
+    if sanitize:
+        sanitized = mol_tools.sanitize(mol)
+
     descriptors = _parse_pdb_descriptors(descriptors_dict, "descriptor")
     descriptors += _parse_pdb_descriptors(identifiers_dict, "identifier")
     properties = _parse_pdb_properties(properties_dict)
 
-    comp = Component(mol.GetMol(), cif_dict, properties, descriptors, sanitize=sanitize)
-    reader_result = CCDReaderResult(warnings=warnings, errors=errors, component=comp)
+    comp = Component(mol.GetMol(), cif_dict, properties, descriptors)
+    reader_result = CCDReaderResult(
+        warnings=warnings, errors=errors, component=comp, sanitized=sanitized
+    )
 
     return reader_result
 
@@ -212,20 +222,23 @@ def _parse_pdb_conformers(mol, atoms):
     if not atoms:
         return
 
-    ideal = _setup_pdb_conformer(atoms, "pdbx_model_Cartn_{}_ideal")
-    model = _setup_pdb_conformer(atoms, "model_Cartn_{}")
+    ideal = _setup_pdb_conformer(
+        atoms, "pdbx_model_Cartn_{}_ideal", ConformerType.Ideal.name
+    )
+    model = _setup_pdb_conformer(atoms, "model_Cartn_{}", ConformerType.Model.name)
 
     mol.AddConformer(ideal, assignId=True)
     mol.AddConformer(model, assignId=True)
 
 
-def _setup_pdb_conformer(atoms, label):
+def _setup_pdb_conformer(atoms, label, name):
     """
     Setup a conformer
 
     Args:
         atoms (dict): mmcif category with the atom info.
         label (str): Namespace with the [x,y,z] coordinates.
+        name (str): Conformer name.
 
     Returns:
         rdkit.Chem.rdchem.Conformer: Conformer of the component.
@@ -242,6 +255,8 @@ def _setup_pdb_conformer(atoms, label):
 
         atom_position = rdkit.Chem.rdGeometry.Point3D(x, y, z)
         conformer.SetAtomPosition(i, atom_position)
+
+    conformer.SetProp("name", name)
 
     return conformer
 
@@ -352,6 +367,11 @@ def _parse_pdb_properties(chem_comp):
 
         rel_status = chem_comp["pdbx_release_status"][0]
         rel_status = ReleaseStatus.from_str(chem_comp["pdbx_release_status"][0])
+        weight = (
+            0.0
+            if chem_comp["formula_weight"][0] == "?"
+            else float(chem_comp["formula_weight"][0])
+        )
 
         properties = CCDProperties(
             id=chem_comp["id"][0],
@@ -359,9 +379,7 @@ def _parse_pdb_properties(chem_comp):
             formula=chem_comp["formula"][0],
             modified_date=d,
             pdbx_release_status=rel_status,
-            weight=0.0
-            if chem_comp["formula_weight"][0] == "?"
-            else float(chem_comp["formula_weight"][0]),
+            weight=weight,
         )
     return properties
 

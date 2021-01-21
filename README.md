@@ -1,4 +1,4 @@
-![GitHub](https://img.shields.io/github/license/pdbeurope/ccdutils) ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg)
+[![CodeFactor](https://www.codefactor.io/repository/github/pdbeurope/ccdutils/badge/master)](https://www.codefactor.io/repository/github/pdbeurope/ccdutils/overview/master)  ![PYPi](https://img.shields.io/pypi/v/pdbeccdutils?color=green&style=flat)  ![GitHub](https://img.shields.io/github/license/pdbeurope/ccdutils)   ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg)
 
 # pdbeccdutils
 
@@ -43,8 +43,7 @@
 
 ## TODO list
 
-* Port rest of the important functionality implemented by Oliver
-* Add more unit/regression tests to get at least higher code coverage.
+* Add more unit/regression tests to get higher code coverage.
 * Further improvements of the documentation.
 
 ## Notes
@@ -65,7 +64,7 @@ Otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing
 
 * Generate *.rst* files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
 * Alternatively, use the `recommonmark` package along with the proper configuration to get the Markdown working.
-  
+
  Use the following to generate initial markup files to be used by sphinx.  This needs to be used when adding another sub-packages.
 
 ```console

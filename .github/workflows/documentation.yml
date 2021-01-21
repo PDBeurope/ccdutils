@@ -4,44 +4,42 @@ name: ccdutils documentation
 
 on:
   push:
-    branches: 
+    branches:
       - master
 
   pull_request:
-    branches: 
+    branches:
       - master
 
-  
 jobs:
   documentation:
     name: Generate documentation
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        persist-credentials: false    
-    
-    - name: Set up python
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    
-    - name: Set up environment and generate docs
-      uses: s-weigand/setup-conda@v1
-      with:
-        activate-conda: true
-        conda-channels: conda-forge 
-    - run: |
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Set up python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Set up environment and generate docs
+        uses: s-weigand/setup-conda@v1
+        with:
+          activate-conda: true
+          conda-channels: conda-forge
+      - run: |
           conda install rdkit=2020.03.6
-          pip install -e ".[docs]"    
-    - run: |
+          pip install -e ".[docs]"
+      - run: |
           cd doc
           make html
-    
-        
-    - name: Deploy pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./doc/_build/html
+
+      - name: Deploy pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/_build/html

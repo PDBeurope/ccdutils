@@ -93,8 +93,8 @@ class FragmentLibrary:
         else:
             temp = self.library
 
-        mols = [v.mol for k, v in temp.items()]
-        names = [v.name for k, v in temp.items()]
+        mols = [v.mol for v in temp.values()]
+        names = [v.name for v in temp.values()]
         img = Chem.Draw.MolsToGridImage(
             mols, legends=names, molsPerRow=10, useSVG=use_svg
         )

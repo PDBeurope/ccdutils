@@ -1,11 +1,11 @@
 import json
 import os
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
-import pytest
+from rdkit import Chem
+
 from pdbeccdutils.core import ccd_writer
 from pdbeccdutils.core.models import ConformerType
-from rdkit import Chem
 
 
 class TestFileWrites:
@@ -70,7 +70,7 @@ class TestFileWrites:
         for ideal in True, False:
             for remove_h in True, False:
                 conformer = ConformerType.Ideal if ideal else ConformerType.Model
-                conf_id = component.conformers_mapping[conformer]
+                conf_id = component.get_conformer(conformer).GetId()
                 rdkit_mol = component.mol_no_h if remove_h else component.mol
 
                 pdb_repr = ccd_writer._to_pdb_str_fallback(
