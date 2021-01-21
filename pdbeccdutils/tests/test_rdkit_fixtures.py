@@ -1,6 +1,6 @@
 import rdkit
 import numpy as np
-from pdbeccdutils.helpers.rdkit_fixtures import fix_conformer
+from pdbeccdutils.helpers.mol_tools import fix_conformer
 
 
 class TestRDKitFixtures:

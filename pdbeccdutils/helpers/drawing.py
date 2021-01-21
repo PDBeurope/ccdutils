@@ -20,7 +20,7 @@
 
 import os
 import re
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from collections import OrderedDict
 from sys import platform
 
@@ -408,5 +408,5 @@ def _supply_font():
 
     if os.path.isfile(font):
         return font
-    else:
-        return None
+
+    return None

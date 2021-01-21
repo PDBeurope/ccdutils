@@ -2,8 +2,7 @@
 """
 
 import os
-import xml.etree.ElementTree as ET
-from pdbeccdutils.core.fragment_library import FragmentLibrary
+import defusedxml.ElementTree as ET
 from pdbeccdutils.helpers.drawing import svg_namespace
 
 

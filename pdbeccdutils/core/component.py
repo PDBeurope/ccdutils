@@ -17,9 +17,7 @@
 
 import json
 import re
-import sys
 from datetime import date
-from io import StringIO
 from typing import Any, Dict, List, Tuple
 
 import rdkit
@@ -29,6 +27,7 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.helpers import mol_tools
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (
     CCDProperties,
@@ -38,7 +37,7 @@ from pdbeccdutils.core.models import (
     ScaffoldingMethod,
     SubstructureMapping,
 )
-from pdbeccdutils.helpers import conversions, drawing
+from pdbeccdutils.helpers import conversions, drawing, logging
 from pdbeccdutils.utils import web_services
 
 METALS_SMART = (
@@ -62,20 +61,11 @@ class Component:
         ccd_cif_dict: Dict[str, Any] = None,
         properties: CCDProperties = None,
         descriptors: List[Descriptor] = None,
-        sanitize: bool = True,
     ) -> None:
-
-        self.conformers_mapping = {
-            ConformerType.AllConformers: -1,
-            ConformerType.Ideal: 0,
-            ConformerType.Model: 1 if len(mol.GetConformers()) == 2 else 1000,
-            ConformerType.Computed: 2000,
-        }
 
         self.mol = mol
         self._mol_no_h = None
         self.mol2D = None
-        self._sanitization_issues = False
         self.ccd_cif_dict = ccd_cif_dict
         self._fragments: Dict[str, SubstructureMapping] = {}
         self._scaffolds: Dict[str, SubstructureMapping] = {}
@@ -84,9 +74,6 @@ class Component:
         self._inchikey_from_rdkit = ""
         self._physchem_properties: Dict[str, Any] = {}
         self._external_mapping: List[Tuple[str, str]] = []
-
-        if sanitize:
-            self._sanitization_issues = self._sanitize()
 
         if descriptors is not None:
             self._descriptors = descriptors
@@ -306,15 +293,6 @@ class Component:
         return tuple(atom.GetProp("name") for atom in self.mol.GetAtoms())
 
     @property
-    def sanitized(self):
-        """Checks whether sanitization process succeeded.
-
-        Returns:
-            bool: Whether or not the sanitization process has been successfull
-        """
-        return self._sanitization_issues
-
-    @property
     def physchem_properties(self):
         """RDKit calculated properties related to the CCD compound
 
@@ -393,10 +371,12 @@ class Component:
         if connectivity_only:
             if len(self.inchikey) < 14 or len(self.inchikey_from_rdkit) < 14:
                 return False
-            elif self.inchikey[:14] != self.inchikey_from_rdkit[:14]:
+            if self.inchikey[:14] != self.inchikey_from_rdkit[:14]:
                 return False
-        elif self.inchikey != self.inchikey_from_rdkit:
+
+        if self.inchikey != self.inchikey_from_rdkit:
             return False
+
         return True
 
     def compute_2d(
@@ -545,52 +525,13 @@ class Component:
             rdkit.Chem.AllChem.UFFOptimizeMolecule(
                 self.mol, confId=conf_id, maxIters=1000
             )
-            self.conformers_mapping[ConformerType.Computed] = conf_id
+            conformer = self.mol.GetConformer(conf_id)
+            conformer.SetProp("name", ConformerType.Computed.name)
             return True
         except RuntimeError:
             return False  # Force field issue here
         except ValueError:
             return False  # sanitization issue here
-
-    def _sanitize(self) -> bool:
-        """
-        Attempts to sanitize mol in place. RDKit's standard error can be
-        processed in order to find out what went wrong with sanitization
-        to fix the molecule.
-
-        Args:
-            fast (bool, optional): Defaults to False. If fast option is
-                triggered original Oliver's sanitization process is run.
-
-
-        Returns:
-            bool: Result of the sanitization process.
-        """
-        rwmol = rdkit.Chem.RWMol(self.mol)
-        try:
-            success = self._fix_molecule(rwmol)
-
-            if not success:
-                return False
-
-            rdkit.Chem.Kekulize(rwmol)
-            # rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
-
-            if self.has_degenerated_conformer(ConformerType.Ideal):
-                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(
-                    rwmol, self.conformers_mapping[ConformerType.Model]
-                )
-            else:
-                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(
-                    rwmol, self.conformers_mapping[ConformerType.Ideal]
-                )
-
-            self.mol = rwmol.GetMol()
-        except Exception as e:
-            print(e, file=sys.stderr)
-            return False
-
-        return success
 
     def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
         """
@@ -604,23 +545,35 @@ class Component:
                 to be inspected.
 
         Returns:
-            bool: true if more then 1 atom has coordinates [0, 0, 0]
+            bool: True if more then 1 atom has coordinates [0, 0, 0]
         """
-        try:
-            conformer = self.mol.GetConformer(self.conformers_mapping[c_type])
-            empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
-            counter = 0
+        ok_conformer = False
 
-            for i in range(conformer.GetNumAtoms()):
-                pos = conformer.GetAtomPosition(i)
-                if pos.Distance(empty_coords) == 0.0:
-                    counter += 1
+        for c in self.mol.GetConformers():
+            if c.GetProp("name") == c_type.name:
+                ok_conformer = mol_tools.is_degenerate_conformer(c)
+                break
 
-            if counter > 1:
-                return True
-            return False
-        except ValueError:  # Conformer does not exist
-            return False
+        return ok_conformer
+
+    def get_conformer(self, c_type) -> rdkit.Chem.rdchem.Conformer:
+        """
+        Retrieve an rdkit object for a deemed conformer.
+
+        Args:
+            c_type (ConformerType): Conformer type to be retrieved.
+
+        Raises:
+            ValueError: If conformer does not exist
+
+        Returns:
+            rdkit.Chem.rdchem.Conformer: RDKit conformer object
+        """
+        for c in self.mol.GetConformers():
+            if c.GetProp("name") == c_type.name:
+                return c
+
+        raise ValueError(f"Conformer {c_type.name} does not exist.")
 
     def locate_fragment(
         self, mol: rdkit.Chem.rdchem.Mol
@@ -673,7 +626,7 @@ class Component:
                     )
 
             except Exception:
-                pass
+                logging.logger.warning(f'Error mapping fragment {v.name}.')
 
         self._fragments.update(temp)
 
@@ -758,74 +711,6 @@ class Component:
             raise CCDUtilsError(
                 f"Computing scaffolds using method {scaffolding_method.name} failed."
             )
-
-    def _fix_molecule(self, rwmol: rdkit.Chem.rdchem.RWMol):
-        """
-        Single molecule sanitization process. Presently, only valence
-        errors are taken care are of.
-
-        Args:
-            rwmol (rdkit.Chem.rdchem.RWMol): rdkit molecule to be
-                sanitized
-
-        Returns:
-            bool: Whether or not sanitization succeeded
-        """
-        attempts = 10
-        success = False
-        saved_std_err = sys.stderr
-        log = sys.stderr = StringIO()
-        rdkit.Chem.WrapLogs()
-
-        while (not success) and attempts >= 0:
-            sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
-
-            if sanitization_result == 0:
-                sys.stderr = saved_std_err
-                return True
-
-            sanitization_failures = re.findall("[a-zA-Z]{1,2}, \\d+", log.getvalue())
-            if not sanitization_failures:
-                sys.stderr = saved_std_err
-                return False
-
-            for sanitization_failure in sanitization_failures:
-
-                split_object = sanitization_failure.split(
-                    ","
-                )  # [0] element [1] valency
-                element = split_object[0]
-                valency = int(split_object[1].strip())
-
-                smarts_metal_check = rdkit.Chem.MolFromSmarts(
-                    METALS_SMART + "~[{}]".format(element)
-                )
-                metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-                rdkit.Chem.SanitizeMol(
-                    rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-                )
-
-                for (metal_index, atom_index) in metal_atom_bonds:
-                    metal_atom = rwmol.GetAtomWithIdx(metal_index)
-                    erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
-
-                    # change the bond type to dative
-                    bond = rwmol.GetBondBetweenAtoms(
-                        metal_atom.GetIdx(), erroneous_atom.GetIdx()
-                    )
-                    bond.SetBondType(rdkit.Chem.BondType.SINGLE)
-
-                    if erroneous_atom.GetExplicitValence() == valency:
-                        erroneous_atom.SetFormalCharge(
-                            erroneous_atom.GetFormalCharge() + 1
-                        )
-                        metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
-
-            attempts -= 1
-
-        sys.stderr = saved_std_err
-
-        return False
 
     def _get_atom_name(self, atom: rdkit.Chem.rdchem.Atom):
         """Supplies atom_id obrained from `_chem_comp_atom.atom_id`, see:

@@ -9,20 +9,19 @@ before_script:
 
 test:
   script:
-  - pytest --cov=pdbeccdutils
+    - pytest --cov=pdbeccdutils
 
   only:
-  - master
+    - master
 
 pages:
   script:
-  - cd doc
-  - make html
-  - mv _build/html/ ../public/
-  
+    - cd doc
+    - make html
+    - mv _build/html/ ../public/
+
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - master
-
+    - master

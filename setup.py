@@ -12,8 +12,8 @@ def get_version(rel_path):
         if line.startswith("__version__"):
             delim = '"' if '"' in line else "'"
             return line.split(delim)[1]
-    else:
-        raise RuntimeError("Unable to find version string.")
+
+    raise RuntimeError("Unable to find version string.")
 
 
 setup(
@@ -35,7 +35,13 @@ setup(
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.6",
-    install_requires=["Pillow", "scipy", "numpy", "pdbecif>=1.5",],
+    install_requires=[
+        "Pillow",
+        "scipy",
+        "numpy",
+        "requests",
+        "pdbecif>=1.5",
+    ],
     extras_require={
         "tests": ["pytest", "pytest-cov"],
         "docs": [

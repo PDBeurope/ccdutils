@@ -175,7 +175,7 @@ class PDBeChemManager:
         if ccd_reader_result.errors:
             self.logger.debug(f'errors: {";".join(ccd_reader_result.errors)}')
 
-        if not ccd_reader_result.component.sanitized:
+        if not ccd_reader_result.sanitized:
             self.logger.debug("sanitization issue.")
 
         if not ccd_reader_result.component.inchikey_from_rdkit_matches_ccd():

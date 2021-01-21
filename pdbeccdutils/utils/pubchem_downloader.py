@@ -15,18 +15,70 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import json
-import os
-import urllib
-import urllib.request
-from urllib.error import HTTPError, URLError
 
+import os
 
 import numpy
+import requests
+from pdbeccdutils.core import ccd_reader
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from pdbeccdutils.core import ccd_reader
+
+def rescale_molecule(path, factor):
+    """
+    Rescale molecule coords to a given factor
+
+    Args:
+        path (str) Path to the molecule to be rescaled.
+        factor (float): rescaling factor
+    """
+    mol = Chem.MolFromMolFile(path, sanitize=True)
+    matrix = numpy.zeros((4, 4), numpy.float)
+
+    for i in range(3):
+        matrix[i, i] = factor
+    matrix[3, 3] = 1
+
+    AllChem.TransformMol(mol, matrix)
+    Chem.MolToMolFile(mol, path)
+
+
+def download_template(destination: str, template_id: str, inchikey: str) -> bool:
+    """Download 2D layout from the PubChem FTP.
+
+    Args:
+        destination (str): Path to the pubchem template
+        template_id (str): CCD id of a pubchem template
+        inchikey (str): CCD's INCHIKey
+
+    Returns:
+        bool: If the download was successful or no.
+    """
+    pubchem_api = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound"
+
+    if os.path.isfile(destination):
+        return False
+
+    inchi_url = f"{pubchem_api}/inchikey/{inchikey}/cids/json"
+    response = requests.get(inchi_url)
+
+    if response.status_code != 200:
+        return False
+
+    json_file = response.json()
+    cid = json_file["IdentifierList"]["CID"][0]
+
+    structure_url = f"{pubchem_api}/cid/{cid}/record/SDF/?record_type=2d&response_type=save&response_basename={template_id}.sdf"
+    response = requests.get(structure_url)
+
+    if response.status_code != 200:
+        return False
+
+    with open(destination, "wb") as fp:
+        fp.write(response.content)
+
+    return True
 
 
 class PubChemDownloader:
@@ -79,63 +131,9 @@ class PubChemDownloader:
             bool: whether or not the new template has been processed
         """
         destination = os.path.join(self.pubchem_templates, f"{component.id}.sdf")
-        downloaded = self.download_template(
-            destination, component.id, component.inchikey
-        )
+        downloaded = download_template(destination, component.id, component.inchikey)
 
         if downloaded:
-            self._rescale_molecule(destination, 1.5)
+            rescale_molecule(destination, 1.5)
 
         return downloaded
-
-    def download_template(
-        self, destination: str, template_id: str, inchikey: str
-    ) -> bool:
-        """Download 2D layout from the PubChem FTP.
-
-        Args:
-            destination (str): Path to the pubchem template
-            template_id (str): CCD id of a pubchem template
-            inchikey (str): CCD's INCHIKey
-
-        Returns:
-            bool: If the download was successful or no.
-        """
-        pubchem_api = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound"
-
-        if os.path.isfile(destination):
-            return False
-
-        try:
-            inchi_url = f"{pubchem_api}/inchikey/{inchikey}/cids/json"
-            response = urllib.request.urlopen(inchi_url).read().decode("utf-8")
-            jsonFile = json.loads(response)
-            cid = jsonFile["IdentifierList"]["CID"][0]
-
-            structure_url = f"{pubchem_api}/cid/{cid}/record/SDF/?record_type=2d&response_type=save&response_basename={template_id}.sdf"
-            urllib.request.urlretrieve(structure_url, destination)
-
-            return True
-
-        except HTTPError:
-            return False
-        except URLError:
-            return False
-
-    def _rescale_molecule(self, path, factor):
-        """
-        Rescale molecule coords to a given factor
-
-        Args:
-            path (str) Path to the molecule to be rescaled.
-            factor (float): rescaling factor
-        """
-        mol = Chem.MolFromMolFile(path, sanitize=True)
-        matrix = numpy.zeros((4, 4), numpy.float)
-
-        for i in range(3):
-            matrix[i, i] = factor
-        matrix[3, 3] = 1
-
-        AllChem.TransformMol(mol, matrix)
-        Chem.MolToMolFile(mol, path)

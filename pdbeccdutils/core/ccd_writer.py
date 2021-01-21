@@ -28,15 +28,15 @@ import math
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from typing import List
-from xml.dom import minidom
-
-import pdbecif.mmcif_io as mmcif
-import rdkit
 
 import pdbeccdutils
+import pdbecif.mmcif_io as mmcif
+import rdkit
+from defusedxml import minidom
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
+from pdbeccdutils.helpers.logging import logger
 
 
 def write_molecule(
@@ -165,24 +165,24 @@ def to_sdf_str(
     Returns:
         str: String representation of the component in the SDF format
     """
-    (mol_to_save, conf_id, conf_type) = _prepate_structure(
-        component, remove_hs, conf_type
-    )
+    (mol_to_save, _, conf_type) = _prepate_structure(component, remove_hs, conf_type)
 
     mol_block = []
-    mappings = {}
+
     if conf_type == ConformerType.AllConformers:
         conformers = [ConformerType.Model, ConformerType.Ideal, ConformerType.Computed]
     else:
         conformers = [conf_type]
     try:
-        for conf in conformers:
+        for c in conformers:
             try:
+                conf_id = -1
+                if c != ConformerType.AllConformers:
+                    conf_id = component.get_conformer(c).GetId()
+
                 block = [
-                    f"{component.id} - {conf.name} conformer",
-                    rdkit.Chem.MolToMolBlock(
-                        mol_to_save, confId=component.conformers_mapping[conf]
-                    ).strip(),
+                    f"{component.id} - {c.name} conformer",
+                    rdkit.Chem.MolToMolBlock(mol_to_save, confId=conf_id).strip(),
                     "$$$$\n",
                 ]
                 mol_block += block
@@ -192,8 +192,7 @@ def to_sdf_str(
                 else:
                     raise CCDUtilsError(f"Error writing SDF file - {e}")
     except Exception:
-        mappings = {m.name: component.conformers_mapping[m] for m in conformers}
-        mol_block = _to_sdf_str_fallback(mol_to_save, component.id, mappings)
+        mol_block = _to_sdf_str_fallback(mol_to_save, component.id, conformers)
 
     return "\n".join(mol_block)
 
@@ -544,11 +543,16 @@ def _prepate_structure(component, remove_hs, conf_type):
         tuple(rdkit.Mol,int,ConformerType): mol along with properties
         to be exported.
     """
-    conf_id = (
-        0
-        if conf_type == ConformerType.Depiction
-        else component.conformers_mapping[conf_type]
-    )
+    conf_id = -1  # this is AllConformers options
+
+    if conf_type == ConformerType.Depiction:
+        conf_id = 0
+    else:
+        for c in component.mol.GetConformers():
+            if c.GetProp("name") == conf_type.name:
+                conf_id = c.GetId()
+                break
+
     mol_to_save = (
         component.mol2D if conf_type == ConformerType.Depiction else component.mol
     )
@@ -794,11 +798,14 @@ def _get_cml_bond_type(bond_order):
     """
     if bond_order == rdkit.Chem.rdchem.BondType.SINGLE:
         return "1"
-    elif bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
+
+    if bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
         return "2"
-    elif bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
+
+    if bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
         return "3"
-    elif bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
+
+    if bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
         return "A"
     else:
         return str(bond_order)
@@ -823,13 +830,14 @@ def _get_ccd_cif_bond_stereo(bond):
         rdkit.Chem.rdchem.BondStereo.STEREOCIS,
     ):
         return "E"
-    elif stereo in (
+
+    if stereo in (
         rdkit.Chem.rdchem.BondStereo.STEREOZ,
         rdkit.Chem.rdchem.BondStereo.STEREOTRANS,
     ):
         return "Z"
-    else:
-        return "N"
+
+    return "N"
 
 
 def _get_ccd_cif_bond_type(bond):
@@ -848,16 +856,20 @@ def _get_ccd_cif_bond_type(bond):
 
     if bond_order == rdkit.Chem.rdchem.BondType.SINGLE:
         return "SING"
-    elif bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
+
+    if bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
         return "DOUB"
-    elif bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
+
+    if bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
         return "TRIP"
-    elif bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
+
+    if bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
         return "AROM"
-    elif bond_order == rdkit.Chem.rdchem.BondType.QUADRUPLE:
+
+    if bond_order == rdkit.Chem.rdchem.BondType.QUADRUPLE:
         return "QUAD"
-    else:
-        return "SING"
+
+    return "SING"
 
 
 def _get_ccd_cif_chiral_type(atom):
@@ -877,10 +889,11 @@ def _get_ccd_cif_chiral_type(atom):
 
     if chiral_type == rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CW:
         return "R"
-    elif chiral_type == rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW:
+
+    if chiral_type == rdkit.Chem.rdchem.ChiralType.CHI_TETRAHEDRAL_CCW:
         return "S"
-    else:
-        return "N"
+
+    return "N"
 
 
 def _get_atom_coord(component, at_id, conformer_type):
@@ -895,39 +908,49 @@ def _get_atom_coord(component, at_id, conformer_type):
     Returns:
         rdkit.Geometry.rdGeometry.Point3D: 3D coordinates of the atom.
     """
-    conf_id = component.conformers_mapping[conformer_type]
+    conformer = None
+    for c in component.mol.GetConformers():
+        if c.GetProp("name") == conformer_type.name:
+            conformer = c
+            break
 
-    return component.mol.GetConformer(conf_id).GetAtomPosition(at_id)
+    return conformer.GetAtomPosition(at_id)
 
 
 # region fallbacks
 
 
-def _to_sdf_str_fallback(mol, ccd_id, mappings):
+def _to_sdf_str_fallback(mol, ccd_id, conformers):
     """Fallback method to generate SDF file in case the default one in
     RDKit fails.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): rdkit mol to be exported
         id (str): component id.
-        mappings (dict of str): Deemed mappings to be exported
+        conformers (list of of ConformerType): List of conformer types
+            to be exported.
 
     Returns:
         list of str: SDF representation of the component
     """
     content = []
 
-    for k, v in mappings.items():
-        try:
-            rdkit_conformer = mol.GetConformer(v)
-        except ValueError:
-            continue
+    for c in conformers:
+        rdkit_conformer = None
+
+        if c == ConformerType.AllConformers:
+            rdkit_conformer = mol.GetConformer()
+        else:
+            for conf in mol.GetConformers():
+                if conf.GetProp("name") == c.name:
+                    rdkit_conformer = conf
+                    break
 
         atom_count = mol.GetNumAtoms()
         bond_count = mol.GetNumBonds()
 
         content += [
-            f"{ccd_id} - {k} conformer",
+            f"{ccd_id} - {c.name} conformer",
             "    RDKit   3D",
             "\n" f"{atom_count:>3}{bond_count:3}  0  0  0  0  0  0  0  0999 V2000",
         ]
@@ -1041,20 +1064,20 @@ def __charge_to_sdf(charge):
     """
     if charge == -3:
         return "7"
-    elif charge == -2:
+    if charge == -2:
         return "6"
-    elif charge == -1:
+    if charge == -1:
         return "5"
-    elif charge == 0:
+    if charge == 0:
         return "0"
-    elif charge == 1:
+    if charge == 1:
         return "+1"
-    elif charge == 2:
+    if charge == 2:
         return "+2"
-    elif charge == 3:
+    if charge == 3:
         return "+4"
-    else:
-        return "0"
+
+    return "0"
 
 
 def __bond_stereo_to_sdf(bond):
@@ -1095,14 +1118,14 @@ def __bond_type_to_sdf(bond):
 
     if bond_order == rdkit.Chem.rdchem.BondType.SINGLE:
         return "1"
-    elif bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
+    if bond_order == rdkit.Chem.rdchem.BondType.DOUBLE:
         return "2"
-    elif bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
+    if bond_order == rdkit.Chem.rdchem.BondType.TRIPLE:
         return "3"
-    elif bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
+    if bond_order == rdkit.Chem.rdchem.BondType.AROMATIC:
         return "A"
-    else:
-        return "0"
+
+    return "0"
 
 
 def __post_process_cif_category(cif_copy, category_name):
@@ -1382,11 +1405,11 @@ def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
         the CIF file.
     remove_hs (boolean): Whether or not hydrogen atoms should be written
     """
+
     try:
-        conformer = component.mol.GetConformer(
-            component.conformers_mapping[ConformerType.Computed]
-        )
+        conformer = component.get_conformer(ConformerType.Computed)
     except ValueError:
+        logger.warning("Computed conformer does not exist.")
         return  # no conformer nothing to write, we quit
 
     category = "_pdbe_chem_comp_rdkit_conformer"
