@@ -36,5 +36,5 @@ for k, v in component.fragments:
 Below you can find actual fragment structures comming with the pdbeccdutil's `FragmentsLibrary` from the PDBe resource:
 
 <div align='center'>
-    <img src='../_static/pdbe_fragments.svg' />    
+    <img src='../_static/pdbe_fragments.svg' />  
 </div>

@@ -1,3 +1,6 @@
+"""Test of routine for retrieving 2D layouts of the CCDs.
+"""
+
 import os
 
 import pytest
@@ -7,9 +10,6 @@ from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
 
-
-"""Test of routine for retrieving 2D layouts of the CCDs.
-"""
 
 ids_to_test = ["MAN", "NAG", "SO4", "GOL", "SAC", "VIA", "GLU"]
 

@@ -35,15 +35,15 @@ import sys
 import traceback
 from typing import Dict, Optional
 
-import rdkit
-
 import pdbeccdutils
+import rdkit
 from pdbeccdutils.core import ccd_reader, ccd_writer
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
+from pdbeccdutils.helpers.logging import logger
 from pdbeccdutils.utils import PubChemDownloader, config
 
 
@@ -428,7 +428,7 @@ def check_args(args):
             required arguments
     """
     if not os.path.isfile(args.components_cif):
-        print(f"{args.components_cif} does not exist", file=sys.stderr)
+        logger.error(f"{args.components_cif} does not exist")
         sys.exit(os.EX_NOINPUT)
 
     if not os.path.isdir(args.output_dir):
@@ -436,9 +436,7 @@ def check_args(args):
 
     if args.test_first is not None:
         if args.test_first < 1:
-            print(
-                f"Test_first mode needs to have at least 1 component.", file=sys.stderr
-            )
+            logger.error("Test_first mode needs to have at least 1 component.")
             sys.exit(os.EX_NOINPUT)
 
 
@@ -456,7 +454,7 @@ def _set_up_logger(args):
     level = logging.DEBUG if args.debug else logging.ERROR
     frm = "[%(asctime)-15s]  %(message)s"
     logging.basicConfig(level=level, format=frm, datefmt="%a, %d %b %Y %H:%M:%S")
-    logger.info(f"PDBeChem pipeline using:")
+    logger.info("PDBeChem pipeline using:")
     logger.info(
         f"pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}"
     )

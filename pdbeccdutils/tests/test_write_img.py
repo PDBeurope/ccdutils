@@ -130,10 +130,10 @@ class TestWriteImg:
         assert all(atom["name"] for atom in json_obj["atoms"])  # do we have atom names?
 
         for atom in json_obj["atoms"]:
-            for l in atom["labels"]:
-                h_tspans = sum(1 for x in l["tspans"] if x == "H")
+            for label in atom["labels"]:
+                h_tspans = sum(1 for x in label["tspans"] if x == "H")
                 assert h_tspans < len(
-                    l["tspans"]
+                    label["tspans"]
                 )  # we do not have bare H labels, because we dont have links to them.
 
         assert all(

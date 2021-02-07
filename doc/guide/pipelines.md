@@ -8,7 +8,7 @@ Presently there are four pipelines in the production based on the `pdbeccdutils`
 
 ## PDBeChem
 
-This pipeline generates all the chemistry data consumed on the PDBe pages. It can process standard ligand definitions defined by [CCD](http://www.wwpdb.org/data/ccd) or [BIRD](https://www.wwpdb.org/data/bird) dictionaries. 
+This pipeline generates all the chemistry data consumed on the PDBe pages. It can process standard ligand definitions defined by [CCD](http://www.wwpdb.org/data/ccd) or [BIRD](https://www.wwpdb.org/data/bird) dictionaries.
 
 ### FTP area content
 
@@ -42,7 +42,7 @@ Aside from the standard content of the wwPDB CCD files. PDBeChem adds the follow
 * ChEMBL synonyms.
 * DrugBank details - summary, synonyms, international brands, taxonomy, and known targets.
 * 2D coordinations of the ligand.
-* RDKit regenerated 3D conformer. 
+* RDKit regenerated 3D conformer.
 * Information about scaffold and fragments found in the entry.
 
 
@@ -52,4 +52,3 @@ Aside from the standard content of the wwPDB CCD files. PDBeChem adds the follow
 ## [Reactants](https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/reactants.html)
 
 ## [Similarities](https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/similarities.html)
-

@@ -44,7 +44,7 @@ setup(
         "pdbecif>=1.5",
     ],
     extras_require={
-        "tests": ["pytest", "pytest-cov"],
+        "tests": ["pytest", "pytest-cov", "pre-commit"],
         "docs": [
             "sphinx",
             "sphinx_rtd_theme",
@@ -60,7 +60,7 @@ setup(
         ]
     },
     classifiers=[
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
@@ -69,10 +69,12 @@ setup(
         "Programming Language :: Python :: Implementation :: PyPy",
         "Operating System :: Unix",
         "Operating System :: MacOS",
+        "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Topic :: Scientific/Engineering :: Chemistry",
         "Development Status :: 5 - Production/Stable",
     ],
 )

@@ -19,6 +19,7 @@
 Set of methods for molecular sanitization and work with conformers
 """
 
+import re
 import sys
 from io import StringIO
 
@@ -26,6 +27,10 @@ import numpy as np
 import rdkit
 
 empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
+METALS_SMART = (
+    "[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
+    "Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]"
+)
 
 
 def is_degenerate_conformer(conformer):

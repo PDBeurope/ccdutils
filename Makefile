@@ -11,7 +11,7 @@ package:
 	pip install -e .;\
 	find dist -name "pdbeccdutils-*-py3*" -exec pip install {} \;
 
-make upload: 
+make upload:
 	twine upload dist/* --verbose
 
 make pypi: package upload clean

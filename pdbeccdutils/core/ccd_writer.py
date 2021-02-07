@@ -386,7 +386,7 @@ def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ide
     root.set("dictRef", "ebiMolecule:ebiMoleculeDict.cml")
     root.set("ebiMolecule", "http://www.ebi.ac.uk/felics/molecule")
 
-    f_charge = sum([l.GetFormalCharge() for l in mol_to_save.GetAtoms()])
+    f_charge = sum([a.GetFormalCharge() for a in mol_to_save.GetAtoms()])
     mol = ET.SubElement(
         root, "molecule", {"id": component.id, "formalCharge": str(f_charge)}
     )
@@ -1204,8 +1204,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_copy):
     ids = [f"S{i+1}" for i in range(0, len(component.scaffolds))]
     ids += [f"F{i+1}" for i in range(0, len(component.fragments))]
 
-    types = [f"scaffold" for i in range(0, len(component.scaffolds))]
-    types += [f"fragment" for i in range(0, len(component.fragments))]
+    types = ["scaffold"] * len(component.scaffolds)
+    types += ["fragment"] * len(component.fragments)
 
     names = [i.name for i in component.scaffolds]
     names += [i.name for i in component.fragments]
