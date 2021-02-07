@@ -1,7 +1,7 @@
 import pytest
 
 from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.tests.tst_utilities import cif_filename, unl_model
+from pdbeccdutils.tests.tst_utilities import cif_filename
 
 test_inputs = {
     "ATP": {

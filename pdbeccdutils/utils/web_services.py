@@ -83,7 +83,7 @@ all_resource = {
     "41": ("SwissLipids", "SwissLipids"),
 }
 
-url_prefix = f"https://www.ebi.ac.uk/unichem/rest/inchikey/"
+url_prefix = "https://www.ebi.ac.uk/unichem/rest/inchikey/"
 
 
 def get_agreed_unichem_mapping(inchikey):

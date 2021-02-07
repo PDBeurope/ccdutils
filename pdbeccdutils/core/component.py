@@ -40,11 +40,6 @@ from pdbeccdutils.core.models import (
 from pdbeccdutils.helpers import conversions, drawing, logging
 from pdbeccdutils.utils import web_services
 
-METALS_SMART = (
-    "[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
-    "Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]"
-)
-
 
 class Component:
     """
@@ -626,7 +621,7 @@ class Component:
                     )
 
             except Exception:
-                logging.logger.warning(f'Error mapping fragment {v.name}.')
+                logging.logger.warning(f"Error mapping fragment {v.name}.")
 
         self._fragments.update(temp)
 
