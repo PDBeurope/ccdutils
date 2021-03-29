@@ -27,6 +27,7 @@ import json
 import math
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
+from pathlib import Path
 from typing import List
 
 import pdbeccdutils
@@ -52,7 +53,7 @@ def write_molecule(
     ConformerType.AllConformers is presently supported only for PDB.
 
     Args:
-        path (str): Path to the file. Extension determines format to be
+        path (str|Path): Path to the file. Suffix determines format to be
             used.
         component (Component): Component to be exported
         remove_hs (bool, optional): Defaults to True. Whether or not
@@ -66,6 +67,8 @@ def write_molecule(
     Raises:
         CCDUtilsError: For unsupported format
     """
+    path = str(path) if isinstance(path, Path) else path
+
     extension = path.split(".")[-1].lower()
     str_representation = ""
 

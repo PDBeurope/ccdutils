@@ -6,7 +6,7 @@ import argparse
 import os
 import sys
 
-from pdbeccdutils.utils import PubChemDownloader
+from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
 
 
 def main():

@@ -31,9 +31,8 @@ https://gitlab.ebi.ac.uk/pdbe/release/pdbechem
 import argparse
 import logging
 import os
-import sys
 import traceback
-from typing import Dict, Optional
+from pathlib import Path
 
 import pdbeccdutils
 import rdkit
@@ -43,8 +42,17 @@ from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
-from pdbeccdutils.helpers.logging import logger
-from pdbeccdutils.utils import PubChemDownloader, config
+from pdbeccdutils.utils import config
+from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
+
+
+def is_valid_path(path):
+    p = Path(path)
+
+    if not p.exists():
+        raise argparse.ArgumentTypeError(f"{path} does not exists.")
+
+    return p
 
 
 class PDBeChemManager:
@@ -52,98 +60,74 @@ class PDBeChemManager:
     PDBeChem update process.
     """
 
-    def __init__(self, logger=None):
-        """Initialize class properties
+    def __init__(
+        self,
+        pubchem_templates="",
+        general_templates=config.general_templates,
+        library_path=config.fragment_library,
+        logger=None,
+    ):
+        """Initialize manager
 
         Args:
-            logger (logging.Logger, optional): Defaults to None. Application log
+            pubchem_templates (str): Path to the pubchem templates
+            general_templates (str, optional): Path to the general templates.
+                Defaults to config.general_templates.
+            library_path (str, optional): Path to the fragments library:
+                Defaults to config.fragment_library.
+            logger (logging.Logger, optional): Application loggger.
         """
-        self.compounds: Dict[
-            str, ccd_reader.CCDReaderResult
-        ] = {}  # processed compounds
-        self.ligands_to_process: int = 0  # no. ligands to process
-        self.output_dir: str = ""  # where the results will be written
-        self.depictions: Optional[
-            DepictionManager
-        ] = None  # helper class to get nice depictions
-        self.pubchem: Optional[
-            PubChemDownloader
-        ] = None  # helper class to download templates if needed
-        self.fragment_library: Optional[
-            FragmentLibrary
-        ] = None  # Fragments library to get substructure matches
-        self.logger = (
-            logger if logger is not None else logging.getLogger(__name__)
-        )  # log of the application
-
-    def run_pipeline(self, args):
-        """Run PDBeChem pipeline
-
-        Args:
-            args (argparse.Namespace): Verified application arguments
-        """
-        self._init(args)
-        self._process_data()
-
-    def _init(self, args):
-        """Initialize PDBeChem pipeline and necessary objects.
-
-        Args:
-            args (argparse.Namespace): Verified application arguments
-        """
-        self.logger.debug("Initializing calculation...")
-
-        self.output_dir = args.output_dir
-        self.depictions = DepictionManager(
-            args.pubchem_templates, args.general_templates
-        )
+        # helper class to download templates if needed
         self.pubchem = (
-            PubChemDownloader(args.pubchem_templates)
-            if os.path.isdir(args.pubchem_templates)
-            else None
-        )
-        self.fragment_library = FragmentLibrary(args.library)
-
-        self.logger.debug(f"Reading in {args.components_cif} file...")
-        self.compounds = ccd_reader.read_pdb_components_file(args.components_cif)
-        self.ligands_to_process = (
-            len(self.compounds) if args.test_first is None else args.test_first
+            PubChemDownloader(pubchem_templates) if pubchem_templates else None
         )
 
-        self.logger.debug("Initialization finished.")
+        # helper class to get nice depictions
+        self.depictions = DepictionManager(pubchem_templates, general_templates)
 
-    def _process_data(self):
-        """Main part of the PDBeChem process. Update all the data."""
-        for key, ccd_reader_result in self.compounds.items():
+        # Fragments library to get substructure matches
+        self.fragment_library = FragmentLibrary(library_path)
+
+        # log of the application
+        self.logger = logger if logger is not None else logging.getLogger(__name__)
+
+    def run(self, components_path, out_dir):
+        """Process components
+
+        Args:
+            components_path (Path): Path to the components.cif file.
+            out_dir (Path): Path to the out_dir
+        """
+        self.logger.info("Reading in components...")
+        data = ccd_reader.read_pdb_components_file(components_path)
+
+        for key, ccd_reader_result in data.items():
             try:
-                self.process_single_component(ccd_reader_result)
+                ccd_out = out_dir / key[0] / key
+                os.makedirs(ccd_out, exist_ok=True)
+                self.process_single_component(ccd_reader_result, ccd_out)
             except Exception:
                 self.logger.error(f"{key} | FAILURE {traceback.format_exc()}.")
-            self.ligands_to_process -= 1
 
-            self.compounds[key] = None
+            finally:
+                data[key] = None
 
-            if self.ligands_to_process == 0:
-                self.logger.debug("All is done!")
-                break
+        self.logger.debug("All is done!")
 
-    def process_single_component(self, ccd_reader_result):
+    def process_single_component(self, ccd_reader_result, out_dir):
         """Process single PDB-CCD component
 
         Args:
             ccd_reader_result (CCDReaderResult): pdbeccdutils parser output.
+            out_dir (Path): Out directory
         """
         self.logger.info(f"{ccd_reader_result.component.id} | processing...")
 
-        ccd_id = ccd_reader_result.component.id
         component = ccd_reader_result.component
-
-        parent_dir = os.path.join(self.output_dir, ccd_id[0], ccd_id)
-        os.makedirs(parent_dir, exist_ok=True)
 
         # check parsing and conformer degeneration
         self._check_component_parsing(ccd_reader_result)
-        self._generate_ideal_structure(ccd_reader_result.component)
+        self._generate_ideal_structure(component)
 
         # download templates if the user wants them.
         if self.pubchem is not None:
@@ -156,8 +140,8 @@ class PDBeChemManager:
         self._compute_component_scaffolds(component)
 
         # write out files
-        self._generate_depictions(component)
-        self._export_structure_formats(component)
+        self._generate_depictions(component, out_dir)
+        self._export_structure_formats(component, out_dir)
 
     def _check_component_parsing(self, ccd_reader_result):
         """Checks components parsing and highlights issues encountered with
@@ -243,19 +227,16 @@ class PDBeChemManager:
 
         self.logger.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
 
-    def _generate_depictions(self, component: Component):
-        """Generate nice 2D depictions for the component. Presently depictions
-        are generated in the following resolutions (100,200,300,400,500) with
-        and without atom names.
+    def _generate_depictions(self, component: Component, out_dir: str):
+        """Generate nice 2D depictions for the component and
+        depiction annotations in JSON format. Presently depictions
+        are generated in the following resolutions (100,200,300,400,500)
+        with and without atom names.
 
         Args:
             component (Component): Component to be depicted.
-            depictions (DepictionManager): Helper class
-                to carry out depiction process.
-            parent_dir (str): Where the depiction should be stored
+            out_dir (str): Where the depictions should be stored.
         """
-        parent_dir = os.path.join(self.output_dir, component.id[0], component.id)
-
         depiction_result = component.compute_2d(self.depictions)
 
         if depiction_result.source == DepictionSource.Failed:
@@ -271,78 +252,75 @@ class PDBeChemManager:
 
         for i in range(100, 600, 100):
             component.export_2d_svg(
-                os.path.join(parent_dir, f"{component.id}_{i}.svg"),
+                os.path.join(out_dir, f"{component.id}_{i}.svg"),
                 width=i,
                 wedge_bonds=wedge_bonds,
             )
             component.export_2d_svg(
-                os.path.join(parent_dir, f"{component.id}_{i}_names.svg"),
+                os.path.join(out_dir, f"{component.id}_{i}_names.svg"),
                 width=i,
                 names=True,
                 wedge_bonds=wedge_bonds,
             )
 
         component.export_2d_annotation(
-            os.path.join(parent_dir, f"{component.id}_annotation.json"),
+            os.path.join(out_dir, f"{component.id}_annotation.json"),
             wedge_bonds=wedge_bonds,
         )
 
-    def _export_structure_formats(self, component: Component):
+    def _export_structure_formats(self, component: Component, out_dir: Path):
         """Writes out component in a different formats as required for the
         PDBeChem FTP area.
 
         Args:
             component (Component): Component being processed.
-            parent_dir (str): Working directory.
-            ideal_conformer (ConformerType): ConformerType
-                to be used for ideal coordinates.
+            out_dir (Path): Where the results should be written
         """
-        parent_dir = os.path.join(self.output_dir, component.id[0], component.id)
 
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}_model.sdf"),
+            out_dir / f"{component.id}_model.sdf",
             component,
             False,
             ConformerType.Model,
         )
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}_ideal.sdf"),
+            out_dir / f"{component.id}_ideal.sdf",
             component,
             False,
             ConformerType.Ideal,
         )
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}_ideal_alt.pdb"),
+            out_dir / f"{component.id}_ideal_alt.pdb",
             component,
             True,
             ConformerType.Ideal,
         )
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}_model_alt.pdb"),
+            out_dir / f"{component.id}_model_alt.pdb",
             component,
             True,
             ConformerType.Model,
         )
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}_ideal.pdb"),
+            out_dir / f"{component.id}_ideal.pdb",
             component,
             False,
             ConformerType.Ideal,
         )
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}_model.pdb"),
+            out_dir / f"{component.id}_model.pdb",
             component,
             False,
             ConformerType.Model,
         )
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}.cml"),
+            out_dir / f"{component.id}.cml",
             component,
             False,
             ConformerType.Model,
         )
         self.__write_molecule(
-            os.path.join(parent_dir, f"{component.id}.cif"),
+            out_dir / f"{component.id}.cif",
             component,
             False,
             ConformerType.AllConformers,
@@ -352,7 +330,7 @@ class PDBeChemManager:
         """Write out deemed structure.
 
         Args:
-            path str: Path where the molecule will be stored.
+            path (Path): Path where the molecule will be stored.
             component (Component): Component to be written.
             alt_names (bool): Whether or not molecule will be written with
                 alternate names.
@@ -384,60 +362,42 @@ def create_parser():
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
-    add_arg = parser.add_argument
-    add_arg(
+
+    parser.add_argument(
         "components_cif", help="Input PDB-CCD components.cif file (must be specified)"
     )
-    add_arg(
-        "--general_templates",
+    parser.add_argument(
+        "-g",
+        "--general-templates",
+        type=is_valid_path,
         default=config.general_templates,
-        type=str,
-        help="Path to the directory with general templates in sdf format.",
+        help="Use general templates in SDF format instead of those supplied with the code.",
     )
-    add_arg(
-        "--pubchem_templates",
-        default="",
+    parser.add_argument(
+        "-p",
+        "--pubchem-templates",
+        type=is_valid_path,
         help="Path to the directory with pubchem templates in sdf format.",
     )
-    add_arg(
-        "--output_dir",
+    parser.add_argument(
         "-o",
+        "--output-dir",
+        type=is_valid_path,
         required=True,
         help="Create an output directory with files suitable for PDBeChem ftp directory",
     )
-    add_arg(
-        "--test_first",
-        type=int,
-        help="Only process the first TEST_FIRST chemical component definitions (for testing).",
-    )
-    add_arg(
-        "--library",
+    parser.add_argument(
+        "-fl",
+        "--fragment-library",
+        type=is_valid_path,
         default=config.fragment_library,
         help="Use this fragment library in place of the one supplied with the code.",
     )
-    add_arg("--debug", action="store_true", help="Turn on debug message logging output")
+    parser.add_argument(
+        "--debug", action="store_true", help="Turn on debug message logging output"
+    )
 
     return parser
-
-
-def check_args(args):
-    """Validate suplied arguments.
-
-    Args:
-        args (argparse.Namespace): an argparse namespace containing the
-            required arguments
-    """
-    if not os.path.isfile(args.components_cif):
-        logger.error(f"{args.components_cif} does not exist")
-        sys.exit(os.EX_NOINPUT)
-
-    if not os.path.isdir(args.output_dir):
-        os.makedirs(args.output_dir)
-
-    if args.test_first is not None:
-        if args.test_first < 1:
-            logger.error("Test_first mode needs to have at least 1 component.")
-            sys.exit(os.EX_NOINPUT)
 
 
 def _set_up_logger(args):
@@ -470,15 +430,16 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    check_args(args)
     log = _set_up_logger(args)
 
     log.info("Settings:")
     for k, v in vars(args).items():
         log.info(f'{"":5s}{k:25s}{v}')
 
-    pdbechem = PDBeChemManager(log)
-    pdbechem.run_pipeline(args)
+    pdbechem = PDBeChemManager(
+        args.pubchem_templates, args.general_templates, args.fragment_library, log
+    )
+    pdbechem.run(args.components_cif, args.output_dir)
 
 
 if __name__ == "__main__":
