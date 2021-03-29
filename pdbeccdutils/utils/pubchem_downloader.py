@@ -24,6 +24,10 @@ from pdbeccdutils.core import ccd_reader
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
+import logging
+
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 
 def rescale_molecule(path, factor):
     """
@@ -88,7 +92,7 @@ class PubChemDownloader:
 
     def __init__(self, pubchem_templates: str) -> None:
         if not os.path.isdir(pubchem_templates):
-            raise ValueError(pubchem_templates + " is not a valid path")
+            raise ValueError(f"{pubchem_templates} is not a valid path")
 
         self.pubchem_templates = pubchem_templates
 
