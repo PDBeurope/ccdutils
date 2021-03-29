@@ -26,7 +26,6 @@ import sys
 from collections import OrderedDict
 from typing import Dict
 
-import pdbeccdutils.helpers.collection_ext as ext
 import rdkit
 from pdbeccdutils.core.models import DepictionResult, DepictionSource
 from pdbeccdutils.helpers.logging import logger
@@ -348,7 +347,7 @@ class DepictionValidator:
         Returns:
             float: Size of the angle in degrees.
         """
-        pivot = ext.find_element_with_max_occurrence(names)
+        pivot = max(names, key=names.count)
 
         if names[0] != pivot:  # Atoms needs to be order to pick vectors correctly
             vecA = vecA * -1
