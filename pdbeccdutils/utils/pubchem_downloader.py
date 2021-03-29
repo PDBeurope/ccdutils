@@ -34,7 +34,7 @@ def rescale_molecule(path, factor):
         factor (float): rescaling factor
     """
     mol = Chem.MolFromMolFile(path, sanitize=True)
-    matrix = numpy.zeros((4, 4), numpy.float)
+    matrix = numpy.zeros((4, 4), float)
 
     for i in range(3):
         matrix[i, i] = factor
