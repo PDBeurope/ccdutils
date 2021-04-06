@@ -102,46 +102,51 @@ class PDBeChemManager:
         data = ccd_reader.read_pdb_components_file(components_path)
 
         for key, ccd_reader_result in data.items():
-            try:
-                ccd_out = out_dir / key[0] / key
-                os.makedirs(ccd_out, exist_ok=True)
-                self.process_single_component(ccd_reader_result, ccd_out)
-            except Exception:
-                self.logger.error(f"{key} | FAILURE {traceback.format_exc()}.")
+            ccd_out = out_dir / key[0] / key
+            os.makedirs(ccd_out, exist_ok=True)
+            self.process_single_component(ccd_reader_result, ccd_out)
 
-            finally:
-                data[key] = None
+            data[key] = None
 
         self.logger.debug("All is done!")
 
     def process_single_component(self, ccd_reader_result, out_dir):
-        """Process single PDB-CCD component
+        """Process single PDB-CCD component.
 
         Args:
             ccd_reader_result (CCDReaderResult): pdbeccdutils parser output.
             out_dir (Path): Out directory
+
+        Return:
+            bool: Whether or not all the files were succesfully written.
         """
-        self.logger.info(f"{ccd_reader_result.component.id} | processing...")
+        try:
+            component = ccd_reader_result.component
+            self.logger.info(f"{component.id} | processing...")
 
-        component = ccd_reader_result.component
+            # check parsing and conformer degeneration
+            self._check_component_parsing(ccd_reader_result)
+            self._generate_ideal_structure(component)
 
-        # check parsing and conformer degeneration
-        self._check_component_parsing(ccd_reader_result)
-        self._generate_ideal_structure(component)
+            # download templates if the user wants them.
+            if self.pubchem is not None:
+                self._download_template(component)
 
-        # download templates if the user wants them.
-        if self.pubchem is not None:
-            self._download_template(component)
+            # search fragment library
+            self._search_fragment_library(component)
 
-        # search fragment library
-        self._search_fragment_library(component)
+            # get scaffolds
+            self._compute_component_scaffolds(component)
 
-        # get scaffolds
-        self._compute_component_scaffolds(component)
-
-        # write out files
-        self._generate_depictions(component, out_dir)
-        self._export_structure_formats(component, out_dir)
+            # write out files
+            self._generate_depictions(component, out_dir)
+            self._export_structure_formats(component, out_dir)
+            return True
+        except Exception:
+            self.logger.error(
+                f"{ccd_reader_result.component.id} | FAILURE {traceback.format_exc()}."
+            )
+            return False
 
     def _check_component_parsing(self, ccd_reader_result):
         """Checks components parsing and highlights issues encountered with
