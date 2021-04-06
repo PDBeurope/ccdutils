@@ -25,8 +25,10 @@ Raises:
 import copy
 import json
 import math
-import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement
+from xml.etree import ElementTree as ET
 from collections import OrderedDict
+from pathlib import Path
 from typing import List
 
 import pdbeccdutils
@@ -52,7 +54,7 @@ def write_molecule(
     ConformerType.AllConformers is presently supported only for PDB.
 
     Args:
-        path (str): Path to the file. Extension determines format to be
+        path (str|Path): Path to the file. Suffix determines format to be
             used.
         component (Component): Component to be exported
         remove_hs (bool, optional): Defaults to True. Whether or not
@@ -66,6 +68,8 @@ def write_molecule(
     Raises:
         CCDUtilsError: For unsupported format
     """
+    path = str(path) if isinstance(path, Path) else path
+
     extension = path.split(".")[-1].lower()
     str_representation = ""
 
@@ -238,15 +242,15 @@ def to_xml_xml(component, remove_hs=True, conf_type=ConformerType.Ideal):
     Returns:
         xml.etree.ElementTree.Element: XML object
     """
-    root = ET.Element("chemComp")
+    root = Element("chemComp")
 
-    id_e = ET.SubElement(root, "id")
-    name_e = ET.SubElement(root, "name")
-    formula_e = ET.SubElement(root, "formula")
-    sys_name_e = ET.SubElement(root, "systematicName")
-    s_smiles_e = ET.SubElement(root, "stereoSmiles")
-    n_smiles_e = ET.SubElement(root, "nonStereoSmiles")
-    inchi_e = ET.SubElement(root, "inchi")
+    id_e = SubElement(root, "id")
+    name_e = SubElement(root, "name")
+    formula_e = SubElement(root, "formula")
+    sys_name_e = SubElement(root, "systematicName")
+    s_smiles_e = SubElement(root, "stereoSmiles")
+    n_smiles_e = SubElement(root, "nonStereoSmiles")
+    inchi_e = SubElement(root, "inchi")
 
     name_e.text = component.name
     id_e.text = component.id
@@ -386,7 +390,7 @@ def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ide
     root.set("dictRef", "ebiMolecule:ebiMoleculeDict.cml")
     root.set("ebiMolecule", "http://www.ebi.ac.uk/felics/molecule")
 
-    f_charge = sum([l.GetFormalCharge() for l in mol_to_save.GetAtoms()])
+    f_charge = sum([a.GetFormalCharge() for a in mol_to_save.GetAtoms()])
     mol = ET.SubElement(
         root, "molecule", {"id": component.id, "formalCharge": str(f_charge)}
     )
@@ -1204,8 +1208,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_copy):
     ids = [f"S{i+1}" for i in range(0, len(component.scaffolds))]
     ids += [f"F{i+1}" for i in range(0, len(component.fragments))]
 
-    types = [f"scaffold" for i in range(0, len(component.scaffolds))]
-    types += [f"fragment" for i in range(0, len(component.fragments))]
+    types = ["scaffold"] * len(component.scaffolds)
+    types += ["fragment"] * len(component.fragments)
 
     names = [i.name for i in component.scaffolds]
     names += [i.name for i in component.fragments]

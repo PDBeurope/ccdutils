@@ -38,7 +38,7 @@ from pdbeccdutils.core.models import (
     Descriptor,
     ReleaseStatus,
 )
-from pdbeccdutils.helpers import collection_ext, conversions, mol_tools, logging
+from pdbeccdutils.helpers import conversions, mol_tools, logging
 from pdbecif.mmcif_io import MMCIF2Dict
 
 
@@ -186,8 +186,15 @@ def _parse_pdb_atoms(mol, atoms):
     if not atoms:
         return
 
-    for i in range(len(atoms["atom_id"])):
-        element = atoms["type_symbol"][i]
+    data = zip(
+        atoms["atom_id"],
+        atoms["type_symbol"],
+        atoms["alt_atom_id"],
+        atoms["pdbx_leaving_atom_flag"],
+        atoms["charge"],
+    )
+
+    for atom_id, element, alt_atom_id, leaving_atom, charge in data:
         element = element if len(element) == 1 else element[0] + element[1].lower()
         isotope = None
 
@@ -199,10 +206,10 @@ def _parse_pdb_atoms(mol, atoms):
 
         atom = rdkit.Chem.Atom(element)
         # atom.SetChiralTag(_atom_chiral_tag(atoms['pdbx_stereo_config'][i]))
-        atom.SetProp("name", atoms["atom_id"][i])
-        atom.SetProp("alt_name", atoms["alt_atom_id"][i])
-        atom.SetBoolProp("leaving_atom", atoms["pdbx_leaving_atom_flag"][i] == "Y")
-        atom.SetFormalCharge(conversions.str_to_int(atoms["charge"][i]))
+        atom.SetProp("name", atom_id)
+        atom.SetProp("alt_name", alt_atom_id)
+        atom.SetBoolProp("leaving_atom", leaving_atom == "Y")
+        atom.SetFormalCharge(conversions.str_to_int(charge))
 
         if isotope is not None:
             atom.SetIsotope(isotope)
@@ -271,29 +278,25 @@ def _parse_pdb_bonds(mol, bonds, atoms, errors):
         atoms (dict): mmcif category with the atom info.
         errors (list[str]): Issues encountered while parsing.
     """
-    if not bonds:
+
+    if not bonds or "atom_id" not in atoms or not atoms["atom_id"]:
         return
 
-    for i in range(len(bonds["atom_id_1"])):
-        atom_1 = collection_ext.find_element_in_list(
-            atoms["atom_id"], bonds["atom_id_1"][i]
-        )
-        atom_2 = collection_ext.find_element_in_list(
-            atoms["atom_id"], bonds["atom_id_2"][i]
-        )
-        bond_order = _bond_pdb_order(bonds["value_order"][i])
-
-        if any(a is None for a in [atom_1, atom_2, bond_order]):
-            errors.append(
-                "Problem with the {}-th bond in the _chem_comp_bond group".format(i + 1)
-            )
-
+    atoms_ids = atoms["atom_id"]
+    data_struct = zip(bonds["atom_id_1"], bonds["atom_id_2"], bonds["value_order"])
+    for atom_1, atom_2, order in data_struct:
         try:
-            mol.AddBond(atom_1, atom_2, bond_order)
-        except RuntimeError:
+            atom_1_id = atoms_ids.index(atom_1)
+            atom_2_id = atoms_ids.index(atom_2)
+            bond_order = _bond_pdb_order(order)
+
+            mol.AddBond(atom_1_id, atom_2_id, bond_order)
+        except ValueError:
             errors.append(
-                f'Duplicit bond {bonds["atom_id_1"][i]}-{bonds["atom_id_2"][i]}'
+                f"Error perceiving {atom_1} - {atom_2} bond in _chem_comp_bond"
             )
+        except RuntimeError:
+            errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
 
 def _handle_implicit_hydrogens(mol):

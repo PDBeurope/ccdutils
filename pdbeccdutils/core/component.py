@@ -40,11 +40,6 @@ from pdbeccdutils.core.models import (
 from pdbeccdutils.helpers import conversions, drawing, logging
 from pdbeccdutils.utils import web_services
 
-METALS_SMART = (
-    "[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
-    "Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]"
-)
-
 
 class Component:
     """
@@ -436,6 +431,12 @@ class Component:
         Raises:
             CCDUtilsError: If bond or atom does not exist.
         """
+        get_atom_name = (
+            lambda a: a.GetProp("name")
+            if a.HasProp("name")
+            else a.GetSymbol() + str(a.GetIdx())
+        )
+
         if self.mol2D is None:
             drawing.save_no_image(file_name, self.id, width)
             return
@@ -443,7 +444,7 @@ class Component:
         drawer = Draw.rdMolDraw2D.MolDraw2DSVG(width, width)
         options = drawer.drawOptions()
         atom_mapping = {
-            self._get_atom_name(a): i for i, a in enumerate(self.mol2D.GetAtoms())
+            get_atom_name(a): i for i, a in enumerate(self.mol2D.GetAtoms())
         }
 
         atom_highlight = {} if atom_highlight is None else atom_highlight
@@ -476,7 +477,7 @@ class Component:
 
         if names:
             for i, a in enumerate(self.mol2D.GetAtoms()):
-                atom_name = self._get_atom_name(a)
+                atom_name = get_atom_name(a)
                 options.atomLabels[i] = atom_name
                 a.SetProp("molFileAlias", atom_name)
 
@@ -626,7 +627,7 @@ class Component:
                     )
 
             except Exception:
-                logging.logger.warning(f'Error mapping fragment {v.name}.')
+                logging.logger.warning(f"Error mapping fragment {v.name}.")
 
         self._fragments.update(temp)
 
@@ -711,26 +712,6 @@ class Component:
             raise CCDUtilsError(
                 f"Computing scaffolds using method {scaffolding_method.name} failed."
             )
-
-    def _get_atom_name(self, atom: rdkit.Chem.rdchem.Atom):
-        """Supplies atom_id obrained from `_chem_comp_atom.atom_id`, see:
-
-        http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx.dic/Categories/chem_comp_atom.html
-
-        If there is no such atom name, it is created from the element
-        symbol and atom index.
-
-        Args:
-            atom (rdkit.Chem.rdchem.Atom): rdkit atom
-
-        Returns:
-            str: atom name
-        """
-        return (
-            atom.GetProp("name")
-            if atom.HasProp("name")
-            else atom.GetSymbol() + str(atom.GetIdx())
-        )
 
     def _id_to_name_mapping(self, struct_mapping):
         """Lists matched scaffolds and atom names

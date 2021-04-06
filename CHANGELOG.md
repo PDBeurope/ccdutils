@@ -1,5 +1,12 @@
 # Changelog
 
+## RELEASE 0.6 - xx xx, xxxxx
+
+### Features
+
+* a lot of minor bug fixes and code improvements
+* new templates for 2D layouts
+
 ## RELEASE 0.5 - May 15, 2019
 
 ### Features
