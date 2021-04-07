@@ -20,7 +20,7 @@
 
 import os
 import re
-import defusedxml.ElementTree as ET
+import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from sys import platform
 

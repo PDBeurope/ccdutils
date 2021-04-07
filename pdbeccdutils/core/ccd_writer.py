@@ -27,6 +27,7 @@ import json
 import math
 from xml.etree.ElementTree import Element, SubElement
 from xml.etree import ElementTree as ET
+from xml.dom import minidom
 from collections import OrderedDict
 from pathlib import Path
 from typing import List
@@ -34,7 +35,6 @@ from typing import List
 import pdbeccdutils
 import pdbecif.mmcif_io as mmcif
 import rdkit
-from defusedxml import minidom
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
@@ -300,9 +300,9 @@ def to_xml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ide
     root = to_xml_xml(component, remove_hs, conf_type)
 
     xml = ET.tostring(root, encoding="utf-8", method="xml")
-    pretty = minidom.parseString(xml)
+    xmls_tring = minidom.parseString(xml)
 
-    return pretty.toprettyxml(indent="  ")
+    return xmls_tring.toprettyxml(indent="  ")
 
 
 def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
