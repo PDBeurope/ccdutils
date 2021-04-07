@@ -9,7 +9,7 @@ import json
 import os
 from pathlib import Path
 
-import defusedxml.ElementTree as ET
+import xml.etree.ElementTree as ET
 import pytest
 from pdbeccdutils.scripts.process_components_cif_cli import (
     PDBeChemManager,

@@ -2,7 +2,7 @@
 """
 
 import os
-import defusedxml.ElementTree as ET
+import xml.etree.ElementTree as ET
 from pdbeccdutils.helpers.drawing import svg_namespace
 
 
