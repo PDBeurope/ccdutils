@@ -65,7 +65,6 @@ class PDBeChemManager:
         pubchem_templates="",
         general_templates=config.general_templates,
         library_path=config.fragment_library,
-        logger=None,
     ):
         """Initialize manager
 
@@ -75,7 +74,6 @@ class PDBeChemManager:
                 Defaults to config.general_templates.
             library_path (str, optional): Path to the fragments library:
                 Defaults to config.fragment_library.
-            logger (logging.Logger, optional): Application loggger.
         """
         # helper class to download templates if needed
         self.pubchem = (
@@ -88,9 +86,6 @@ class PDBeChemManager:
         # Fragments library to get substructure matches
         self.fragment_library = FragmentLibrary(library_path)
 
-        # log of the application
-        self.logger = logger if logger is not None else logging.getLogger(__name__)
-
     def run(self, components_path, out_dir):
         """Process components
 
@@ -98,7 +93,7 @@ class PDBeChemManager:
             components_path (Path): Path to the components.cif file.
             out_dir (Path): Path to the out_dir
         """
-        self.logger.info("Reading in components...")
+        logging.info("Reading in components...")
         data = ccd_reader.read_pdb_components_file(components_path)
 
         for key, ccd_reader_result in data.items():
@@ -108,7 +103,7 @@ class PDBeChemManager:
 
             data[key] = None
 
-        self.logger.debug("All is done!")
+        logging.debug("All is done!")
 
     def process_single_component(self, ccd_reader_result, out_dir):
         """Process single PDB-CCD component.
@@ -122,7 +117,7 @@ class PDBeChemManager:
         """
         try:
             component = ccd_reader_result.component
-            self.logger.info(f"{component.id} | processing...")
+            logging.info(f"{component.id} | processing...")
 
             # check parsing and conformer degeneration
             self._check_component_parsing(ccd_reader_result)
@@ -143,7 +138,7 @@ class PDBeChemManager:
             self._export_structure_formats(component, out_dir)
             return True
         except Exception:
-            self.logger.error(
+            logging.error(
                 f"{ccd_reader_result.component.id} | FAILURE {traceback.format_exc()}."
             )
             return False
@@ -159,16 +154,16 @@ class PDBeChemManager:
         """
 
         if ccd_reader_result.warnings:
-            self.logger.debug(f'warnings: {";".join(ccd_reader_result.warnings)}')
+            logging.debug(f'warnings: {";".join(ccd_reader_result.warnings)}')
 
         if ccd_reader_result.errors:
-            self.logger.debug(f'errors: {";".join(ccd_reader_result.errors)}')
+            logging.debug(f'errors: {";".join(ccd_reader_result.errors)}')
 
         if not ccd_reader_result.sanitized:
-            self.logger.debug("sanitization issue.")
+            logging.debug("sanitization issue.")
 
         if not ccd_reader_result.component.inchikey_from_rdkit_matches_ccd():
-            self.logger.debug("inchikey mismatch.")
+            logging.debug("inchikey mismatch.")
 
     def _download_template(self, component: Component):
         """Attempts to download a pubchem template for the given component
@@ -176,10 +171,9 @@ class PDBeChemManager:
         Args:
             component (Component): Component to be used.
         """
-        logger = logging.getLogger(__name__)
         component_downloaded = self.pubchem.process_template(component)
         if component_downloaded:
-            logger.debug("downloaded new pubchem template.")
+            logging.debug("downloaded new pubchem template.")
 
     def _generate_ideal_structure(self, component: Component):
         """Checks whether or not the component has degenerated ideal
@@ -195,10 +189,10 @@ class PDBeChemManager:
         result = component.compute_3d()
 
         if component.has_degenerated_conformer(ConformerType.Ideal):
-            self.logger.debug("has degenerated ideal coordinates.")
+            logging.debug("has degenerated ideal coordinates.")
 
         if not result:
-            self.logger.debug("error in generating 3D conformation.")
+            logging.debug("error in generating 3D conformation.")
 
         return result
 
@@ -212,7 +206,7 @@ class PDBeChemManager:
         matches = component.library_search(self.fragment_library)
 
         if matches:
-            self.logger.debug(
+            logging.debug(
                 f"{len(matches)} matches found in the library `{self.fragment_library.name}`."
             )
 
@@ -226,11 +220,11 @@ class PDBeChemManager:
         try:
             component.get_scaffolds()
         except CCDUtilsError as e:
-            self.logger.error(str(e))
+            logging.error(str(e))
 
             return
 
-        self.logger.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
+        logging.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
 
     def _generate_depictions(self, component: Component, out_dir: str):
         """Generate nice 2D depictions for the component and
@@ -245,11 +239,11 @@ class PDBeChemManager:
         depiction_result = component.compute_2d(self.depictions)
 
         if depiction_result.source == DepictionSource.Failed:
-            self.logger.debug("failed to generate 2D image.")
+            logging.debug("failed to generate 2D image.")
         else:
             if depiction_result.score > 0.99:
-                self.logger.debug("collision free image could not be generated.")
-            self.logger.debug(
+                logging.debug("collision free image could not be generated.")
+            logging.debug(
                 f"2D generated using {depiction_result.source.name} with score {depiction_result.score}."
             )
 
@@ -350,7 +344,7 @@ class PDBeChemManager:
                 conf_type=conformer_type,
             )
         except Exception:
-            self.logger.error(f"error writing {path}.")
+            logging.error(f"error writing {path}.")
 
             with open(path, "w") as f:
                 f.write("")
@@ -405,28 +399,6 @@ def create_parser():
     return parser
 
 
-def _set_up_logger(args):
-    """Set up application level logging.
-
-    Args:
-        args (argparse.Namespace): Parsed arguments.
-
-    Returns:
-        logging.Logger: Application logger
-    """
-
-    logger = logging.getLogger(__name__)
-    level = logging.DEBUG if args.debug else logging.ERROR
-    frm = "[%(asctime)-15s]  %(message)s"
-    logging.basicConfig(level=level, format=frm, datefmt="%a, %d %b %Y %H:%M:%S")
-    logger.info("PDBeChem pipeline using:")
-    logger.info(
-        f"pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}"
-    )
-
-    return logger
-
-
 # endregion
 
 
@@ -435,14 +407,21 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    log = _set_up_logger(args)
+    frm = "[%(asctime)-15s]  %(message)s"
+    lvl = logging.DEBUG if __name__ == "__main__" and args.debug else logging.INFO
 
-    log.info("Settings:")
+    logging.basicConfig(level=lvl, format=frm, datefmt="%a, %d %b %Y %H:%M:%S")
+    logging.info("PDBeChem pipeline using:")
+    logging.info(
+        f"pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}"
+    )
+
+    logging.info("Settings:")
     for k, v in vars(args).items():
-        log.info(f'{"":5s}{k:25s}{v}')
+        logging.info(f'{"":5s}{k:25s}{v}')
 
     pdbechem = PDBeChemManager(
-        args.pubchem_templates, args.general_templates, args.fragment_library, log
+        args.pubchem_templates, args.general_templates, args.fragment_library
     )
     pdbechem.run(args.components_cif, args.output_dir)
 

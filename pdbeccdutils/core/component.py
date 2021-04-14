@@ -16,6 +16,7 @@
 # under the License.
 
 import json
+import logging
 import re
 from datetime import date
 from typing import Any, Dict, List, Tuple
@@ -37,7 +38,7 @@ from pdbeccdutils.core.models import (
     ScaffoldingMethod,
     SubstructureMapping,
 )
-from pdbeccdutils.helpers import conversions, drawing, logging
+from pdbeccdutils.helpers import conversions, drawing
 from pdbeccdutils.utils import web_services
 
 
@@ -627,7 +628,7 @@ class Component:
                     )
 
             except Exception:
-                logging.logger.warning(f"Error mapping fragment {v.name}.")
+                logging.warning(f"Error mapping fragment {v.name}.")
 
         self._fragments.update(temp)
 

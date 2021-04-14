@@ -26,6 +26,7 @@ of molecules. The basic use can be as easy as this:
 """
 
 import os
+import logging
 from datetime import date
 from typing import Dict, List, NamedTuple
 
@@ -38,7 +39,7 @@ from pdbeccdutils.core.models import (
     Descriptor,
     ReleaseStatus,
 )
-from pdbeccdutils.helpers import conversions, mol_tools, logging
+from pdbeccdutils.helpers import conversions, mol_tools
 from pdbecif.mmcif_io import MMCIF2Dict
 
 
@@ -117,9 +118,7 @@ def read_pdb_components_file(
         try:
             result_bag[k] = _parse_pdb_mmcif(v, sanitize)
         except CCDUtilsError as e:
-            logging.logger.error(
-                f"ERROR: Data block {k} not processed. Reason: ({str(e)})."
-            )
+            logging.error(f"ERROR: Data block {k} not processed. Reason: ({str(e)}).")
 
     return result_bag
 
