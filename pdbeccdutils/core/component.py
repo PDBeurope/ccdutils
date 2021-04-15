@@ -16,6 +16,7 @@
 # under the License.
 
 import json
+import logging
 import re
 from datetime import date
 from typing import Any, Dict, List, Tuple
@@ -37,7 +38,7 @@ from pdbeccdutils.core.models import (
     ScaffoldingMethod,
     SubstructureMapping,
 )
-from pdbeccdutils.helpers import conversions, drawing, logging
+from pdbeccdutils.helpers import conversions, drawing
 from pdbeccdutils.utils import web_services
 
 
@@ -520,19 +521,24 @@ class Component:
         """
         options = rdkit.Chem.AllChem.ETKDGv2()
         options.clearConfs = False
+        conf_id = -1
 
         try:
             conf_id = rdkit.Chem.AllChem.EmbedMolecule(self.mol, options)
             rdkit.Chem.AllChem.UFFOptimizeMolecule(
                 self.mol, confId=conf_id, maxIters=1000
             )
+        except RuntimeError:
+            pass  # Force field issue here
+        except ValueError:
+            pass  # sanitization issue here
+
+        if conf_id != -1:
             conformer = self.mol.GetConformer(conf_id)
             conformer.SetProp("name", ConformerType.Computed.name)
             return True
-        except RuntimeError:
-            return False  # Force field issue here
-        except ValueError:
-            return False  # sanitization issue here
+
+        return False
 
     def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
         """
@@ -571,8 +577,11 @@ class Component:
             rdkit.Chem.rdchem.Conformer: RDKit conformer object
         """
         for c in self.mol.GetConformers():
-            if c.GetProp("name") == c_type.name:
-                return c
+            try:
+                if c.GetProp("name") == c_type.name:
+                    return c
+            except KeyError:
+                pass
 
         raise ValueError(f"Conformer {c_type.name} does not exist.")
 
@@ -627,7 +636,7 @@ class Component:
                     )
 
             except Exception:
-                logging.logger.warning(f"Error mapping fragment {v.name}.")
+                logging.warning(f"Error mapping fragment {v.name}.")
 
         self._fragments.update(temp)
 

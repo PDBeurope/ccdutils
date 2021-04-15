@@ -24,13 +24,14 @@ Raises:
 """
 import copy
 import json
+import logging
 import math
-from xml.etree.ElementTree import Element, SubElement
-from xml.etree import ElementTree as ET
-from xml.dom import minidom
 from collections import OrderedDict
 from pathlib import Path
 from typing import List
+from xml.dom import minidom
+from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement
 
 import pdbeccdutils
 import pdbecif.mmcif_io as mmcif
@@ -38,7 +39,6 @@ import rdkit
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
-from pdbeccdutils.helpers.logging import logger
 
 
 def write_molecule(
@@ -1413,7 +1413,7 @@ def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
     try:
         conformer = component.get_conformer(ConformerType.Computed)
     except ValueError:
-        logger.warning("Computed conformer does not exist.")
+        logging.warning(f"Computed conformer for {component.id} does not exist.")
         return  # no conformer nothing to write, we quit
 
     category = "_pdbe_chem_comp_rdkit_conformer"

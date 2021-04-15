@@ -20,6 +20,7 @@
 quality
 
 """
+import logging
 import math
 import os
 import sys
@@ -28,7 +29,6 @@ from typing import Dict
 
 import rdkit
 from pdbeccdutils.core.models import DepictionResult, DepictionSource
-from pdbeccdutils.helpers.logging import logger
 from pdbeccdutils.helpers.mol_tools import fix_conformer
 from pdbeccdutils.utils import config
 from rdkit import Chem, Geometry
@@ -256,7 +256,7 @@ class DepictionManager:
                     )
         except Exception:
             # if it fails it fails, but generally it wont
-            logger.warning("Depiction generation by template failed")
+            logging.warning("Depiction generation by template failed")
 
         return results
 
