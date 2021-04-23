@@ -1417,6 +1417,7 @@ def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
         return  # no conformer nothing to write, we quit
 
     category = "_pdbe_chem_comp_rdkit_conformer"
+    method = conformer.GetProp("coord_generation")
     cif_copy[category] = {}
 
     atom_count = (
@@ -1448,7 +1449,7 @@ def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
     cif_copy[category]["Cartn_z_rdkit"] = [
         f"{conformer.GetAtomPosition(i).z:.3f}" for i in atom_indices
     ]
-    cif_copy[category]["rdkit_method"] = ["ETKDGv2"] * atom_count
+    cif_copy[category]["rdkit_method"] = [method] * atom_count
     cif_copy[category]["rdkit_ordinal"] = [i for i in range(1, atom_count + 1)]
 
     __post_process_cif_category(cif_copy, category)

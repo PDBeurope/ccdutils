@@ -512,14 +512,25 @@ class Component:
         with open(file_name, "w") as fp:
             json.dump(json_repr, fp, indent=4, sort_keys=True)
 
-    def compute_3d(self) -> bool:
-        """
-        Generate 3D coordinates using ETKDGv2 method from RDKit.
+    def compute_3d(self, version="v3") -> bool:
+        """Generate 3D coordinates using EKTDG method. Version can be specified
+
+        Args:
+            version (str, optional): Version of EKTDG to be used.
+                Defaults to "v3".
 
         Returns:
             bool: Result of the structure generation process.
         """
-        options = rdkit.Chem.AllChem.ETKDGv2()
+
+        if version == "v3":
+            options = rdkit.Chem.AllChem.ETKDGv3()
+
+        elif version == "v2":
+            options = rdkit.Chem.AllChem.ETKDGv2()
+        else:
+            options = rdkit.Chem.AllChem.ETKDGv2()
+
         options.clearConfs = False
         conf_id = -1
 
@@ -528,6 +539,9 @@ class Component:
             rdkit.Chem.AllChem.UFFOptimizeMolecule(
                 self.mol, confId=conf_id, maxIters=1000
             )
+            if conf_id != -1:
+                c = self.mol.GetConformer(conf_id)
+                c.SetProp("coord_generation", f"ETKDG{version}")
         except RuntimeError:
             pass  # Force field issue here
         except ValueError:
