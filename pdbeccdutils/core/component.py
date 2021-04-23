@@ -525,7 +525,6 @@ class Component:
 
         if version == "v3":
             options = rdkit.Chem.AllChem.ETKDGv3()
-
         elif version == "v2":
             options = rdkit.Chem.AllChem.ETKDGv2()
         else:
@@ -539,9 +538,7 @@ class Component:
             rdkit.Chem.AllChem.UFFOptimizeMolecule(
                 self.mol, confId=conf_id, maxIters=1000
             )
-            if conf_id != -1:
-                c = self.mol.GetConformer(conf_id)
-                c.SetProp("coord_generation", f"ETKDG{version}")
+
         except RuntimeError:
             pass  # Force field issue here
         except ValueError:
@@ -550,6 +547,8 @@ class Component:
         if conf_id != -1:
             conformer = self.mol.GetConformer(conf_id)
             conformer.SetProp("name", ConformerType.Computed.name)
+            conformer.SetProp("coord_generation", f"ETKDG{version}")
+
             return True
 
         return False
