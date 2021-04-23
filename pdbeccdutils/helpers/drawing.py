@@ -216,8 +216,8 @@ def _parse_labels_from_svg(path_elements, atoms):
             atoms[atom_id]["labels"].append(
                 {"d": label_svg.attrib["d"], "fill": label_svg.attrib["fill"]}
             )
-        except IndexError:
-            pass  # we do not care for H labels
+        except (IndexError, KeyError):
+            pass  # we do not care for H labels and radicals
 
 
 def _parse_bonds_from_svg(bond_elements, mol):
@@ -250,7 +250,7 @@ def _parse_bonds_from_svg(bond_elements, mol):
             }
 
             result.append(temp)
-        except RuntimeError:
+        except (RuntimeError, KeyError):
             pass  # we do not care about bonded Hydrogens
     return result
 
