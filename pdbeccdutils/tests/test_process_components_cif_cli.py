@@ -7,10 +7,12 @@ adapted to use nose then converted to pytest
 """
 import json
 import os
+import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
-import xml.etree.ElementTree as ET
 import pytest
+from pdbeccdutils.helpers.drawing import svg_namespace
 from pdbeccdutils.scripts.process_components_cif_cli import (
     PDBeChemManager,
     create_parser,
@@ -82,21 +84,20 @@ class TestCutDownComponentsCif:
             assert file_pointer.stat().st_size > 0
 
     @staticmethod
-    @pytest.mark.parametrize(
-        "id_,name",
-        [("000", "OA"), ("001", "F11"), ("002", "N3"), ("003", "C17"), ("004", "OXT")],
-    )
-    def test_images_with_names_created(pipeline_wd: Path, id_, name):
+    @pytest.mark.parametrize("id_", ["000", "001", "002", "003", "004"])
+    def test_images_with_names_created(pipeline_wd: Path, id_):
         """Test if the depictions with names contain certain atom labels
         as expected.
         """
         path = pipeline_wd / id_[0] / id_ / f"{id_}_100_names.svg"
-        pattern = f"<tspan>{name}</tspan>"
+        xml = ET.parse(path)
+        path_elements = xml.findall("svg:path", svg_namespace)
 
-        with open(path) as f:
-            str_repr = f.read()
+        for e in path_elements:
+            if re.fullmatch(r"atom-\d+", e.attrib["class"]):
+                return  # label is where it should be we can quit
 
-            assert pattern in str_repr
+        assert False  # this compound should have had label
 
     @staticmethod
     @pytest.mark.parametrize(
