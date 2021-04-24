@@ -35,4 +35,6 @@ jobs:
       - run: |
           conda install rdkit=2020.03.6
           pip install -e ".[tests]"
+          pip install pre-commit
+          pre-commit install && pre-commit run --all
       - run: pytest --cov=pdbeccdutils
