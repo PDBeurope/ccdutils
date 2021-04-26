@@ -6,7 +6,7 @@ from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
-problematic_ids = ["UNL", "NA", "SY9", "10R", "ASX"]
+problematic_ids = ["UNL", "NA", "SY9", "10R", "ASX", "0KA"]
 
 
 @pytest.fixture(scope="session", params=sample_ccd_cifs)

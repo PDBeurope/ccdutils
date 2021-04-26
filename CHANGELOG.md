@@ -1,11 +1,12 @@
 # Changelog
 
-## RELEASE 0.6 - xx xx, xxxxx
+## RELEASE 0.6 - April 26, 2021
 
 ### Features
 
-* a lot of minor bug fixes and code improvements
-* new templates for 2D layouts
+* A lot of minor bug fixes and code improvements
+* New templates for 2D layouts
+* Support for rdkit 2021.03.x
 
 ## RELEASE 0.5 - May 15, 2019
 

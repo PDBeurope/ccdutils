@@ -32,7 +32,7 @@ jobs:
           activate-conda: true
           conda-channels: conda-forge
       - run: |
-          conda install rdkit=2020.03.6
+          conda install rdkit=2021.03.1
           pip install -e ".[docs]"
       - run: |
           cd doc

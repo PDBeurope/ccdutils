@@ -2,10 +2,20 @@ import json
 import os
 import xml.etree.ElementTree as ET
 
+import pytest
+from pdbeccdutils.core import ccd_writer
+from pdbeccdutils.core.component import Component
+from pdbeccdutils.core.models import ConformerType
+from pdbecif.mmcif_io import CifFileReader
 from rdkit import Chem
 
-from pdbeccdutils.core import ccd_writer
-from pdbeccdutils.core.models import ConformerType
+reader = CifFileReader()
+must_have_categories = [
+    "_chem_comp",
+    "_chem_comp_atom",
+    "_chem_comp_bond",
+    "_pdbx_chem_comp_descriptor",
+]
 
 
 class TestFileWrites:
@@ -159,3 +169,45 @@ class TestFileWrites:
                 assert key == component.id
                 assert len(js[key]["atoms"]) == rdkit_mol.GetNumAtoms()
                 assert len(js[key]["bonds"]) == rdkit_mol.GetNumBonds()
+
+    @staticmethod
+    @pytest.mark.parametrize("rem_hs", [True, False])
+    def test_cif_write(component: Component, tmpdir, rem_hs):
+        path = tmpdir.join(f"{component.id}.cif")
+        to_check = must_have_categories.copy()
+
+        ccd_writer.write_molecule(str(path), component, remove_hs=rem_hs)
+        json_obj = reader.read(path)
+
+        if component.id == "NA":  # Na is an atom!
+            to_check.pop(2)  # remove "_chem_comp_bond"
+
+        if component.id == "D3O" and rem_hs:  # D3O has single heavy atom
+            to_check.pop(2)
+
+        assert json_obj
+        assert component.id in json_obj
+        for c in to_check:
+            assert c in json_obj[component.id]
+
+    @staticmethod
+    @pytest.mark.parametrize("rem_hs", [True, False])
+    def test_plain_cif_write(component: Component, tmpdir, rem_hs):
+        path = tmpdir.join(f"{component.id}.cif")
+        to_check = must_have_categories.copy()
+
+        component.ccd_cif_dict = None
+        ccd_writer.write_molecule(str(path), component, remove_hs=rem_hs)
+        json_obj = reader.read(path)
+
+        if component.id == "NA":  # Na is an atom!
+            to_check.pop(2)  # remove "_chem_comp_bond"
+
+        if component.id == "D3O" and rem_hs:  # D3O has single heavy atom
+            to_check.pop(2)
+
+        assert json_obj
+        assert component.id in json_obj
+
+        for c in to_check:
+            assert c in json_obj[component.id]
