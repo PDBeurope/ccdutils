@@ -13,8 +13,6 @@ repos:
       - id: fix-byte-order-marker
       - id: end-of-file-fixer
       - id: check-ast
-      - id: no-commit-to-branch
-        args: ["--branch", "master"]
 
   - repo: https://github.com/ambv/black
     rev: 21.4b0

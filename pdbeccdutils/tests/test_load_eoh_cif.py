@@ -65,7 +65,7 @@ class TestLoadEOH:
 
     @staticmethod
     def test_eoh_has_nine_atoms(component_eoh):
-        """ test number of atoms in the _chem_comp_atom table"""
+        """test number of atoms in the _chem_comp_atom table"""
         assert component_eoh.number_atoms == 9
 
     @staticmethod
