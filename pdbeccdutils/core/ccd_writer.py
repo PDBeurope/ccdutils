@@ -36,6 +36,7 @@ from xml.etree.ElementTree import Element, SubElement
 import pdbeccdutils
 import pdbecif.mmcif_io as mmcif
 import rdkit
+from pdbeccdutils.helpers import cif_tools
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
@@ -315,6 +316,49 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
         component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
     """
+
+    def remove_hydrogens(cif):
+        cif_tools.preprocess_cif_category(cif_copy, "_chem_comp_atom")
+        cif_tools.preprocess_cif_category(cif_copy, "_chem_comp_bond")
+
+        h_indices: List[int] = [
+            i
+            for i, x in enumerate(cif_copy["_chem_comp_atom"]["type_symbol"])
+            if x == "H"
+        ]
+        h_names: List[str] = [cif["_chem_comp_atom"]["atom_id"][i] for i in h_indices]
+
+        # scrap hydrogen atoms
+        for key in cif["_chem_comp_atom"]:
+            cif["_chem_comp_atom"][key] = [
+                k
+                for i, k in enumerate(cif["_chem_comp_atom"][key])
+                if i not in h_indices
+            ]
+
+        # scrap bonds to hydrogen atoms
+        if "_chem_comp_bond" not in cif:
+            return
+
+        hb_indices = []
+        for key in ("atom_id_1", "atom_id_2"):
+            indices = [
+                i for i, k in enumerate(cif["_chem_comp_bond"][key]) if k in h_names
+            ]
+            hb_indices += indices
+
+        hb_indices = list(set(hb_indices))
+
+        for key in cif["_chem_comp_bond"]:
+            cif["_chem_comp_bond"][key] = [
+                k
+                for i, k in enumerate(cif["_chem_comp_bond"][key])
+                if i not in hb_indices
+            ]
+
+        cif_tools.post_process_cif_category(cif_copy, "_chem_comp_atom")
+        cif_tools.post_process_cif_category(cif_copy, "_chem_comp_bond")
+
     if not isinstance(component.ccd_cif_dict, dict):
         component.ccd_cif_dict = _to_pdb_ccd_cif_dict(component)
 
@@ -328,41 +372,7 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
     _add_rdkit_conformer_cif(component, cif_copy, remove_hs)
 
     if remove_hs:
-        h_indices: List[int] = [
-            i
-            for i, x in enumerate(cif_copy["_chem_comp_atom"]["type_symbol"])
-            if x == "H"
-        ]
-        h_names: List[str] = [
-            cif_copy["_chem_comp_atom"]["atom_id"][i] for i in h_indices
-        ]
-
-        hb_indices = []
-        for key in ("atom_id_1", "atom_id_2"):
-            indices = [
-                i
-                for i, k in enumerate(cif_copy["_chem_comp_bond"][key])
-                if k in h_names
-            ]
-            hb_indices += indices
-
-        hb_indices = list(set(hb_indices))
-
-        # scrap hydrogen atoms
-        for key in cif_copy["_chem_comp_atom"]:
-            cif_copy["_chem_comp_atom"][key] = [
-                k
-                for i, k in enumerate(cif_copy["_chem_comp_atom"][key])
-                if i not in h_indices
-            ]
-
-        # scrap bonds to hydrogen atoms
-        for key in cif_copy["_chem_comp_bond"]:
-            cif_copy["_chem_comp_bond"][key] = [
-                k
-                for i, k in enumerate(cif_copy["_chem_comp_bond"][key])
-                if i not in hb_indices
-            ]
+        remove_hydrogens(cif_copy)
 
     cfd = mmcif.CifFileWriter(path)
     cfd.write({component.id: cif_copy})
@@ -1132,30 +1142,6 @@ def __bond_type_to_sdf(bond):
     return "0"
 
 
-def __post_process_cif_category(cif_copy, category_name):
-    """Single value category needs to be string rather than array
-    with a single value. Also if the category contains nothing, it should
-    be removed.
-
-    Args:
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
-        category_name (str): Category name to be accounted for
-    """
-    if not cif_copy[category_name]:  # nothing in the category => should be removed
-        cif_copy.pop(category_name)
-        return
-
-    for k, v in cif_copy[category_name].items():
-        if isinstance(v, list):
-            if len(v) == 1:
-                cif_copy[category_name][k] = v[0]
-
-            if not v:
-                cif_copy.pop(category_name)
-                return
-
-
 # endregion helpers
 
 
@@ -1236,8 +1222,6 @@ def _add_fragments_and_scaffolds_cif(component, cif_copy):
     cif_copy[substructure_category]["substructure_inchis"] = inchis
     cif_copy[substructure_category]["substructure_inchikeys"] = inchikeys
 
-    __post_process_cif_category(cif_copy, substructure_category)
-
     cif_copy[mapping_category]["comp_id"] = []
     cif_copy[mapping_category]["atom_id"] = []
     cif_copy[mapping_category]["substructure_id"] = []
@@ -1246,7 +1230,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_copy):
     _add_scaffold_cif(component, cif_copy[mapping_category])
     _add_fragments_cif(component, cif_copy[mapping_category])
 
-    __post_process_cif_category(cif_copy, mapping_category)
+    cif_tools.post_process_cif_category(cif_copy, mapping_category)
+    cif_tools.post_process_cif_category(cif_copy, substructure_category)
 
 
 def _add_fragments_cif(component, cif_copy):
@@ -1299,7 +1284,7 @@ def _add_rdkit_properties_cif(component, cif_copy):
     for k, v in component.physchem_properties.items():
         cif_copy[category][k] = f"{v:.0f}" if v.is_integer() else f"{v:.3f}"
 
-    __post_process_cif_category(cif_copy, category)
+    cif_tools.post_process_cif_category(cif_copy, category)
 
 
 def __add_rdkit_2d_atoms_cif(component, cif_copy):
@@ -1336,7 +1321,7 @@ def __add_rdkit_2d_atoms_cif(component, cif_copy):
         i + 1 for i in range(0, conformer.GetNumAtoms())
     ]
 
-    __post_process_cif_category(cif_copy, category)
+    cif_tools.post_process_cif_category(cif_copy, category)
 
 
 def __add_rdkit_2d_bonds_cif(component, cif_copy):
@@ -1373,7 +1358,7 @@ def __add_rdkit_2d_bonds_cif(component, cif_copy):
     cif_copy[category]["bond_dir"] = [b.GetBondDir().name for b in bonds]
     cif_copy[category]["pdbx_ordinal"] = list(range(1, len(bonds) + 1))
 
-    __post_process_cif_category(cif_copy, category)
+    cif_tools.post_process_cif_category(cif_copy, category)
 
 
 def _add_unichem_mapping_cif(component, cif_copy):
@@ -1398,7 +1383,7 @@ def _add_unichem_mapping_cif(component, cif_copy):
         cif_copy[category]["resource"].append(i[0])
         cif_copy[category]["resource_id"].append(i[1])
 
-    __post_process_cif_category(cif_copy, category)
+    cif_tools.post_process_cif_category(cif_copy, category)
 
 
 def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
@@ -1452,7 +1437,7 @@ def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
     cif_copy[category]["rdkit_method"] = [method] * atom_count
     cif_copy[category]["rdkit_ordinal"] = [i for i in range(1, atom_count + 1)]
 
-    __post_process_cif_category(cif_copy, category)
+    cif_tools.post_process_cif_category(cif_copy, category)
 
 
 # endregion
