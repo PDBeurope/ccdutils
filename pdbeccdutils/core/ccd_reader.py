@@ -25,8 +25,8 @@ of molecules. The basic use can be as easy as this:
     rdkit_mol = ccdutils_component.mol
 """
 
-import os
 import logging
+import os
 from datetime import date
 from typing import Dict, List, NamedTuple
 
@@ -39,8 +39,18 @@ from pdbeccdutils.core.models import (
     Descriptor,
     ReleaseStatus,
 )
-from pdbeccdutils.helpers import conversions, mol_tools
+from pdbeccdutils.helpers import cif_tools, conversions, mol_tools
 from pdbecif.mmcif_io import MMCIF2Dict
+
+# categories that need to be 'fixed'
+# str => list[str]
+preprocessable_categories = [
+    "_chem_comp_atom",
+    "_chem_comp_bond",
+    "_pdbx_chem_comp_identifier",
+    "_pdbx_chem_comp_descriptor",
+    "_chem_comp",
+]
 
 
 class CCDReaderResult(NamedTuple):
@@ -124,12 +134,12 @@ def read_pdb_components_file(
 
 
 # region parse mmcif
-def _parse_pdb_mmcif(cif_dict, sanitize=True):
+def _parse_pdb_mmcif(cif, sanitize=True):
     """
     Create internal representation of the molecule from mmcif format.
 
     Args:
-        cif_dict (dict): mmcif category
+        cif (dict): mmcif dictionary
         sanitize (bool): Whether or not the rdkit component should
             be sanitized. Defaults to True.
 
@@ -142,29 +152,29 @@ def _parse_pdb_mmcif(cif_dict, sanitize=True):
     sanitized = False
     mol = rdkit.Chem.RWMol()
 
-    atoms_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp_atom", warnings)
-    bonds_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp_bond", warnings)
-    identifiers_dict = _preprocess_pdb_parser_output(
-        cif_dict, "_pdbx_chem_comp_identifier", warnings
-    )
-    descriptors_dict = _preprocess_pdb_parser_output(
-        cif_dict, "_pdbx_chem_comp_descriptor", warnings
-    )
-    properties_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp", warnings)
+    for c in preprocessable_categories:
+        w = cif_tools.preprocess_cif_category(cif, c)
 
-    _parse_pdb_atoms(mol, atoms_dict)
-    _parse_pdb_conformers(mol, atoms_dict)
-    _parse_pdb_bonds(mol, bonds_dict, atoms_dict, errors)
+        if w:
+            warnings.append(w)
+
+    _parse_pdb_atoms(mol, cif)
+    _parse_pdb_conformers(mol, cif)
+    _parse_pdb_bonds(mol, cif, errors)
     _handle_implicit_hydrogens(mol)
 
     if sanitize:
         sanitized = mol_tools.sanitize(mol)
 
-    descriptors = _parse_pdb_descriptors(descriptors_dict, "descriptor")
-    descriptors += _parse_pdb_descriptors(identifiers_dict, "identifier")
-    properties = _parse_pdb_properties(properties_dict)
+    descriptors = _parse_pdb_descriptors(
+        cif, "_pdbx_chem_comp_descriptor", "descriptor"
+    )
+    descriptors += _parse_pdb_descriptors(
+        cif, "_pdbx_chem_comp_identifier", "identifier"
+    )
+    properties = _parse_pdb_properties(cif["_chem_comp"])
 
-    comp = Component(mol.GetMol(), cif_dict, properties, descriptors)
+    comp = Component(mol.GetMol(), cif, properties, descriptors)
     reader_result = CCDReaderResult(
         warnings=warnings, errors=errors, component=comp, sanitized=sanitized
     )
@@ -172,19 +182,19 @@ def _parse_pdb_mmcif(cif_dict, sanitize=True):
     return reader_result
 
 
-def _parse_pdb_atoms(mol, atoms):
+def _parse_pdb_atoms(mol, cif):
     """
     Setup atoms in the component
 
     Args:
         mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
             compound representation.
-        atoms (dict): MMCIF dictionary with parsed _chem_comp_atom
-            category.
+        cif (dict): mmCIF dictionary.
     """
-    if not atoms:
+    if "_chem_comp_atom" not in cif:
         return
 
+    atoms = cif["_chem_comp_atom"]
     data = zip(
         atoms["atom_id"],
         atoms["type_symbol"],
@@ -216,18 +226,19 @@ def _parse_pdb_atoms(mol, atoms):
         mol.AddAtom(atom)
 
 
-def _parse_pdb_conformers(mol, atoms):
+def _parse_pdb_conformers(mol, cif):
     """
     Setup model and ideal cooordinates in the rdkit Mol object.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the compound
             representation.
-        atoms (dict): mmcif category with atom info category.
+        cif (dict): mmCIF dictionary.
     """
-    if not atoms:
+    if "_chem_comp_atom" not in cif:
         return
 
+    atoms = cif["_chem_comp_atom"]
     ideal = _setup_pdb_conformer(
         atoms, "pdbx_model_Cartn_{}_ideal", ConformerType.Ideal.name
     )
@@ -267,19 +278,20 @@ def _setup_pdb_conformer(atoms, label, name):
     return conformer
 
 
-def _parse_pdb_bonds(mol, bonds, atoms, errors):
+def _parse_pdb_bonds(mol, cif, errors):
     """
     Setup bonds in the compound
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule which receives bonds.
-        bonds (dict): mmcif category with the bonds info.
-        atoms (dict): mmcif category with the atom info.
+        cif (dict): mmcif dictionary.
         errors (list[str]): Issues encountered while parsing.
     """
-
-    if not bonds or "atom_id" not in atoms or not atoms["atom_id"]:
+    if "_chem_comp_atom" not in cif or "_chem_comp_bond" not in cif:
         return
+
+    atoms = cif["_chem_comp_atom"]
+    bonds = cif["_chem_comp_bond"]
 
     atoms_ids = atoms["atom_id"]
     data_struct = zip(bonds["atom_id_1"], bonds["atom_id_2"], bonds["value_order"])
@@ -319,7 +331,7 @@ def _handle_implicit_hydrogens(mol):
         atom.SetNoImplicit(no_Hs)
 
 
-def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label="descriptor"):
+def _parse_pdb_descriptors(cif, cat_name, label="descriptor"):
     """
     Parse useful information from _pdbx_chem_comp_* category
 
@@ -332,16 +344,16 @@ def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label="descriptor"):
     Returns:
         Descriptor: namedtuple with the property info
     """
-    descriptors = list()
+    descriptors = []
 
-    if not pdbx_chem_comp_descriptors:
+    if cat_name not in cif:
         return descriptors
 
-    for i in range(len(pdbx_chem_comp_descriptors[label])):
+    for i in range(len(cif[cat_name][label])):
         d = Descriptor(
-            type=pdbx_chem_comp_descriptors["type"][i],
-            program=pdbx_chem_comp_descriptors["program"][i],
-            value=pdbx_chem_comp_descriptors[label][i],
+            type=cif[cat_name]["type"][i],
+            program=cif[cat_name]["program"][i],
+            value=cif[cat_name][label][i],
         )
         descriptors.append(d)
 
@@ -384,33 +396,6 @@ def _parse_pdb_properties(chem_comp):
             weight=weight,
         )
     return properties
-
-
-def _preprocess_pdb_parser_output(dictionary, label, warnings):
-    """
-    The mmcif dictionary values are either str or list(), which is a bit
-    tricky to work with. This method makes list() of all of them in
-    order to parse all of the in the same way.
-
-    Args:
-        dictionary (dict): mmcif category with the parser output.
-        label (str): name of the category
-        warnings (list): possible issues encountered when parsing
-
-    Returns:
-        dict: unified dictionary for structure parsing.
-    """
-    if label not in dictionary:
-        warnings.append("Namespace {} does not exist.".format(label))
-        return []
-
-    check_element = list(dictionary[label].keys())[0]
-    values = (
-        dictionary[label]
-        if isinstance(dictionary[label][check_element], list)
-        else {k: [v] for k, v in dictionary[label].items()}
-    )
-    return values
 
 
 def _bond_pdb_order(value_order):

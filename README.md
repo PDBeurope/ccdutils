@@ -6,7 +6,7 @@
   for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd)
 
 * The tools use:
-  * [RDKit](http://www.rdkit.org/) for chemistry
+  * [RDKit](http://www.rdkit.org/) for chemistry Presently tested with `2021.03.x`
   * [PDBeCIF](https://github.com/PDBeurope/pdbecif) cif parser.
   * [scipy](https://www.scipy.org/) for depiction quality check.
   * [numpy](https://www.numpy.org/) for molecular scaling.
@@ -37,7 +37,7 @@
 * Generation of 3D conformations.
 * Fragment library search.
 * Chemical scaffolds (Murcko scaffold, Murcko general, BRICS).
-* Lightweight implementation of [parity method](https://doi.org/10.1016/j.str.2018.02.009) by Jon Tyczak.
+* Lightweight implementation of [parity method](https://doi.org/10.1016/j.str.2018.02.009) by Jon Tyzack.
 * RDKit molecular properties per component.
 * UniChem mapping.
 

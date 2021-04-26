@@ -4,13 +4,14 @@
 
 import json
 import os
+import re
 import xml.etree.ElementTree as ET
 
 import pytest
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.component import Component
-from pdbeccdutils.helpers.drawing import save_no_image, svg_namespace
 from pdbeccdutils.core.depictions import DepictionManager, DepictionSource
+from pdbeccdutils.helpers.drawing import save_no_image, svg_namespace
 from pdbeccdutils.tests.tst_utilities import cif_filename
 
 collision_free_templates = [
@@ -43,27 +44,29 @@ class TestWriteImg:
         assert os.path.isfile(path)
 
     @staticmethod
-    @pytest.mark.parametrize(
-        "ccd_id,expected,names",
-        [
-            ("NAG", "C8", True),
-            ("ATP", "C5&apos;", True),
-            ("08T", "BE", True),
-            ("BCD", "C66", True),
-            ("ATP", "<rect", False),
-            ("08T", "<rect", False),
-            ("10R", "<rect", False),
-            ("0OD", "<rect", False),
-        ],
-    )
-    def test_image_generation_with_names(tmpdir, ccd_id, expected, names):
+    @pytest.mark.parametrize("ccd_id", ["NAG", "ATP", "08T", "BCD", "10R", "0OD"])
+    def test_image_generation_with_names(tmpdir, ccd_id):
         mol = load_molecule(ccd_id)
-        path = str(tmpdir.join(f"{ccd_id}_{'names' if names else 'no_names'}.svg"))
-        mol.export_2d_svg(path, names=names)
+        path = str(tmpdir.join(f"{ccd_id}.svg"))
+        path_with_names = str(tmpdir.join(f"{ccd_id}_names.svg"))
+        mol.export_2d_svg(path, names=False)
+        mol.export_2d_svg(path_with_names, names=True)
 
-        with open(path, "r") as f:
-            content = f.readlines()
-        assert any(expected in i for i in content)
+        img = ET.parse(path).findall("svg:path", svg_namespace)
+        img_names = ET.parse(path_with_names).findall("svg:path", svg_namespace)
+
+        img = [
+            x
+            for x in img
+            if "class" in x.attrib and re.fullmatch(r"atom-\d+", x.attrib["class"])
+        ]
+        img_names = [
+            x
+            for x in img_names
+            if "class" in x.attrib and re.fullmatch(r"atom-\d+", x.attrib["class"])
+        ]
+
+        assert len(img_names) > len(img)
 
     @staticmethod
     @pytest.mark.parametrize("expected_template,names", collision_free_templates)
@@ -128,13 +131,6 @@ class TestWriteImg:
         assert len(json_obj["atoms"]) == component.mol_no_h.GetNumAtoms()
         assert len(json_obj["bonds"]) >= component.mol_no_h.GetNumBonds()
         assert all(atom["name"] for atom in json_obj["atoms"])  # do we have atom names?
-
-        for atom in json_obj["atoms"]:
-            for label in atom["labels"]:
-                h_tspans = sum(1 for x in label["tspans"] if x == "H")
-                assert h_tspans < len(
-                    label["tspans"]
-                )  # we do not have bare H labels, because we dont have links to them.
 
         assert all(
             bond["bgn"] in atom_names and bond["end"] in atom_names

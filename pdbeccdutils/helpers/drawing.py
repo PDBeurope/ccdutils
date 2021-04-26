@@ -26,7 +26,6 @@ from sys import platform
 
 import rdkit
 from PIL import Image, ImageDraw, ImageFont
-from scipy.spatial import KDTree
 
 MIN_IMG_DIMENSION = 300
 svg_namespace = {"svg": "http://www.w3.org/2000/svg"}
@@ -145,22 +144,15 @@ def convert_svg(svg_string, ccd_id, mol: rdkit.Chem.Mol):
     result_bag = OrderedDict(
         [("ccd_id", ccd_id), ("resolution", {}), ("atoms", []), ("bonds", [])]
     )
-    svg_string = _fix_svg(svg_string)
     svg = ET.fromstring(svg_string)
 
-    atom_elem = svg.findall("svg:circle", svg_namespace)
-    bond_elem = svg.findall("svg:path", svg_namespace)
+    atom_elems = svg.findall("svg:circle", svg_namespace)
+    path_elems = svg.findall("svg:path", svg_namespace)
     dimensions_svg = svg.find("svg:rect", svg_namespace)
-    label_elem = svg.findall("svg:text", svg_namespace)
-    kd_tree = None
 
-    atoms = _parse_atoms_from_svg(atom_elem, mol)
-    bonds = _parse_bonds_from_svg(bond_elem, mol)
-
-    atom_centers = [[atom["x"], atom["y"]] for atom in atoms]
-    kd_tree = KDTree(atom_centers)
-
-    _parse_labels_from_svg(label_elem, kd_tree, atoms)
+    atoms = _parse_atoms_from_svg(atom_elems, mol)
+    bonds = _parse_bonds_from_svg(path_elems, mol)
+    _parse_labels_from_svg(path_elems, atoms)
 
     result_bag["atoms"] = atoms
     result_bag["bonds"] = bonds
@@ -185,69 +177,47 @@ def _parse_atoms_from_svg(atom_elements, mol: rdkit.Chem.Mol):
     """
     result = []
     for atom_svg in atom_elements:
-        atom_id_str = re.search(r"\d+", atom_svg.attrib.get("class")).group(0)
-        atom_id = int(atom_id_str)
+        try:
+            atom_id_str = re.search(r"\d+", atom_svg.attrib.get("class")).group(0)
+            atom_id = int(atom_id_str)
 
-        if atom_id >= mol.GetNumAtoms():
-            continue
+            if atom_id >= mol.GetNumAtoms():
+                continue
 
-        temp = {
-            "name": mol.GetAtomWithIdx(atom_id).GetProp("name"),
-            "labels": [],
-            "x": float(atom_svg.attrib.get("cx")),
-            "y": float(atom_svg.attrib.get("cy")),
-        }
-        result.append(temp)
+            temp = {
+                "name": mol.GetAtomWithIdx(atom_id).GetProp("name"),
+                "labels": [],
+                "x": float(atom_svg.attrib.get("cx")),
+                "y": float(atom_svg.attrib.get("cy")),
+            }
+            result.append(temp)
+        except RuntimeError:
+            pass  # we do not care for H atoms
 
     return result
 
 
-def _parse_labels_from_svg(label_elements, kd_tree, atoms):
+def _parse_labels_from_svg(path_elements, atoms):
     """Parse atom label information from the SVG.
 
     Args:
-        label_elements (list[xml.etree.ElementTree.Element]):
-            List of SVG circle elements with atom information.
-        kd_tree (KDTree): Kdtree with atom proximities
+        path_elements (list[xml.etree.ElementTree.Element]):
+            List of path elements that encode bonds and text.
         atoms (list[dict]): JSON-style representation of atoms.
     """
-    for label_svg in label_elements:
-        x = label_svg.attrib.get("x")
-        y = label_svg.attrib.get("y")
-
-        if "nan" in x or "nan" in y:  # check for broken labels with 'nan' and '-nan'
-            continue
-
-        temp = {
-            "x": float(x),
-            "y": float(y),
-            "style": label_svg.attrib.get("style"),
-            "dominant-baseline": label_svg.attrib.get("dominant-baseline"),
-            "text-anchor": label_svg.attrib.get("text-anchor"),
-            "tspans": [],
-        }
-        filtered_tspans = [
-            x for x in label_svg.findall("svg:tspan", svg_namespace) if x.text
-        ]
-
-        for tspan in filtered_tspans:
-            tspan_style = tspan.attrib.get("style")
-
-            if tspan.text == "H" and len(filtered_tspans) == 1:
-                # get rid of H's as we do not have any connection to them anyway in 2D.
+    atom_id_re = r"atom-\d+"
+    for label_svg in path_elements:
+        try:
+            match = re.fullmatch(atom_id_re, label_svg.attrib["class"])
+            if not match:
                 continue
 
-            tspan_item = {
-                "value": tspan.text,
-                "style": tspan_style if tspan_style else "",
-            }
-
-            temp["tspans"].append(tspan_item)
-
-        nearest_index = kd_tree.query([temp["x"], temp["y"]])[1]
-
-        if temp["tspans"]:
-            atoms[nearest_index]["labels"].append(temp)
+            atom_id = int(match.group(0)[5:])
+            atoms[atom_id]["labels"].append(
+                {"d": label_svg.attrib["d"], "fill": label_svg.attrib["fill"]}
+            )
+        except (IndexError, KeyError):
+            pass  # we do not care for H labels and radicals
 
 
 def _parse_bonds_from_svg(bond_elements, mol):
@@ -256,55 +226,33 @@ def _parse_bonds_from_svg(bond_elements, mol):
     Args:
         bond_elements (list[xml.etree.ElementTree.Element]):
             List of SVG path elements.
-        mol (rdkit.Chem.rdchem.Mol): [description]
+        mol (rdkit.Chem.rdchem.Mol): RDKit mol object]
 
     Returns:
         list[dict]: JSON-style formated bond informations
     """
     result = []
+    re_bond_regex = r"bond-\d+"
     for bond_svg in bond_elements:
-        if (
-            "class" not in bond_svg.attrib
-            or "bond-selector" in bond_svg.attrib["class"]
-        ):
-            continue
+        try:
+            if not re.search(re_bond_regex, bond_svg.attrib["class"]):
+                continue
 
-        bond_id_str = re.search(r"\d+", bond_svg.attrib["class"]).group(0)
-        bond_id = int(bond_id_str)
-        if bond_id >= mol.GetNumBonds():
-            continue
+            atoms = re.findall(r"atom-\d+", bond_svg.attrib["class"])
+            atom_id_a = int(atoms[0][5:])  # to get int part of "atom-0"
+            atom_id_b = int(atoms[1][5:])
 
-        bond = mol.GetBondWithIdx(bond_id)
-        temp = {
-            "bgn": bond.GetBeginAtom().GetProp("name"),
-            "end": bond.GetEndAtom().GetProp("name"),
-            "coords": bond_svg.attrib.get("d"),
-            "style": bond_svg.attrib.get("style"),
-        }
+            temp = {
+                "bgn": mol.GetAtomWithIdx(atom_id_a).GetProp("name"),
+                "end": mol.GetAtomWithIdx(atom_id_b).GetProp("name"),
+                "coords": bond_svg.attrib["d"],
+                "style": bond_svg.attrib["style"],
+            }
 
-        result.append(temp)
-
+            result.append(temp)
+        except (RuntimeError, KeyError):
+            pass  # we do not care about bonded Hydrogens
     return result
-
-
-def _fix_svg(svg_string):
-    """RDKit presently produces invalid XML when some metadata are
-    being exported. This method fixes all the standing issues so the XML
-    can be processed.
-
-    Args:
-        svg_string (str): XML in str representation to be fixed.
-
-    Returns:
-        str: Fixed XML representation as a string.
-    """
-
-    svg_string = re.sub("<sub>", "&lt;sub&gt;", svg_string)
-    svg_string = re.sub("</sub>", "&lt;/sub&gt;", svg_string)
-    svg_string = re.sub("<sup>", "&lt;sup&gt;", svg_string)
-    svg_string = re.sub("</sup>", "&lt;/sup&gt;", svg_string)
-
-    return svg_string
 
 
 def _png_no_image(path_to_image, width):
