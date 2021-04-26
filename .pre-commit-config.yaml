@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.3.0
+    rev: v3.4.0
     hooks:
       - id: check-yaml
       - id: check-added-large-files
@@ -17,13 +17,13 @@ repos:
         args: ["--branch", "master"]
 
   - repo: https://github.com/ambv/black
-    rev: stable
+    rev: 21.4b0
     hooks:
       - id: black
         language_version: python3.7
 
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.4
+    rev: 3.9.1
     hooks:
       - id: flake8
         args: ["--max-line-length=88", "--ignore=E501,W503"]
