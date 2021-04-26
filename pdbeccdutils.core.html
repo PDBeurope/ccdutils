@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>core &mdash; pdbeccdutils 0.5.10 documentation</title>
+  <title>core &mdash; pdbeccdutils 0.6 documentation</title>
   
 
   
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.5.10
+                0.6
               </div>
             
           
@@ -424,14 +424,18 @@ hydrogens prior to depiction.</p></li>
 
 <dl class="py method">
 <dt id="pdbeccdutils.core.component.Component.compute_3d">
-<code class="sig-name descname"><span class="pre">compute_3d</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a><a class="headerlink" href="#pdbeccdutils.core.component.Component.compute_3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate 3D coordinates using ETKDGv2 method from RDKit.</p>
+<code class="sig-name descname"><span class="pre">compute_3d</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'v3'</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a><a class="headerlink" href="#pdbeccdutils.core.component.Component.compute_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate 3D coordinates using EKTDG method. Version can be specified</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Result of the structure generation process.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – Version of EKTDG to be used.
+Defaults to “v3”.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of the structure generation process.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
