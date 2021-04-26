@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>scripts &mdash; pdbeccdutils 0.5.8 documentation</title>
+  <title>scripts &mdash; pdbeccdutils 0.5.10 documentation</title>
   
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.5.8
+                0.5.10
               </div>
             
           
@@ -139,7 +139,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.helpers.html">helpers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.collection_ext">pdbeccdutils.helpers.collection_ext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils-helpers-collection-ext">pdbeccdutils.helpers.collection_ext</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.conversions">pdbeccdutils.helpers.conversions</a></li>
 </ul>
@@ -240,48 +240,48 @@ More detailed description can be found here:</p>
 <p><a class="reference external" href="https://gitlab.ebi.ac.uk/pdbe/release/pdbechem">https://gitlab.ebi.ac.uk/pdbe/release/pdbechem</a></p>
 <dl class="py class">
 <dt id="pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager">
-<em class="property">class </em><code class="sig-prename descclassname">pdbeccdutils.scripts.process_components_cif_cli.</code><code class="sig-name descname">PDBeChemManager</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pdbeccdutils.scripts.process_components_cif_cli.</span></code><code class="sig-name descname"><span class="pre">PDBeChemManager</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pubchem_templates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">general_templates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/runner/work/ccdutils/ccdutils/pdbeccdutils/data/general_templates'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/runner/work/ccdutils/ccdutils/pdbeccdutils/data/fragment_library.tsv'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Manager orchestrating computation and generation of all parts of the
 PDBeChem update process.</p>
 <dl class="py method">
 <dt id="pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.process_single_component">
-<code class="sig-name descname">process_single_component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ccd_reader_result</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.process_single_component" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process single PDB-CCD component</p>
+<code class="sig-name descname"><span class="pre">process_single_component</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccd_reader_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.process_single_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process single PDB-CCD component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ccd_reader_result</strong> (<a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult"><em>CCDReaderResult</em></a>) – pdbeccdutils parser output.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ccd_reader_result</strong> (<a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_reader.CCDReaderResult" title="pdbeccdutils.core.ccd_reader.CCDReaderResult"><em>CCDReaderResult</em></a>) – pdbeccdutils parser output.</p></li>
+<li><p><strong>out_dir</strong> (<em>Path</em>) – Out directory</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Whether or not all the files were succesfully written.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.run_pipeline">
-<code class="sig-name descname">run_pipeline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.run_pipeline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run PDBeChem pipeline</p>
+<dt id="pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.run">
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process components</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.9)"><em>argparse.Namespace</em></a>) – Verified application arguments</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>components_path</strong> (<em>Path</em>) – Path to the components.cif file.</p></li>
+<li><p><strong>out_dir</strong> (<em>Path</em>) – Path to the out_dir</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt id="pdbeccdutils.scripts.process_components_cif_cli.check_args">
-<code class="sig-prename descclassname">pdbeccdutils.scripts.process_components_cif_cli.</code><code class="sig-name descname">check_args</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.check_args" title="Permalink to this definition">¶</a></dt>
-<dd><p>Validate suplied arguments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.9)"><em>argparse.Namespace</em></a>) – an argparse namespace containing the
-required arguments</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="pdbeccdutils.scripts.process_components_cif_cli.create_parser">
-<code class="sig-prename descclassname">pdbeccdutils.scripts.process_components_cif_cli.</code><code class="sig-name descname">create_parser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.create_parser" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">pdbeccdutils.scripts.process_components_cif_cli.</span></code><code class="sig-name descname"><span class="pre">create_parser</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.create_parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets up parse the command line options.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -292,7 +292,7 @@ required arguments</p>
 
 <dl class="py function">
 <dt id="pdbeccdutils.scripts.process_components_cif_cli.main">
-<code class="sig-prename descclassname">pdbeccdutils.scripts.process_components_cif_cli.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.main" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">pdbeccdutils.scripts.process_components_cif_cli.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs the PDBeChem pipeline</p>
 </dd></dl>
 
@@ -304,7 +304,7 @@ the pdbeccdutils. Based on the inchikey provided in the CCD
 a corresponding 2D layout is downloaded from PubChem database.</p>
 <dl class="py function">
 <dt id="pdbeccdutils.scripts.setup_pubchem_library_cli.main">
-<code class="sig-prename descclassname">pdbeccdutils.scripts.setup_pubchem_library_cli.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.setup_pubchem_library_cli.main" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">pdbeccdutils.scripts.setup_pubchem_library_cli.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.setup_pubchem_library_cli.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main method of the whole process.</p>
 </dd></dl>
 
