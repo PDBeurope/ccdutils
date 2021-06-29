@@ -86,12 +86,17 @@ class Component:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.id.html
 
-        If not defined then the empty string '' will be returned.
+        If not defined then the RDKIT InChIKey is returned.
 
         Returns:
-            str: the _chem_comp.id or ''.
+            str: the _chem_comp.id or InChIKey
         """
-        return self._cif_properties.id
+
+        return (
+            self._cif_properties.id
+            if self._cif_properties
+            else self.inchikey_from_rdkit
+        )
 
     @property
     def name(self) -> str:
@@ -105,7 +110,8 @@ class Component:
         Returns:
             str: the _chem_comp.name or ''.
         """
-        return self._cif_properties.name
+
+        return self._cif_properties.name if self._cif_properties else ""
 
     @property
     def formula(self) -> str:
@@ -115,12 +121,16 @@ class Component:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_std.dic/Items/_chem_comp.formula.html
 
-        If not defined then the empty string '' will be returned.
+        If not defined then the RDKit formula is returned.
 
         Returns:
-            str: the _chem_comp.formula or ''.
+            str: the _chem_comp.formula or RDKit formular.
         """
-        return self._cif_properties.formula
+        return (
+            self._cif_properties.formula
+            if self._cif_properties
+            else rdkit.Chem.rdMolDescriptors.CalcMolFormula(self.mol)
+        )
 
     @property
     def pdbx_release_status(self) -> ReleaseStatus:
@@ -133,7 +143,11 @@ class Component:
             pdbeccdutils.core.enums.ReleaseStatus: enum of the release
             status (this includes NOT_SET if no value is defined).
         """
-        return self._cif_properties.pdbx_release_status
+        return (
+            self._cif_properties.pdbx_release_status
+            if self._cif_properties
+            else ReleaseStatus.NOT_SET
+        )
 
     @property
     def modified_date(self) -> date:
@@ -142,15 +156,18 @@ class Component:
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html
 
+        If not defined then date.today() is returned
+
         Returns:
             datetime.date: Date of the last entrie's modification.
         """
-        return self._cif_properties.modified_date
+        return (
+            self._cif_properties.modified_date if self._cif_properties else date.today()
+        )
 
     @property
     def descriptors(self) -> List[Descriptor]:
-        """Supply the pdbx_modified_date for the PDB-CCD
-        Obtained from PDB-CCD's _chem_comp.pdbx_modified_date:
+        """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
 
         http://mmcif.rcsb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.program_version.html
 
@@ -172,7 +189,11 @@ class Component:
         Returns:
             str: the InChIKey or ''.
         """
-        return next((x.value for x in self._descriptors if x.type == "InChIKey"), "")
+        tmp = ""
+        if self._descriptors:
+            tmp = next((x.value for x in self._descriptors if x.type == "InChIKey"), "")
+
+        return tmp
 
     @property
     def inchi(self) -> str:
@@ -187,7 +208,11 @@ class Component:
         Returns:
             str: the InChI or ''.
         """
-        return next((x.value for x in self._descriptors if x.type == "InChI"), "")
+        tmp = ""
+        if self._descriptors:
+            tmp = next((x.value for x in self._descriptors if x.type == "InChI"), "")
+
+        return tmp
 
     @property
     def inchi_from_rdkit(self) -> str:
@@ -227,7 +252,10 @@ class Component:
         Returns:
             bool: True if PDB-CCD has been released.
         """
-        return self._cif_properties.pdbx_release_status == ReleaseStatus.REL
+        if self._cif_properties:
+            return self._cif_properties.pdbx_release_status == ReleaseStatus.REL
+        else:
+            return False
 
     @property
     def mol_no_h(self) -> rdkit.Chem.rdchem.Mol:
@@ -344,12 +372,12 @@ class Component:
         Returns:
             dict[str, str]: Return resource ids pairing established by UniChem.
         """
+        key = self.inchikey or self.inchikey_from_rdkit
+
         if all_mappings:
-            self._external_mapping = web_services.get_all_unichem_mapping(self.inchikey)
+            self._external_mapping = web_services.get_all_unichem_mapping(key)
         else:
-            self._external_mapping = web_services.get_agreed_unichem_mapping(
-                self.inchikey
-            )
+            self._external_mapping = web_services.get_agreed_unichem_mapping(key)
 
         return self._external_mapping
 
@@ -362,7 +390,7 @@ class Component:
         Returns:
             bool: True for match
         """
-        if self.inchikey is None or self.inchikey_from_rdkit == "ERROR":
+        if not self.inchikey or self.inchikey_from_rdkit == "ERROR":
             return False
         if connectivity_only:
             if len(self.inchikey) < 14 or len(self.inchikey_from_rdkit) < 14:
