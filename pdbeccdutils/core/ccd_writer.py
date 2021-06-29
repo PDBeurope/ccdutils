@@ -512,8 +512,8 @@ def to_json_dict(component: Component, remove_hs=True, conf_type=ConformerType.I
 
     for bond in mol_to_save.GetBonds():
         bond_dict = {}
-        bond_dict["from"] = bond.GetBeginAtomIdx()
-        bond_dict["to"] = bond.GetEndAtomIdx()
+        bond_dict["from"] = bond.GetBeginAtom().GetProp("name")
+        bond_dict["to"] = bond.GetEndAtom().GetProp("name")
         bond_dict["type"] = bond.GetBondType().name
 
         result["bonds"].append(bond_dict)
