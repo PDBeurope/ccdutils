@@ -383,28 +383,27 @@ class DepictionValidator:
 
         return False
 
-    def count_suboptimal_atom_positions(self, lowerBound, upperBound):
+    def count_suboptimal_atom_positions(self, lower_bound, upper_bound):
         """
         Detects whether the structure has a pair or atoms in the range
         <lowerBound, upperBound> meaning that the depiction could
         be improved.
 
         Arguments:
-            lowerBound (float): lower bound
-            upperBound (float): upper bound
+            lower_bound (float): lower bound
+            upper_bound (float): upper bound
 
         Returns:
-            bool: indication whether or not the atoms are not in
-            optimal coordinates
+            float: number of atoms with crowded neighbourhood
         """
         counter = 0
         for i in range(self.conformer.GetNumAtoms()):
             center = self.conformer.GetAtomPosition(i)
             point = [center.x, center.y, center.z]
-            surroundingLow = self.kd_tree.query_ball_point(point, lowerBound)
-            surroundingHigh = self.kd_tree.query_ball_point(point, upperBound)
+            surrounding_low = self.kd_tree.query_ball_point(point, lower_bound)
+            surrounding_high = self.kd_tree.query_ball_point(point, upper_bound)
 
-            if len(surroundingHigh) - len(surroundingLow) > 0:
+            if len(surrounding_high) - len(surrounding_low) > 0:
                 counter += 1
 
         return counter / 2

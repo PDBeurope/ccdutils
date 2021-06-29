@@ -92,7 +92,7 @@ def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResul
         the internal representation of the component.
     """
     if not os.path.isfile(path_to_cif):
-        raise ValueError("File '{}' does not exists".format(path_to_cif))
+        raise ValueError(f"File '{path_to_cif}' does not exists")
 
     cif_dict = list(MMCIF2Dict().parse(path_to_cif).values())[0]
 
