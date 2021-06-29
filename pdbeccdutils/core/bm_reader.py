@@ -28,24 +28,27 @@ internal representation of bound molecules. The basic use can be as easy as this
 """
 
 import os
-from typing import Dict, List, NamedTuple
+
+# from typing import Dict, List, NamedTuple
 
 import rdkit
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.component import Component
-from pdbeccdutils.core.exceptions import CCDUtilsError
+
+# from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import (
-    CCDProperties,
+    # CCDProperties,
     ConformerType,
-    Descriptor,
-    ReleaseStatus,
+    # Descriptor,
+    # ReleaseStatus,
     Residue,
     BoundMolecule,
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from pdbecif.mmcif_io import MMCIF2Dict
 from networkx import DiGraph, connected_components
-import networkx
+
+# import networkx
 
 
 def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
@@ -64,7 +67,7 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
         A dictionary of CCDResult representation of each bound molecule.
     """
     if not os.path.isfile(path_to_cif):
-        raise ValueError("File '{}' does not exists".format(path_to_cif))
+        raise ValueError(f"File '{path_to_cif}' does not exists")
 
     cif_dict = list(MMCIF2Dict().parse(path_to_cif).values())[0]
 
@@ -75,10 +78,10 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     sanitized = False
 
     biomolecule_result = []
-    json_result = []
+    # json_result = []
 
-    atoms_dict = cif_tools.preprocess_cif_category(cif_dict, "_atom_site")
-    bonds_dict = cif_tools.preprocess_cif_category(cif_dict, "_chem_comp_bond")
+    cif_tools.preprocess_cif_category(cif_dict, "_atom_site")
+    cif_tools.preprocess_cif_category(cif_dict, "_chem_comp_bond")
 
     bms = infer_bound_molecules(path_to_cif, ["HOH"])
     multiple_chem_comp_bms = [
@@ -87,10 +90,14 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
 
     for bm in multiple_chem_comp_bms:
         mol = rdkit.Chem.RWMol()
-        (index_atoms, bm_atoms_dict) = _parse_pdb_atom_site(mol, atoms_dict, bm)
+        index_atoms, bm_atoms_dict = _parse_pdb_atom_site(
+            mol, cif_dict["_atom_site"], bm
+        )
 
         _parse_pdb_conformers_site(mol, bm_atoms_dict, index_atoms)
-        _parse_pdb_bonds_site(mol, bonds_dict, bm_atoms_dict, errors, index_atoms, bm)
+        _parse_pdb_bonds_site(
+            mol, cif_dict["_chem_comp_bond"], bm_atoms_dict, errors, index_atoms, bm
+        )
 
         # _handle_implicit_hydrogens(mol)
         _handle_disconnected_hydrogens(mol)
@@ -99,17 +106,17 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
 
         # Set empty descriptors and properties for Bound Molecule
         # Note: This is because component.compute_2d expects self.id
-        descriptors = list()
-        properties = CCDProperties(
-            id="",
-            name="",
-            formula="",
-            modified_date="",
-            pdbx_release_status="",
-            weight="",
-        )
+        # descriptors = list()
+        # properties = CCDProperties(
+        #     id="",
+        #     name="",
+        #     formula="",
+        #     modified_date="",
+        #     pdbx_release_status="",
+        #     weight="",
+        # )
 
-        comp = Component(mol.GetMol(), cif_dict, properties, descriptors)
+        comp = Component(mol.GetMol(), cif_dict)
         reader_result = ccd_reader.CCDReaderResult(
             warnings=warnings, errors=errors, component=comp, sanitized=sanitized
         )
@@ -212,7 +219,7 @@ def _parse_pdb_atom_site(mol, atoms, bm):
 
                 mol.AddAtom(atom)
 
-    return (index_atoms, bm_atoms_dict)
+    return index_atoms, bm_atoms_dict
 
 
 def _parse_pdb_conformers_site(mol, atoms, index_atoms):
@@ -282,8 +289,8 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule which receives bonds.
-        bonds (dict): mmcif category with the bonds info.
-        atoms (dict): mmcif category with the atom info.
+        bonds (dict): mmcif category with the bonds info. TODO not being used
+        atoms (dict): mmcif category with the atom info. TODO not being used
         errors (list[str]): Issues encountered while parsing.
     """
     if not bonds:
@@ -400,27 +407,27 @@ def parse_bound_molecules(path, to_discard):
         for i in range(len(entity_branch_link["link_id"])):
             ent_id = entity_branch_link["entity_id"][i]
             for chain in entities[ent_id]:
-                for l in bms.nodes:
+                for node in bms.nodes:
                     prtnr1 = False
                     prtnr2 = False
                     atom1 = False
                     atom2 = False
                     if (
-                        l.name == entity_branch_link["comp_id_1"][i]
-                        and l.chain == chain
-                        and l.res_id
+                        node.name == entity_branch_link["comp_id_1"][i]
+                        and node.chain == chain
+                        and node.res_id
                         == entity_branch_link["entity_branch_list_num_1"][i]
                     ):
-                        prtnr1 = l
-                        atom1 = l.name
+                        prtnr1 = node
+                        atom1 = node.name
                     elif (
-                        l.name == entity_branch_link["comp_id_2"][i]
-                        and l.chain == chain
-                        and l.res_id
+                        node.name == entity_branch_link["comp_id_2"][i]
+                        and node.chain == chain
+                        and node.res_id
                         == entity_branch_link["entity_branch_list_num_2"][i]
                     ):
-                        prtnr2 = l
-                        atom2 = l.name
+                        prtnr2 = node
+                        atom2 = node.name
                 if prtnr1 and prtnr2:
                     bms.add_edge(prtnr1, prtnr2, a=atom1, b=atom2)
 
@@ -480,14 +487,14 @@ def find_pntr_entry(struct_conn, residue_pool, partner, i):
         i (int): Index in the struct_conn table
     """
     atom_name = struct_conn[f"ptnr{partner}_label_atom_id"][i]
-    for l in residue_pool:
+    for residue in residue_pool:
         if (
-            l.name == struct_conn[f"ptnr{partner}_label_comp_id"][i]
-            and l.chain == struct_conn[f"ptnr{partner}_auth_asym_id"][i]
-            and l.res_id == struct_conn[f"ptnr{partner}_auth_seq_id"][i]
+            residue.name == struct_conn[f"ptnr{partner}_label_comp_id"][i]
+            and residue.chain == struct_conn[f"ptnr{partner}_auth_asym_id"][i]
+            and residue.res_id == struct_conn[f"ptnr{partner}_auth_seq_id"][i]
         ):
 
-            return (l, atom_name)
+            return (residue, atom_name)
 
     return (None, atom_name)
 
