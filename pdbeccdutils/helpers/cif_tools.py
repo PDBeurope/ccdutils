@@ -44,8 +44,6 @@ def preprocess_cif_category(cif, label):
     )
     cif[label] = values
 
-    return values
-
 
 def post_process_cif_category(cif, category_name):
     """Single value category needs to be string rather than array
