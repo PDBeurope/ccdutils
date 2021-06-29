@@ -22,7 +22,7 @@ internal representation of bound molecules. The basic use can be as easy as this
     from pdbeccdutils.core import bm_reader
 
     bound_molecules = bm_reader.read_pdb_updated_cif_file('/path/to/cif/xxx_updated.cif')
-    for i in bound_molecules[0]:
+    for i in bound_molecules:
         rdkit_mol = i.component.mol
         rdkit_inchikey = i.component.inchikey_from_rdkit
 """
@@ -39,96 +39,14 @@ from pdbeccdutils.core.models import (
     ConformerType,
     Descriptor,
     ReleaseStatus,
+    Residue,
+    BoundMolecule,
 )
-from pdbeccdutils.helpers import cif_tools, conversions, mol_tools
+from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from pdbecif.mmcif_io import MMCIF2Dict
 from networkx import DiGraph, connected_components
 import networkx
 
-class BoundMolecule:
-    def __init__(self, graph):
-        self.graph = graph
-
-    def to_dict(self):
-        """Return dictionary style representation of the bound molecule.
-
-        Returns:
-            dict of `str`: dict representation of the object
-        """
-
-        nodes = sorted(self.graph, key=lambda l: (int(l.res_id), l.chain))
-
-        results_bag = {'residues': [], 'connections': []}
-        results_bag['residues'] = [x.to_dict() for x in nodes]
-        results_bag['connections'] = [[e.id, f.id, a]
-                                      for e, f, a in self.graph.edges(data=True)]
-
-        return results_bag
-    
-    def to_list(self):
-        results_bag = [(e.to_dict(), f.to_dict(), a) for e, f, a in self.graph.edges(data=True)]
-        return results_bag
-
-    def to_arpeggio(self):
-        """Return str representation of the bound molecule.
-
-        Returns:
-            list of `str`: A list of residues found in the bound molecule.
-        """
-        return [x.to_arpeggio() for x in self.graph.nodes]
-
-    def __str__(self):
-        return '-'.join(self.to_arpeggio())
-
-class Residue:
-    """Represents a single residue.
-    """
-
-    def __init__(self, name, chain, res_id, ins_code, ent_id):
-        self.name = name
-        self.chain = chain
-        self.res_id = res_id
-        self.ins_code = '' if ins_code in ('.', '?') else ins_code
-        self.ent_id = ent_id
-        self.id = f'{chain}{res_id}{self.ins_code}'
-
-    def __eq__(self, other):
-        if self.id != other.id:
-            return False
-
-        return True
-
-    def to_dict(self):
-        """Returns a dictionary representation of a given residue.
-
-        Returns:
-            (:obj:`dict` of :obj:`str`): Dictionary representation along
-            with the mmCIF keys.
-        """
-        return {
-            'id': self.id,
-            'label_comp_id': self.name,
-            'auth_asym_id': self.chain,
-            'auth_seq_id': self.res_id,
-            'pdbx_PDB_ins_code': ' ' if not self.ins_code else self.ins_code,
-            'entity_id': self.ent_id,
-
-        }
-
-    def __hash__(self):
-        return hash(f'{self.chain}{self.res_id}{self.name}{self.ins_code}')
-
-    def __str__(self):
-        return f'/{self.name}/{self.res_id}{self.ins_code}/{self.chain}/'
-
-    def to_arpeggio(self):
-        """Gets Arpeggio style representation of a residue e.g. `/A/129/`
-        or /A/129A/ in case there is an insertion code.
-
-        Returns:
-            str: Residue description in Arpeggio style.
-        """
-        return f'/{self.chain}/{self.res_id}{self.ins_code}/'
 
 def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     """
@@ -143,29 +61,29 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
         ValueError: if file does not exist
 
     Returns:
-        A tuple containing two items. 
-        The first item is a dictionary of CCDResult representation of each bound molecule.
-        The second item is a dictionary of jsons with details of each bound molecule.
+        A dictionary of CCDResult representation of each bound molecule.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError("File '{}' does not exists".format(path_to_cif))
 
     cif_dict = list(MMCIF2Dict().parse(path_to_cif).values())[0]
 
-    #return _parse_pdb_updated_mmcif(cif_dict, sanitize)
+    # return _parse_pdb_updated_mmcif(cif_dict, sanitize)
 
     warnings = []
     errors = []
     sanitized = False
-    
+
     biomolecule_result = []
     json_result = []
 
-    atoms_dict = _preprocess_pdb_parser_output(cif_dict, "_atom_site", warnings)
-    bonds_dict = _preprocess_pdb_parser_output(cif_dict, "_chem_comp_bond", warnings)
+    atoms_dict = cif_tools.preprocess_cif_category(cif_dict, "_atom_site")
+    bonds_dict = cif_tools.preprocess_cif_category(cif_dict, "_chem_comp_bond")
 
-    bms = infer_bound_molecules(path_to_cif,["HOH"])
-    multiple_chem_comp_bms = [bm.to_dict() for bm in bms if len(bm.to_dict()['residues'])]
+    bms = infer_bound_molecules(path_to_cif, ["HOH"])
+    multiple_chem_comp_bms = [
+        bm.to_dict() for bm in bms if len(bm.to_dict()["residues"]) > 1
+    ]
 
     for bm in multiple_chem_comp_bms:
         mol = rdkit.Chem.RWMol()
@@ -173,41 +91,58 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
 
         _parse_pdb_conformers_site(mol, bm_atoms_dict, index_atoms)
         _parse_pdb_bonds_site(mol, bonds_dict, bm_atoms_dict, errors, index_atoms, bm)
-    
-        #_handle_implicit_hydrogens(mol)
+
+        # _handle_implicit_hydrogens(mol)
         _handle_disconnected_hydrogens(mol)
         if sanitize:
             sanitized = mol_tools.sanitize(mol)
-        properties_dict = _preprocess_pdb_parser_output(cif_dict, "_atom_site", warnings)
-    
-        descriptors_dict = _preprocess_pdb_parser_output(
-            cif_dict, "_entity", warnings
+
+        # Set empty descriptors and properties for Bound Molecule
+        # Note: This is because component.compute_2d expects self.id
+        descriptors = list()
+        properties = CCDProperties(
+            id="",
+            name="",
+            formula="",
+            modified_date="",
+            pdbx_release_status="",
+            weight="",
         )
-        descriptors = _parse_pdb_descriptors(descriptors_dict, "id")
-        properties = _parse_pdb_properties(properties_dict)
-    
+
         comp = Component(mol.GetMol(), cif_dict, properties, descriptors)
         reader_result = ccd_reader.CCDReaderResult(
             warnings=warnings, errors=errors, component=comp, sanitized=sanitized
         )
         biomolecule_result.append(reader_result)
-        json_result.append(bm)
 
-    return (biomolecule_result, json_result)
+    return biomolecule_result
+
 
 def _handle_disconnected_hydrogens(mol):
-    disconnected_hydrogens = [atom for atom in mol.GetAtoms() if 
-    atom.GetAtomicNum() == 1 and atom.GetDegree() == 0]
-    atoms_to_remove = ([atom.GetIdx() for atom in disconnected_hydrogens])
+    """
+    Delete hydrogens without neighbours (degree = 0).
+    RDKit works but gives warning for these ("WARNING: not removing hydrogen atom without neighbors").
+    However we wouldn't want these hydrogens as they affect molecular properties.
+
+    Args:
+        mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
+            compound representation.
+    """
+    disconnected_hydrogens = [
+        atom
+        for atom in mol.GetAtoms()
+        if atom.GetAtomicNum() == 1 and atom.GetDegree() == 0
+    ]
+    atoms_to_remove = [atom.GetIdx() for atom in disconnected_hydrogens]
     atoms_to_remove.sort(reverse=True)
 
-    em1 = rdkit.Chem.EditableMol(mol)
     for atom in atoms_to_remove:
         mol.RemoveAtom(atom)
 
+
 def _parse_pdb_atom_site(mol, atoms, bm):
     """
-    Setup atoms in the component
+    Setup atoms in the bound molecule
 
     Args:
         mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
@@ -217,23 +152,33 @@ def _parse_pdb_atom_site(mol, atoms, bm):
     """
     if not atoms:
         return
+
     exclude_alternate_atoms = True
     if exclude_alternate_atoms:
         seen = {}
+
     index_atoms = []
     bm_atoms_dict = {}
 
     for i in range(len(atoms["id"])):
-        if atoms["group_PDB"][i] != 'HETATM':
+        if atoms["group_PDB"][i] != "HETATM":  # only consider nonpolys
             continue
         for j in bm["residues"]:
-            if atoms["label_comp_id"][i] == j["label_comp_id"] and atoms["auth_asym_id"][i] == j["auth_asym_id"] and atoms["auth_seq_id"][i] == j["auth_seq_id"]:
-                atom_name = f"{atoms['auth_seq_id'][i]}/{atoms['auth_atom_id'][i]}/{atoms['auth_comp_id'][i]}"
+            if (
+                atoms["label_comp_id"][i] == j["label_comp_id"]
+                and atoms["auth_asym_id"][i] == j["auth_asym_id"]
+                and atoms["auth_seq_id"][i] == j["auth_seq_id"]
+            ):
+                atom_tuple = (
+                    atoms["auth_seq_id"][i],
+                    atoms["auth_atom_id"][i],
+                    atoms["auth_comp_id"][i],
+                )
                 if exclude_alternate_atoms:
-                    if atom_name in seen:
+                    if atom_tuple in seen:
                         continue
-                    seen[atom_name] = True
-                
+                    seen[atom_tuple] = True
+
                 for categories in atoms:
                     if categories not in bm_atoms_dict:
                         bm_atoms_dict[categories] = []
@@ -241,7 +186,9 @@ def _parse_pdb_atom_site(mol, atoms, bm):
                         bm_atoms_dict[categories].append(atoms[categories][i])
 
                 element = atoms["type_symbol"][i]
-                element = element if len(element) == 1 else element[0] + element[1].lower()
+                element = (
+                    element if len(element) == 1 else element[0] + element[1].lower()
+                )
                 isotope = None
 
                 if element == "D":
@@ -251,8 +198,14 @@ def _parse_pdb_atom_site(mol, atoms, bm):
                     element = "*"
 
                 atom = rdkit.Chem.Atom(element)
-                atom.SetProp("name", atom_name)
-                index_atoms.append((f"{atoms['auth_asym_id'][i]}/{atoms['auth_seq_id'][i]}",atoms['auth_comp_id'][i],atoms['auth_atom_id'][i]))
+                atom.SetProp("name", "/".join(atom_tuple))
+                index_atoms.append(
+                    (
+                        f"{atoms['auth_asym_id'][i]}/{atoms['auth_seq_id'][i]}",
+                        atoms["auth_comp_id"][i],
+                        atoms["auth_atom_id"][i],
+                    )
+                )
 
                 if isotope is not None:
                     atom.SetIsotope(isotope)
@@ -260,6 +213,7 @@ def _parse_pdb_atom_site(mol, atoms, bm):
                 mol.AddAtom(atom)
 
     return (index_atoms, bm_atoms_dict)
+
 
 def _parse_pdb_conformers_site(mol, atoms, index_atoms):
     """
@@ -273,12 +227,12 @@ def _parse_pdb_conformers_site(mol, atoms, index_atoms):
     if not atoms:
         return
 
-    model = _setup_pdb_conformer_site(atoms, "Cartn_{}", ConformerType.Model.name, index_atoms)
+    model = _setup_pdb_conformer_site(
+        atoms, "Cartn_{}", ConformerType.Model.name, index_atoms
+    )
 
-    initial_conformer_id = mol.AddConformer(model, assignId=True)
-    mol.UpdatePropertyCache(strict=False)
-    # Assign stereochemistry from coordinates
-    rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol, confId=initial_conformer_id, replaceExistingTags=True)
+    mol.AddConformer(model, assignId=True)
+
 
 def _setup_pdb_conformer_site(atoms, label, name, index_atoms):
     """
@@ -299,23 +253,28 @@ def _setup_pdb_conformer_site(atoms, label, name, index_atoms):
 
     j = 0
     for i in range(len(atoms["id"])):
-        if atoms["group_PDB"][i] != 'HETATM':
+        if atoms["group_PDB"][i] != "HETATM":
             continue
         x = conversions.str_to_float(atoms[label.format(("x"))][i])
         y = conversions.str_to_float(atoms[label.format(("y"))][i])
         z = conversions.str_to_float(atoms[label.format(("z"))][i])
-        index = find_element_in_list(
-            index_atoms, 
-            (f"{atoms['auth_asym_id'][i]}/{atoms['auth_seq_id'][i]}",atoms['auth_comp_id'][i],atoms['auth_atom_id'][i])
+        index = helper.find_element_in_list(
+            index_atoms,
+            (
+                f"{atoms['auth_asym_id'][i]}/{atoms['auth_seq_id'][i]}",
+                atoms["auth_comp_id"][i],
+                atoms["auth_atom_id"][i],
+            ),
         )
 
         atom_position = rdkit.Chem.rdGeometry.Point3D(x, y, z)
         conformer.SetAtomPosition(index, atom_position)
-        j = j +1
+        j = j + 1
 
         conformer.SetProp("name", name)
 
     return conformer
+
 
 def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
     """
@@ -332,34 +291,34 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
 
     bond_per_type = {}
     for i in range(len(bonds["atom_id_1"])):
-        content = (bonds["atom_id_1"][i],bonds["atom_id_2"][i],bonds["value_order"][i])
+        content = (
+            bonds["atom_id_1"][i],
+            bonds["atom_id_2"][i],
+            bonds["value_order"][i],
+        )
         if bonds["comp_id"][i] in bond_per_type:
             bond_per_type[bonds["comp_id"][i]].append(content)
         else:
             bond_per_type[bonds["comp_id"][i]] = [content]
 
-    #get connection mapping
+    # get connection mapping
     connection_mapping = {}
-    for j in bm["residues"]: 
-        connection_mapping[j['id']] = j
+    for j in bm["residues"]:
+        connection_mapping[j["id"]] = j
 
-    for j in bm["residues"]:       
-        lig = j['label_comp_id']
-        if lig not in bond_per_type: #ions
+    for j in bm["residues"]:
+        lig = j["label_comp_id"]
+        if lig not in bond_per_type:  # ions
             continue
         chain_res = f"{j['auth_asym_id']}/{j['auth_seq_id']}"
         for pairs in bond_per_type[lig]:
-            tuple_to_find_1 = (chain_res,lig,pairs[0])
-            tuple_to_find_2 = (chain_res,lig,pairs[1])
-            atom_1 = find_element_in_list(
-                index_atoms, tuple_to_find_1
-             )
-            atom_2 = find_element_in_list(
-                index_atoms, tuple_to_find_2
-             )
+            tuple_to_find_1 = (chain_res, lig, pairs[0])
+            tuple_to_find_2 = (chain_res, lig, pairs[1])
+            atom_1 = helper.find_element_in_list(index_atoms, tuple_to_find_1)
+            atom_2 = helper.find_element_in_list(index_atoms, tuple_to_find_2)
             bond_order = ccd_reader._bond_pdb_order(pairs[2])
             if any(a is None for a in [atom_1, atom_2, bond_order]):
-                pass 
+                pass
             else:
                 mol.AddBond(atom_1, atom_2, bond_order)
 
@@ -369,47 +328,18 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
         second_res = connection_mapping[connection[1]]
         chain_res_1 = f"{first_res['auth_asym_id']}/{first_res['auth_seq_id']}"
         chain_res_2 = f"{second_res['auth_asym_id']}/{second_res['auth_seq_id']}"
-        lig_1 = first_res['label_comp_id']
-        lig_2 = second_res['label_comp_id']
-        tuple_to_find_1 = (chain_res_1,lig_1,connection[2]['a'])
-        tuple_to_find_2 = (chain_res_2,lig_2,connection[2]['b'])
-        atom_1 = find_element_in_list(
-                index_atoms, tuple_to_find_1
-             )
-        atom_2 = find_element_in_list(
-                index_atoms, tuple_to_find_2
-             )
-      
+        lig_1 = first_res["label_comp_id"]
+        lig_2 = second_res["label_comp_id"]
+        tuple_to_find_1 = (chain_res_1, lig_1, connection[2]["a"])
+        tuple_to_find_2 = (chain_res_2, lig_2, connection[2]["b"])
+        atom_1 = helper.find_element_in_list(index_atoms, tuple_to_find_1)
+        atom_2 = helper.find_element_in_list(index_atoms, tuple_to_find_2)
+
         if any(a is None for a in [atom_1, atom_2]):
-            pass 
+            pass
         else:
             mol.AddBond(atom_1, atom_2, ccd_reader._bond_pdb_order("SING"))
 
-def _preprocess_pdb_parser_output(dictionary, label, warnings):
-    """
-    The mmcif dictionary values are either str or list(), which is a bit
-    tricky to work with. This method makes list() of all of them in
-    order to parse all of the in the same way.
-
-    Args:
-        dictionary (dict): mmcif category with the parser output.
-        label (str): name of the category
-        warnings (list): possible issues encountered when parsing
-
-    Returns:
-        dict: unified dictionary for structure parsing.
-    """
-    if label not in dictionary:
-        warnings.append("Namespace {} does not exist.".format(label))
-        return []
-
-    check_element = list(dictionary[label].keys())[0]
-    values = (
-        dictionary[label]
-        if isinstance(dictionary[label][check_element], list)
-        else {k: [v] for k, v in dictionary[label].items()}
-    )
-    return values
 
 def infer_bound_molecules(structure, to_discard):
     """Identify bound molecules in the input protein structure.
@@ -424,11 +354,12 @@ def infer_bound_molecules(structure, to_discard):
     for bm_nodes in connected_components(bms.to_undirected()):
         subgraph = bms.subgraph(bm_nodes)
         bm = BoundMolecule(subgraph)
-        
+
         bound_molecules.append(bm)
 
     bound_molecules = sorted(bound_molecules, key=lambda l: -len(l.graph.nodes))
     return bound_molecules
+
 
 def parse_bound_molecules(path, to_discard):
     """Parse information from the information about HETATMS from the
@@ -441,77 +372,100 @@ def parse_bound_molecules(path, to_discard):
     Returns:
         DiGraph: All the bound molecules in a given entry.
     """
+
     def __add_connections(struct_conn, bms):
-        for i in range(len(struct_conn['id'])):
+        for i in range(len(struct_conn["id"])):
             (ptnr1, atom1) = find_pntr_entry(struct_conn, bms.nodes, 1, i)
             (ptnr2, atom2) = find_pntr_entry(struct_conn, bms.nodes, 2, i)
 
             # we want covalent connections among ligands only.
-            if ptnr1 and ptnr2 and struct_conn['conn_type_id'][i] != 'metalc':
+            if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
                 bms.add_edge(ptnr1, ptnr2, a=atom1, b=atom2)
 
     def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
         entities = {}
-        for i in range(len(branch_scheme['entity_id'])):
-            if branch_scheme['entity_id'][i] not in entities:
-                entities[branch_scheme['entity_id'][i]] = [branch_scheme['pdb_asym_id'][i]]
-            elif branch_scheme['pdb_asym_id'][i] not in entities[branch_scheme['entity_id'][i]]:
-                entities[branch_scheme['entity_id'][i]].append(branch_scheme['pdb_asym_id'][i])
+        for i in range(len(branch_scheme["entity_id"])):
+            if branch_scheme["entity_id"][i] not in entities:
+                entities[branch_scheme["entity_id"][i]] = [
+                    branch_scheme["pdb_asym_id"][i]
+                ]
+            elif (
+                branch_scheme["pdb_asym_id"][i]
+                not in entities[branch_scheme["entity_id"][i]]
+            ):
+                entities[branch_scheme["entity_id"][i]].append(
+                    branch_scheme["pdb_asym_id"][i]
+                )
 
-        for i in range(len(entity_branch_link['link_id'])):
-            ent_id = entity_branch_link['entity_id'][i]
+        for i in range(len(entity_branch_link["link_id"])):
+            ent_id = entity_branch_link["entity_id"][i]
             for chain in entities[ent_id]:
                 for l in bms.nodes:
                     prtnr1 = False
                     prtnr2 = False
                     atom1 = False
                     atom2 = False
-                    if (l.name == entity_branch_link['comp_id_1'][i]
-                    and l.chain == chain
-                    and l.res_id == entity_branch_link['entity_branch_list_num_1'][i]
+                    if (
+                        l.name == entity_branch_link["comp_id_1"][i]
+                        and l.chain == chain
+                        and l.res_id
+                        == entity_branch_link["entity_branch_list_num_1"][i]
                     ):
                         prtnr1 = l
                         atom1 = l.name
-                    elif (l.name == entity_branch_link['comp_id_2'][i]
-                    and l.chain == chain
-                    and l.res_id == entity_branch_link['entity_branch_list_num_2'][i]
+                    elif (
+                        l.name == entity_branch_link["comp_id_2"][i]
+                        and l.chain == chain
+                        and l.res_id
+                        == entity_branch_link["entity_branch_list_num_2"][i]
                     ):
                         prtnr2 = l
                         atom2 = l.name
                 if prtnr1 and prtnr2:
                     bms.add_edge(prtnr1, prtnr2, a=atom1, b=atom2)
-            
+
     mmcif_dict = list(MMCIF2Dict().parse(path).values())[0]
 
-    if '_pdbx_nonpoly_scheme' not in mmcif_dict and '_pdbx_branch_scheme' not in mmcif_dict:
+    if (
+        "_pdbx_nonpoly_scheme" not in mmcif_dict
+        and "_pdbx_branch_scheme" not in mmcif_dict
+    ):
         return DiGraph()
 
-    if '_pdbx_nonpoly_scheme' in mmcif_dict:
-        mmcif_category_preproces(mmcif_dict, '_pdbx_nonpoly_scheme')
+    if "_pdbx_nonpoly_scheme" in mmcif_dict:
+        cif_tools.preprocess_cif_category(mmcif_dict, "_pdbx_nonpoly_scheme")
         bms = parse_ligands_from_nonpoly_scheme(
-            mmcif_dict['_pdbx_nonpoly_scheme'], to_discard)
+            mmcif_dict["_pdbx_nonpoly_scheme"], to_discard
+        )
 
     else:
         bms = DiGraph()
 
-    if '_pdbx_branch_scheme' in mmcif_dict:
-        mmcif_category_preproces(mmcif_dict, '_pdbx_branch_scheme')
+    if "_pdbx_branch_scheme" in mmcif_dict:
+        cif_tools.preprocess_cif_category(mmcif_dict, "_pdbx_branch_scheme")
         if bms:
             bms = parse_ligands_from_branch_scheme(
-                mmcif_dict['_pdbx_branch_scheme'], to_discard, bms)
+                mmcif_dict["_pdbx_branch_scheme"], to_discard, bms
+            )
         else:
             bms = parse_ligands_from_branch_scheme(
-                mmcif_dict['_pdbx_branch_scheme'], to_discard, DiGraph())
+                mmcif_dict["_pdbx_branch_scheme"], to_discard, DiGraph()
+            )
 
-    if '_struct_conn' in mmcif_dict:
-        mmcif_category_preproces(mmcif_dict, '_struct_conn')
-        __add_connections(mmcif_dict['_struct_conn'], bms)
+    if "_struct_conn" in mmcif_dict:
+        cif_tools.preprocess_cif_category(mmcif_dict, "_struct_conn")
+        __add_connections(mmcif_dict["_struct_conn"], bms)
 
-    if '_pdbx_branch_scheme' in mmcif_dict:
-        mmcif_category_preproces(mmcif_dict, '_pdbx_entity_branch_link')
-        __add_con_branch_link(mmcif_dict['_pdbx_entity_branch_link'], mmcif_dict['_pdbx_branch_scheme'], bms)
+    if "_pdbx_branch_scheme" in mmcif_dict:
+        cif_tools.preprocess_cif_category(mmcif_dict, "_pdbx_entity_branch_link")
+        __add_con_branch_link(
+            mmcif_dict["_pdbx_entity_branch_link"],
+            mmcif_dict["_pdbx_branch_scheme"],
+            bms,
+        )
 
     return bms
+
 
 def find_pntr_entry(struct_conn, residue_pool, partner, i):
     """Helper method to find ligand residue in parsed ligands and check
@@ -525,16 +479,18 @@ def find_pntr_entry(struct_conn, residue_pool, partner, i):
         partner (str): Identification of the partner (should be 1 or 2)
         i (int): Index in the struct_conn table
     """
-    atom_name = struct_conn[f'ptnr{partner}_label_atom_id'][i]
+    atom_name = struct_conn[f"ptnr{partner}_label_atom_id"][i]
     for l in residue_pool:
-        if (l.name == struct_conn[f'ptnr{partner}_label_comp_id'][i]
-                and l.chain == struct_conn[f'ptnr{partner}_auth_asym_id'][i]
-                and l.res_id == struct_conn[f'ptnr{partner}_auth_seq_id'][i]
-                ):
+        if (
+            l.name == struct_conn[f"ptnr{partner}_label_comp_id"][i]
+            and l.chain == struct_conn[f"ptnr{partner}_auth_asym_id"][i]
+            and l.res_id == struct_conn[f"ptnr{partner}_auth_seq_id"][i]
+        ):
 
             return (l, atom_name)
 
     return (None, atom_name)
+
 
 def parse_ligands_from_branch_scheme(branch_scheme, to_discard, g):
     """Parse ligands from the mmcif file.
@@ -548,20 +504,21 @@ def parse_ligands_from_branch_scheme(branch_scheme, to_discard, g):
         DiGraph: Ligands and their connectivity in a PDB entry
     """
 
-    for i in range(len(branch_scheme['asym_id'])):
-        #(orig_auth_asym_id, operator) = get_additional_fields(branch_scheme['pdb_asym_id'][i])
+    for i in range(len(branch_scheme["asym_id"])):
+        # (orig_auth_asym_id, operator) = get_additional_fields(branch_scheme['pdb_asym_id'][i])
         n = Residue(
-            branch_scheme['pdb_mon_id'][i],     # aka label_comp_id
-            branch_scheme['pdb_asym_id'][i],    # aka auth_asym_id
-            branch_scheme['num'][i],            # aka auth_seq_id
-            ".",                                # aka pdbx_PDB_ins_code
-            branch_scheme['entity_id'][i],
-            )
+            branch_scheme["pdb_mon_id"][i],  # aka label_comp_id
+            branch_scheme["pdb_asym_id"][i],  # aka auth_asym_id
+            branch_scheme["num"][i],  # aka auth_seq_id
+            ".",  # aka pdbx_PDB_ins_code
+            branch_scheme["entity_id"][i],
+        )
 
         if n.name not in to_discard:
             g.add_node(n)
 
     return g
+
 
 def parse_ligands_from_nonpoly_scheme(nonpoly_scheme, to_discard):
     """Parse ligands from the mmcif file.
@@ -576,101 +533,19 @@ def parse_ligands_from_nonpoly_scheme(nonpoly_scheme, to_discard):
     """
     g = DiGraph()
 
-    for i in range(len(nonpoly_scheme['asym_id'])):
+    for i in range(len(nonpoly_scheme["asym_id"])):
 
-        #(orig_auth_asym_id, operator) = get_additional_fields(nonpoly_scheme['pdb_strand_id'][i])
+        # (orig_auth_asym_id, operator) = get_additional_fields(nonpoly_scheme['pdb_strand_id'][i])
 
         n = Residue(
-            nonpoly_scheme['pdb_mon_id'][i],     # aka label_comp_id
-            nonpoly_scheme['pdb_strand_id'][i],  # aka auth_asym_id
-            nonpoly_scheme['pdb_seq_num'][i],    # aka auth_seq_id
-            nonpoly_scheme['pdb_ins_code'][i],   # aka pdbx_PDB_ins_code
-            nonpoly_scheme['entity_id'][i]
+            nonpoly_scheme["pdb_mon_id"][i],  # aka label_comp_id
+            nonpoly_scheme["pdb_strand_id"][i],  # aka auth_asym_id
+            nonpoly_scheme["pdb_seq_num"][i],  # aka auth_seq_id
+            nonpoly_scheme["pdb_ins_code"][i],  # aka pdbx_PDB_ins_code
+            nonpoly_scheme["entity_id"][i],
         )
 
         if n.name not in to_discard:
             g.add_node(n)
 
     return g
-
-def mmcif_category_preproces(mmcif_dict, category):
-    """Preprocess mmcif category. This is due to the nature of the mmcif
-    parser. Loop returns a list of values, whereas no loop returns just
-    string as a value, which makes it difficult to work with.
-
-    Args:
-        mmcif_dict (dict of str): Parsed mmcif file.
-        category (str): Name of the category to process.
-    """
-    pivot = list(mmcif_dict[category].keys())[0]
-    mmcif_dict[category] = (mmcif_dict[category]
-                            if isinstance(mmcif_dict[category][pivot], list)
-                            else {k: [v] for k, v in mmcif_dict[category].items()})
-
-def _parse_pdb_descriptors(pdbx_chem_comp_descriptors, label="id"):
-    """
-    Parse useful information from _pdbx_chem_comp_* category
-
-    Args:
-        pdbx_chem_comp_descriptors (dict): mmcif category with the
-            descriptors info.
-        label (str, optional): Defaults to 'descriptor'. Name of the
-            category to be parsed.
-
-    Returns:
-        Descriptor: namedtuple with the property info
-    """
-    descriptors = list()
-
-    if not pdbx_chem_comp_descriptors:
-        return descriptors
-
-    for i in range(len(pdbx_chem_comp_descriptors[label])):
-        d = Descriptor(
-            type="type",
-            program="program",
-            value="descriptor",
-        )
-        descriptors.append(d)
-
-    return descriptors
-
-def _parse_pdb_properties(chem_comp):
-    """
-    Parse useful information from _chem_comp category
-
-    Args:
-        chem_comp (dict): the mmcif category with _chem_comp info
-
-    Returns:
-        Properties: dataclass with the CCD properties.
-    """
-    properties = None
-
-
-    properties = CCDProperties(
-        id='',
-        name='',
-        formula='',
-        modified_date='',
-        pdbx_release_status='',
-        weight='',
-    )
-    return properties
-
-def find_element_in_list(array, element):
-    """
-    Finds an element in an array. Does not crash if not found
-
-    Args:
-        array (list): list to be searched
-        element (any): element to be found
-
-    Returns:
-        int: Index of the element or None if the element is not found.
-    """
-    try:
-        index = array.index(element)
-        return index
-    except ValueError:
-        return None
