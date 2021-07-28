@@ -72,7 +72,7 @@ def test_bound_molecule_conformer_is_broken_ion():
     assert c.GetAtomPosition(0).z == 0.0
 
 
-def test_conformer_has_broken_atom():
+def test_bound_molecule_conformer_has_broken_atom():
     mol = rdkit.Chem.RWMol()
     o = rdkit.Chem.Atom("O")
     h = rdkit.Chem.Atom("H")
