@@ -1,0 +1,189 @@
+data_7OM
+# 
+_chem_comp.id                                    7OM 
+_chem_comp.name                                  "(3~{R})-1-(5-methyl-[1,2,4]triazolo[1,5-a]pyrimidin-7-yl)-~{N}-naphthalen-2-yl-piperidine-3-carboxamide" 
+_chem_comp.type                                  NON-POLYMER 
+_chem_comp.pdbx_type                             HETAIN 
+_chem_comp.formula                               "C22 H22 N6 O" 
+_chem_comp.mon_nstd_parent_comp_id               ? 
+_chem_comp.pdbx_synonyms                         ? 
+_chem_comp.pdbx_formal_charge                    0 
+_chem_comp.pdbx_initial_date                     2016-11-25 
+_chem_comp.pdbx_modified_date                    2017-02-17 
+_chem_comp.pdbx_ambiguous_flag                   N 
+_chem_comp.pdbx_release_status                   REL 
+_chem_comp.pdbx_replaced_by                      ? 
+_chem_comp.pdbx_replaces                         ? 
+_chem_comp.formula_weight                        386.450 
+_chem_comp.one_letter_code                       ? 
+_chem_comp.three_letter_code                     7OM 
+_chem_comp.pdbx_model_coordinates_details        ? 
+_chem_comp.pdbx_model_coordinates_missing_flag   N 
+_chem_comp.pdbx_ideal_coordinates_details        ? 
+_chem_comp.pdbx_ideal_coordinates_missing_flag   Y 
+_chem_comp.pdbx_model_coordinates_db_code        5TZ3 
+_chem_comp.pdbx_subcomponent_list                ? 
+_chem_comp.pdbx_processing_site                  RCSB 
+# 
+loop_
+_chem_comp_atom.comp_id 
+_chem_comp_atom.atom_id 
+_chem_comp_atom.alt_atom_id 
+_chem_comp_atom.type_symbol 
+_chem_comp_atom.charge 
+_chem_comp_atom.pdbx_align 
+_chem_comp_atom.pdbx_aromatic_flag 
+_chem_comp_atom.pdbx_leaving_atom_flag 
+_chem_comp_atom.pdbx_stereo_config 
+_chem_comp_atom.model_Cartn_x 
+_chem_comp_atom.model_Cartn_y 
+_chem_comp_atom.model_Cartn_z 
+_chem_comp_atom.pdbx_model_Cartn_x_ideal 
+_chem_comp_atom.pdbx_model_Cartn_y_ideal 
+_chem_comp_atom.pdbx_model_Cartn_z_ideal 
+_chem_comp_atom.pdbx_component_atom_id 
+_chem_comp_atom.pdbx_component_comp_id 
+_chem_comp_atom.pdbx_ordinal 
+7OM C5  C1  C 0 1 N N N 5.698  3.813  2.327 ? ? ? C5  7OM 1  
+7OM C6  C2  C 0 1 N N N 6.303  4.639  1.220 ? ? ? C6  7OM 2  
+7OM C7  C3  C 0 1 N N N 7.745  4.253  0.985 ? ? ? C7  7OM 3  
+7OM N12 N1  N 0 1 Y N N 6.476  4.391  8.077 ? ? ? N12 7OM 4  
+7OM C13 C4  C 0 1 Y N N 7.547  4.904  7.399 ? ? ? C13 7OM 5  
+7OM C15 C5  C 0 1 Y N N 4.629  3.027  4.768 ? ? ? C15 7OM 6  
+7OM C20 C6  C 0 1 Y N N 9.239  7.188  4.357 ? ? ? C20 7OM 7  
+7OM C21 C7  C 0 1 Y N N 9.733  7.459  5.612 ? ? ? C21 7OM 8  
+7OM C22 C8  C 0 1 Y N N 9.887  8.763  6.029 ? ? ? C22 7OM 9  
+7OM C24 C9  C 0 1 Y N N 9.055  9.509  3.926 ? ? ? C24 7OM 10 
+7OM C26 C10 C 0 1 Y N N 10.377 9.054  7.283 ? ? ? C26 7OM 11 
+7OM C28 C11 C 0 1 Y N N 10.187 11.384 6.840 ? ? ? C28 7OM 12 
+7OM C27 C12 C 0 1 Y N N 10.527 10.359 7.689 ? ? ? C27 7OM 13 
+7OM C29 C13 C 0 1 Y N N 9.694  11.098 5.586 ? ? ? C29 7OM 14 
+7OM C25 C14 C 0 1 Y N N 8.897  8.212  3.507 ? ? ? C25 7OM 15 
+7OM C23 C15 C 0 1 Y N N 9.543  9.794  5.179 ? ? ? C23 7OM 16 
+7OM C11 C16 C 0 1 Y N N 5.741  3.890  7.108 ? ? ? C11 7OM 17 
+7OM C18 C17 C 0 1 Y N N 5.797  3.661  4.719 ? ? ? C18 7OM 18 
+7OM C16 C18 C 0 1 Y N N 4.031  2.850  6.094 ? ? ? C16 7OM 19 
+7OM C1  C19 C 0 1 N N N 8.949  5.669  2.576 ? ? ? C1  7OM 20 
+7OM C3  C20 C 0 1 N N N 7.887  3.660  3.463 ? ? ? C3  7OM 21 
+7OM C2  C21 C 0 1 N N R 8.570  4.256  2.252 ? ? ? C2  7OM 22 
+7OM C19 C22 C 0 1 N N N 2.711  2.144  6.151 ? ? ? C19 7OM 23 
+7OM N14 N2  N 0 1 Y N N 7.505  4.739  6.075 ? ? ? N14 7OM 24 
+7OM N17 N3  N 0 1 Y N N 4.559  3.254  7.200 ? ? ? N17 7OM 25 
+7OM N10 N4  N 0 1 Y N N 6.349  4.087  5.900 ? ? ? N10 7OM 26 
+7OM N4  N5  N 0 1 N N N 6.464  3.896  3.550 ? ? ? N4  7OM 27 
+7OM N8  N6  N 0 1 N N N 9.075  5.870  3.925 ? ? ? N8  7OM 28 
+7OM O9  O1  O 0 1 N N N 9.128  6.526  1.723 ? ? ? O9  7OM 29 
+7OM H1  H1  H 0 1 N N N 4.678  4.175  2.522 ? ? ? H1  7OM 30 
+7OM H2  H2  H 0 1 N N N 5.659  2.762  2.004 ? ? ? H2  7OM 31 
+7OM H3  H3  H 0 1 N N N 6.255  5.702  1.497 ? ? ? H3  7OM 32 
+7OM H4  H4  H 0 1 N N N 5.731  4.475  0.295 ? ? ? H4  7OM 33 
+7OM H5  H5  H 0 1 N N N 7.771  3.242  0.552 ? ? ? H5  7OM 34 
+7OM H6  H6  H 0 1 N N N 8.188  4.968  0.276 ? ? ? H6  7OM 35 
+7OM H7  H7  H 0 1 N N N 8.364  5.404  7.897 ? ? ? H7  7OM 36 
+7OM H8  H8  H 0 1 N N N 4.145  2.661  3.875 ? ? ? H8  7OM 37 
+7OM H9  H9  H 0 1 N N N 10.001 6.647  6.272 ? ? ? H9  7OM 38 
+7OM H10 H10 H 0 1 N N N 8.792  10.318 3.261 ? ? ? H10 7OM 39 
+7OM H11 H11 H 0 1 N N N 10.646 8.250  7.953 ? ? ? H11 7OM 40 
+7OM H12 H12 H 0 1 N N N 10.306 12.410 7.155 ? ? ? H12 7OM 41 
+7OM H13 H13 H 0 1 N N N 10.912 10.578 8.674 ? ? ? H13 7OM 42 
+7OM H14 H14 H 0 1 N N N 9.425  11.903 4.919 ? ? ? H14 7OM 43 
+7OM H15 H15 H 0 1 N N N 8.509  7.999  2.522 ? ? ? H15 7OM 44 
+7OM H16 H16 H 0 1 N N N 8.050  2.572  3.444 ? ? ? H16 7OM 45 
+7OM H17 H17 H 0 1 N N N 8.357  4.086  4.362 ? ? ? H17 7OM 46 
+7OM H18 H18 H 0 1 N N N 9.491  3.685  2.063 ? ? ? H18 7OM 47 
+7OM H19 H19 H 0 1 N N N 2.376  2.076  7.196 ? ? ? H19 7OM 48 
+7OM H20 H20 H 0 1 N N N 1.969  2.706  5.564 ? ? ? H20 7OM 49 
+7OM H21 H21 H 0 1 N N N 2.818  1.132  5.734 ? ? ? H21 7OM 50 
+7OM H22 H22 H 0 1 N N N 9.051  5.107  4.571 ? ? ? H22 7OM 51 
+# 
+loop_
+_chem_comp_bond.comp_id 
+_chem_comp_bond.atom_id_1 
+_chem_comp_bond.atom_id_2 
+_chem_comp_bond.value_order 
+_chem_comp_bond.pdbx_aromatic_flag 
+_chem_comp_bond.pdbx_stereo_config 
+_chem_comp_bond.pdbx_ordinal 
+7OM C7  C6  SING N N 1  
+7OM C7  C2  SING N N 2  
+7OM C6  C5  SING N N 3  
+7OM O9  C1  DOUB N N 4  
+7OM C2  C1  SING N N 5  
+7OM C2  C3  SING N N 6  
+7OM C5  N4  SING N N 7  
+7OM C1  N8  SING N N 8  
+7OM C3  N4  SING N N 9  
+7OM C25 C24 DOUB Y N 10 
+7OM C25 C20 SING Y N 11 
+7OM N4  C18 SING N N 12 
+7OM N8  C20 SING N N 13 
+7OM C24 C23 SING Y N 14 
+7OM C20 C21 DOUB Y N 15 
+7OM C18 C15 DOUB Y N 16 
+7OM C18 N10 SING Y N 17 
+7OM C15 C16 SING Y N 18 
+7OM C23 C29 DOUB Y N 19 
+7OM C23 C22 SING Y N 20 
+7OM C29 C28 SING Y N 21 
+7OM C21 C22 SING Y N 22 
+7OM N10 N14 SING Y N 23 
+7OM N10 C11 SING Y N 24 
+7OM C22 C26 DOUB Y N 25 
+7OM N14 C13 DOUB Y N 26 
+7OM C16 C19 SING N N 27 
+7OM C16 N17 DOUB Y N 28 
+7OM C28 C27 DOUB Y N 29 
+7OM C11 N17 SING Y N 30 
+7OM C11 N12 DOUB Y N 31 
+7OM C26 C27 SING Y N 32 
+7OM C13 N12 SING Y N 33 
+7OM C5  H1  SING N N 34 
+7OM C5  H2  SING N N 35 
+7OM C6  H3  SING N N 36 
+7OM C6  H4  SING N N 37 
+7OM C7  H5  SING N N 38 
+7OM C7  H6  SING N N 39 
+7OM C13 H7  SING N N 40 
+7OM C15 H8  SING N N 41 
+7OM C21 H9  SING N N 42 
+7OM C24 H10 SING N N 43 
+7OM C26 H11 SING N N 44 
+7OM C28 H12 SING N N 45 
+7OM C27 H13 SING N N 46 
+7OM C29 H14 SING N N 47 
+7OM C25 H15 SING N N 48 
+7OM C3  H16 SING N N 49 
+7OM C3  H17 SING N N 50 
+7OM C2  H18 SING N N 51 
+7OM C19 H19 SING N N 52 
+7OM C19 H20 SING N N 53 
+7OM C19 H21 SING N N 54 
+7OM N8  H22 SING N N 55 
+# 
+loop_
+_pdbx_chem_comp_descriptor.comp_id 
+_pdbx_chem_comp_descriptor.type 
+_pdbx_chem_comp_descriptor.program 
+_pdbx_chem_comp_descriptor.program_version 
+_pdbx_chem_comp_descriptor.descriptor 
+7OM SMILES_CANONICAL "OpenEye OEToolkits" 2.0.6 "Cc1cc(n2c(n1)ncn2)N3CCC[C@H](C3)C(=O)Nc4ccc5ccccc5c4" 
+7OM SMILES           "OpenEye OEToolkits" 2.0.6 "Cc1cc(n2c(n1)ncn2)N3CCCC(C3)C(=O)Nc4ccc5ccccc5c4"     
+# 
+loop_
+_pdbx_chem_comp_identifier.comp_id 
+_pdbx_chem_comp_identifier.type 
+_pdbx_chem_comp_identifier.program 
+_pdbx_chem_comp_identifier.program_version 
+_pdbx_chem_comp_identifier.identifier 
+7OM "SYSTEMATIC NAME" "OpenEye OEToolkits" 2.0.6 "(3~{R})-1-(5-methyl-[1,2,4]triazolo[1,5-a]pyrimidin-7-yl)-~{N}-naphthalen-2-yl-piperidine-3-carboxamide" 
+# 
+loop_
+_pdbx_chem_comp_audit.comp_id 
+_pdbx_chem_comp_audit.action_type 
+_pdbx_chem_comp_audit.date 
+_pdbx_chem_comp_audit.processing_site 
+7OM "Create component" 2016-11-25 RCSB 
+7OM "Modify formula"   2016-11-25 RCSB 
+7OM "Modify formula"   2016-11-25 RCSB 
+7OM "Initial release"  2017-02-22 RCSB 
+# 
