@@ -5,7 +5,9 @@ from pdbeccdutils.core import bm_reader
 import rdkit
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
+from pdbeccdutils.helpers.mol_tools import fix_conformer
 import numpy as np
+import os
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
 problematic_ids = ["UNL", "NA", "SY9", "10R", "ASX"]
@@ -16,7 +18,7 @@ def component(request):
     reader_list = bm_reader.read_pdb_updated_cif_file(request.param)
     
     for reader_result in reader_list:
-        c = reader.component
+        c = reader_result.component
         if c.id not in problematic_ids:
             assert reader.warnings == []
 
@@ -43,18 +45,19 @@ def test_write_bound_molecule(component, tmpdir_factory):
 
 
 def test_valid_properties_bound_molecule(key):
-    physchem_props = bm_reader.read_pdb_cif_file(
-        cif_filename(key)
-    ).component.physchem_properties
-
-    assert test_inputs[key]["logp"] == round(physchem_props["CrippenClogP"], 3)
-    assert test_inputs[key]["heavy_atom_count"] == physchem_props["NumHeavyAtoms"]
-    assert test_inputs[key]["numH_acceptors"] == physchem_props["NumHBA"]
-    assert test_inputs[key]["numH_donors"] == physchem_props["NumHBD"]
-    assert test_inputs[key]["num_rotable_bonds"] == physchem_props["NumRotatableBonds"]
-    assert test_inputs[key]["rings_count"] == physchem_props["NumRings"]
-    assert test_inputs[key]["TPSA"] == round(physchem_props["tpsa"], 3)
-    assert test_inputs[key]["molwt"] == round(physchem_props["exactmw"], 3)
+    
+    reader_list = bm_reader.read_pdb_updated_cif_file(cif_filename(key))
+    for reader_result in reader_list:
+        c = reader_result.component
+        physchem_props = c.physchem_properties
+        assert test_inputs[key]["logp"] == round(physchem_props["CrippenClogP"], 3)
+        assert test_inputs[key]["heavy_atom_count"] == physchem_props["NumHeavyAtoms"]
+        assert test_inputs[key]["numH_acceptors"] == physchem_props["NumHBA"]
+        assert test_inputs[key]["numH_donors"] == physchem_props["NumHBD"]
+        assert test_inputs[key]["num_rotable_bonds"] == physchem_props["NumRotatableBonds"]
+        assert test_inputs[key]["rings_count"] == physchem_props["NumRings"]
+        assert test_inputs[key]["TPSA"] == round(physchem_props["tpsa"], 3)
+        assert test_inputs[key]["molwt"] == round(physchem_props["exactmw"], 3)
 
 
 def test_bound_molecule_conformer_is_broken_ion():
