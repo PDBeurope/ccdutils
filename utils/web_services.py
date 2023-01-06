@@ -88,7 +88,7 @@ url_prefix = "https://www.ebi.ac.uk/unichem/rest/inchikey"
 
 def get_agreed_unichem_mapping(inchikey):
     """Get the agreed mappings for PDBeChem:
-        * ChEMBL, DrugBank, KEGG LIGAND, ChEBI, ZINC, NMRShiftDB, BindingDB
+        * ChEMBL, DrugBank, KEGG LIGAND, ChEBI, ZINC, N¬MRShiftDB, BindingDB
           MetaboLights, BRENDA, Rhea
 
     Args:

@@ -265,7 +265,7 @@ class Residue:
         self.name = name
         self.chain = chain
         self.res_id = res_id
-        self.ins_code = "" if ins_code in (".", "?") else ins_code
+        self.ins_code = "" if not ins_code else ins_code
         self.ent_id = ent_id
         self.id = f"{chain}{res_id}{self.ins_code}"
 

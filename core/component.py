@@ -76,6 +76,7 @@ class Component:
 
         if properties is not None:
             self._cif_properties = properties
+         
 
     # region properties
     @property

@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan  4 15:24:18 2023
-
-@author: roshan
-"""
-
 #!/usr/bin/env python
 # software from PDBe: Protein Data Bank in Europe; https://pdbe.org
 #
@@ -45,7 +37,7 @@ from pdbeccdutils.core.component import Component
 
 # from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import (
-    # CCDProperties,
+    CCDProperties,
     ConformerType,
     # Descriptor,
     # ReleaseStatus,
@@ -117,17 +109,17 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
 
         # Set empty descriptors and properties for Bound Molecule
         # Note: This is because component.compute_2d expects self.id
-        # descriptors = list()
-        # properties = CCDProperties(
-        #     id="",
-        #     name="",
-        #     formula="",
-        #     modified_date="",
-        #     pdbx_release_status="",
-        #     weight="",
-        # )
+        descriptors = list()
+        properties = CCDProperties(
+            id="",
+            name="",
+            formula="",
+            modified_date="",
+            pdbx_release_status="",
+            weight="",
+        )
 
-        comp = Component(mol.GetMol(), cif_dict)
+        comp = Component(mol.GetMol(), cif_block, properties, descriptors)
         reader_result = ccd_reader.CCDReaderResult(
             warnings=warnings, errors=errors, component=comp, sanitized=sanitized
         )
@@ -165,7 +157,7 @@ def _parse_pdb_atom_site(mol, atoms, bm):
     Args:
         mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
             compound representation.
-        atoms (dict): MMCIF dictionary with parsed _chem_comp_atom
+        atoms (dict): dictionary with parsed _chem_comp_atom
             category.
     """
     if not atoms:
