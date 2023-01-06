@@ -3,27 +3,13 @@
 import pytest
 from pdbeccdutils.core import bm_reader, ccd_writer
 from pdbeccdutils.core.models import ConformerType
-from pdbeccdutils.core.fragment_library import FragmentLibrary
-from pdbeccdutils.tests.tst_utilities import supply_list_of_cifs_with_boundmolecules
 from pdbeccdutils.helpers.mol_tools import fix_conformer
 import rdkit
 from rdkit import Chem
 import numpy as np
 import os
 
-sample_cifs_with_boundmolecules = supply_list_of_cifs_with_boundmolecules()
 
-
-@pytest.fixture(scope="session", params=sample_cifs_with_boundmolecules)
-def boundMolecules(request):
-    reader_list = bm_reader.read_pdb_updated_cif_file(request.param)
-    bm_components = []
-    for reader_result in reader_list:
-        c = reader_result.component
-        assert reader_result.warnings == []
-        bm_components.append(c)    
-    
-    return bm_components
 
 @pytest.mark.boundmolecule
 def test_write_bound_molecule(boundMolecules, tmpdir_factory):
