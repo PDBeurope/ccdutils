@@ -50,6 +50,13 @@ def test_write_bound_molecule(boundMolecules, tmpdir_factory):
 
 
 @pytest.mark.boundmolecule
+def test_bound_molecule_has_degenerate_conformer(boundMolecules):
+    for bm in boundMolecules:
+        assert not bm.has_degenerated_conformer(ConformerType.Model)
+        
+        
+
+@pytest.mark.boundmolecule
 def test_bound_molecule_conformer_is_broken_ion():
     mol = rdkit.Chem.RWMol()
     atom = rdkit.Chem.Atom("H")

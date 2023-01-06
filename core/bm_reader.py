@@ -32,6 +32,7 @@ import os
 # from typing import Dict, List, NamedTuple
 
 import rdkit
+from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.component import Component
 
@@ -39,13 +40,12 @@ from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.models import (
     CCDProperties,
     ConformerType,
-    # Descriptor,
+    Descriptor,
     # ReleaseStatus,
     Residue,
     BoundMolecule,
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
-# from pdbecif.mmcif_io import MMCIF2Dict
 from gemmi import cif
 from networkx import DiGraph, connected_components
 
@@ -107,17 +107,18 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
         if sanitize:
             sanitized = mol_tools.sanitize(mol)
 
-        # Set empty descriptors and properties for Bound Molecule
+        # Set InChI and InChIKey calculated by rdkit as descriptors 
         # Note: This is because component.compute_2d expects self.id
-        descriptors = list()
-        properties = CCDProperties(
-            id="",
-            name="",
-            formula="",
-            modified_date="",
-            pdbx_release_status="",
-            weight="",
-        )
+        comp = Component(mol.GetMol(), cif_block)
+        descriptors = [Descriptor(type = 'InChI',program = 'rdkit',value = comp.inchi_from_rdkit),
+                       Descriptor(type = 'InChIKey',program = 'rdkit',value = comp.inchikey_from_rdkit)]
+        properties = CCDProperties(id="",
+                                   name="",
+                                   formula=CalcMolFormula(comp.mol),
+                                   modified_date="",
+                                   pdbx_release_status="",
+                                   weight=round(comp.physchem_properties['exactmw'], 3),
+                                  )
 
         comp = Component(mol.GetMol(), cif_block, properties, descriptors)
         reader_result = ccd_reader.CCDReaderResult(
@@ -227,7 +228,7 @@ def _parse_pdb_atom_site(mol, atoms, bm):
 
 def _parse_pdb_conformers_site(mol, atoms, index_atoms):
     """
-    Setup model and ideal cooordinates in the rdkit Mol object.
+    Setup model cooordinates in the rdkit Mol object.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the compound
