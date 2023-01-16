@@ -6,8 +6,8 @@
   for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd) and [wwPDB The Biologically Interesting Molecule Reference Dictionary](https://www.wwpdb.org/data/bird)
 
 * The tools use:
-  * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2021.03.x`
-  * [PDBeCIF](https://github.com/PDBeurope/pdbecif) cif parser.
+  * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2022.09.3`
+  * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing cif files.
   * [scipy](https://www.scipy.org/) for depiction quality check.
   * [numpy](https://www.numpy.org/) for molecular scaling.
 
