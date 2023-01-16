@@ -120,7 +120,7 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
     success = False
     saved_std_err = sys.stderr
     log = sys.stderr = StringIO()
-    rdkit.Chem.WrapLogs()
+    rdkit.rdBase.LogToPythonStderr()
 
     while (not success) and attempts >= 0:
         sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)

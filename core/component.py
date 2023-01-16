@@ -506,6 +506,7 @@ class Component:
                 self.mol2D, wedgeBonds=False, kekulize=True, addChiralHs=False
             )
         drawer.DrawMolecule(tmp)
+        drawer.TagAtoms(self.mol2D)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText()
         json_repr = drawing.convert_svg(svg, self.id, self.mol2D)

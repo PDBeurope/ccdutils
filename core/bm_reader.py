@@ -372,6 +372,60 @@ def infer_bound_molecules(structure, to_discard):
     return bound_molecules
 
 
+
+def __add_connections(struct_conn, bms):
+    for i in range(len(struct_conn["id"])):
+        (ptnr1, atom1) = find_pntr_entry(struct_conn, bms.nodes, 1, i)
+        (ptnr2, atom2) = find_pntr_entry(struct_conn, bms.nodes, 2, i)
+
+        # we want covalent connections among ligands only.
+        if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
+            bms.add_edge(ptnr1, ptnr2, a=atom1, b=atom2)
+
+
+def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
+    entities = {}
+    for i in range(len(branch_scheme["entity_id"])):
+        if branch_scheme["entity_id"][i] not in entities:
+            entities[branch_scheme["entity_id"][i]] = [
+                branch_scheme["pdb_asym_id"][i]
+            ]
+        elif (
+            branch_scheme["pdb_asym_id"][i]
+            not in entities[branch_scheme["entity_id"][i]]
+        ):
+            entities[branch_scheme["entity_id"][i]].append(
+                branch_scheme["pdb_asym_id"][i]
+            )
+            
+    for i in range(len(entity_branch_link["link_id"])):
+        ent_id = entity_branch_link["entity_id"][i]
+        for chain in entities[ent_id]:
+            for node in bms.nodes:
+                prtnr1 = False
+                prtnr2 = False
+                atom1 = False
+                atom2 = False
+                if (
+                    node.name == entity_branch_link["comp_id_1"][i]
+                    and node.chain == chain
+                    and node.res_id
+                    == entity_branch_link["entity_branch_list_num_1"][i]
+                ):
+                    prtnr1 = node
+                    atom1 = node.name
+                elif (
+                    node.name == entity_branch_link["comp_id_2"][i]
+                    and node.chain == chain
+                    and node.res_id
+                    == entity_branch_link["entity_branch_list_num_2"][i]
+                ):
+                    prtnr2 = node
+                    atom2 = node.name
+            if prtnr1 and prtnr2:
+                bms.add_edge(prtnr1, prtnr2, a=atom1, b=atom2)
+
+
 def parse_bound_molecules(path, to_discard):
     """Parse information from the information about HETATMS from the
     `_pdbx_nonpoly_scheme` and connectivity among them from `_struct_conn`.
@@ -382,62 +436,9 @@ def parse_bound_molecules(path, to_discard):
 
     Returns:
         DiGraph: All the bound molecules in a given entry.
-    """
-
-    def __add_connections(struct_conn, bms):
-        for i in range(len(struct_conn["id"])):
-            (ptnr1, atom1) = find_pntr_entry(struct_conn, bms.nodes, 1, i)
-            (ptnr2, atom2) = find_pntr_entry(struct_conn, bms.nodes, 2, i)
-
-            # we want covalent connections among ligands only.
-            if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
-                bms.add_edge(ptnr1, ptnr2, a=atom1, b=atom2)
-
-    def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
-        entities = {}
-        for i in range(len(branch_scheme["entity_id"])):
-            if branch_scheme["entity_id"][i] not in entities:
-                entities[branch_scheme["entity_id"][i]] = [
-                    branch_scheme["pdb_asym_id"][i]
-                ]
-            elif (
-                branch_scheme["pdb_asym_id"][i]
-                not in entities[branch_scheme["entity_id"][i]]
-            ):
-                entities[branch_scheme["entity_id"][i]].append(
-                    branch_scheme["pdb_asym_id"][i]
-                )
-
-        for i in range(len(entity_branch_link["link_id"])):
-            ent_id = entity_branch_link["entity_id"][i]
-            for chain in entities[ent_id]:
-                for node in bms.nodes:
-                    prtnr1 = False
-                    prtnr2 = False
-                    atom1 = False
-                    atom2 = False
-                    if (
-                        node.name == entity_branch_link["comp_id_1"][i]
-                        and node.chain == chain
-                        and node.res_id
-                        == entity_branch_link["entity_branch_list_num_1"][i]
-                    ):
-                        prtnr1 = node
-                        atom1 = node.name
-                    elif (
-                        node.name == entity_branch_link["comp_id_2"][i]
-                        and node.chain == chain
-                        and node.res_id
-                        == entity_branch_link["entity_branch_list_num_2"][i]
-                    ):
-                        prtnr2 = node
-                        atom2 = node.name
-                if prtnr1 and prtnr2:
-                    bms.add_edge(prtnr1, prtnr2, a=atom1, b=atom2)
-
+    """    
     doc = cif.read(path)
     cif_block = doc.sole_block()
-    # mmcif_dict = list(MMCIF2Dict().parse(path).values())[0]
 
     if (
         "_pdbx_nonpoly_scheme." not in cif_block.get_mmcif_category_names()

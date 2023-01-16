@@ -94,8 +94,9 @@ class TestCutDownComponentsCif:
         path_elements = xml.findall("svg:path", svg_namespace)
 
         for e in path_elements:
-            if re.fullmatch(r"atom-\d+", e.attrib["class"]):
-                return  # label is where it should be we can quit
+            if('class' in e.attrib):
+                if re.fullmatch(r"atom-\d+", e.attrib["class"]):
+                    return  # label is where it should be we can quit
 
         assert False  # this compound should have had label
 
