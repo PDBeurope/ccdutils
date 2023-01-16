@@ -40,7 +40,7 @@ setup(
         "scipy",
         "numpy",
         "requests",
-        "pdbecif>=1.5",
+        "gemmi",
     ],
     extras_require={
         "tests": ["pytest", "pytest-cov", "pre-commit"],
