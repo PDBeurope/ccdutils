@@ -49,8 +49,6 @@ from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from gemmi import cif
 from networkx import DiGraph, connected_components
 
-# import networkx
-
 
 def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     """
@@ -70,45 +68,92 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     if not os.path.isfile(path_to_cif):
         raise ValueError(f"File '{path_to_cif}' does not exists")
 
-    # cif_dict = list(MMCIF2Dict().parse(path_to_cif).values())[0]
-    doc = cif.read(path_to_cif)
-    cif_block = doc.sole_block()
-    
-    # return _parse_pdb_updated_mmcif(cif_dict, sanitize)
+    # doc = cif.read(path_to_cif)
+    # cif_block = doc.sole_block()
 
-    warnings = []
-    errors = []
-    sanitized = False
+    # warnings = []
+    # errors = []
+    # sanitized = False
 
     biomolecule_result = []
-    # json_result = []
 
-    cif_tools.preprocess_cif_category(cif_block, "_atom_site.")
-    cif_tools.preprocess_cif_category(cif_block, "_chem_comp_bond.")
+    # cif_tools.preprocess_cif_category(cif_block, "_atom_site.")
+    # cif_tools.preprocess_cif_category(cif_block, "_chem_comp_bond.")
 
     bms = infer_bound_molecules(path_to_cif, ["HOH"])
-    multiple_chem_comp_bms = [
-        bm.to_dict() for bm in bms if len(bm.to_dict()["residues"]) > 1
-    ]
+    for bm in bms:
+        reader_result =  infer_multiple_chem_comp(path_to_cif, bm.to_dict(), sanitize)
+        if(reader_result):
+            biomolecule_result.append(reader_result)
+    
+    return biomolecule_result       
 
-    for bm in multiple_chem_comp_bms:
+    # multiple_chem_comp_bms = [
+    #     bm.to_dict() for bm in bms if len(bm.to_dict()["residues"]) > 1
+    # ]
+
+    # for bm in multiple_chem_comp_bms:
+    #     mol = rdkit.Chem.RWMol()
+    #     index_atoms, bm_atoms_dict = _parse_pdb_atom_site(
+    #         mol, cif_block.get_mmcif_category('_atom_site.'), bm
+    #     )
+
+    #     _parse_pdb_conformers_site(mol, bm_atoms_dict, index_atoms)
+    #     _parse_pdb_bonds_site(
+    #         mol, cif_block.get_mmcif_category("_chem_comp_bond."), bm_atoms_dict, errors, index_atoms, bm
+    #     )
+
+    #     # _handle_implicit_hydrogens(mol)
+    #     _handle_disconnected_hydrogens(mol)
+    #     if sanitize:
+    #         sanitized = mol_tools.sanitize(mol)
+
+    #     # Set InChI and InChIKey calculated by rdkit as descriptors 
+    #     # Note: This is because component.compute_2d expects self.id
+    #     comp = Component(mol.GetMol(), cif_block)
+    #     descriptors = [Descriptor(type = 'InChI',program = 'rdkit',value = comp.inchi_from_rdkit),
+    #                    Descriptor(type = 'InChIKey',program = 'rdkit',value = comp.inchikey_from_rdkit)]
+    #     properties = CCDProperties(id="",
+    #                                name="",
+    #                                formula=CalcMolFormula(comp.mol),
+    #                                modified_date="",
+    #                                pdbx_release_status="",
+    #                                weight=round(comp.physchem_properties['exactmw'], 3),
+    #                               )
+
+    #     comp = Component(mol.GetMol(), cif_block, properties, descriptors)
+    #     reader_result = ccd_reader.CCDReaderResult(
+    #         warnings=warnings, errors=errors, component=comp, sanitized=sanitized
+    #     )
+
+
+def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize:bool = True):
+
+    if(len(bm["residues"]) <= 1):
+        return
+    
+    else:
+
+        warnings = []
+        errors = []
+        sanitized = False
+        cif_block = cif.read(path_to_cif).sole_block()
+        cif_tools.preprocess_cif_category(cif_block, "_atom_site.")
+        cif_tools.preprocess_cif_category(cif_block, "_chem_comp_bond.")
+
         mol = rdkit.Chem.RWMol()
         index_atoms, bm_atoms_dict = _parse_pdb_atom_site(
             mol, cif_block.get_mmcif_category('_atom_site.'), bm
         )
-
         _parse_pdb_conformers_site(mol, bm_atoms_dict, index_atoms)
         _parse_pdb_bonds_site(
             mol, cif_block.get_mmcif_category("_chem_comp_bond."), bm_atoms_dict, errors, index_atoms, bm
         )
 
-        # _handle_implicit_hydrogens(mol)
         _handle_disconnected_hydrogens(mol)
         if sanitize:
             sanitized = mol_tools.sanitize(mol)
-
-        # Set InChI and InChIKey calculated by rdkit as descriptors 
-        # Note: This is because component.compute_2d expects self.id
+        
         comp = Component(mol.GetMol(), cif_block)
         descriptors = [Descriptor(type = 'InChI',program = 'rdkit',value = comp.inchi_from_rdkit),
                        Descriptor(type = 'InChIKey',program = 'rdkit',value = comp.inchikey_from_rdkit)]
@@ -119,14 +164,13 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
                                    pdbx_release_status="",
                                    weight=round(comp.physchem_properties['exactmw'], 3),
                                   )
-
         comp = Component(mol.GetMol(), cif_block, properties, descriptors)
         reader_result = ccd_reader.CCDReaderResult(
             warnings=warnings, errors=errors, component=comp, sanitized=sanitized
         )
-        biomolecule_result.append(reader_result)
 
-    return biomolecule_result
+        return(reader_result)
+    
 
 
 def _handle_disconnected_hydrogens(mol):
@@ -322,35 +366,48 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
         if lig not in bond_per_type:  # ions
             continue
         chain_res = f"{j['auth_asym_id']}/{j['auth_seq_id']}"
-        for pairs in bond_per_type[lig]:
-            tuple_to_find_1 = (chain_res, lig, pairs[0])
-            tuple_to_find_2 = (chain_res, lig, pairs[1])
-            atom_1 = helper.find_element_in_list(index_atoms, tuple_to_find_1)
-            atom_2 = helper.find_element_in_list(index_atoms, tuple_to_find_2)
-            bond_order = ccd_reader._bond_pdb_order(pairs[2])
-            if any(a is None for a in [atom_1, atom_2, bond_order]):
-                pass
-            else:
-                mol.AddBond(atom_1, atom_2, bond_order)
+        try:
+            for pairs in bond_per_type[lig]:
+                tuple_to_find_1 = (chain_res, lig, pairs[0])
+                tuple_to_find_2 = (chain_res, lig, pairs[1])
+                atom_1 = helper.find_element_in_list(index_atoms, tuple_to_find_1)
+                atom_2 = helper.find_element_in_list(index_atoms, tuple_to_find_2)
+                bond_order = ccd_reader._bond_pdb_order(pairs[2])
+                if any(a is None for a in [atom_1, atom_2, bond_order]):
+                    pass
+                else:
+                    mol.AddBond(atom_1, atom_2, bond_order)
+        except ValueError:
+            errors.append(
+                f"Error perceiving {atom_1} - {atom_2} bond in _chem_comp_bond"
+            )
+        except RuntimeError:
+            errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
     # Add bound molecule connections
-    for connection in bm["connections"]:
-        first_res = connection_mapping[connection[0]]
-        second_res = connection_mapping[connection[1]]
-        chain_res_1 = f"{first_res['auth_asym_id']}/{first_res['auth_seq_id']}"
-        chain_res_2 = f"{second_res['auth_asym_id']}/{second_res['auth_seq_id']}"
-        lig_1 = first_res["label_comp_id"]
-        lig_2 = second_res["label_comp_id"]
-        tuple_to_find_1 = (chain_res_1, lig_1, connection[2]["a"])
-        tuple_to_find_2 = (chain_res_2, lig_2, connection[2]["b"])
-        atom_1 = helper.find_element_in_list(index_atoms, tuple_to_find_1)
-        atom_2 = helper.find_element_in_list(index_atoms, tuple_to_find_2)
+    try:
+        for connection in bm["connections"]:
+            first_res = connection_mapping[connection[0]]
+            second_res = connection_mapping[connection[1]]
+            chain_res_1 = f"{first_res['auth_asym_id']}/{first_res['auth_seq_id']}"
+            chain_res_2 = f"{second_res['auth_asym_id']}/{second_res['auth_seq_id']}"
+            lig_1 = first_res["label_comp_id"]
+            lig_2 = second_res["label_comp_id"]
+            tuple_to_find_1 = (chain_res_1, lig_1, connection[2]["a"])
+            tuple_to_find_2 = (chain_res_2, lig_2, connection[2]["b"])
+            atom_1 = helper.find_element_in_list(index_atoms, tuple_to_find_1)
+            atom_2 = helper.find_element_in_list(index_atoms, tuple_to_find_2)
 
-        if any(a is None for a in [atom_1, atom_2]):
-            pass
-        else:
-            mol.AddBond(atom_1, atom_2, ccd_reader._bond_pdb_order("SING"))
-
+            if any(a is None for a in [atom_1, atom_2]):
+                pass
+            else:
+                mol.AddBond(atom_1, atom_2, ccd_reader._bond_pdb_order("SING"))
+    except ValueError:
+            errors.append(
+                f"Error perceiving {atom_1} - {atom_2} bond in _struct_conn"
+            )
+    except RuntimeError:
+            errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
 def infer_bound_molecules(structure, to_discard):
     """Identify bound molecules in the input protein structure.
@@ -370,7 +427,6 @@ def infer_bound_molecules(structure, to_discard):
 
     bound_molecules = sorted(bound_molecules, key=lambda l: -len(l.graph.nodes))
     return bound_molecules
-
 
 
 def __add_connections(struct_conn, bms):
@@ -515,6 +571,7 @@ def parse_ligands_from_branch_scheme(branch_scheme, to_discard, g):
     """
 
     for i in range(len(branch_scheme["asym_id"])):
+        #This field is only present in assembly file
         # (orig_auth_asym_id, operator) = get_additional_fields(branch_scheme['pdb_asym_id'][i])
         n = Residue(
             branch_scheme["pdb_mon_id"][i],  # aka label_comp_id
@@ -544,7 +601,7 @@ def parse_ligands_from_nonpoly_scheme(nonpoly_scheme, to_discard):
     g = DiGraph()
 
     for i in range(len(nonpoly_scheme["asym_id"])):
-
+        #This field is only present in assembly file
         # (orig_auth_asym_id, operator) = get_additional_fields(nonpoly_scheme['pdb_strand_id'][i])
 
         n = Residue(

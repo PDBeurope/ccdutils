@@ -23,7 +23,6 @@ from dataclasses import dataclass
 from datetime import date
 from enum import IntEnum
 from typing import Any, List, NamedTuple, Dict
-
 import rdkit
 
 
@@ -289,6 +288,7 @@ class Residue:
             "auth_seq_id": self.res_id,
             "pdbx_PDB_ins_code": " " if not self.ins_code else self.ins_code,
             "entity_id": self.ent_id,
+
         }
 
     def __hash__(self):
