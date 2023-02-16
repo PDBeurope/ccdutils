@@ -20,7 +20,7 @@
   For linux/mac OS this is most easily done using the anaconda python with commands similar to:
 
   ```console
-  conda create -c conda-forge -n rdkit-env rdkit python=3.7
+  conda create -c conda-forge -n rdkit-env rdkit python=3.9
   conda activate rdkit-env
   ```
 
@@ -32,7 +32,7 @@
 
 ## Features
 
-* mmCIF CCD read/write.
+* gemmi CCD read/write.
 * Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
 * Generation of 3D conformations.
 * Fragment library search (PDBe hand currated library, ENAMINE, DSI).
