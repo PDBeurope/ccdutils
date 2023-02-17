@@ -33,22 +33,6 @@ def test_write_bound_molecule(boundMolecules, tmpdir_factory):
             assert mol.GetNumAtoms() == rdkit_mol.GetNumAtoms()
 
 
-# def test_valid_properties_bound_molecule(key):
-    
-#     reader_list = bm_reader.read_pdb_updated_cif_file(cif_filename(key))
-#     for reader_result in reader_list:
-#         c = reader_result.component
-#         physchem_props = c.physchem_properties
-#         assert test_inputs[key]["logp"] == round(physchem_props["CrippenClogP"], 3)
-#         assert test_inputs[key]["heavy_atom_count"] == physchem_props["NumHeavyAtoms"]
-#         assert test_inputs[key]["numH_acceptors"] == physchem_props["NumHBA"]
-#         assert test_inputs[key]["numH_donors"] == physchem_props["NumHBD"]
-#         assert test_inputs[key]["num_rotable_bonds"] == physchem_props["NumRotatableBonds"]
-#         assert test_inputs[key]["rings_count"] == physchem_props["NumRings"]
-#         assert test_inputs[key]["TPSA"] == round(physchem_props["tpsa"], 3)
-#         assert test_inputs[key]["molwt"] == round(physchem_props["exactmw"], 3)
-
-
 @pytest.mark.boundmolecule
 def test_bound_molecule_has_degenerate_conformer(boundMolecules):
     for bm in boundMolecules:

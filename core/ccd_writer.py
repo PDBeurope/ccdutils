@@ -598,7 +598,6 @@ def _write_pdb_ccd_cif_info(cif_block, component):
             exported.
     """
     
-    # component.mol.UpdatePropertyCache() # To update implicitValence of atoms (https://github.com/rdkit/rdkit/issues/2216)
     calc_formula = rdkit.Chem.rdMolDescriptors.CalcMolFormula(component.mol)
     calc_weight = rdkit.Chem.rdMolDescriptors.CalcExactMolWt(component.mol)
     date = component.modified_date
