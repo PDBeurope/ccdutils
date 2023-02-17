@@ -41,6 +41,7 @@ setup(
         "numpy",
         "requests",
         "gemmi",
+        "rdkit"
     ],
     extras_require={
         "tests": ["pytest", "pytest-cov", "pre-commit"],
