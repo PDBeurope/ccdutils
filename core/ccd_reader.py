@@ -127,7 +127,7 @@ def read_pdb_components_file(
         try:
             result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
         except CCDUtilsError as e:
-            logging.error(f"ERROR: Data block {n} not processed. Reason: ({str(e)}).")
+            logging.error(f"ERROR: Data block {block.name} not processed. Reason: ({str(e)}).")
 
     return result_bag
 
