@@ -20,8 +20,9 @@
   For linux/mac OS this is most easily done using the anaconda python with commands similar to:
 
   ```console
-  conda create -c conda-forge -n rdkit-env rdkit python=3.9
+  conda create -n rdkit-env python=3.9
   conda activate rdkit-env
+  pip install rdkit
   ```
 
 * Once you have installed RDKit, as described above then install pdbeccdutils using pip:
