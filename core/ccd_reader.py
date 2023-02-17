@@ -138,7 +138,7 @@ def _parse_pdb_mmcif(cif_block, sanitize=True):
     Create internal representation of the molecule from mmcif format.
 
     Args:
-        cif_block (block): mmcif block from gemmi
+        cif_block (cif.Block): mmcif block object from gemmi
         sanitize (bool): Whether or not the rdkit component should
             be sanitized. Defaults to True.
 
@@ -187,7 +187,7 @@ def _parse_pdb_atoms(mol, cif_block):
     Args:
         mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
             compound representation.
-        cif_block (block): mmCIF block from gemmi.
+        cif_block (cif.Block): mmCIF block object from gemmi.
     """
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
         return
@@ -227,7 +227,7 @@ def _parse_pdb_conformers(mol, cif_block):
     Args:
         mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the compound
             representation.
-        cif_block (block): mmCIF block from gemmi.
+        cif_block (cif.Block): mmCIF block object from gemmi.
     """
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
         return
@@ -248,6 +248,7 @@ def _setup_pdb_conformer(atoms,label,name):
 
     Args:
         atoms (Table): mmcif table with the atom info.
+        label (str): Conformer category 
         name (str): Conformer name.
 
     Returns:
@@ -276,7 +277,7 @@ def _parse_pdb_bonds(mol, cif_block, errors):
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule which receives bonds.
-        cif_block (block): mmcif block from gemmi.
+        cif_block (cif.Block): mmcif block Block from gemmi.
         errors (list[str]): Issues encountered while parsing.
     """
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names() or '_chem_comp_bond.' not in cif_block.get_mmcif_category_names():
@@ -328,7 +329,8 @@ def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
     Parse useful information from _pdbx_chem_comp_* category
 
     Args:
-        pdbx_chem_comp_descriptors (dict): mmcif category with the
+        cif_block (cif.Block): mmCIF Block object from gemmi
+        cat_name (str): mmcif category with the
             descriptors info.
         label (str, optional): Defaults to 'descriptor'. Name of the
             category to be parsed.
@@ -357,7 +359,7 @@ def _parse_pdb_properties(cif_block):
     Parse useful information from _chem_comp category
 
     Args:
-        cif_block (block): the mmcif block from gemmi
+        cif_block (cif.Block): mmcif block object from gemmi
 
     Returns:
         Properties: dataclass with the CCD properties.

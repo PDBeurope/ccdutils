@@ -48,7 +48,7 @@ from networkx import DiGraph, connected_components
 def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     """
     Read in single wwPDB Model CIF and create internal
-    representation of its bound molecules.
+    representation of its bound-molecules with multiple components.
 
     Args:
         path_to_cif (str): Path to the cif file
@@ -58,7 +58,7 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
         ValueError: if file does not exist
 
     Returns:
-        A dictionary of CCDResult representation of each bound molecule.
+        A list of CCDResult representations of each bound-molecule.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError(f"File '{path_to_cif}' does not exists")
@@ -74,6 +74,21 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
 
 
 def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize:bool = True):
+
+    """
+    Read in single wwPDB Model CIF and single bound-molecule to create internal
+    representation of the bound molecule.
+
+    Args:
+        path_to_cif (str): Path to the cif file
+        bm (dict): Dictionary representation of bound-molecule
+        sanitize (bool): [Defaults: True]
+
+
+    Returns:
+        A dictionary of CCDResult representation of bound-molecule.
+    """
+
 
     if(len(bm["residues"]) <= 1):
         return
@@ -146,10 +161,11 @@ def _parse_pdb_atom_site(mol, atoms, bm):
     Setup atoms in the bound molecule
 
     Args:
-        mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
+        mol (rdkit.Chem.rchem.Mol): RDkit Mol object with the
             compound representation.
         atoms (dict): dictionary with parsed _chem_comp_atom
             category.
+        bm (dict): dictionary representation of bound-molecule
     """
     if not atoms:
         return
@@ -224,6 +240,7 @@ def _parse_pdb_conformers_site(mol, atoms, index_atoms):
         mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the compound
             representation.
         atoms (dict): mmcif category with atom info category.
+        index_atoms (list): List of intx atoms
     """
     if not atoms:
         return
@@ -243,6 +260,7 @@ def _setup_pdb_conformer_site(atoms, label, name, index_atoms):
         atoms (dict): mmcif category with the atom info.
         label (str): Namespace with the [x,y,z] coordinates.
         name (str): Conformer name.
+        index_atoms (lsit): List of index atoms
 
     Returns:
         rdkit.Chem.rdchem.Conformer: Conformer of the component.
@@ -286,6 +304,8 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
         bonds (dict): mmcif category with the bonds info. TODO not being used
         atoms (dict): mmcif category with the atom info. TODO not being used
         errors (list[str]): Issues encountered while parsing.
+        index_atoms (list): List of index atoms
+        bm (dict): Dictionary representation of bound-molecule
     """
     if not bonds:
         return

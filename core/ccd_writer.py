@@ -584,10 +584,8 @@ def _write_pdb_ccd_cif_info(cif_block, component):
     component
 
     Args:
-        cif_block (Block: gemmi.cif.Block): Block representation of the molecule
-        from gemmi.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
     
     calc_formula = rdkit.Chem.rdMolDescriptors.CalcMolFormula(component.mol)
@@ -614,10 +612,8 @@ def _write_pdb_ccd_cif_atoms(cif_block, component):
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_atom.html
 
     Args:
-        cif_block (Block: gemmi.cif.Block): Block representation of the molecule
-        from gemmi.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
 
     if component.mol.GetNumAtoms() < 1:
@@ -653,10 +649,8 @@ def _write_pdb_ccd_cif_bonds(cif_block, component):
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_bond.html
 
     Args:
-        cif_block (Block: gemmi.cif.Block): Block representation of the molecule
-        from gemmi.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
     if component.mol.GetNumBonds() < 1:
         return
@@ -677,10 +671,8 @@ def _write_pdb_ccd_cif_descriptor(cif_block, component):
     """Writes the _pdbx_chem_comp_descriptor namespace with details.
 
     Args:
-        cif_block (Block: gemmi.cif.Block): Block representation of the molecule
-        from gemmi.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
 
     if not component.descriptors:
