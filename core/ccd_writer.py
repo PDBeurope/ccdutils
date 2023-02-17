@@ -340,10 +340,6 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
     if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
         component.ccd_cif_block = _to_pdb_ccd_cif_block(component)
 
-    '''
-    deepcopy is not working with gemmi.cif.Block object. So the block is copied to a newly created document 
-    '''
-    # cif_block_copy = copy.deepcopy(component.ccd_cif_block)
     temp_doc = cif.Document()
     cif_block_copy = temp_doc.add_copied_block(component.ccd_cif_block)
 
@@ -570,11 +566,7 @@ def _to_pdb_ccd_cif_block(component):
         (dict of str: str)): dictionary representation of the component
             to be serialized as a cif file.
     """
-    
-    # if remove_hs:
-    #     component.mol = rdkit.Chem.RemoveHs(component.mol, sanitize=False)
-    #     component.mol.UpdatePropertyCache(strict=False)
-        
+            
     doc = cif.Document()
     cif_block = doc.add_new_block(component.id)
     

@@ -210,7 +210,6 @@ def _parse_pdb_atoms(mol, cif_block):
             element = "*"
             
         atom = rdkit.Chem.Atom(element)
-        # atom.SetChiralTag(_atom_chiral_tag(atoms['pdbx_stereo_config'][i]))
         atom.SetProp("name", atom_id)
         atom.SetProp("alt_name", alt_atom_id)
         atom.SetBoolProp("leaving_atom", leaving_atom == "Y")
@@ -407,25 +406,5 @@ def _bond_pdb_order(value_order):
         return rdkit.Chem.rdchem.BondType(3)
 
     return None
-
-
-def _atom_chiral_tag(tag):
-    """Parse _chem_comp.pdbx_stereo.config from chem_comp
-
-    Args:
-        tag (str): R/S/N identification of chiral center.
-
-    Returns:
-        rdkit.Chem.ChiralType: Chiral center in RDKit language.
-    """
-    if tag == "N":
-        return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
-    if tag == "S":
-        return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CCW
-    if tag == "R":
-        return rdkit.Chem.ChiralType.CHI_TETRAHEDRAL_CW
-
-    return rdkit.Chem.ChiralType.CHI_UNSPECIFIED
-
 
 # endregion parse mmcif

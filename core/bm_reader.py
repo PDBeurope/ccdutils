@@ -28,20 +28,15 @@ internal representation of bound molecules. The basic use can be as easy as this
 """
 
 import os
-
-# from typing import Dict, List, NamedTuple
-
 import rdkit
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.component import Component
 
-# from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import (
     CCDProperties,
     ConformerType,
     Descriptor,
-    # ReleaseStatus,
     Residue,
     BoundMolecule,
 )
@@ -68,18 +63,7 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     if not os.path.isfile(path_to_cif):
         raise ValueError(f"File '{path_to_cif}' does not exists")
 
-    # doc = cif.read(path_to_cif)
-    # cif_block = doc.sole_block()
-
-    # warnings = []
-    # errors = []
-    # sanitized = False
-
     biomolecule_result = []
-
-    # cif_tools.preprocess_cif_category(cif_block, "_atom_site.")
-    # cif_tools.preprocess_cif_category(cif_block, "_chem_comp_bond.")
-
     bms = infer_bound_molecules(path_to_cif, ["HOH"])
     for bm in bms:
         reader_result =  infer_multiple_chem_comp(path_to_cif, bm.to_dict(), sanitize)
@@ -87,44 +71,6 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
             biomolecule_result.append(reader_result)
     
     return biomolecule_result       
-
-    # multiple_chem_comp_bms = [
-    #     bm.to_dict() for bm in bms if len(bm.to_dict()["residues"]) > 1
-    # ]
-
-    # for bm in multiple_chem_comp_bms:
-    #     mol = rdkit.Chem.RWMol()
-    #     index_atoms, bm_atoms_dict = _parse_pdb_atom_site(
-    #         mol, cif_block.get_mmcif_category('_atom_site.'), bm
-    #     )
-
-    #     _parse_pdb_conformers_site(mol, bm_atoms_dict, index_atoms)
-    #     _parse_pdb_bonds_site(
-    #         mol, cif_block.get_mmcif_category("_chem_comp_bond."), bm_atoms_dict, errors, index_atoms, bm
-    #     )
-
-    #     # _handle_implicit_hydrogens(mol)
-    #     _handle_disconnected_hydrogens(mol)
-    #     if sanitize:
-    #         sanitized = mol_tools.sanitize(mol)
-
-    #     # Set InChI and InChIKey calculated by rdkit as descriptors 
-    #     # Note: This is because component.compute_2d expects self.id
-    #     comp = Component(mol.GetMol(), cif_block)
-    #     descriptors = [Descriptor(type = 'InChI',program = 'rdkit',value = comp.inchi_from_rdkit),
-    #                    Descriptor(type = 'InChIKey',program = 'rdkit',value = comp.inchikey_from_rdkit)]
-    #     properties = CCDProperties(id="",
-    #                                name="",
-    #                                formula=CalcMolFormula(comp.mol),
-    #                                modified_date="",
-    #                                pdbx_release_status="",
-    #                                weight=round(comp.physchem_properties['exactmw'], 3),
-    #                               )
-
-    #     comp = Component(mol.GetMol(), cif_block, properties, descriptors)
-    #     reader_result = ccd_reader.CCDReaderResult(
-    #         warnings=warnings, errors=errors, component=comp, sanitized=sanitized
-    #     )
 
 
 def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize:bool = True):
@@ -571,8 +517,6 @@ def parse_ligands_from_branch_scheme(branch_scheme, to_discard, g):
     """
 
     for i in range(len(branch_scheme["asym_id"])):
-        #This field is only present in assembly file
-        # (orig_auth_asym_id, operator) = get_additional_fields(branch_scheme['pdb_asym_id'][i])
         n = Residue(
             branch_scheme["pdb_mon_id"][i],  # aka label_comp_id
             branch_scheme["pdb_asym_id"][i],  # aka auth_asym_id
@@ -601,8 +545,6 @@ def parse_ligands_from_nonpoly_scheme(nonpoly_scheme, to_discard):
     g = DiGraph()
 
     for i in range(len(nonpoly_scheme["asym_id"])):
-        #This field is only present in assembly file
-        # (orig_auth_asym_id, operator) = get_additional_fields(nonpoly_scheme['pdb_strand_id'][i])
 
         n = Residue(
             nonpoly_scheme["pdb_mon_id"][i],  # aka label_comp_id
