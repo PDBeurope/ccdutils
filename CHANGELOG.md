@@ -6,6 +6,7 @@
 * Replaced pdbecif with gemmi for mmcif parsing
 * Support for rdkit 2022.09.x
 * Component representation of boundMolecules with multiple components
+* Replaced ccd_cif_dict (dict) property of Component with ccd_cif_block (gemmi.cif.Block) 
 
 ## RELEASE 0.6 - April 26, 2021
 
