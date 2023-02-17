@@ -1,5 +1,12 @@
 # Changelog
 
+## RELEASE 0.7.0 - February 26, 2023
+
+### Features
+* Replaced pdbecif with gemmi for mmcif parsing
+* Support for rdkit 2022.09.x
+* Component representation of boundMolecules with multiple components
+
 ## RELEASE 0.6 - April 26, 2021
 
 ### Features
