@@ -1,15 +1,13 @@
 """Common fixtures shared among all the tests
 """
 import pytest
-from pdbeccdutils.core import bm_reader, ccd_writer
+from pdbeccdutils.core import ccd_writer
 from pdbeccdutils.core.models import ConformerType
 from pdbeccdutils.helpers.mol_tools import fix_conformer
 import rdkit
 from rdkit import Chem
 import numpy as np
 import os
-
-
 
 @pytest.mark.boundmolecule
 def test_write_bound_molecule(boundMolecules, tmpdir_factory):
@@ -38,8 +36,6 @@ def test_bound_molecule_has_degenerate_conformer(boundMolecules):
     for bm in boundMolecules:
         assert not bm.has_degenerated_conformer(ConformerType.Model)
         
-        
-
 @pytest.mark.boundmolecule
 def test_bound_molecule_conformer_is_broken_ion():
     mol = rdkit.Chem.RWMol()
