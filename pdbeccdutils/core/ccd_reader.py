@@ -192,7 +192,7 @@ def _parse_pdb_atoms(mol, cif_block):
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
         return
     
-    atoms = cif_block.find('_chem_comp_atom.', ['atom_id', 'type_symbol','alt_atom_id','pdbx_leaving_atom_flag','charge'])    
+    atoms = cif_block.find('_chem_comp_atom.', ['atom_id', 'type_symbol', 'alt_atom_id', 'pdbx_leaving_atom_flag', 'charge'])    
     for row in atoms:
         atom_id = row['_chem_comp_atom.atom_id'].strip('\"')
         element = row['_chem_comp_atom.type_symbol'].strip('\"')
@@ -221,30 +221,29 @@ def _parse_pdb_atoms(mol, cif_block):
         mol.AddAtom(atom)    
         
 def _parse_pdb_conformers(mol, cif_block):
-    """
-    Setup model and ideal cooordinates in the rdkit Mol object.
+    """Setup model and ideal cooordinates in the rdkit Mol object.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the compound
             representation.
         cif_block (cif.Block): mmCIF block object from gemmi.
     """
+
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
         return
     
     required_fields = ['model_Cartn_x', 'model_Cartn_y', 'model_Cartn_z', 'pdbx_model_Cartn_x_ideal', 'pdbx_model_Cartn_y_ideal', 'pdbx_model_Cartn_z_ideal']
     atoms = cif_block.find('_chem_comp_atom.', required_fields)
     ideal = _setup_pdb_conformer(
-        atoms,"pdbx_model_Cartn_{}_ideal", ConformerType.Ideal.name
+        atoms, "pdbx_model_Cartn_{}_ideal", ConformerType.Ideal.name
     )
-    model = _setup_pdb_conformer(atoms,"model_Cartn_{}", ConformerType.Model.name)
+    model = _setup_pdb_conformer(atoms, "model_Cartn_{}", ConformerType.Model.name)
 
     mol.AddConformer(ideal, assignId=True)
     mol.AddConformer(model, assignId=True)
 
-def _setup_pdb_conformer(atoms,label,name):
-    """
-    Setup a conformer
+def _setup_pdb_conformer(atoms, label, name):
+    """Setup a conformer
 
     Args:
         atoms (Table): mmcif table with the atom info.
@@ -283,9 +282,7 @@ def _parse_pdb_bonds(mol, cif_block, errors):
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names() or '_chem_comp_bond.' not in cif_block.get_mmcif_category_names():
         return
     atoms = cif_block.find('_chem_comp_atom.', ['atom_id'])
-    bonds = cif_block.find('_chem_comp_bond.', ['atom_id_1', 'atom_id_2','value_order'])
-    
-
+    bonds = cif_block.find('_chem_comp_bond.', ['atom_id_1', 'atom_id_2', 'value_order'])
     atoms_ids = list(atoms.find_column("_chem_comp_atom.atom_id"))
     for row in bonds:
         try:
@@ -325,8 +322,7 @@ def _handle_implicit_hydrogens(mol):
 
 
 def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
-    """
-    Parse useful information from _pdbx_chem_comp_* category
+    """Parse useful information from _pdbx_chem_comp_* category
 
     Args:
         cif_block (cif.Block): mmCIF Block object from gemmi
@@ -355,8 +351,7 @@ def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
     return descriptors
 
 def _parse_pdb_properties(cif_block):
-    """
-    Parse useful information from _chem_comp category
+    """Parse useful information from _chem_comp category
 
     Args:
         cif_block (cif.Block): mmcif block object from gemmi
@@ -366,17 +361,17 @@ def _parse_pdb_properties(cif_block):
     """
     properties = None
     if "_chem_comp." in cif_block.get_mmcif_category_names():
-        mod_date = cif_block.find_value('_chem_comp.pdbx_modified_date').split("-")
-        d = (
-            date(1970, 1, 1)
-            if mod_date[0] == "?"
-            else date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
-        )
-
+        mod_date = cif_block.find_value('_chem_comp.pdbx_modified_date')
+        if not mod_date:
+            d = date(1970, 1, 1)
+        else:
+            mod_date = mod_date.split('-')
+            d = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+            
         rel_status = ReleaseStatus.from_str(cif_block.find_value('_chem_comp.pdbx_release_status'))
         weight = (
             0.0
-            if cif_block.find_value('_chem_comp.formula_weight') == "?"
+            if not cif_block.find_value('_chem_comp.formula_weight')
             else float(cif_block.find_value('_chem_comp.formula_weight'))
         )
 

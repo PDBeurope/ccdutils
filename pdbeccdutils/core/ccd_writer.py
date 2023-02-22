@@ -627,9 +627,12 @@ def _write_pdb_ccd_cif_atoms(cif_block, component):
         )
 
     label = "_chem_comp_atom."
-    atom_fields = ['comp_id','atom_id','alt_atom_id','type_symbol','charge','pdbx_align','pdbx_aromatic_flag','pdbx_leaving_atom_flag','pdbx_stereo_config','model_Cartn_x',
-                   'model_Cartn_y','model_Cartn_z','pdbx_model_Cartn_x_ideal','pdbx_model_Cartn_y_ideal','pdbx_model_Cartn_z_ideal','pdbx_component_atom_id','pdbx_component_comp_id',
-                   'pdbx_ordinal']
+    atom_fields = ['comp_id', 'atom_id', 'alt_atom_id', 'type_symbol', 'charge', 'pdbx_align',
+                    'pdbx_aromatic_flag', 'pdbx_leaving_atom_flag', 'pdbx_stereo_config', 
+                    'model_Cartn_x', 'model_Cartn_y', 'model_Cartn_z', 'pdbx_model_Cartn_x_ideal',
+                    'pdbx_model_Cartn_y_ideal', 'pdbx_model_Cartn_z_ideal', 'pdbx_component_atom_id',
+                    'pdbx_component_comp_id','pdbx_ordinal',
+                    ]
     atom_loop = cif_block.init_loop(label, atom_fields)
 
     for atom in component.mol.GetAtoms():
@@ -656,7 +659,9 @@ def _write_pdb_ccd_cif_bonds(cif_block, component):
         return
 
     label = "_chem_comp_bond."
-    bond_fields = ['comp_id','atom_id_1','atom_id_2','value_order','pdbx_aromatic_flag','pdbx_stereo_config','pdbx_ordinal']
+    bond_fields = ['comp_id', 'atom_id_1', 'atom_id_2', 'value_order', 'pdbx_aromatic_flag',
+                    'pdbx_stereo_config', 'pdbx_ordinal',
+                    ]
     bond_loop = cif_block.init_loop(label, bond_fields)
 
     for b in component.mol.GetBonds():
@@ -680,7 +685,7 @@ def _write_pdb_ccd_cif_descriptor(cif_block, component):
 
     label = "_pdbx_chem_comp_descriptor."
     
-    descriptor_fields = ['comp_id','type','program','descriptor']
+    descriptor_fields = ['comp_id', 'type', 'program', 'descriptor']
     descriptor_loop = cif_block.init_loop(label, descriptor_fields)
 
     for entry in component.descriptors:

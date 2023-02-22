@@ -66,14 +66,14 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     biomolecule_result = []
     bms = infer_bound_molecules(path_to_cif, ["HOH"])
     for bm in bms:
-        reader_result =  infer_multiple_chem_comp(path_to_cif, bm.to_dict(), sanitize)
+        reader_result = infer_multiple_chem_comp(path_to_cif, bm.to_dict(), sanitize)
         if(reader_result):
             biomolecule_result.append(reader_result)
     
     return biomolecule_result       
 
 
-def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize:bool = True):
+def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize: bool = True):
 
     """
     Read in single wwPDB Model CIF and single bound-molecule to create internal
@@ -89,12 +89,10 @@ def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize:bool = True):
         A dictionary of CCDResult representation of bound-molecule.
     """
 
-
     if(len(bm["residues"]) <= 1):
         return
-    
-    else:
 
+    else:
         warnings = []
         errors = []
         sanitized = False
@@ -116,15 +114,15 @@ def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize:bool = True):
             sanitized = mol_tools.sanitize(mol)
         
         comp = Component(mol.GetMol(), cif_block)
-        descriptors = [Descriptor(type = 'InChI',program = 'rdkit',value = comp.inchi_from_rdkit),
-                       Descriptor(type = 'InChIKey',program = 'rdkit',value = comp.inchikey_from_rdkit)]
+        descriptors = [Descriptor(type='InChI', program='rdkit', value=comp.inchi_from_rdkit),
+                       Descriptor(type='InChIKey', program='rdkit', value=comp.inchikey_from_rdkit)]
         properties = CCDProperties(id="",
                                    name="",
                                    formula=CalcMolFormula(comp.mol),
                                    modified_date="",
                                    pdbx_release_status="",
                                    weight=round(comp.physchem_properties['exactmw'], 3),
-                                  )
+                                   )
         comp = Component(mol.GetMol(), cif_block, properties, descriptors)
         reader_result = ccd_reader.CCDReaderResult(
             warnings=warnings, errors=errors, component=comp, sanitized=sanitized
@@ -132,8 +130,6 @@ def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize:bool = True):
 
         return(reader_result)
     
-
-
 def _handle_disconnected_hydrogens(mol):
     """
     Delete hydrogens without neighbours (degree = 0).
@@ -369,11 +365,11 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
             else:
                 mol.AddBond(atom_1, atom_2, ccd_reader._bond_pdb_order("SING"))
     except ValueError:
-            errors.append(
-                f"Error perceiving {atom_1} - {atom_2} bond in _struct_conn"
+        errors.append(
+            f"Error perceiving {atom_1} - {atom_2} bond in _struct_conn"
             )
     except RuntimeError:
-            errors.append(f"Duplicit bond {atom_1} - {atom_2}")
+        errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
 def infer_bound_molecules(structure, to_discard):
     """Identify bound molecules in the input protein structure.
@@ -382,18 +378,17 @@ def infer_bound_molecules(structure, to_discard):
         structure (str): Path to the structure.
         to_discard (list of str): List of residue names to be discarded
     """
+
     bms = parse_bound_molecules(structure, to_discard)
     bound_molecules = []
 
     for bm_nodes in connected_components(bms.to_undirected()):
         subgraph = bms.subgraph(bm_nodes)
         bm = BoundMolecule(subgraph)
-
         bound_molecules.append(bm)
 
     bound_molecules = sorted(bound_molecules, key=lambda l: -len(l.graph.nodes))
     return bound_molecules
-
 
 def __add_connections(struct_conn, bms):
     for i in range(len(struct_conn["id"])):
@@ -403,7 +398,6 @@ def __add_connections(struct_conn, bms):
         # we want covalent connections among ligands only.
         if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
             bms.add_edge(ptnr1, ptnr2, a=atom1, b=atom2)
-
 
 def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
     entities = {}
