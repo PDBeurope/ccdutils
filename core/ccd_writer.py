@@ -641,7 +641,7 @@ def _write_pdb_ccd_cif_atoms(cif_block, component):
                    "N", _get_ccd_cif_chiral_type(atom), f"{model_atom.x:.3f}", f"{model_atom.y:.3f}", f"{model_atom.z:.3f}", f"{ideal_atom.x:.3f}", f"{ideal_atom.y:.3f}",
                    f"{ideal_atom.z:.3f}", _get_atom_name(atom), component.id, str(atom.GetIdx() + 1)]
         
-        atom_loop.add_row(new_row)
+        atom_loop.add_row(cif.quote_list(new_row))
 
 def _write_pdb_ccd_cif_bonds(cif_block, component):
     """Writes the _chem_comp_bond namespace with atom details.
@@ -664,7 +664,7 @@ def _write_pdb_ccd_cif_bonds(cif_block, component):
         atom_b = b.GetEndAtom()
         
         new_row = [component.id, _get_atom_name(atom_a), _get_atom_name(atom_b), _get_ccd_cif_bond_type(b), "Y" if b.GetIsAromatic() else "N", _get_ccd_cif_bond_stereo(b), str(b.GetIdx() + 1)]
-        bond_loop.add_row(new_row)
+        bond_loop.add_row(cif.quote_list(new_row))
         
 
 def _write_pdb_ccd_cif_descriptor(cif_block, component):
@@ -685,7 +685,7 @@ def _write_pdb_ccd_cif_descriptor(cif_block, component):
 
     for entry in component.descriptors:
         new_row = [component.id, entry.type,entry.program, entry.value]
-        descriptor_loop.add_row(new_row)
+        descriptor_loop.add_row(cif.quote_list(new_row))
         
 
 def _get_atom_name(atom):
@@ -1076,8 +1076,8 @@ def _add_sw_info_cif(cif_block_copy):
     category = "_software."
     sw_fields = ['name', 'version', 'description']
     sw_loop = cif_block_copy.init_loop(category, sw_fields)
-    sw_loop.add_row(['rdkit', rdkit.__version__, cif.quote('Core functionality.')])
-    sw_loop.add_row(['pdbeccdutils', pdbeccdutils.__version__, cif.quote('Wrapper to provide 2D templates and molecular fragments.')])
+    sw_loop.add_row(cif.quote_list(['rdkit', rdkit.__version__, cif.quote('Core functionality.')]))
+    sw_loop.add_row(cif.quote_list(['pdbeccdutils', pdbeccdutils.__version__, cif.quote('Wrapper to provide 2D templates and molecular fragments.')]))
 
 def _add_2d_depiction_cif(component, cif_block_copy):
     """Add 2D coordinates of the component depiction
@@ -1109,12 +1109,12 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
     for i, scaffold in enumerate(component.scaffolds):
         mol = rdkit.Chem.MolFromSmiles(scaffold.smiles)
         new_row = [component.id, scaffold.name, f'S{i+1}', "scaffold", scaffold.smiles, rdkit.Chem.MolToInchi(mol), rdkit.Chem.MolToInchiKey(mol)]
-        substructure_loop.add_row(new_row)
+        substructure_loop.add_row(cif.quote_list(new_row))
     
     for j,fragment in enumerate(component.fragments):
         mol = rdkit.Chem.MolFromSmiles(fragment.smiles)
         new_row = [component.id, fragment.name, f'F{j+1}', "fragment", fragment.smiles, rdkit.Chem.MolToInchi(mol), rdkit.Chem.MolToInchiKey(mol)]
-        substructure_loop.add_row(new_row)
+        substructure_loop.add_row(cif.quote_list(new_row))
         
     mapping_category = "_pdbe_chem_comp_substructure_mapping."
     mapping_fields = ['comp_id', 'atom_id', 'substructure_id', 'substructure_ordinal']
@@ -1124,13 +1124,13 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
         for a, mapping in enumerate(scaffold.mappings):
             for atom_name in mapping:
                 new_row = [component.id, atom_name, f"S{i+1}", f"{a+1}"]
-                mapping_loop.add_row(new_row)
+                mapping_loop.add_row(cif.quote_list(new_row))
                 
     for i, fragment in enumerate(component.fragments):
         for a, mapping in enumerate(fragment.mappings):
             for atom_name in mapping:
                 new_row = [component.id,atom_name,f"F{i+1}",f"{a+1}"]
-                mapping_loop.add_row(new_row)
+                mapping_loop.add_row(cif.quote_list(new_row))
         
 
 def _add_rdkit_properties_cif(component, cif_block_copy):
@@ -1163,7 +1163,7 @@ def __add_rdkit_2d_atoms_cif(component, cif_block_copy):
     
     for i, atom in enumerate(component.mol2D.GetAtoms()):
         new_row = [component.id, atom.GetProp("name"), atom.GetSymbol(), f"{conformer.GetAtomPosition(i).x:.3f}", f"{conformer.GetAtomPosition(i).y:.3f}", str(i + 1)]
-        atom_depiction_loop.add_row(new_row)
+        atom_depiction_loop.add_row(cif.quote_list(new_row))
     
 
 def __add_rdkit_2d_bonds_cif(component, cif_block_copy):
@@ -1197,7 +1197,7 @@ def __add_rdkit_2d_bonds_cif(component, cif_block_copy):
         if(b.GetEndAtom().GetSymbol() != "H"):
             bond_depiction_ordinal += 1
             new_row = [component.id, b.GetBeginAtom().GetProp("name"), b.GetEndAtom().GetProp("name"),b.GetBondType().name, b.GetBondDir().name, str(bond_depiction_ordinal)]
-            bonds_depiction_loop.add_row(new_row)
+            bonds_depiction_loop.add_row(cif.quote_list(new_row))
     
 
 def _add_unichem_mapping_cif(component, cif_block_copy):
@@ -1214,7 +1214,7 @@ def _add_unichem_mapping_cif(component, cif_block_copy):
     external_mapping_loop = cif_block_copy.init_loop(category, fields)
     for mapping in component.external_mappings:
         new_row = [component.id,"UniChem",mapping[0],mapping[1]]
-        external_mapping_loop.add_row(new_row)
+        external_mapping_loop.add_row(cif.quote_list(new_row))
     
 
 def _add_rdkit_conformer_cif(component, cif_block_copy, remove_hs):
@@ -1250,7 +1250,7 @@ def _add_rdkit_conformer_cif(component, cif_block_copy, remove_hs):
     for i, atom_index in enumerate(atom_indices):
         new_row = [component.id, component.mol.GetAtomWithIdx(atom_index).GetProp("name"), f"{conformer.GetAtomPosition(atom_index).x:.3f}", f"{conformer.GetAtomPosition(atom_index).y:.3f}",
                    f"{conformer.GetAtomPosition(atom_index).z:.3f}", method, str(i+1)]
-        rdkit_conformer_loop.add_row(new_row)
+        rdkit_conformer_loop.add_row(cif.quote_list(new_row))
         
 
 # endregion
