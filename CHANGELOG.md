@@ -8,7 +8,7 @@
 * Component representation of bound-molecules with multiple components
 
 ### Breaking changes
-* Removed ccd_cif_dict (dict) property of Component. Please use ccd_cif_block (gemmi.cif.Block) to access data from mmcif file 
+* Removed ccd_cif_dict (dict) property of Component. Please use ccd_cif_block (gemmi.cif.Block) to access data from mmcif file
 
 ## RELEASE 0.6 - April 26, 2021
 
