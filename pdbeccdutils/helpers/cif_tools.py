@@ -35,5 +35,3 @@ def preprocess_cif_category(cif_block, label):
     """
     if label not in cif_block.get_mmcif_category_names():
         return f"Namespace {label} does not exist."
-
-

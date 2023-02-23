@@ -35,14 +35,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.6",
-    install_requires=[
-        "Pillow",
-        "scipy",
-        "numpy",
-        "requests",
-        "gemmi",
-        "rdkit"
-    ],
+    install_requires=["Pillow", "scipy", "numpy", "requests", "gemmi", "rdkit"],
     extras_require={
         "tests": ["pytest", "pytest-cov", "pre-commit"],
         "docs": [

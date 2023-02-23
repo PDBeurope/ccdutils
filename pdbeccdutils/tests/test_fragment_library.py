@@ -12,7 +12,6 @@ def test__img_crated(library, tmpdir):
     assert os.path.isfile(file_path)
 
 
-
 def test_img_png_created(library, tmpdir):
     file_path = str(tmpdir.join("library.png"))
     library.to_image(file_path, source="PDBe")

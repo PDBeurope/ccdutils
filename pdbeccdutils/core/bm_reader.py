@@ -67,14 +67,13 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
     bms = infer_bound_molecules(path_to_cif, ["HOH"])
     for bm in bms:
         reader_result = infer_multiple_chem_comp(path_to_cif, bm.to_dict(), sanitize)
-        if(reader_result):
+        if reader_result:
             biomolecule_result.append(reader_result)
-    
-    return biomolecule_result       
+
+    return biomolecule_result
 
 
 def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize: bool = True):
-
     """
     Read in single wwPDB Model CIF and single bound-molecule to create internal
     representation of the bound molecule.
@@ -89,7 +88,7 @@ def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize: bool = True):
         A dictionary of CCDResult representation of bound-molecule.
     """
 
-    if(len(bm["residues"]) <= 1):
+    if len(bm["residues"]) <= 1:
         return
 
     else:
@@ -102,34 +101,45 @@ def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize: bool = True):
 
         mol = rdkit.Chem.RWMol()
         index_atoms, bm_atoms_dict = _parse_pdb_atom_site(
-            mol, cif_block.get_mmcif_category('_atom_site.'), bm
+            mol, cif_block.get_mmcif_category("_atom_site."), bm
         )
         _parse_pdb_conformers_site(mol, bm_atoms_dict, index_atoms)
         _parse_pdb_bonds_site(
-            mol, cif_block.get_mmcif_category("_chem_comp_bond."), bm_atoms_dict, errors, index_atoms, bm
+            mol,
+            cif_block.get_mmcif_category("_chem_comp_bond."),
+            bm_atoms_dict,
+            errors,
+            index_atoms,
+            bm,
         )
 
         _handle_disconnected_hydrogens(mol)
         if sanitize:
             sanitized = mol_tools.sanitize(mol)
-        
+
         comp = Component(mol.GetMol(), cif_block)
-        descriptors = [Descriptor(type='InChI', program='rdkit', value=comp.inchi_from_rdkit),
-                       Descriptor(type='InChIKey', program='rdkit', value=comp.inchikey_from_rdkit)]
-        properties = CCDProperties(id="",
-                                   name="",
-                                   formula=CalcMolFormula(comp.mol),
-                                   modified_date="",
-                                   pdbx_release_status="",
-                                   weight=round(comp.physchem_properties['exactmw'], 3),
-                                   )
+        descriptors = [
+            Descriptor(type="InChI", program="rdkit", value=comp.inchi_from_rdkit),
+            Descriptor(
+                type="InChIKey", program="rdkit", value=comp.inchikey_from_rdkit
+            ),
+        ]
+        properties = CCDProperties(
+            id="",
+            name="",
+            formula=CalcMolFormula(comp.mol),
+            modified_date="",
+            pdbx_release_status="",
+            weight=round(comp.physchem_properties["exactmw"], 3),
+        )
         comp = Component(mol.GetMol(), cif_block, properties, descriptors)
         reader_result = ccd_reader.CCDReaderResult(
             warnings=warnings, errors=errors, component=comp, sanitized=sanitized
         )
 
-        return(reader_result)
-    
+        return reader_result
+
+
 def _handle_disconnected_hydrogens(mol):
     """
     Delete hydrogens without neighbours (degree = 0).
@@ -365,11 +375,10 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
             else:
                 mol.AddBond(atom_1, atom_2, ccd_reader._bond_pdb_order("SING"))
     except ValueError:
-        errors.append(
-            f"Error perceiving {atom_1} - {atom_2} bond in _struct_conn"
-            )
+        errors.append(f"Error perceiving {atom_1} - {atom_2} bond in _struct_conn")
     except RuntimeError:
         errors.append(f"Duplicit bond {atom_1} - {atom_2}")
+
 
 def infer_bound_molecules(structure, to_discard):
     """Identify bound molecules in the input protein structure.
@@ -390,6 +399,7 @@ def infer_bound_molecules(structure, to_discard):
     bound_molecules = sorted(bound_molecules, key=lambda l: -len(l.graph.nodes))
     return bound_molecules
 
+
 def __add_connections(struct_conn, bms):
     for i in range(len(struct_conn["id"])):
         (ptnr1, atom1) = find_pntr_entry(struct_conn, bms.nodes, 1, i)
@@ -399,13 +409,12 @@ def __add_connections(struct_conn, bms):
         if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
             bms.add_edge(ptnr1, ptnr2, a=atom1, b=atom2)
 
+
 def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
     entities = {}
     for i in range(len(branch_scheme["entity_id"])):
         if branch_scheme["entity_id"][i] not in entities:
-            entities[branch_scheme["entity_id"][i]] = [
-                branch_scheme["pdb_asym_id"][i]
-            ]
+            entities[branch_scheme["entity_id"][i]] = [branch_scheme["pdb_asym_id"][i]]
         elif (
             branch_scheme["pdb_asym_id"][i]
             not in entities[branch_scheme["entity_id"][i]]
@@ -413,7 +422,7 @@ def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
             entities[branch_scheme["entity_id"][i]].append(
                 branch_scheme["pdb_asym_id"][i]
             )
-            
+
     for i in range(len(entity_branch_link["link_id"])):
         ent_id = entity_branch_link["entity_id"][i]
         for chain in entities[ent_id]:
@@ -425,16 +434,14 @@ def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
                 if (
                     node.name == entity_branch_link["comp_id_1"][i]
                     and node.chain == chain
-                    and node.res_id
-                    == entity_branch_link["entity_branch_list_num_1"][i]
+                    and node.res_id == entity_branch_link["entity_branch_list_num_1"][i]
                 ):
                     prtnr1 = node
                     atom1 = node.name
                 elif (
                     node.name == entity_branch_link["comp_id_2"][i]
                     and node.chain == chain
-                    and node.res_id
-                    == entity_branch_link["entity_branch_list_num_2"][i]
+                    and node.res_id == entity_branch_link["entity_branch_list_num_2"][i]
                 ):
                     prtnr2 = node
                     atom2 = node.name
@@ -452,7 +459,7 @@ def parse_bound_molecules(path, to_discard):
 
     Returns:
         DiGraph: All the bound molecules in a given entry.
-    """    
+    """
     doc = cif.read(path)
     cif_block = doc.sole_block()
 
@@ -477,7 +484,9 @@ def parse_bound_molecules(path, to_discard):
             )
         else:
             bms = parse_ligands_from_branch_scheme(
-                cif_block.get_mmcif_category("_pdbx_branch_scheme."), to_discard, DiGraph()
+                cif_block.get_mmcif_category("_pdbx_branch_scheme."),
+                to_discard,
+                DiGraph(),
             )
 
     if "_struct_conn." in cif_block.get_mmcif_category_names():
@@ -512,7 +521,6 @@ def find_pntr_entry(struct_conn, residue_pool, partner, i):
             and residue.chain == struct_conn[f"ptnr{partner}_auth_asym_id"][i]
             and residue.res_id == struct_conn[f"ptnr{partner}_auth_seq_id"][i]
         ):
-
             return (residue, atom_name)
 
     return (None, atom_name)
@@ -559,7 +567,6 @@ def parse_ligands_from_nonpoly_scheme(nonpoly_scheme, to_discard):
     g = DiGraph()
 
     for i in range(len(nonpoly_scheme["asym_id"])):
-
         n = Residue(
             nonpoly_scheme["pdb_mon_id"][i],  # aka label_comp_id
             nonpoly_scheme["pdb_strand_id"][i],  # aka auth_asym_id

@@ -9,6 +9,7 @@ from rdkit import Chem
 import numpy as np
 import os
 
+
 @pytest.mark.boundmolecule
 def test_write_bound_molecule(boundMolecules, tmpdir_factory):
     wd = tmpdir_factory.mktemp("bm_test")
@@ -35,7 +36,8 @@ def test_write_bound_molecule(boundMolecules, tmpdir_factory):
 def test_bound_molecule_has_degenerate_conformer(boundMolecules):
     for bm in boundMolecules:
         assert not bm.has_degenerated_conformer(ConformerType.Model)
-        
+
+
 @pytest.mark.boundmolecule
 def test_bound_molecule_conformer_is_broken_ion():
     mol = rdkit.Chem.RWMol()

@@ -33,7 +33,9 @@ test_depiction = os.path.join(tests_dir(), "ccd_mmcif_test_files", "depiction_te
 test_cut_down_components_cif = os.path.join(
     tests_dir(), "components_cif", "cut_down_components.cif"
 )
-test_boundmolecules = os.path.join(tests_dir(), "ccd_mmcif_test_files", "boundMolecule_sample")
+test_boundmolecules = os.path.join(
+    tests_dir(), "ccd_mmcif_test_files", "boundMolecule_sample"
+)
 
 
 def cif_filename(code):
@@ -61,12 +63,11 @@ def supply_list_of_sample_cifs():
 def supply_list_of_cifs_with_boundmolecules():
     """
     returns a list of cif files with boundmolecules
-    
-    Args: 
-        
+
+    Args:
+
     Returns:
         list of filenames
     """
-    
-    return sorted(glob.glob(os.path.join(test_boundmolecules, "*.cif")))
 
+    return sorted(glob.glob(os.path.join(test_boundmolecules, "*.cif")))
