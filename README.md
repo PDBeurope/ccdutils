@@ -10,6 +10,7 @@
   * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing cif files.
   * [scipy](https://www.scipy.org/) for depiction quality check.
   * [numpy](https://www.numpy.org/) for molecular scaling.
+  * [networkx](https://networkx.org/) for bound-molecules.
 
 * Please note that the project is under active development.
 
@@ -20,9 +21,8 @@
   For linux/mac OS this is most easily done using the anaconda python with commands similar to:
 
   ```console
-  conda create -n rdkit-env python=3.9
+  conda create -n rdkit-env rdkit python=3.9
   conda activate rdkit-env
-  pip install rdkit
   ```
 
 * Once you have installed RDKit, as described above then install pdbeccdutils using pip:
