@@ -135,7 +135,6 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
             return False
 
         for sanitization_failure in sanitization_failures:
-
             split_object = sanitization_failure.split(",")  # [0] element [1] valency
             element = split_object[0]
             valency = int(split_object[1].strip())
@@ -148,7 +147,7 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
                 rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
             )
 
-            for (metal_index, atom_index) in metal_atom_bonds:
+            for metal_index, atom_index in metal_atom_bonds:
                 metal_atom = rwmol.GetAtomWithIdx(metal_index)
                 erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
 

@@ -29,8 +29,8 @@ def boundMolecules(request):
     for reader_result in reader_list:
         c = reader_result.component
         assert reader_result.warnings == []
-        bm_components.append(c)    
-    
+        bm_components.append(c)
+
     return bm_components
 
 

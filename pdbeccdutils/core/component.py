@@ -42,6 +42,7 @@ from pdbeccdutils.core.models import (
 from pdbeccdutils.helpers import conversions, drawing
 from pdbeccdutils.utils import web_services
 
+
 class Component:
     """
     Wrapper for the rdkit.Chem.Mol object enabling some of its
@@ -58,7 +59,6 @@ class Component:
         properties: CCDProperties = None,
         descriptors: List[Descriptor] = None,
     ) -> None:
-
         self.mol = mol
         self._mol_no_h = None
         self.mol2D = None
@@ -76,7 +76,6 @@ class Component:
 
         if properties is not None:
             self._cif_properties = properties
-         
 
     # region properties
     @property
@@ -759,4 +758,3 @@ class Component:
             res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
 
         return res
-

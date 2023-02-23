@@ -52,6 +52,7 @@ preprocessable_categories = [
     "_chem_comp.",
 ]
 
+
 class CCDReaderResult(NamedTuple):
     """
     NamedTuple for the result of reading an individual PDB chemical
@@ -72,6 +73,7 @@ class CCDReaderResult(NamedTuple):
     errors: List[str]
     component: Component
     sanitized: bool
+
 
 def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResult:
     """
@@ -127,11 +129,15 @@ def read_pdb_components_file(
         try:
             result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
         except CCDUtilsError as e:
-            logging.error(f"ERROR: Data block {block.name} not processed. Reason: ({str(e)}).")
+            logging.error(
+                f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
+            )
 
     return result_bag
 
+
 # region parse mmcif
+
 
 def _parse_pdb_mmcif(cif_block, sanitize=True):
     """
@@ -180,6 +186,7 @@ def _parse_pdb_mmcif(cif_block, sanitize=True):
 
     return reader_result
 
+
 def _parse_pdb_atoms(mol, cif_block):
     """
     Setup atoms in the component
@@ -191,24 +198,27 @@ def _parse_pdb_atoms(mol, cif_block):
     """
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
         return
-    
-    atoms = cif_block.find('_chem_comp_atom.', ['atom_id', 'type_symbol', 'alt_atom_id', 'pdbx_leaving_atom_flag', 'charge'])    
+
+    atoms = cif_block.find(
+        "_chem_comp_atom.",
+        ["atom_id", "type_symbol", "alt_atom_id", "pdbx_leaving_atom_flag", "charge"],
+    )
     for row in atoms:
-        atom_id = row['_chem_comp_atom.atom_id'].strip('\"')
-        element = row['_chem_comp_atom.type_symbol'].strip('\"')
-        alt_atom_id = row['_chem_comp_atom.alt_atom_id'].strip('\"')
-        leaving_atom = row['_chem_comp_atom.pdbx_leaving_atom_flag'].strip('\"')
-        charge = row['_chem_comp_atom.charge'].strip('\"')
-        
+        atom_id = row["_chem_comp_atom.atom_id"].strip('"')
+        element = row["_chem_comp_atom.type_symbol"].strip('"')
+        alt_atom_id = row["_chem_comp_atom.alt_atom_id"].strip('"')
+        leaving_atom = row["_chem_comp_atom.pdbx_leaving_atom_flag"].strip('"')
+        charge = row["_chem_comp_atom.charge"].strip('"')
+
         element = element if len(element) == 1 else element[0] + element[1].lower()
         isotope = None
-        
+
         if element == "D":
             element = "H"
             isotope = 2
         elif element == "X":
             element = "*"
-            
+
         atom = rdkit.Chem.Atom(element)
         atom.SetProp("name", atom_id)
         atom.SetProp("alt_name", alt_atom_id)
@@ -218,8 +228,9 @@ def _parse_pdb_atoms(mol, cif_block):
         if isotope is not None:
             atom.SetIsotope(isotope)
 
-        mol.AddAtom(atom)    
-        
+        mol.AddAtom(atom)
+
+
 def _parse_pdb_conformers(mol, cif_block):
     """Setup model and ideal cooordinates in the rdkit Mol object.
 
@@ -231,9 +242,16 @@ def _parse_pdb_conformers(mol, cif_block):
 
     if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
         return
-    
-    required_fields = ['model_Cartn_x', 'model_Cartn_y', 'model_Cartn_z', 'pdbx_model_Cartn_x_ideal', 'pdbx_model_Cartn_y_ideal', 'pdbx_model_Cartn_z_ideal']
-    atoms = cif_block.find('_chem_comp_atom.', required_fields)
+
+    required_fields = [
+        "model_Cartn_x",
+        "model_Cartn_y",
+        "model_Cartn_z",
+        "pdbx_model_Cartn_x_ideal",
+        "pdbx_model_Cartn_y_ideal",
+        "pdbx_model_Cartn_z_ideal",
+    ]
+    atoms = cif_block.find("_chem_comp_atom.", required_fields)
     ideal = _setup_pdb_conformer(
         atoms, "pdbx_model_Cartn_{}_ideal", ConformerType.Ideal.name
     )
@@ -242,12 +260,13 @@ def _parse_pdb_conformers(mol, cif_block):
     mol.AddConformer(ideal, assignId=True)
     mol.AddConformer(model, assignId=True)
 
+
 def _setup_pdb_conformer(atoms, label, name):
     """Setup a conformer
 
     Args:
         atoms (Table): mmcif table with the atom info.
-        label (str): Conformer category 
+        label (str): Conformer category
         name (str): Conformer name.
 
     Returns:
@@ -257,18 +276,25 @@ def _setup_pdb_conformer(atoms, label, name):
         return
 
     conformer = rdkit.Chem.Conformer(len(atoms))
-    
+
     for row in atoms:
-        x = conversions.str_to_float(row['_chem_comp_atom.{}'.format(label.format('x'))])
-        y = conversions.str_to_float(row['_chem_comp_atom.{}'.format(label.format('y'))])
-        z = conversions.str_to_float(row['_chem_comp_atom.{}'.format(label.format('z'))])
-        
+        x = conversions.str_to_float(
+            row["_chem_comp_atom.{}".format(label.format("x"))]
+        )
+        y = conversions.str_to_float(
+            row["_chem_comp_atom.{}".format(label.format("y"))]
+        )
+        z = conversions.str_to_float(
+            row["_chem_comp_atom.{}".format(label.format("z"))]
+        )
+
         atom_position = rdkit.Chem.rdGeometry.Point3D(x, y, z)
         conformer.SetAtomPosition(row.row_index, atom_position)
-        
+
     conformer.SetProp("name", name)
 
     return conformer
+
 
 def _parse_pdb_bonds(mol, cif_block, errors):
     """
@@ -279,18 +305,23 @@ def _parse_pdb_bonds(mol, cif_block, errors):
         cif_block (cif.Block): mmcif block Block from gemmi.
         errors (list[str]): Issues encountered while parsing.
     """
-    if "_chem_comp_atom." not in cif_block.get_mmcif_category_names() or '_chem_comp_bond.' not in cif_block.get_mmcif_category_names():
+    if (
+        "_chem_comp_atom." not in cif_block.get_mmcif_category_names()
+        or "_chem_comp_bond." not in cif_block.get_mmcif_category_names()
+    ):
         return
-    atoms = cif_block.find('_chem_comp_atom.', ['atom_id'])
-    bonds = cif_block.find('_chem_comp_bond.', ['atom_id_1', 'atom_id_2', 'value_order'])
+    atoms = cif_block.find("_chem_comp_atom.", ["atom_id"])
+    bonds = cif_block.find(
+        "_chem_comp_bond.", ["atom_id_1", "atom_id_2", "value_order"]
+    )
     atoms_ids = list(atoms.find_column("_chem_comp_atom.atom_id"))
     for row in bonds:
         try:
-            atom_1 = row['_chem_comp_bond.atom_id_1']
+            atom_1 = row["_chem_comp_bond.atom_id_1"]
             atom_1_id = atoms_ids.index(atom_1)
-            atom_2 = row['_chem_comp_bond.atom_id_2']
+            atom_2 = row["_chem_comp_bond.atom_id_2"]
             atom_2_id = atoms_ids.index(atom_2)
-            bond_order = _bond_pdb_order(row['_chem_comp_bond.value_order'])
+            bond_order = _bond_pdb_order(row["_chem_comp_bond.value_order"])
 
             mol.AddBond(atom_1_id, atom_2_id, bond_order)
         except ValueError:
@@ -299,6 +330,7 @@ def _parse_pdb_bonds(mol, cif_block, errors):
             )
         except RuntimeError:
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
+
 
 def _handle_implicit_hydrogens(mol):
     """Forbid atoms which does not have explicit Hydrogen partner to get
@@ -338,17 +370,18 @@ def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
 
     if cat_name not in cif_block.get_mmcif_category_names():
         return descriptors
-    
-    descriptors_block = cif_block.find(cat_name, [label, 'type', 'program'])
+
+    descriptors_block = cif_block.find(cat_name, [label, "type", "program"])
     for row in descriptors_block:
         d = Descriptor(
-            type = row[f'{cat_name}type'],
-            program = row[f'{cat_name}program'],
-            value = row[f'{cat_name}{label}']
+            type=row[f"{cat_name}type"],
+            program=row[f"{cat_name}program"],
+            value=row[f"{cat_name}{label}"],
         )
         descriptors.append(d)
-        
+
     return descriptors
+
 
 def _parse_pdb_properties(cif_block):
     """Parse useful information from _chem_comp category
@@ -361,29 +394,32 @@ def _parse_pdb_properties(cif_block):
     """
     properties = None
     if "_chem_comp." in cif_block.get_mmcif_category_names():
-        mod_date = cif_block.find_value('_chem_comp.pdbx_modified_date')
+        mod_date = cif_block.find_value("_chem_comp.pdbx_modified_date")
         if not mod_date:
             d = date(1970, 1, 1)
         else:
-            mod_date = mod_date.split('-')
+            mod_date = mod_date.split("-")
             d = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
-            
-        rel_status = ReleaseStatus.from_str(cif_block.find_value('_chem_comp.pdbx_release_status'))
+
+        rel_status = ReleaseStatus.from_str(
+            cif_block.find_value("_chem_comp.pdbx_release_status")
+        )
         weight = (
             0.0
-            if not cif_block.find_value('_chem_comp.formula_weight')
-            else float(cif_block.find_value('_chem_comp.formula_weight'))
+            if not cif_block.find_value("_chem_comp.formula_weight")
+            else float(cif_block.find_value("_chem_comp.formula_weight"))
         )
 
         properties = CCDProperties(
-            id=cif_block.find_value('_chem_comp.id'),
-            name=cif_block.find_value('_chem_comp.name').strip('\"'),
-            formula=cif_block.find_value('_chem_comp.formula').strip('\"'),
+            id=cif_block.find_value("_chem_comp.id"),
+            name=cif_block.find_value("_chem_comp.name").strip('"'),
+            formula=cif_block.find_value("_chem_comp.formula").strip('"'),
             modified_date=d,
             pdbx_release_status=rel_status,
             weight=weight,
         )
     return properties
+
 
 def _bond_pdb_order(value_order):
     """
@@ -403,5 +439,6 @@ def _bond_pdb_order(value_order):
         return rdkit.Chem.rdchem.BondType(3)
 
     return None
+
 
 # endregion parse mmcif
