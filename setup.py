@@ -39,7 +39,6 @@ setup(
     extras_require={
         "tests": ["pytest", "pytest-cov", "pre-commit"],
         "docs": [
-            "docutils==0.16",
             "sphinx",
             "sphinx_rtd_theme",
             "recommonmark",
