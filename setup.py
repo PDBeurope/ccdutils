@@ -39,11 +39,12 @@ setup(
     extras_require={
         "tests": ["pytest", "pytest-cov", "pre-commit"],
         "docs": [
-            "sphinx",
+            "sphinx < 4.0.0",
             "sphinx_rtd_theme",
             "recommonmark",
             "sphinx-autodoc-typehints",
             "sphinx-markdown-tables",
+            "Jinja2<3.1.0",
         ],
     },
     entry_points={
