@@ -24,7 +24,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.9
+          python-version: '3.9'
 
       - name: Set up environment and generate docs
         uses: s-weigand/setup-conda@v1
