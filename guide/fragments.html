@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fragments &mdash; pdbeccdutils 0.7.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -55,7 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="intro.html#a-single-component-file">A single component file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="intro.html#chemical-component-dictionary">Chemical component dictionary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="intro.html#bound-molecule-from-pdb-model-files">Bound molecule from PDB model files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#bound-molecule-from-pdb-model-files">Bound-molecule from PDB model files</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="intro.html#writing-ccd-files">Writing CCD files</a></li>
@@ -142,7 +143,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.helpers.html">helpers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils-helpers-collection-ext">pdbeccdutils.helpers.collection_ext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.cif_tools">pdbeccdutils.helpers.cif_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.preprocess_cif_category"><code class="docutils literal notranslate"><span class="pre">preprocess_cif_category()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.convert_svg"><code class="docutils literal notranslate"><span class="pre">convert_svg()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.draw_molecule"><code class="docutils literal notranslate"><span class="pre">draw_molecule()</span></code></a></li>
@@ -154,6 +158,17 @@
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.listit"><code class="docutils literal notranslate"><span class="pre">listit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_float"><code class="docutils literal notranslate"><span class="pre">str_to_float()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_int"><code class="docutils literal notranslate"><span class="pre">str_to_int()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.helper">pdbeccdutils.helpers.helper</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.find_element_in_list"><code class="docutils literal notranslate"><span class="pre">find_element_in_list()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.mol_tools">pdbeccdutils.helpers.mol_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -213,7 +228,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="fragments">
+  <section id="fragments">
 <span id="id1"></span><h1>Fragments<a class="headerlink" href="#fragments" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> comes with the code to search components using common fragments. Presently, the fragment library contains some ~2k fragments which were manually currated at PDBe and collaborating resources (ENAMINE, DSI). Should you wish to check all the fragments which come with code, please check <code class="docutils literal notranslate"><span class="pre">pdbeccdutils/data/fragment_library.tsv</span></code> file.</p>
 <p>Alternativelly fragments can be supplied in an external library (*.tsv) provided the library is formatted accordingly:</p>
@@ -249,7 +264,8 @@
 <td>PDBe</td>
 </tr>
 </tbody>
-</table><div class="section" id="basic-use-case">
+</table>
+<section id="basic-use-case">
 <h2>Basic use case<a class="headerlink" href="#basic-use-case" title="Permalink to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_reader</span>
 <span class="kn">from</span> <span class="nn">pdbeccdutils.core.fragment_library</span> <span class="kn">import</span> <span class="n">FragmentLibrary</span>
@@ -265,14 +281,15 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Matches this substructure: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="pdbe-supplied-fragments">
+</section>
+<section id="pdbe-supplied-fragments">
 <h2>PDBe supplied fragments<a class="headerlink" href="#pdbe-supplied-fragments" title="Permalink to this heading"></a></h2>
 <p>Below you can find actual fragment structures comming with the pdbeccdutil’s <code class="docutils literal notranslate"><span class="pre">FragmentsLibrary</span></code> from the PDBe resource:</p>
 <div align='center'>
     <img src='../_static/pdbe_fragments.svg' />  
-</div></div>
 </div>
+</section>
+</section>
 
 
            </div>

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pipelines &mdash; pdbeccdutils 0.7.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -55,7 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="intro.html#a-single-component-file">A single component file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="intro.html#chemical-component-dictionary">Chemical component dictionary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="intro.html#bound-molecule-from-pdb-model-files">Bound molecule from PDB model files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#bound-molecule-from-pdb-model-files">Bound-molecule from PDB model files</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="intro.html#writing-ccd-files">Writing CCD files</a></li>
@@ -142,7 +143,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.helpers.html">helpers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils-helpers-collection-ext">pdbeccdutils.helpers.collection_ext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.cif_tools">pdbeccdutils.helpers.cif_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.preprocess_cif_category"><code class="docutils literal notranslate"><span class="pre">preprocess_cif_category()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.convert_svg"><code class="docutils literal notranslate"><span class="pre">convert_svg()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.draw_molecule"><code class="docutils literal notranslate"><span class="pre">draw_molecule()</span></code></a></li>
@@ -154,6 +158,17 @@
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.listit"><code class="docutils literal notranslate"><span class="pre">listit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_float"><code class="docutils literal notranslate"><span class="pre">str_to_float()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_int"><code class="docutils literal notranslate"><span class="pre">str_to_int()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.helper">pdbeccdutils.helpers.helper</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.find_element_in_list"><code class="docutils literal notranslate"><span class="pre">find_element_in_list()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.mol_tools">pdbeccdutils.helpers.mol_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -213,17 +228,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="pipelines">
+  <section id="pipelines">
 <span id="id1"></span><h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this heading"></a></h1>
 <p>Presently there are four pipelines in the production based on the <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> code.</p>
-<div class="section" id="pdbechem">
+<section id="pdbechem">
 <h2>PDBeChem<a class="headerlink" href="#pdbechem" title="Permalink to this heading"></a></h2>
 <p>This pipeline generates all the chemistry data consumed on the PDBe pages. It can process standard ligand definitions defined by <a class="reference external" href="http://www.wwpdb.org/data/ccd">CCD</a> or <a class="reference external" href="https://www.wwpdb.org/data/bird">BIRD</a> dictionaries.</p>
-<div class="section" id="ftp-area-content">
+<section id="ftp-area-content">
 <h3>FTP area content<a class="headerlink" href="#ftp-area-content" title="Permalink to this heading"></a></h3>
 <p>Following files are generated in the tree-like structure (A/ATP/…) in our <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/">FTP area</a>.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ATP.cif</span></code> - Standard wwPDB CCD file with the <a class="reference external" href="#data-enrichment-process">data enrichments</a> | <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP.cif</span></code> - Standard wwPDB CCD file with the <span class="xref myst">data enrichments</span> | <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ATP_ideal.pdb</span></code> - ideal cooordinates | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ATP_ideal_alt.pdb</span></code> - ideal cooordinates with atom alternate names | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ATP_model.pdb</span></code> - model cooordinates | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
@@ -242,8 +257,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">components.cif</span></code> - Aggregated files with all the CCD information.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pdbechem.tar.gz</span></code> - The archive in the <code class="docutils literal notranslate"><span class="pre">*.tar.gz</span></code> format:</p></li>
 </ul>
-</div>
-<div class="section" id="data-enrichment-process">
+</section>
+<section id="data-enrichment-process">
 <h3>Data enrichment process<a class="headerlink" href="#data-enrichment-process" title="Permalink to this heading"></a></h3>
 <p>Aside from the standard content of the wwPDB CCD files. PDBeChem adds the following information in the <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code> files. See example for <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/A/ATP/ATP.cif">ATP</a>:</p>
 <ul class="simple">
@@ -254,18 +269,18 @@
 <li><p>RDKit regenerated 3D conformer.</p></li>
 <li><p>Information about scaffold and fragments found in the entry.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="cofactors">
+</section>
+</section>
+<section id="cofactors">
 <h2><a class="reference external" href="https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/cofactors.html">Cofactors</a><a class="headerlink" href="#cofactors" title="Permalink to this heading"></a></h2>
-</div>
-<div class="section" id="reactants">
+</section>
+<section id="reactants">
 <h2><a class="reference external" href="https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/reactants.html">Reactants</a><a class="headerlink" href="#reactants" title="Permalink to this heading"></a></h2>
-</div>
-<div class="section" id="similarities">
+</section>
+<section id="similarities">
 <h2><a class="reference external" href="https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/similarities.html">Similarities</a><a class="headerlink" href="#similarities" title="Permalink to this heading"></a></h2>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Introduction &mdash; pdbeccdutils 0.7.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -55,7 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#a-single-component-file">A single component file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#chemical-component-dictionary">Chemical component dictionary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#bound-molecule-from-pdb-model-files">Bound molecule from PDB model files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bound-molecule-from-pdb-model-files">Bound-molecule from PDB model files</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#writing-ccd-files">Writing CCD files</a></li>
@@ -142,7 +143,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.helpers.html">helpers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils-helpers-collection-ext">pdbeccdutils.helpers.collection_ext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.cif_tools">pdbeccdutils.helpers.cif_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.preprocess_cif_category"><code class="docutils literal notranslate"><span class="pre">preprocess_cif_category()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.drawing">pdbeccdutils.helpers.drawing</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.convert_svg"><code class="docutils literal notranslate"><span class="pre">convert_svg()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.draw_molecule"><code class="docutils literal notranslate"><span class="pre">draw_molecule()</span></code></a></li>
@@ -154,6 +158,17 @@
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.listit"><code class="docutils literal notranslate"><span class="pre">listit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_float"><code class="docutils literal notranslate"><span class="pre">str_to_float()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_int"><code class="docutils literal notranslate"><span class="pre">str_to_int()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.helper">pdbeccdutils.helpers.helper</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.find_element_in_list"><code class="docutils literal notranslate"><span class="pre">find_element_in_list()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.mol_tools">pdbeccdutils.helpers.mol_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -213,10 +228,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="introduction">
+  <section id="introduction">
 <span id="intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> is under development and new functionality is added regularly as well as its functionality is being revised and updated. When properly installed all the code should have documentation. All the <em>public</em> methods do have <a class="reference external" href="http://mypy-lang.org/">static typing</a> introduced in Python 3.5. All the interfaces should be well documented.</p>
-<div class="section" id="installation">
+<section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> can be presently obtained from <a class="reference external" href="https://pypi.org/project/pdbeccdutils/">PYPI</a> using the following command:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install pdbeccdutils</span>
@@ -227,15 +242,15 @@
 </pre></div>
 </div>
 <p>If you want to contribute to the project please fork it first and then do a pull request.</p>
-</div>
-</div>
-<div class="section" id="getting-started">
+</section>
+</section>
+<section id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
 <p>The centerpoint of the <code class="docutils literal notranslate"><span class="pre">pdbecccdutils</span></code> package is a <code class="docutils literal notranslate"><span class="pre">Component</span></code> object, which is a wrapper around the default <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> object (object property <code class="docutils literal notranslate"><span class="pre">mol</span></code>) providing most of the functionality and access to its properties. All the conformers are stored in the <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> with the exception of 2D depiction, as this one does not contain explicit hydrogens. <code class="docutils literal notranslate"><span class="pre">pdbeccdutils.core.modes.ConformerType</span></code> object allows accessing all of them.</p>
 <p>Below you can find a few typical use cases.</p>
-<div class="section" id="reading-ccd-mmcif-files">
+<section id="reading-ccd-mmcif-files">
 <h2>Reading CCD mmCIF files<a class="headerlink" href="#reading-ccd-mmcif-files" title="Permalink to this heading"></a></h2>
-<div class="section" id="a-single-component-file">
+<section id="a-single-component-file">
 <h3>A single component file<a class="headerlink" href="#a-single-component-file" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_reader</span>
 
@@ -244,8 +259,8 @@
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> object is sanitized already.</p>
-</div>
-<div class="section" id="chemical-component-dictionary">
+</section>
+<section id="chemical-component-dictionary">
 <h3>Chemical component dictionary<a class="headerlink" href="#chemical-component-dictionary" title="Permalink to this heading"></a></h3>
 <p>Chemical component dictionary can be read in a single command and <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> representations obtained immediately. Resulting data structure of <code class="docutils literal notranslate"><span class="pre">ccd_reader.read_pdb_components_file</span></code> function is <code class="docutils literal notranslate"><span class="pre">Dict&lt;str,pdbeccdutils.core.Component&gt;</span></code> keyed on component ID as provided by the <code class="docutils literal notranslate"><span class="pre">data_XXX</span></code> element in the respective mmCIF file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_reader</span>
@@ -256,11 +271,11 @@
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> objects are sanitized already!</p>
-</div>
-<div class="section" id="bound-molecule-from-pdb-model-files">
-<h3>Bound molecule from PDB model files<a class="headerlink" href="#bound-molecule-from-pdb-model-files" title="Permalink to this heading"></a></h3>
-<p>The bm_reader module infers all Bound Molecules (covalently-bound chemical components) within a single PDB mmCIF files. The result of
-<code class="docutils literal notranslate"><span class="pre">bm_reader.read_pdb_updated_cif_file</span></code> function is a dictionary of instances of <code class="docutils literal notranslate"><span class="pre">CCDReaderResult</span></code>, with each instance representing a single Bound Molecule. The <code class="docutils literal notranslate"><span class="pre">Component</span></code> Object of CCDReaderResult can then be used to probe the properties of each Bound Molecule.</p>
+</section>
+<section id="bound-molecule-from-pdb-model-files">
+<h3>Bound-molecule from PDB model files<a class="headerlink" href="#bound-molecule-from-pdb-model-files" title="Permalink to this heading"></a></h3>
+<p>The bm_reader module infers all Bound-molecules (covalently-bound chemical components) within a single PDB mmCIF files. The result of
+<code class="docutils literal notranslate"><span class="pre">bm_reader.read_pdb_updated_cif_file</span></code> function is a list of instances of <code class="docutils literal notranslate"><span class="pre">CCDReaderResult</span></code>, with each instance representing a single Bound-molecule. The <code class="docutils literal notranslate"><span class="pre">Component</span></code> Object of CCDReaderResult can then be used to probe the properties of each Bound-molecule.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">bm_reader</span>
 
 <span class="n">bms</span> <span class="o">=</span> <span class="n">bm_reader</span><span class="o">.</span><span class="n">read_pdb_updated_cif_file</span><span class="p">(</span><span class="s1">&#39;/path/to/xxxx_updated.cif&#39;</span><span class="p">,</span><span class="n">sanitize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -268,9 +283,9 @@
 <span class="n">rdkit_mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">mol</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">bm_components</span><span class="p">]</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="writing-ccd-files">
+</section>
+</section>
+<section id="writing-ccd-files">
 <h2>Writing CCD files<a class="headerlink" href="#writing-ccd-files" title="Permalink to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_writer</span>
 <span class="kn">from</span> <span class="nn">pdbeccdutils.core.models</span> <span class="kn">import</span> <span class="n">ConformerType</span>
@@ -285,8 +300,8 @@
 <span class="n">ccd_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;HEM.cif&#39;</span><span class="p">,</span> <span class="n">component</span><span class="p">,</span> <span class="n">conf_type</span><span class="o">=</span><span class="n">ConformerType</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

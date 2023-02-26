@@ -2,7 +2,7 @@
 
 ## pdbeccdutils.computations.parity_method
 
-```eval_rst
+```{eval-rst}
 .. automodule:: pdbeccdutils.computations.parity_method
     :members:
 ```
