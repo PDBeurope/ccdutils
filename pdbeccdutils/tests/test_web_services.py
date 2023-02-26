@@ -24,7 +24,7 @@ class TestWebServices:
         comp = ccd_reader.read_pdb_cif_file(cif_filename(het_code)).component
         dl.process_template(comp)
 
-        assert os.path.isfile(to_download)
+        assert os.path.exists(to_download)
         assert os.path.getsize(to_download) > 0
         assert comp.mol_no_h.HasSubstructMatch(
             Chem.MolFromMolFile(to_download, sanitize=True)
@@ -39,7 +39,7 @@ class TestWebServices:
         dl.update_ccd_file(cif_filename(het_code))
         mol = Chem.MolFromMolFile(to_download)
 
-        assert os.path.isfile(to_download)
+        assert os.path.exists(to_download)
         assert os.path.getsize(to_download) > 0
         assert isinstance(mol, Chem.Mol)
         assert mol.GetNumAtoms() > 0
