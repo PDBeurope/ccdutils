@@ -5,6 +5,7 @@
 ```{eval-rst}
 .. automodule:: pdbeccdutils.core.ccd_reader
     :members:
+    :noindex:
 ```
 
 ## pdbeccdutils.core.component
