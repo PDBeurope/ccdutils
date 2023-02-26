@@ -90,12 +90,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../pdbeccdutils.core.html">core</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#module-pdbeccdutils.core.ccd_reader">pdbeccdutils.core.ccd_reader</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.ccd_reader.CCDReaderResult"><code class="docutils literal notranslate"><span class="pre">CCDReaderResult</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.ccd_reader.read_pdb_cif_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_cif_file()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.ccd_reader.read_pdb_components_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_components_file()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils-core-ccd-reader">pdbeccdutils.core.ccd_reader</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pdbeccdutils.core.html#module-pdbeccdutils.core.component">pdbeccdutils.core.component</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.component.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a></li>
 </ul>
@@ -238,7 +233,7 @@
 <h3>FTP area content<a class="headerlink" href="#ftp-area-content" title="Permalink to this heading"></a></h3>
 <p>Following files are generated in the tree-like structure (A/ATP/…) in our <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/">FTP area</a>.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ATP.cif</span></code> - Standard wwPDB CCD file with the <span class="xref myst">data enrichments</span> | <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ATP.cif</span></code> - Standard wwPDB CCD file with the <a class="reference internal" href="#data-enrichment-process"><span class="std std-ref">data enrichments</span></a> | <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ATP_ideal.pdb</span></code> - ideal cooordinates | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ATP_ideal_alt.pdb</span></code> - ideal cooordinates with atom alternate names | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ATP_model.pdb</span></code> - model cooordinates | <code class="docutils literal notranslate"><span class="pre">PDB</span></code>.</p></li>
@@ -259,7 +254,7 @@
 </ul>
 </section>
 <section id="data-enrichment-process">
-<h3>Data enrichment process<a class="headerlink" href="#data-enrichment-process" title="Permalink to this heading"></a></h3>
+<span id="id2"></span><h3>Data enrichment process<a class="headerlink" href="#data-enrichment-process" title="Permalink to this heading"></a></h3>
 <p>Aside from the standard content of the wwPDB CCD files. PDBeChem adds the following information in the <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code> files. See example for <a class="reference external" href="http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/A/ATP/ATP.cif">ATP</a>:</p>
 <ul class="simple">
 <li><p>ID mapping to some popular resources like ChEMBL, ChEBI, DrugBank, etc. The curated list is available in the pdbeccdutils package.(<code class="docutils literal notranslate"><span class="pre">pdbeccdutils.utils.web_services.agreed_resources</span></code>).</p></li>
