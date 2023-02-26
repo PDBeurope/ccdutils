@@ -47,9 +47,6 @@
 * Add more unit/regression tests to get higher code coverage.
 * Further improvements of the documentation.
 
-## Notes
-
-* Protein-ligand interaction has been extracted [here](https://gitlab.ebi.ac.uk/pdbe/release/interactions). This was because of the fact that at the end of the day it was not using any of the pdbeccdutils functionality and introduced additional dependencies on the package.
 
 ## Documentation
 
