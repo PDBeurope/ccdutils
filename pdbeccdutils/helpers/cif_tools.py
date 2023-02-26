@@ -16,15 +16,13 @@
 # under the License.
 
 """
-Set of methods to format data for pdbecif parser
+Set of methods to format data for gemmi parser
 """
 
 
 def preprocess_cif_category(cif_block, label):
     """
-    The mmcif dictionary values are either str or list(), which is a bit
-    tricky to work with. This method makes list() of all of them in
-    order to parse all of the in the same way.
+    Checks if the category is present in gemmi.cif.Block object
 
     Args:
         cif_block (Block): mmcif Block from gemmi.
