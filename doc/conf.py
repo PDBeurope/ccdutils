@@ -12,7 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# from recommonmark.transform import AutoStructify
+
 import pdbeccdutils
 
 # region Project information
@@ -43,8 +43,7 @@ extensions = [
     "sphinx_markdown_tables",
     "sphinx.ext.coverage",
     "sphinx.ext.intersphinx",
-    # "recommonmark",
-    "myst_parser",
+    "myst-parser",
 ]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
@@ -111,9 +110,6 @@ html_static_path = ["_static"]
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
-# end region
-
-# region Options for HTMLHelp output
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "pdbeccdutilsdoc"
@@ -174,36 +170,5 @@ texinfo_documents = [
         "Miscellaneous",
     ),
 ]
-
-# endregion
-
-# region Extension configuration
-# github_doc_root = "https://github.com/rtfd/recommonmark/tree/master/doc/"
-
-
-# def setup(app):
-#     app.add_config_value(
-#         "recommonmark_config",
-#         {
-#             "url_resolver": lambda url: github_doc_root + url,
-#             "auto_toc_tree_section": "Contents",
-#         },
-#         True,
-#     )
-#     app.add_transform(AutoStructify)
-#     app.connect(
-#         "autodoc-process-docstring",
-#         no_namedtuple_attrib_docstring,
-#     )
-
-
-# def no_namedtuple_attrib_docstring(app, what, name, obj, options, lines):
-#     is_namedtuple_docstring = len(lines) == 1 and lines[0].startswith(
-#         "Alias for field number"
-#     )
-#     if is_namedtuple_docstring:
-#         # We don't return, so we need to purge in-place
-#         del lines[:]
-
 
 # endregion

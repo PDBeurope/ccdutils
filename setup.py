@@ -41,11 +41,9 @@ setup(
         "docs": [
             "sphinx",
             "sphinx_rtd_theme",
-            # "recommonmark",
             "sphinx-autodoc-typehints",
             "sphinx-markdown-tables",
-            "myst-parser"
-            # "Jinja2<3.1.0",
+            "myst-parser",
         ],
     },
     entry_points={
