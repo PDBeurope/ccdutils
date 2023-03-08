@@ -1,4 +1,4 @@
-```eval_rst
+```{eval-rst}
 .. _pipelines:
 ```
 
@@ -14,7 +14,7 @@ This pipeline generates all the chemistry data consumed on the PDBe pages. It ca
 
 Following files are generated in the tree-like structure (A/ATP/...) in our [FTP area](http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/).
 
-* `ATP.cif` - Standard wwPDB CCD file with the [data enrichments](#data-enrichment-process) | `mmCIF`.
+* `ATP.cif` - Standard wwPDB CCD file with the [data enrichments](data-enrichment-process) | `mmCIF`.
 * `ATP_ideal.pdb` - ideal cooordinates | `PDB`.
 * `ATP_ideal_alt.pdb` - ideal cooordinates with atom alternate names | `PDB`.
 * `ATP_model.pdb` - model cooordinates | `PDB`.
@@ -33,7 +33,7 @@ On the top of that these files are generated:
 * `components.cif` - Aggregated files with all the CCD information.
 * `pdbechem.tar.gz` - The archive in the `*.tar.gz` format:
 
-
+(data-enrichment-process)=
 ### Data enrichment process
 
 Aside from the standard content of the wwPDB CCD files. PDBeChem adds the following information in the `mmCIF` files. See example for [ATP](http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/A/ATP/ATP.cif):

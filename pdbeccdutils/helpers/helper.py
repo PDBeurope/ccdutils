@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # software from PDBe: Protein Data Bank in Europe; https://pdbe.org
 #
-# Copyright 2021 EMBL - European Bioinformatics Institute
+# Copyright 2018 EMBL - European Bioinformatics Institute
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,21 +15,23 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""
-Set of methods to format data for gemmi parser
+"""Generic helper functions that may be re-used
 """
 
 
-def preprocess_cif_category(cif_block, label):
+def find_element_in_list(array, element):
     """
-    Checks if the category is present in gemmi.cif.Block object
+    Finds an element in an array. Does not crash if not found
 
     Args:
-        cif_block (Block): mmcif Block from gemmi.
-        label (str): name of the category
+        array (list): list to be searched
+        element (any): element to be found
 
     Returns:
-        str: Possible error encountered
+        int: Index of the element or None if the element is not found.
     """
-    if label not in cif_block.get_mmcif_category_names():
-        return f"Namespace {label} does not exist."
+    try:
+        index = array.index(element)
+        return index
+    except ValueError:
+        return None

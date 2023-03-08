@@ -22,11 +22,9 @@ Raises:
     CCDUtilsError: If deemed format is not supported or an unrecoverable
         error occurres.
 """
-import copy
 import json
 import logging
 import math
-from collections import OrderedDict
 from pathlib import Path
 from typing import List
 from xml.dom import minidom
@@ -34,8 +32,9 @@ from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement
 
 import pdbeccdutils
-import pdbecif.mmcif_io as mmcif
 import rdkit
+import gemmi
+from gemmi import cif
 from pdbeccdutils.helpers import cif_tools
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
@@ -107,7 +106,7 @@ def to_pdb_str(
     """Converts structure to the PDB format.
 
     Args:
-        component (Component): Component to be exported.
+        Component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
         alt_names (bool, optional): Defaults to False. Whether or not
             alternate atom names should be exported.
@@ -317,65 +316,44 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
         remove_hs (bool, optional): Defaults to True.
     """
 
-    def remove_hydrogens(cif):
-        cif_tools.preprocess_cif_category(cif_copy, "_chem_comp_atom")
-        cif_tools.preprocess_cif_category(cif_copy, "_chem_comp_bond")
-
-        h_indices: List[int] = [
-            i
-            for i, x in enumerate(cif_copy["_chem_comp_atom"]["type_symbol"])
-            if x == "H"
-        ]
-        h_names: List[str] = [cif["_chem_comp_atom"]["atom_id"][i] for i in h_indices]
+    def remove_hydrogens(cif_block_copy):
+        cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_atom.")
+        cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_bond.")
 
         # scrap hydrogen atoms
-        for key in cif["_chem_comp_atom"]:
-            cif["_chem_comp_atom"][key] = [
-                k
-                for i, k in enumerate(cif["_chem_comp_atom"][key])
-                if i not in h_indices
-            ]
+        h_names: List[str] = []
+        atom_table = cif_block_copy.find("_chem_comp_atom.", ["type_symbol", "atom_id"])
+        for i in range(len(atom_table) - 1, -1, -1):
+            if atom_table[i][0] == "H":
+                h_names.append(atom_table[i][1])
+                del atom_table[i]
 
         # scrap bonds to hydrogen atoms
-        if "_chem_comp_bond" not in cif:
+        if "_chem_comp_bond." not in cif_block_copy.get_mmcif_category_names():
             return
 
-        hb_indices = []
-        for key in ("atom_id_1", "atom_id_2"):
-            indices = [
-                i for i, k in enumerate(cif["_chem_comp_bond"][key]) if k in h_names
-            ]
-            hb_indices += indices
+        bond_table = cif_block_copy.find("_chem_comp_bond.", ["atom_id_1", "atom_id_2"])
+        for j in range(len(bond_table) - 1, -1, -1):
+            if (bond_table[j][0] in h_names) or (bond_table[j][1] in h_names):
+                del bond_table[j]
 
-        hb_indices = list(set(hb_indices))
+    if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
+        component.ccd_cif_block = _to_pdb_ccd_cif_block(component)
 
-        for key in cif["_chem_comp_bond"]:
-            cif["_chem_comp_bond"][key] = [
-                k
-                for i, k in enumerate(cif["_chem_comp_bond"][key])
-                if i not in hb_indices
-            ]
+    temp_doc = cif.Document()
+    cif_block_copy = temp_doc.add_copied_block(component.ccd_cif_block)
 
-        cif_tools.post_process_cif_category(cif_copy, "_chem_comp_atom")
-        cif_tools.post_process_cif_category(cif_copy, "_chem_comp_bond")
-
-    if not isinstance(component.ccd_cif_dict, dict):
-        component.ccd_cif_dict = _to_pdb_ccd_cif_dict(component)
-
-    cif_copy = copy.deepcopy(component.ccd_cif_dict)
-
-    _add_sw_info_cif(cif_copy)
-    _add_2d_depiction_cif(component, cif_copy)
-    _add_fragments_and_scaffolds_cif(component, cif_copy)
-    _add_rdkit_properties_cif(component, cif_copy)
-    _add_unichem_mapping_cif(component, cif_copy)
-    _add_rdkit_conformer_cif(component, cif_copy, remove_hs)
+    _add_sw_info_cif(cif_block_copy)
+    _add_2d_depiction_cif(component, cif_block_copy)
+    _add_fragments_and_scaffolds_cif(component, cif_block_copy)
+    _add_rdkit_properties_cif(component, cif_block_copy)
+    _add_unichem_mapping_cif(component, cif_block_copy)
+    _add_rdkit_conformer_cif(component, cif_block_copy, remove_hs)
 
     if remove_hs:
-        remove_hydrogens(cif_copy)
+        remove_hydrogens(cif_block_copy)
 
-    cfd = mmcif.CifFileWriter(path)
-    cfd.write({component.id: cif_copy})
+    temp_doc.write_file(path, cif.Style.Pdbx)
 
 
 def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ideal):
@@ -578,7 +556,7 @@ def _prepate_structure(component, remove_hs, conf_type):
     return (mol_to_save, conf_id, conf_type)
 
 
-def _to_pdb_ccd_cif_dict(component):
+def _to_pdb_ccd_cif_block(component):
     """Export component to the PDB CCD CIF file.
 
     Args:
@@ -590,25 +568,24 @@ def _to_pdb_ccd_cif_dict(component):
             to be serialized as a cif file.
     """
 
-    cif_dict = OrderedDict([])
+    doc = cif.Document()
+    cif_block = doc.add_new_block(component.id)
 
-    _write_pdb_ccd_cif_info(cif_dict, component)
-    _write_pdb_ccd_cif_atoms(cif_dict, component)
-    _write_pdb_ccd_cif_bonds(cif_dict, component)
-    _write_pdb_ccd_cif_descriptor(cif_dict, component)
+    _write_pdb_ccd_cif_info(cif_block, component)
+    _write_pdb_ccd_cif_atoms(cif_block, component)
+    _write_pdb_ccd_cif_bonds(cif_block, component)
+    _write_pdb_ccd_cif_descriptor(cif_block, component)
 
-    return cif_dict
+    return cif_block
 
 
-def _write_pdb_ccd_cif_info(cif_dict, component):
+def _write_pdb_ccd_cif_info(cif_block, component):
     """Writes _chem_comp namespace with general information about the
     component
 
     Args:
-        cif_dict (dict of str: str): cif representation of the molecule
-            in a dictionary.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
 
     calc_formula = rdkit.Chem.rdMolDescriptors.CalcMolFormula(component.mol)
@@ -616,31 +593,34 @@ def _write_pdb_ccd_cif_info(cif_dict, component):
     date = component.modified_date
     mod_date = f"{date.year}-{date.month:02d}-{date.day:02d}"
 
-    label = "_chem_comp"
-    cif_dict[label] = OrderedDict([])
-    cif_dict[label]["id"] = component.id
-    cif_dict[label]["type"] = "NON-POLYMER"
-    cif_dict[label]["pdbx_type"] = "HETAIN"
-    cif_dict[label]["formula"] = (
-        component.formula if component.formula else calc_formula
+    label = "_chem_comp."
+    cif_block.set_pairs(
+        label,
+        {
+            "id": component.id,
+            "type": "NON-POLYMER",
+            "pdbx_type": "HETAIN",
+            "formula": cif.quote(component.formula)
+            if component.formula
+            else cif.quote(calc_formula),
+            "formula_weight": f"{calc_weight:.3f}",
+            "three_letter_code": component.id,
+            "pdbx_type": "HETAIN",
+            "pdbx_modified_date": mod_date,
+            "pdbx_release_status": component.pdbx_release_status.name,
+        },
+        raw=True,
     )
-    cif_dict[label]["formula_weight"] = f"{calc_weight:.3f}"
-    cif_dict[label]["three_letter_code"] = component.id
-    cif_dict[label]["pdbx_type"] = "HETAIN"
-    cif_dict[label]["pdbx_modified_date"] = mod_date
-    cif_dict[label]["pdbx_release_status"] = component.pdbx_release_status.name
 
 
-def _write_pdb_ccd_cif_atoms(cif_dict, component):
+def _write_pdb_ccd_cif_atoms(cif_block, component):
     """Writes the _chem_comp_atom namespace with atom details.
     Controlled dictionary:
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_atom.html
 
     Args:
-        cif_dict (dict of str: str): cif representation of the molecule
-            in a dictionary.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
 
     if component.mol.GetNumAtoms() < 1:
@@ -653,121 +633,117 @@ def _write_pdb_ccd_cif_atoms(cif_dict, component):
             ConformerType.Computed if component.compute_3d() else ConformerType.Ideal
         )
 
-    label = "_chem_comp_atom"
-
-    cif_dict[label] = OrderedDict([])
-    cif_dict[label]["comp_id"] = []
-    cif_dict[label]["atom_id"] = []
-    cif_dict[label]["alt_atom_id"] = []
-    cif_dict[label]["type_symbol"] = []
-    cif_dict[label]["charge"] = []
-    cif_dict[label]["pdbx_align"] = []
-    cif_dict[label]["pdbx_aromatic_flag"] = []
-    cif_dict[label]["pdbx_leaving_atom_flag"] = []
-    cif_dict[label]["pdbx_stereo_config"] = []
-    cif_dict[label]["model_Cartn_x"] = []
-    cif_dict[label]["model_Cartn_y"] = []
-    cif_dict[label]["model_Cartn_z"] = []
-    cif_dict[label]["pdbx_model_Cartn_x_ideal"] = []
-    cif_dict[label]["pdbx_model_Cartn_y_ideal"] = []
-    cif_dict[label]["pdbx_model_Cartn_z_ideal"] = []
-    cif_dict[label]["pdbx_component_atom_id"] = []
-    cif_dict[label]["pdbx_component_comp_id"] = []
-    cif_dict[label]["pdbx_ordinal"] = []
+    label = "_chem_comp_atom."
+    atom_fields = [
+        "comp_id",
+        "atom_id",
+        "alt_atom_id",
+        "type_symbol",
+        "charge",
+        "pdbx_align",
+        "pdbx_aromatic_flag",
+        "pdbx_leaving_atom_flag",
+        "pdbx_stereo_config",
+        "model_Cartn_x",
+        "model_Cartn_y",
+        "model_Cartn_z",
+        "pdbx_model_Cartn_x_ideal",
+        "pdbx_model_Cartn_y_ideal",
+        "pdbx_model_Cartn_z_ideal",
+        "pdbx_component_atom_id",
+        "pdbx_component_comp_id",
+        "pdbx_ordinal",
+    ]
+    atom_loop = cif_block.init_loop(label, atom_fields)
 
     for atom in component.mol.GetAtoms():
         at_id = atom.GetIdx()
-
         model_atom = _get_atom_coord(component, at_id, ConformerType.Model)
         ideal_atom = _get_atom_coord(component, at_id, ideal_type)
 
-        cif_dict[label]["comp_id"].append(component.id)
-        cif_dict[label]["atom_id"].append(_get_atom_name(atom))
-        cif_dict[label]["alt_atom_id"].append(_get_alt_atom_name(atom))
-        cif_dict[label]["type_symbol"].append(atom.GetSymbol())
-        cif_dict[label]["charge"].append(str(atom.GetFormalCharge()))
-        cif_dict[label]["pdbx_align"].append("?")
-        cif_dict[label]["pdbx_aromatic_flag"].append(
-            "Y" if atom.GetIsAromatic() else "N"
-        )
-        cif_dict[label]["pdbx_leaving_atom_flag"].append("N")
-        cif_dict[label]["pdbx_stereo_config"].append(_get_ccd_cif_chiral_type(atom))
+        new_row = [
+            component.id,
+            _get_atom_name(atom),
+            _get_alt_atom_name(atom),
+            atom.GetSymbol(),
+            str(atom.GetFormalCharge()),
+            "?",
+            "Y" if atom.GetIsAromatic() else "N",
+            "N",
+            _get_ccd_cif_chiral_type(atom),
+            f"{model_atom.x:.3f}",
+            f"{model_atom.y:.3f}",
+            f"{model_atom.z:.3f}",
+            f"{ideal_atom.x:.3f}",
+            f"{ideal_atom.y:.3f}",
+            f"{ideal_atom.z:.3f}",
+            _get_atom_name(atom),
+            component.id,
+            str(atom.GetIdx() + 1),
+        ]
 
-        cif_dict[label]["model_Cartn_x"].append(f"{model_atom.x:.3f}")
-        cif_dict[label]["model_Cartn_y"].append(f"{model_atom.y:.3f}")
-        cif_dict[label]["model_Cartn_z"].append(f"{model_atom.z:.3f}")
-
-        cif_dict[label]["pdbx_model_Cartn_x_ideal"].append(f"{ideal_atom.x:.3f}")
-        cif_dict[label]["pdbx_model_Cartn_y_ideal"].append(f"{ideal_atom.y:.3f}")
-        cif_dict[label]["pdbx_model_Cartn_z_ideal"].append(f"{ideal_atom.z:.3f}")
-
-        cif_dict[label]["pdbx_component_atom_id"].append(_get_atom_name(atom))
-        cif_dict[label]["pdbx_component_comp_id"].append(component.id)
-        cif_dict[label]["pdbx_ordinal"].append(str(atom.GetIdx() + 1))
+        atom_loop.add_row(cif.quote_list(new_row))
 
 
-def _write_pdb_ccd_cif_bonds(cif_dict, component):
+def _write_pdb_ccd_cif_bonds(cif_block, component):
     """Writes the _chem_comp_bond namespace with atom details.
     Controlled dictionary:
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_bond.html
 
     Args:
-        cif_dict (dict of str: str): cif representation of the molecule
-            in a dictionary.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
     if component.mol.GetNumBonds() < 1:
         return
 
-    label = "_chem_comp_bond"
-    cif_dict[label] = OrderedDict([])
-    cif_dict[label]["comp_id"] = []
-    cif_dict[label]["atom_id_1"] = []
-    cif_dict[label]["atom_id_2"] = []
-    cif_dict[label]["value_order"] = []
-    cif_dict[label]["pdbx_aromatic_flag"] = []
-    cif_dict[label]["pdbx_stereo_config"] = []
-    cif_dict[label]["pdbx_ordinal"] = []
+    label = "_chem_comp_bond."
+    bond_fields = [
+        "comp_id",
+        "atom_id_1",
+        "atom_id_2",
+        "value_order",
+        "pdbx_aromatic_flag",
+        "pdbx_stereo_config",
+        "pdbx_ordinal",
+    ]
+    bond_loop = cif_block.init_loop(label, bond_fields)
 
     for b in component.mol.GetBonds():
         atom_a = b.GetBeginAtom()
         atom_b = b.GetEndAtom()
 
-        cif_dict[label]["comp_id"].append(component.id)
-        cif_dict[label]["atom_id_1"].append(_get_atom_name(atom_a))
-        cif_dict[label]["atom_id_2"].append(_get_atom_name(atom_b))
-        cif_dict[label]["value_order"].append(_get_ccd_cif_bond_type(b))
-        cif_dict[label]["pdbx_aromatic_flag"].append("Y" if b.GetIsAromatic() else "N")
-        cif_dict[label]["pdbx_stereo_config"].append(_get_ccd_cif_bond_stereo(b))
-        cif_dict[label]["pdbx_ordinal"].append(str(b.GetIdx() + 1))
+        new_row = [
+            component.id,
+            _get_atom_name(atom_a),
+            _get_atom_name(atom_b),
+            _get_ccd_cif_bond_type(b),
+            "Y" if b.GetIsAromatic() else "N",
+            _get_ccd_cif_bond_stereo(b),
+            str(b.GetIdx() + 1),
+        ]
+        bond_loop.add_row(cif.quote_list(new_row))
 
 
-def _write_pdb_ccd_cif_descriptor(cif_dict, component):
+def _write_pdb_ccd_cif_descriptor(cif_block, component):
     """Writes the _pdbx_chem_comp_descriptor namespace with details.
 
     Args:
-        cif_dict (dict of str: str): cif representation of the molecule
-            in a dictionary.
-        component (Component): Component to be
-            exported.
+        cif_block (cif.Block): mmcif Block object from gemmi.
+        component (Component): Component to be exported.
     """
 
     if not component.descriptors:
         return
 
-    label = "_pdbx_chem_comp_descriptor"
-    cif_dict[label] = OrderedDict([])
-    cif_dict[label]["comp_id"] = []
-    cif_dict[label]["type"] = []
-    cif_dict[label]["program"] = []
-    cif_dict[label]["descriptor"] = []
+    label = "_pdbx_chem_comp_descriptor."
+
+    descriptor_fields = ["comp_id", "type", "program", "descriptor"]
+    descriptor_loop = cif_block.init_loop(label, descriptor_fields)
 
     for entry in component.descriptors:
-        cif_dict[label]["comp_id"].append(component.id)
-        cif_dict[label]["type"].append(entry.type)
-        cif_dict[label]["program"].append(entry.program)
-        cif_dict[label]["descriptor"].append(entry.value)
+        new_row = [component.id, entry.type, entry.program, entry.value]
+        descriptor_loop.add_row(cif.quote_list(new_row))
 
 
 def _get_atom_name(atom):
@@ -1146,194 +1122,180 @@ def __bond_type_to_sdf(bond):
 
 
 # region cif-export addition
-def _add_sw_info_cif(cif_copy):
+
+
+def _add_sw_info_cif(cif_block_copy):
     """Add information to the cif file about software versions used
     to generate this information
 
     Args:
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
+        cif_block_copy (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     """
-    category = "_software"
+    category = "_software."
+    sw_fields = ["name", "version", "description"]
+    sw_loop = cif_block_copy.init_loop(category, sw_fields)
+    sw_loop.add_row(
+        cif.quote_list(["rdkit", rdkit.__version__, cif.quote("Core functionality.")])
+    )
+    sw_loop.add_row(
+        cif.quote_list(
+            [
+                "pdbeccdutils",
+                pdbeccdutils.__version__,
+                cif.quote("Wrapper to provide 2D templates and molecular fragments."),
+            ]
+        )
+    )
 
-    cif_copy[category] = {}
-    cif_copy[category]["name"] = ["rdkit", "pdbeccdutils"]
-    cif_copy[category]["version"] = [rdkit.__version__, pdbeccdutils.__version__]
-    cif_copy[category]["description"] = [
-        "Core functionality.",
-        "Wrapper to provide 2D templates and molecular fragments.",
-    ]
 
-
-def _add_2d_depiction_cif(component, cif_copy):
+def _add_2d_depiction_cif(component, cif_block_copy):
     """Add 2D coordinates of the component depiction
 
     Args:
         component (Component): pdbeccdutils component.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
+        cif_block_copy (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     """
     if component.mol2D is None:
         return
 
-    __add_rdkit_2d_atoms_cif(component, cif_copy)
-    __add_rdkit_2d_bonds_cif(component, cif_copy)
+    __add_rdkit_2d_atoms_cif(component, cif_block_copy)
+    __add_rdkit_2d_bonds_cif(component, cif_block_copy)
 
 
-def _add_fragments_and_scaffolds_cif(component, cif_copy):
+def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
     """Add fragments and scaffolds information to the CIF export
 
     Args:
         component (Component): Component to be exported.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
+        cif_block_copy (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     """
-    substructure_category = "_pdbe_chem_comp_substructure"
-    mapping_category = "_pdbe_chem_comp_substructure_mapping"
+    substructure_category = "_pdbe_chem_comp_substructure."
+    substructure_fields = [
+        "comp_id",
+        "substructure_name",
+        "id",
+        "substructure_type",
+        "substructure_smiles",
+        "substructure_inchis",
+        "substructure_inchikeys",
+    ]
+    substructure_loop = cif_block_copy.init_loop(
+        substructure_category, substructure_fields
+    )
 
-    ids = [f"S{i+1}" for i in range(0, len(component.scaffolds))]
-    ids += [f"F{i+1}" for i in range(0, len(component.fragments))]
+    for i, scaffold in enumerate(component.scaffolds):
+        mol = rdkit.Chem.MolFromSmiles(scaffold.smiles)
+        new_row = [
+            component.id,
+            scaffold.name,
+            f"S{i+1}",
+            "scaffold",
+            scaffold.smiles,
+            rdkit.Chem.MolToInchi(mol),
+            rdkit.Chem.MolToInchiKey(mol),
+        ]
+        substructure_loop.add_row(cif.quote_list(new_row))
 
-    types = ["scaffold"] * len(component.scaffolds)
-    types += ["fragment"] * len(component.fragments)
+    for j, fragment in enumerate(component.fragments):
+        mol = rdkit.Chem.MolFromSmiles(fragment.smiles)
+        new_row = [
+            component.id,
+            fragment.name,
+            f"F{j+1}",
+            "fragment",
+            fragment.smiles,
+            rdkit.Chem.MolToInchi(mol),
+            rdkit.Chem.MolToInchiKey(mol),
+        ]
+        substructure_loop.add_row(cif.quote_list(new_row))
 
-    names = [i.name for i in component.scaffolds]
-    names += [i.name for i in component.fragments]
+    mapping_category = "_pdbe_chem_comp_substructure_mapping."
+    mapping_fields = ["comp_id", "atom_id", "substructure_id", "substructure_ordinal"]
+    mapping_loop = cif_block_copy.init_loop(mapping_category, mapping_fields)
 
-    smiles = [i.smiles for i in component.scaffolds]
-    smiles += [i.smiles for i in component.fragments]
-
-    mols = [rdkit.Chem.MolFromSmiles(i.smiles) for i in component.scaffolds]
-    mols += [rdkit.Chem.MolFromSmiles(i.smiles) for i in component.fragments]
-
-    inchis = [rdkit.Chem.MolToInchi(i) for i in mols]
-
-    inchikeys = [rdkit.Chem.MolToInchiKey(i) for i in mols]
-
-    # general information about all substructures
-    cif_copy[substructure_category] = {}
-    cif_copy[mapping_category] = {}
-
-    cif_copy[substructure_category]["comp_id"] = [component.id] * len(ids)
-    cif_copy[substructure_category]["substructure_name"] = names
-    cif_copy[substructure_category]["id"] = ids
-    cif_copy[substructure_category]["substructure_type"] = types
-    cif_copy[substructure_category]["substructure_smiles"] = smiles
-    cif_copy[substructure_category]["substructure_inchis"] = inchis
-    cif_copy[substructure_category]["substructure_inchikeys"] = inchikeys
-
-    cif_copy[mapping_category]["comp_id"] = []
-    cif_copy[mapping_category]["atom_id"] = []
-    cif_copy[mapping_category]["substructure_id"] = []
-    cif_copy[mapping_category]["substructure_ordinal"] = []
-
-    _add_scaffold_cif(component, cif_copy[mapping_category])
-    _add_fragments_cif(component, cif_copy[mapping_category])
-
-    cif_tools.post_process_cif_category(cif_copy, mapping_category)
-    cif_tools.post_process_cif_category(cif_copy, substructure_category)
-
-
-def _add_fragments_cif(component, cif_copy):
-    """Add fragment information to the CIF export.
-
-    Args:
-        component (Component): pdbeccdutils component.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the _pdbe_chem_comp_substructure_mapping category.
-    """
     for i, scaffold in enumerate(component.scaffolds):
         for a, mapping in enumerate(scaffold.mappings):
             for atom_name in mapping:
-                cif_copy["comp_id"].append(component.id)
-                cif_copy["atom_id"].append(atom_name)
-                cif_copy["substructure_id"].append(f"S{i+1}")
-                cif_copy["substructure_ordinal"].append(f"{a+1}")
+                new_row = [component.id, atom_name, f"S{i+1}", f"{a+1}"]
+                mapping_loop.add_row(cif.quote_list(new_row))
 
-
-def _add_scaffold_cif(component, cif_copy):
-    """Add scaffold information to the cif export.
-
-    Args:
-        component (Component): pdbeccdutils component.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
-    """
     for i, fragment in enumerate(component.fragments):
         for a, mapping in enumerate(fragment.mappings):
             for atom_name in mapping:
-                cif_copy["comp_id"].append(component.id)
-                cif_copy["atom_id"].append(atom_name)
-                cif_copy["substructure_id"].append(f"F{i+1}")
-                cif_copy["substructure_ordinal"].append(f"{a+1}")
+                new_row = [component.id, atom_name, f"F{i+1}", f"{a+1}"]
+                mapping_loop.add_row(cif.quote_list(new_row))
 
 
-def _add_rdkit_properties_cif(component, cif_copy):
+def _add_rdkit_properties_cif(component, cif_block_copy):
     """Add properties calculated by the rdkit to the dictionary
 
     Args:
         component (Component): pdbeccdutils component.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
+        cif_block (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     """
-    category = "_pdbe_chem_comp_rdkit_properties"
-
-    cif_copy[category] = {}
-    cif_copy[category]["comp_id"] = component.id
+    category = "_pdbe_chem_comp_rdkit_properties."
+    cif_block_copy.set_pairs(category, {"comp_id": component.id})
 
     for k, v in component.physchem_properties.items():
-        cif_copy[category][k] = f"{v:.0f}" if v.is_integer() else f"{v:.3f}"
+        cif_block_copy.set_pairs(
+            category, {k: f"{v:.0f}" if v.is_integer() else f"{v:.3f}"}
+        )
 
-    cif_tools.post_process_cif_category(cif_copy, category)
 
-
-def __add_rdkit_2d_atoms_cif(component, cif_copy):
+def __add_rdkit_2d_atoms_cif(component, cif_block_copy):
     """Add atom coordinates to the mmCIF file.
 
     Args:
         component (Component): pdbeccdutils component.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
+        cif_block_copy (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     """
-    category = "_pdbe_chem_comp_atom_depiction"
-
-    cif_copy[category] = {}
+    category = "_pdbe_chem_comp_atom_depiction."
+    atom_depiction_fields = [
+        "comp_id",
+        "atom_id",
+        "element",
+        "model_Cartn_x",
+        "model_Cartn_y",
+        "pdbx_ordinal",
+    ]
     conformer = component.mol2D.GetConformer()
+    atom_depiction_loop = cif_block_copy.init_loop(category, atom_depiction_fields)
 
-    cif_copy[category]["comp_id"] = [
-        component.id for i in range(0, conformer.GetNumAtoms())
-    ]
-    cif_copy[category]["atom_id"] = [
-        atom.GetProp("name") for atom in component.mol2D.GetAtoms()
-    ]
-    cif_copy[category]["element"] = [
-        atom.GetSymbol() for atom in component.mol2D.GetAtoms()
-    ]
-    cif_copy[category]["model_Cartn_x"] = [
-        f"{conformer.GetAtomPosition(i).x:.3f}"
-        for i in range(0, conformer.GetNumAtoms())
-    ]
-    cif_copy[category]["model_Cartn_y"] = [
-        f"{conformer.GetAtomPosition(i).y:.3f}"
-        for i in range(0, conformer.GetNumAtoms())
-    ]
-    cif_copy[category]["pdbx_ordinal"] = [
-        i + 1 for i in range(0, conformer.GetNumAtoms())
-    ]
-
-    cif_tools.post_process_cif_category(cif_copy, category)
+    for i, atom in enumerate(component.mol2D.GetAtoms()):
+        new_row = [
+            component.id,
+            atom.GetProp("name"),
+            atom.GetSymbol(),
+            f"{conformer.GetAtomPosition(i).x:.3f}",
+            f"{conformer.GetAtomPosition(i).y:.3f}",
+            str(i + 1),
+        ]
+        atom_depiction_loop.add_row(cif.quote_list(new_row))
 
 
-def __add_rdkit_2d_bonds_cif(component, cif_copy):
+def __add_rdkit_2d_bonds_cif(component, cif_block_copy):
     """Add bond information to the mmCIF file.
 
     Args:
         component (Component): pdbeccdutils component.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
+        cif_block (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     """
-    category = "_pdbe_chem_comp_bond_depiction"
-    cif_copy[category] = {}
+    category = "_pdbe_chem_comp_bond_depiction."
+    fields = [
+        "comp_id",
+        "atom_id_1",
+        "atom_id_2",
+        "value_order",
+        "bond_dir",
+        "pdbx_ordinal",
+    ]
+    bonds_depiction_loop = cif_block_copy.init_loop(category, fields)
 
     try:
         copy = rdkit.Chem.Draw.rdMolDraw2D.PrepareMolForDrawing(
@@ -1349,49 +1311,44 @@ def __add_rdkit_2d_bonds_cif(component, cif_copy):
                 component.mol2D, wedgeBonds=False, kekulize=True, addChiralHs=False
             )
 
-    bonds = [b for b in copy.GetBonds() if b.GetEndAtom().GetSymbol() != "H"]
+    bond_depiction_ordinal = 0
+    for i, b in enumerate(copy.GetBonds()):
+        if b.GetEndAtom().GetSymbol() != "H":
+            bond_depiction_ordinal += 1
+            new_row = [
+                component.id,
+                b.GetBeginAtom().GetProp("name"),
+                b.GetEndAtom().GetProp("name"),
+                b.GetBondType().name,
+                b.GetBondDir().name,
+                str(bond_depiction_ordinal),
+            ]
+            bonds_depiction_loop.add_row(cif.quote_list(new_row))
 
-    cif_copy[category]["comp_id"] = [component.id] * len(bonds)
-    cif_copy[category]["atom_id_1"] = [b.GetBeginAtom().GetProp("name") for b in bonds]
-    cif_copy[category]["atom_id_2"] = [b.GetEndAtom().GetProp("name") for b in bonds]
-    cif_copy[category]["value_order"] = [b.GetBondType().name for b in bonds]
-    cif_copy[category]["bond_dir"] = [b.GetBondDir().name for b in bonds]
-    cif_copy[category]["pdbx_ordinal"] = list(range(1, len(bonds) + 1))
 
-    cif_tools.post_process_cif_category(cif_copy, category)
-
-
-def _add_unichem_mapping_cif(component, cif_copy):
+def _add_unichem_mapping_cif(component, cif_block_copy):
     """Add UniChem mapping to CCD CIF.
 
     Args:
         component (Component): pdbeccdutils component.
-        cif_copy (dict of str: dict): Dictionary like structure of
-            the CIF file.
+        cif_block_copy (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     """
-    category = "_pdbe_chem_comp_external_mappings"
-    cif_copy[category] = {}
 
-    cif_copy[category]["comp_id"] = []
-    cif_copy[category]["source"] = []
-    cif_copy[category]["resource"] = []
-    cif_copy[category]["resource_id"] = []
-
-    for i in component.external_mappings:
-        cif_copy[category]["comp_id"].append(component.id)
-        cif_copy[category]["source"].append("UniChem")
-        cif_copy[category]["resource"].append(i[0])
-        cif_copy[category]["resource_id"].append(i[1])
-
-    cif_tools.post_process_cif_category(cif_copy, category)
+    category = "_pdbe_chem_comp_external_mappings."
+    fields = ["comp_id", "source", "resource", "resource_id"]
+    external_mapping_loop = cif_block_copy.init_loop(category, fields)
+    for mapping in component.external_mappings:
+        new_row = [component.id, "UniChem", mapping[0], mapping[1]]
+        external_mapping_loop.add_row(cif.quote_list(new_row))
 
 
-def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
+def _add_rdkit_conformer_cif(component, cif_block_copy, remove_hs):
     """Add 3D coordinates generated by RDKit.
 
     component (Component): pdbeccdutils component.
-    cif_copy (dict of str: dict): Dictionary like structure of
-        the CIF file.
+    cif_block (Block: gemmi.cif.Block): Block representation of the molecule
+        from gemmi.
     remove_hs (boolean): Whether or not hydrogen atoms should be written
     """
 
@@ -1401,15 +1358,18 @@ def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
         logging.warning(f"Computed conformer for {component.id} does not exist.")
         return  # no conformer nothing to write, we quit
 
-    category = "_pdbe_chem_comp_rdkit_conformer"
+    category = "_pdbe_chem_comp_rdkit_conformer."
+    rdkit_conformer_fields = [
+        "comp_id",
+        "atom_id",
+        "Cartn_x_rdkit",
+        "Cartn_y_rdkit",
+        "Cartn_z_rdkit",
+        "rdkit_method",
+        "rdkit_ordinal",
+    ]
+    rdkit_conformer_loop = cif_block_copy.init_loop(category, rdkit_conformer_fields)
     method = conformer.GetProp("coord_generation")
-    cif_copy[category] = {}
-
-    atom_count = (
-        sum(1 for atom in component.mol.GetAtoms() if atom.GetSymbol() != "H")
-        if remove_hs
-        else len(component.mol.GetAtoms())
-    )
 
     # we need to get all the allowed incides
     if remove_hs:
@@ -1421,23 +1381,17 @@ def _add_rdkit_conformer_cif(component, cif_copy, remove_hs):
     else:
         atom_indices = list(range(0, component.mol.GetNumAtoms()))
 
-    cif_copy[category]["comp_id"] = [component.id] * atom_count
-    cif_copy[category]["atom_id"] = [
-        component.mol.GetAtomWithIdx(i).GetProp("name") for i in atom_indices
-    ]
-    cif_copy[category]["Cartn_x_rdkit"] = [
-        f"{conformer.GetAtomPosition(i).x:.3f}" for i in atom_indices
-    ]
-    cif_copy[category]["Cartn_y_rdkit"] = [
-        f"{conformer.GetAtomPosition(i).y:.3f}" for i in atom_indices
-    ]
-    cif_copy[category]["Cartn_z_rdkit"] = [
-        f"{conformer.GetAtomPosition(i).z:.3f}" for i in atom_indices
-    ]
-    cif_copy[category]["rdkit_method"] = [method] * atom_count
-    cif_copy[category]["rdkit_ordinal"] = [i for i in range(1, atom_count + 1)]
-
-    cif_tools.post_process_cif_category(cif_copy, category)
+    for i, atom_index in enumerate(atom_indices):
+        new_row = [
+            component.id,
+            component.mol.GetAtomWithIdx(atom_index).GetProp("name"),
+            f"{conformer.GetAtomPosition(atom_index).x:.3f}",
+            f"{conformer.GetAtomPosition(atom_index).y:.3f}",
+            f"{conformer.GetAtomPosition(atom_index).z:.3f}",
+            method,
+            str(i + 1),
+        ]
+        rdkit_conformer_loop.add_row(cif.quote_list(new_row))
 
 
 # endregion

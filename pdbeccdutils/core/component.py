@@ -22,6 +22,7 @@ from datetime import date
 from typing import Any, Dict, List, Tuple
 
 import rdkit
+import gemmi
 from rdkit.Chem import BRICS, Draw
 from rdkit.Chem.rdMolDescriptors import Properties
 from rdkit.Chem.Scaffolds import MurckoScaffold
@@ -54,15 +55,14 @@ class Component:
     def __init__(
         self,
         mol: rdkit.Chem.rdchem.Mol,
-        ccd_cif_dict: Dict[str, Any] = None,
+        ccd_cif_block: gemmi.cif.Block,
         properties: CCDProperties = None,
         descriptors: List[Descriptor] = None,
     ) -> None:
-
         self.mol = mol
         self._mol_no_h = None
         self.mol2D = None
-        self.ccd_cif_dict = ccd_cif_dict
+        self.ccd_cif_block = ccd_cif_block
         self._fragments: Dict[str, SubstructureMapping] = {}
         self._scaffolds: Dict[str, SubstructureMapping] = {}
         self._descriptors: List[Descriptor] = []
@@ -505,6 +505,7 @@ class Component:
                 self.mol2D, wedgeBonds=False, kekulize=True, addChiralHs=False
             )
         drawer.DrawMolecule(tmp)
+        drawer.TagAtoms(self.mol2D)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText()
         json_repr = drawing.convert_svg(svg, self.id, self.mol2D)

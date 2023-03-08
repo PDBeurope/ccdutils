@@ -35,21 +35,15 @@ setup(
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.6",
-    install_requires=[
-        "Pillow",
-        "scipy",
-        "numpy",
-        "requests",
-        "pdbecif>=1.5",
-    ],
+    install_requires=["Pillow", "scipy", "numpy", "requests", "gemmi", "networkx"],
     extras_require={
         "tests": ["pytest", "pytest-cov", "pre-commit"],
         "docs": [
             "sphinx",
             "sphinx_rtd_theme",
-            "recommonmark",
             "sphinx-autodoc-typehints",
             "sphinx-markdown-tables",
+            "myst-parser",
         ],
     },
     entry_points={
@@ -64,6 +58,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Operating System :: Unix",

@@ -1,4 +1,4 @@
-```eval_rst
+```{eval-rst}
 .. _intro:
 ```
 
@@ -54,6 +54,19 @@ rdkit_mols = [k for k in components.mol]
 ```
 
 The `rdkit.Chem.rdchem.Mol` objects are sanitized already!
+
+### Bound-molecule from PDB model files
+
+The bm_reader module infers all Bound-molecules (covalently-bound chemical components) within a single PDB mmCIF files. The result of
+`bm_reader.read_pdb_updated_cif_file` function is a list of instances of `CCDReaderResult`, with each instance representing a single Bound-molecule. The `Component` Object of CCDReaderResult can then be used to probe the properties of each Bound-molecule.
+
+```python
+from pdbeccdutils.core import bm_reader
+
+bms = bm_reader.read_pdb_updated_cif_file('/path/to/xxxx_updated.cif',sanitize=True)
+bm_components = [bm.component for bm in bms]
+rdkit_mols = [k.mol for k in bm_components]
+```
 
 ## Writing CCD files
 

@@ -6,10 +6,11 @@
   for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd) and [wwPDB The Biologically Interesting Molecule Reference Dictionary](https://www.wwpdb.org/data/bird)
 
 * The tools use:
-  * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2021.03.x`
-  * [PDBeCIF](https://github.com/PDBeurope/pdbecif) cif parser.
+  * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2022.09.4`
+  * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing cif files.
   * [scipy](https://www.scipy.org/) for depiction quality check.
   * [numpy](https://www.numpy.org/) for molecular scaling.
+  * [networkx](https://networkx.org/) for bound-molecules.
 
 * Please note that the project is under active development.
 
@@ -20,7 +21,7 @@
   For linux/mac OS this is most easily done using the anaconda python with commands similar to:
 
   ```console
-  conda create -c conda-forge -n rdkit-env rdkit python=3.7
+  conda create -n rdkit-env rdkit python=3.9
   conda activate rdkit-env
   ```
 
@@ -32,7 +33,7 @@
 
 ## Features
 
-* mmCIF CCD read/write.
+* gemmi CCD read/write.
 * Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
 * Generation of 3D conformations.
 * Fragment library search (PDBe hand currated library, ENAMINE, DSI).
@@ -46,9 +47,6 @@
 * Add more unit/regression tests to get higher code coverage.
 * Further improvements of the documentation.
 
-## Notes
-
-* Protein-ligand interaction has been extracted [here](https://gitlab.ebi.ac.uk/pdbe/release/interactions). This was because of the fact that at the end of the day it was not using any of the pdbeccdutils functionality and introduced additional dependencies on the package.
 
 ## Documentation
 
@@ -56,14 +54,14 @@ The documentation depends on the following packages:
 
 * `sphinx`
 * `sphinx_rtd_theme`
-* `recommonmark`
+* `myst-parser`
 * `sphinx-autodoc-typehints`
 
 Note that `sphinx` needs to be a part of the virtual environment, if you want to generate documentation by yourself.
 Otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
 
 * Generate *.rst* files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
-* Alternatively, use the `recommonmark` package along with the proper configuration to get the Markdown working.
+* Alternatively, use the `myst-parser` package to get the Markdown working.
 
  Use the following to generate initial markup files to be used by sphinx.  This needs to be used when adding another sub-packages.
 

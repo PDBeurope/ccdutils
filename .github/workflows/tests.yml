@@ -25,7 +25,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.7
+          python-version: 3.9
 
       - name: Set up environment and run pytest
         uses: s-weigand/setup-conda@v1
@@ -33,7 +33,7 @@ jobs:
           activate-conda: true
           conda-channels: conda-forge
       - run: |
-          conda install rdkit=2021.03.1
+          conda install rdkit=2022.09.4
           pip install -e ".[tests]"
           pip install pre-commit
           pre-commit install && pre-commit run --all

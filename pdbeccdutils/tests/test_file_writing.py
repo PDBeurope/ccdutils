@@ -6,15 +6,14 @@ import pytest
 from pdbeccdutils.core import ccd_writer
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.models import ConformerType
-from pdbecif.mmcif_io import CifFileReader
+from gemmi import cif
 from rdkit import Chem
 
-reader = CifFileReader()
 must_have_categories = [
-    "_chem_comp",
-    "_chem_comp_atom",
-    "_chem_comp_bond",
-    "_pdbx_chem_comp_descriptor",
+    "_chem_comp.",
+    "_chem_comp_atom.",
+    "_chem_comp_bond.",
+    "_pdbx_chem_comp_descriptor.",
 ]
 
 
@@ -177,7 +176,7 @@ class TestFileWrites:
         to_check = must_have_categories.copy()
 
         ccd_writer.write_molecule(str(path), component, remove_hs=rem_hs)
-        json_obj = reader.read(path)
+        cif_block = cif.read(str(path)).sole_block()
 
         if component.id == "NA":  # Na is an atom!
             to_check.pop(2)  # remove "_chem_comp_bond"
@@ -185,10 +184,10 @@ class TestFileWrites:
         if component.id == "D3O" and rem_hs:  # D3O has single heavy atom
             to_check.pop(2)
 
-        assert json_obj
-        assert component.id in json_obj
+        assert cif_block
+        assert component.id == cif_block.name
         for c in to_check:
-            assert c in json_obj[component.id]
+            assert c in cif_block.get_mmcif_category_names()
 
     @staticmethod
     @pytest.mark.parametrize("rem_hs", [True, False])
@@ -198,7 +197,7 @@ class TestFileWrites:
 
         component.ccd_cif_dict = None
         ccd_writer.write_molecule(str(path), component, remove_hs=rem_hs)
-        json_obj = reader.read(path)
+        cif_block = cif.read(str(path)).sole_block()
 
         if component.id == "NA":  # Na is an atom!
             to_check.pop(2)  # remove "_chem_comp_bond"
@@ -206,8 +205,7 @@ class TestFileWrites:
         if component.id == "D3O" and rem_hs:  # D3O has single heavy atom
             to_check.pop(2)
 
-        assert json_obj
-        assert component.id in json_obj
-
+        assert cif_block
+        assert component.id == cif_block.name
         for c in to_check:
-            assert c in json_obj[component.id]
+            assert c in cif_block.get_mmcif_category_names()

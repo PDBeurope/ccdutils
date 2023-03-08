@@ -23,7 +23,6 @@ from dataclasses import dataclass
 from datetime import date
 from enum import IntEnum
 from typing import Any, List, NamedTuple, Dict
-
 import rdkit
 
 
@@ -217,3 +216,91 @@ class SubstructureMapping:
     smiles: str
     source: str
     mappings: List[List[Any]]
+
+
+class BoundMolecule:
+    def __init__(self, graph):
+        self.graph = graph
+
+    def to_dict(self):
+        """Return dictionary style representation of the bound molecule.
+
+        Returns:
+            dict of `str`: dict representation of the object
+        """
+
+        nodes = sorted(self.graph, key=lambda l: (int(l.res_id), l.chain))
+
+        results_bag = {"residues": [], "connections": []}
+        results_bag["residues"] = [x.to_dict() for x in nodes]
+        results_bag["connections"] = [
+            [e.id, f.id, a] for e, f, a in self.graph.edges(data=True)
+        ]
+
+        return results_bag
+
+    def to_list(self):
+        results_bag = [
+            (e.to_dict(), f.to_dict(), a) for e, f, a in self.graph.edges(data=True)
+        ]
+        return results_bag
+
+    def to_arpeggio(self):
+        """Return str representation of the bound molecule.
+
+        Returns:
+            list of `str`: A list of residues found in the bound molecule.
+        """
+        return [x.to_arpeggio() for x in self.graph.nodes]
+
+    def __str__(self):
+        return "-".join(self.to_arpeggio())
+
+
+class Residue:
+    """Represents a single residue."""
+
+    def __init__(self, name, chain, res_id, ins_code, ent_id):
+        self.name = name
+        self.chain = chain
+        self.res_id = res_id
+        self.ins_code = "" if not ins_code else ins_code
+        self.ent_id = ent_id
+        self.id = f"{chain}{res_id}{self.ins_code}"
+
+    def __eq__(self, other):
+        if self.id != other.id:
+            return False
+
+        return True
+
+    def to_dict(self):
+        """Returns a dictionary representation of a given residue.
+
+        Returns:
+            (:obj:`dict` of :obj:`str`): Dictionary representation along
+            with the mmCIF keys.
+        """
+        return {
+            "id": self.id,
+            "label_comp_id": self.name,
+            "auth_asym_id": self.chain,
+            "auth_seq_id": self.res_id,
+            "pdbx_PDB_ins_code": " " if not self.ins_code else self.ins_code,
+            "entity_id": self.ent_id,
+        }
+
+    def __hash__(self):
+        return hash(f"{self.chain}{self.res_id}{self.name}{self.ins_code}")
+
+    def __str__(self):
+        return f"/{self.name}/{self.res_id}{self.ins_code}/{self.chain}/"
+
+    def to_arpeggio(self):
+        """Gets Arpeggio style representation of a residue e.g. `/A/129/`
+        or /A/129A/ in case there is an insertion code.
+
+        Returns:
+            str: Residue description in Arpeggio style.
+        """
+        return f"/{self.chain}/{self.res_id}{self.ins_code}/"
