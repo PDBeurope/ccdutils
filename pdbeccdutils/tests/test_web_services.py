@@ -10,17 +10,16 @@ from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
 
-
 ids_to_test = ["MAN", "NAG", "SO4", "GOL", "SAC", "VIA", "GLU"]
 
 
 class TestWebServices:
     @staticmethod
     @pytest.mark.parametrize("het_code", ids_to_test)
-    def test_components_layouts_downloaded(tmpdir, het_code):
-        dl = PubChemDownloader(tmpdir)
+    def test_components_layouts_downloaded(tmp_path, het_code):
+        dl = PubChemDownloader(str(tmp_path))
 
-        to_download = os.path.join(tmpdir, f"{het_code}.sdf")
+        to_download = os.path.join(tmp_path, f"{het_code}.sdf")
         comp = ccd_reader.read_pdb_cif_file(cif_filename(het_code)).component
         dl.process_template(comp)
 
@@ -32,10 +31,10 @@ class TestWebServices:
 
     @staticmethod
     @pytest.mark.parametrize("het_code", ids_to_test)
-    def test_components_layouts_updated(tmpdir, het_code):
-        dl = PubChemDownloader(tmpdir)
+    def test_components_layouts_updated(tmp_path, het_code):
+        dl = PubChemDownloader(str(tmp_path))
 
-        to_download = os.path.join(tmpdir, f"{het_code}.sdf")
+        to_download = os.path.join(tmp_path, f"{het_code}.sdf")
         dl.update_ccd_file(cif_filename(het_code))
         mol = Chem.MolFromMolFile(to_download)
 
