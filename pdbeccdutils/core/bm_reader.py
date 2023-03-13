@@ -365,8 +365,8 @@ def _parse_pdb_bonds_site(mol, bonds, atoms, errors, index_atoms, bm):
             chain_res_2 = f"{second_res['auth_asym_id']}/{second_res['auth_seq_id']}"
             lig_1 = first_res["label_comp_id"]
             lig_2 = second_res["label_comp_id"]
-            tuple_to_find_1 = (chain_res_1, lig_1, connection[2]["a"])
-            tuple_to_find_2 = (chain_res_2, lig_2, connection[2]["b"])
+            tuple_to_find_1 = (chain_res_1, lig_1, connection[2]["atom_id_1"])
+            tuple_to_find_2 = (chain_res_2, lig_2, connection[2]["atom_id_2"])
             atom_1 = helper.find_element_in_list(index_atoms, tuple_to_find_1)
             atom_2 = helper.find_element_in_list(index_atoms, tuple_to_find_2)
 
@@ -407,7 +407,7 @@ def __add_connections(struct_conn, bms):
 
         # we want covalent connections among ligands only.
         if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
-            bms.add_edge(ptnr1, ptnr2, a=atom1, b=atom2)
+            bms.add_edge(ptnr1, ptnr2, atom_id_1=atom1, atom_id_2=atom2)
 
 
 def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
@@ -446,7 +446,7 @@ def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
                     prtnr2 = node
                     atom2 = node.name
             if prtnr1 and prtnr2:
-                bms.add_edge(prtnr1, prtnr2, a=atom1, b=atom2)
+                bms.add_edge(prtnr1, prtnr2, atom_id_1=atom1, atom_id_2=atom2)
 
 
 def parse_bound_molecules(path, to_discard):
@@ -543,7 +543,7 @@ def parse_ligands_from_branch_scheme(branch_scheme, to_discard, g):
             branch_scheme["pdb_mon_id"][i],  # aka label_comp_id
             branch_scheme["pdb_asym_id"][i],  # aka auth_asym_id
             branch_scheme["num"][i],  # aka auth_seq_id
-            ".",  # aka pdbx_PDB_ins_code
+            None,  # aka pdbx_PDB_ins_code
             branch_scheme["entity_id"][i],
         )
 
