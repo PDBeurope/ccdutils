@@ -395,7 +395,7 @@ def _parse_pdb_properties(cif_block):
     properties = None
     if "_chem_comp." in cif_block.get_mmcif_category_names():
         mod_date = cif_block.find_value("_chem_comp.pdbx_modified_date")
-        if not mod_date:
+        if mod_date == "?":
             d = date(1970, 1, 1)
         else:
             mod_date = mod_date.split("-")
@@ -406,7 +406,7 @@ def _parse_pdb_properties(cif_block):
         )
         weight = (
             0.0
-            if not cif_block.find_value("_chem_comp.formula_weight")
+            if cif_block.find_value("_chem_comp.formula_weight") == "?"
             else float(cif_block.find_value("_chem_comp.formula_weight"))
         )
 
