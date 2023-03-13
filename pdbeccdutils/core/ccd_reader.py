@@ -39,7 +39,7 @@ from pdbeccdutils.core.models import (
     Descriptor,
     ReleaseStatus,
 )
-from pdbeccdutils.helpers import cif_tools, conversions, mol_tools
+from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from gemmi import cif
 
 # categories that need to be 'fixed'
@@ -321,7 +321,7 @@ def _parse_pdb_bonds(mol, cif_block, errors):
             atom_1_id = atoms_ids.index(atom_1)
             atom_2 = row["_chem_comp_bond.atom_id_2"]
             atom_2_id = atoms_ids.index(atom_2)
-            bond_order = _bond_pdb_order(row["_chem_comp_bond.value_order"])
+            bond_order = helper.bond_pdb_order(row["_chem_comp_bond.value_order"])
 
             mol.AddBond(atom_1_id, atom_2_id, bond_order)
         except ValueError:
@@ -416,26 +416,6 @@ def _parse_pdb_properties(cif_block):
             weight=weight,
         )
     return properties
-
-
-def _bond_pdb_order(value_order):
-    """
-    Transpils mmcif bond order into rdkit language
-
-    Args:
-        value_order (str): bond type as a str
-
-    Returns:
-        rdkit.Chem.rdchem.BondType: -- bond type
-    """
-    if value_order == "SING":
-        return rdkit.Chem.rdchem.BondType(1)
-    if value_order == "DOUB":
-        return rdkit.Chem.rdchem.BondType(2)
-    if value_order == "TRIP":
-        return rdkit.Chem.rdchem.BondType(3)
-
-    return None
 
 
 # endregion parse mmcif
