@@ -234,7 +234,13 @@ class BoundMolecule:
         results_bag = {"residues": [], "connections": []}
         results_bag["residues"] = [x.to_dict() for x in nodes]
         results_bag["connections"] = [
-            [e.id, f.id, a] for e, f, a in self.graph.edges(data=True)
+            {
+                "residue_id_1": residue_1.id,
+                "residue_id_2": residue_2.id,
+                "atom_id_1": atoms["atom_id_1"],
+                "atom_id_2": atoms["atom_id_2"],
+            }
+            for residue_1, residue_2, atoms in self.graph.edges(data=True)
         ]
 
         return results_bag
