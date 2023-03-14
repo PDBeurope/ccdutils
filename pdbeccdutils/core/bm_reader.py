@@ -14,7 +14,7 @@ from pdbeccdutils.core.models import (
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from gemmi import cif
-from networkx import DiGraph, connected_components
+from networkx import MultiDiGraph, connected_components
 
 
 def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
@@ -104,7 +104,7 @@ def _parse_pdb_mmcif(cif_block, bm):
     _parse_pdb_atoms(mol, bm_atoms)
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
-    _add_struct_conn_bonds(mol, bm, errors)
+    _add_connections(mol, bm, errors)
     _remove_disconnected_hydrogens(mol)
     return (mol, warnings, errors)
 
@@ -205,13 +205,13 @@ def _parse_pdb_bonds(mol, bm, cif_block, errors):
                     print(residue.name, atom_1, atom_2)
             except ValueError:
                 errors.append(
-                    f"Error perceiving {atom_1} - {atom_2} bond in _chem_comp_bond"
+                    f"Error perceiving {atom_1} - {atom_2} bond from _chem_comp_bond"
                 )
             except RuntimeError:
                 errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
 
-def _add_struct_conn_bonds(mol, bm, errors):
+def _add_connections(mol, bm, errors):
     for residue_1, residue_2, atoms in bm.edges(data=True):
         try:
             atom_1 = atoms["atom_id_1"]
@@ -223,7 +223,7 @@ def _add_struct_conn_bonds(mol, bm, errors):
                 mol.AddBond(mol_atom_1_idx, mol_atom_2_idx, bond_order)
         except ValueError:
             errors.append(
-                f"Error perceiving {atom_1} - {atom_2} bond in _chem_comp_bond"
+                f"Error perceiving {atom_1} - {atom_2} bond from Boundmolecule connections"
             )
         except RuntimeError:
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
@@ -353,7 +353,7 @@ def parse_bound_molecules(path, to_discard):
         to_discard (list of str): List of residue names to be discarded.
 
     Returns:
-        DiGraph: All the bound molecules in a given entry.
+        MultiDiGraph: All the bound molecules in a given entry.
     """
     doc = cif.read(path)
     cif_block = doc.sole_block()
@@ -362,7 +362,7 @@ def parse_bound_molecules(path, to_discard):
         "_pdbx_nonpoly_scheme." not in cif_block.get_mmcif_category_names()
         and "_pdbx_branch_scheme." not in cif_block.get_mmcif_category_names()
     ):
-        return DiGraph()
+        return MultiDiGraph()
 
     if "_pdbx_nonpoly_scheme." in cif_block.get_mmcif_category_names():
         bms = parse_ligands_from_nonpoly_scheme(
@@ -370,7 +370,7 @@ def parse_bound_molecules(path, to_discard):
         )
 
     else:
-        bms = DiGraph()
+        bms = MultiDiGraph()
 
     if "_pdbx_branch_scheme." in cif_block.get_mmcif_category_names():
         if bms:
@@ -381,7 +381,7 @@ def parse_bound_molecules(path, to_discard):
             bms = parse_ligands_from_branch_scheme(
                 cif_block.get_mmcif_category("_pdbx_branch_scheme."),
                 to_discard,
-                DiGraph(),
+                MultiDiGraph(),
             )
 
     if "_struct_conn." in cif_block.get_mmcif_category_names():
@@ -430,7 +430,7 @@ def parse_ligands_from_branch_scheme(branch_scheme, to_discard, g):
         to_discard (list of str): List of residue names to be discarded.
 
     Returns:
-        DiGraph: Ligands and their connectivity in a PDB entry
+        MultiDiGraph: Ligands and their connectivity in a PDB entry
     """
 
     for i in range(len(branch_scheme["asym_id"])):
@@ -457,9 +457,9 @@ def parse_ligands_from_nonpoly_scheme(nonpoly_scheme, to_discard):
         to_discard (list of str): List of residue names to be discarded.
 
     Returns:
-        DiGraph: Ligands and their connectivity in a PDB entry
+        MultiDiGraph: Ligands and their connectivity in a PDB entry
     """
-    g = DiGraph()
+    g = MultiDiGraph()
 
     for i in range(len(nonpoly_scheme["asym_id"])):
         n = Residue(
