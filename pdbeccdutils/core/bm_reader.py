@@ -333,14 +333,14 @@ def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
                     and node.res_id == entity_branch_link["entity_branch_list_num_1"][i]
                 ):
                     prtnr1 = node
-                    atom1 = node.name
+                    atom1 = entity_branch_link["atom_id_1"][i]
                 elif (
                     node.name == entity_branch_link["comp_id_2"][i]
                     and node.chain == chain
                     and node.res_id == entity_branch_link["entity_branch_list_num_2"][i]
                 ):
                     prtnr2 = node
-                    atom2 = node.name
+                    atom2 = entity_branch_link["atom_id_2"][i]
             if prtnr1 and prtnr2:
                 bms.add_edge(prtnr1, prtnr2, atom_id_1=atom1, atom_id_2=atom2)
 
