@@ -1,6 +1,7 @@
 import os
 import rdkit
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
+from pdbeccdutils.core import models
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.component import Component
 from collections import namedtuple
@@ -37,15 +38,16 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
 
     biomolecule_result = []
     bms = infer_bound_molecules(path_to_cif, ["HOH"])
-    for bm in bms:
-        reader_result = infer_multiple_chem_comp(path_to_cif, bm.graph, sanitize)
+    for i, bm in enumerate(bms, start=1):
+        bm_id = f"bm{i}"
+        reader_result = infer_multiple_chem_comp(path_to_cif, bm.graph, bm_id, sanitize)
         if reader_result:
             biomolecule_result.append(reader_result)
 
     return biomolecule_result
 
 
-def infer_multiple_chem_comp(path_to_cif, bm, sanitize=True):
+def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     if bm.number_of_nodes() <= 1:
         return
 
@@ -60,12 +62,13 @@ def infer_multiple_chem_comp(path_to_cif, bm, sanitize=True):
         Descriptor(type="InChI", program="rdkit", value=comp.inchi_from_rdkit),
         Descriptor(type="InChIKey", program="rdkit", value=comp.inchikey_from_rdkit),
     ]
+    bm_name = "_".join([residue.name for residue in bm.nodes()])
     properties = CCDProperties(
-        id="",
-        name="",
+        id=bm_id,
+        name=bm_name,
         formula=CalcMolFormula(comp.mol),
         modified_date="",
-        pdbx_release_status="",
+        pdbx_release_status=models.ReleaseStatus.NOT_SET,
         weight="",
     )
     comp = Component(mol.GetMol(), cif_block, properties, descriptors)
@@ -201,8 +204,6 @@ def _parse_pdb_bonds(mol, bm, cif_block, errors):
                 bond_order = helper.bond_pdb_order(resiude_bonds.value_order[i])
                 if (mol_atom_1_idx is not None) and (mol_atom_2_idx is not None):
                     mol.AddBond(mol_atom_1_idx, mol_atom_2_idx, bond_order)
-                else:
-                    print(residue.name, atom_1, atom_2)
             except ValueError:
                 errors.append(
                     f"Error perceiving {atom_1} - {atom_2} bond from _chem_comp_bond"
