@@ -7,37 +7,25 @@ on:
     branches:
       - master
 
-  pull_request:
-    branches:
-      - master
-
 jobs:
   documentation:
     name: Generate documentation
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
-
       - name: Set up python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-
-      - name: Set up environment and generate docs
-        uses: s-weigand/setup-conda@v1
-        with:
-          activate-conda: true
-          conda-channels: conda-forge
+          python-version: "3.11"
       - run: |
-          conda install rdkit=2022.09.4
+          pip install rdkit
           pip install -e ".[docs]"
       - run: |
           cd doc
           make html
-
       - name: Deploy pages
         uses: peaceiris/actions-gh-pages@v3
         with:
