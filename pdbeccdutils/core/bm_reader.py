@@ -1,5 +1,8 @@
+import io
 import os
 import rdkit
+import re
+
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from pdbeccdutils.core import models
 from pdbeccdutils.core import ccd_reader
@@ -16,6 +19,11 @@ from pdbeccdutils.core.models import (
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from gemmi import cif
 from networkx import MultiDiGraph, connected_components
+from contextlib import redirect_stderr
+
+BMReaderResult = namedtuple(
+    "BMReaderResult", ccd_reader.CCDReaderResult._fields + ("bound_molecule",)
+)
 
 
 def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
@@ -38,21 +46,35 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
 
     biomolecule_result = []
     bms = infer_bound_molecules(path_to_cif, ["HOH"])
+    rdkit.rdBase.LogToPythonStderr()
     for i, bm in enumerate(bms, start=1):
-        bm_id = f"bm{i}"
-        reader_result = infer_multiple_chem_comp(path_to_cif, bm.graph, bm_id, sanitize)
-        if reader_result:
-            biomolecule_result.append(reader_result)
+        rdkit_stream = io.StringIO()
+        with redirect_stderr(rdkit_stream):
+            bm_id = f"bm{i}"
+            reader_result = infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize)
+            if reader_result:
+                rdkit_log = rdkit_stream.getvalue()
+                if "WARNING" in rdkit_log:
+                    start_index = re.search(r"\bWARNING\b:", rdkit_log).end()
+                    rdkit_log = rdkit_log[start_index:].strip()
+                    reader_result.warnings.append(rdkit_log)
+                elif "ERROR" in rdkit_log:
+                    start_index = re.search(r"\bERROR\b:", rdkit_log).end()
+                    rdkit_log = rdkit_log[start_index:].strip()
+                    reader_result.errors.append(rdkit_log)
+
+                biomolecule_result.append(reader_result)
 
     return biomolecule_result
 
 
 def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
-    if bm.number_of_nodes() <= 1:
+
+    if bm.graph.number_of_nodes() <= 1:
         return
 
     cif_block = cif.read(path_to_cif).sole_block()
-    (mol, warnings, errors) = _parse_pdb_mmcif(cif_block, bm)
+    (mol, warnings, errors) = _parse_pdb_mmcif(cif_block, bm.graph)
     sanitized = False
     if sanitize:
         sanitized = mol_tools.sanitize(mol)
@@ -62,7 +84,7 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
         Descriptor(type="InChI", program="rdkit", value=comp.inchi_from_rdkit),
         Descriptor(type="InChIKey", program="rdkit", value=comp.inchikey_from_rdkit),
     ]
-    bm_name = "_".join([residue.name for residue in bm.nodes()])
+    bm_name = "_".join([residue.name for residue in bm.graph.nodes()])
     properties = CCDProperties(
         id=bm_id,
         name=bm_name,
@@ -72,8 +94,12 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
         weight="",
     )
     comp = Component(mol.GetMol(), cif_block, properties, descriptors)
-    reader_result = ccd_reader.CCDReaderResult(
-        warnings=warnings, errors=errors, component=comp, sanitized=sanitized
+    reader_result = BMReaderResult(
+        warnings=warnings,
+        errors=errors,
+        component=comp,
+        bound_molecule=bm,
+        sanitized=sanitized,
     )
 
     return reader_result
@@ -303,7 +329,14 @@ def __add_connections(struct_conn, bms):
 
         # we want covalent connections among ligands only.
         if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
-            bms.add_edge(ptnr1, ptnr2, atom_id_1=atom1, atom_id_2=atom2)
+            add_edge = True
+            edge_data = bms.get_edge_data(ptnr1, ptnr2)
+            if edge_data:
+                for _, value in edge_data.items():
+                    if value["atom_id_1"] == atom1 and value["atom_id_2"] == atom2:
+                        add_edge = False
+            if add_edge:
+                bms.add_edge(ptnr1, ptnr2, atom_id_1=atom1, atom_id_2=atom2)
 
 
 def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
@@ -341,7 +374,15 @@ def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
                 ):
                     prtnr2 = node
                     atom2 = entity_branch_link["atom_id_2"][i]
-            if prtnr1 and prtnr2:
+            if prtnr1 and prtnr2 and atom1 and atom2:
+                add_edge = True
+                edge_data = bms.get_edge_data(prtnr1, prtnr2)
+                if edge_data:
+                    for _, value in edge_data.items():
+                        if value["atom_id_1"] == atom1 and value["atom_id_2"] == atom2:
+                            add_edge = False
+                if add_edge:
+                    bms.add_edge(prtnr1, prtnr2, atom_id_1=atom1, atom_id_2=atom2)
                 bms.add_edge(prtnr1, prtnr2, atom_id_1=atom1, atom_id_2=atom2)
 
 

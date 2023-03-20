@@ -21,24 +21,6 @@
 import rdkit
 
 
-def find_element_in_list(array, element):
-    """
-    Finds an element in an array. Does not crash if not found
-
-    Args:
-        array (list): list to be searched
-        element (any): element to be found
-
-    Returns:
-        int: Index of the element or None if the element is not found.
-    """
-    try:
-        index = array.index(element)
-        return index
-    except ValueError:
-        return None
-
-
 def bond_pdb_order(value_order):
     """
     Transpils mmcif bond order into rdkit language
@@ -49,11 +31,11 @@ def bond_pdb_order(value_order):
     Returns:
         rdkit.Chem.rdchem.BondType: -- bond type
     """
-    if value_order == "SING":
+    if value_order.casefold() == "SING".casefold():
         return rdkit.Chem.rdchem.BondType(1)
-    if value_order == "DOUB":
+    if value_order.casefold() == "DOUB".casefold():
         return rdkit.Chem.rdchem.BondType(2)
-    if value_order == "TRIP":
+    if value_order.casefold() == "TRIP".casefold():
         return rdkit.Chem.rdchem.BondType(3)
 
     return None
