@@ -2,15 +2,7 @@
 
 name: ccdutils tests
 
-on:
-  push:
-    branches:
-      - master
-      - dev
-  pull_request:
-    branches:
-      - master
-      - dev
+on: push
 
 jobs:
   pytest:
@@ -18,22 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
 
       - name: Set up python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
-      - name: Set up environment and run pytest
-        uses: s-weigand/setup-conda@v1
-        with:
-          activate-conda: true
-          conda-channels: conda-forge
       - run: |
-          conda install rdkit=2022.09.4
+          pip install rdkit
           pip install -e ".[tests]"
           pip install pre-commit
           pre-commit install && pre-commit run --all
