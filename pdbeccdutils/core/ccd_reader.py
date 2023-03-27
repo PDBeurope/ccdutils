@@ -395,7 +395,7 @@ def _parse_pdb_properties(cif_block):
     properties = None
     if "_chem_comp." in cif_block.get_mmcif_category_names():
         mod_date = cif_block.find_value("_chem_comp.pdbx_modified_date")
-        if not mod_date:
+        if cif.is_null(mod_date):
             d = date(1970, 1, 1)
         else:
             mod_date = mod_date.split("-")
@@ -404,11 +404,8 @@ def _parse_pdb_properties(cif_block):
         rel_status = ReleaseStatus.from_str(
             cif_block.find_value("_chem_comp.pdbx_release_status")
         )
-        weight = (
-            0.0
-            if not cif_block.find_value("_chem_comp.formula_weight")
-            else float(cif_block.find_value("_chem_comp.formula_weight"))
-        )
+        formula_weight = cif_block.find_value("_chem_comp.formula_weight")
+        weight = 0.0 if cif.is_null(formula_weight) else cif.as_number(formula_weight)
 
         properties = CCDProperties(
             id=cif_block.find_value("_chem_comp.id"),
