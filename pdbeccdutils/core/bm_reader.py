@@ -6,6 +6,7 @@ import re
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from pdbeccdutils.core import models
 from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.utils import config
 from pdbeccdutils.core.component import Component
 from collections import namedtuple
 
@@ -21,12 +22,17 @@ from gemmi import cif
 from networkx import MultiDiGraph, connected_components
 from contextlib import redirect_stderr
 
+
 BMReaderResult = namedtuple(
     "BMReaderResult", ccd_reader.CCDReaderResult._fields + ("bound_molecule",)
 )
 
 
-def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
+def read_pdb_updated_cif_file(
+    path_to_cif: str,
+    to_discard: set[str] = config.DISCARDED_RESIDUES,
+    sanitize: bool = True,
+):
     """
     Read in single wwPDB Model CIF and create internal
     representation of its bound-molecules with multiple components.
@@ -45,8 +51,7 @@ def read_pdb_updated_cif_file(path_to_cif: str, sanitize: bool = True):
         raise ValueError(f"File '{path_to_cif}' does not exists")
 
     biomolecule_result = []
-    bms = infer_bound_molecules(path_to_cif, ["HOH"])
-    rdkit.rdBase.LogToPythonStderr()
+    bms = infer_bound_molecules(path_to_cif, to_discard)
     for i, bm in enumerate(bms, start=1):
         rdkit_stream = io.StringIO()
         with redirect_stderr(rdkit_stream):
