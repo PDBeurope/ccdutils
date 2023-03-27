@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from datetime import date
 from enum import IntEnum
 from typing import Any, List, NamedTuple, Dict
-import rdkit
+from rdkit import Chem
 
 
 class DepictionSource(IntEnum):
@@ -129,7 +129,7 @@ class DepictionResult(NamedTuple):
 
     source: DepictionSource
     template_name: str
-    mol: rdkit.Chem.rdchem.Mol
+    mol: Chem.rdchem.Mol
     score: float
 
 
@@ -198,7 +198,7 @@ class FragmentEntry:
 
     name: str
     source: str
-    mol: rdkit.Chem.rdchem.Mol
+    mol: Chem.rdchem.Mol
 
 
 @dataclass

@@ -12,3 +12,5 @@ coordgen_templates = os.path.join(
 fragment_library = os.path.join(
     os.path.dirname(pdbeccdutils.__file__), "data", "fragment_library.tsv"
 )
+
+DISCARDED_RESIDUES = {"HOH", "UNX"}

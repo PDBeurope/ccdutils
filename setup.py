@@ -50,6 +50,7 @@ setup(
         "console_scripts": [
             "process_components_cif=pdbeccdutils.scripts.process_components_cif_cli:main",
             "setup_pubchem_library=pdbeccdutils.scripts.setup_pubchem_library_cli:main",
+            "read_boundmolecule=pdbeccdutils.scripts.boundmolecule_cli:run",
         ]
     },
     classifiers=[
