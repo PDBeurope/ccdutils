@@ -13,4 +13,4 @@ fragment_library = os.path.join(
     os.path.dirname(pdbeccdutils.__file__), "data", "fragment_library.tsv"
 )
 
-DISCARDED_RESIDUES = {"HOH", "UNX"}
+DISCARDED_RESIDUES = {"HOH", "UNX", "UNL"}

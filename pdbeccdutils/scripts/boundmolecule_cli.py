@@ -64,7 +64,7 @@ class PDBeBmManager:
         fixed_mmcif_file = os.path.join(output_dir, f"{pdb_id}_processed.cif")
         if os.path.isfile(fixed_mmcif_file):
             bm_reader_results = bm_reader.read_pdb_updated_cif_file(
-                fixed_mmcif_file, sanitize=True
+                fixed_mmcif_file, pdb_id, sanitize=True
             )
             for bm_reader_result in bm_reader_results:
                 self.process_bm_component(pdb_id, bm_reader_result, output_dir)
@@ -75,16 +75,16 @@ class PDBeBmManager:
     def process_bm_component(self, pdb_id, bm_reader_result, output_dir):
 
         component = bm_reader_result.component
-        logging.info(f"{pdb_id} {component.id} | processing...")
+        logging.info(f"{component.id} | processing...")
 
         # check parsing
-        self._check_component_parsing(pdb_id, bm_reader_result)
+        self._check_component_parsing(bm_reader_result)
 
         # download templates if the user wants them.
         if self.pubchem is not None:
             self._download_template(component)
 
-        self._generate_depictions(pdb_id, component, output_dir)
+        self._generate_depictions(component, output_dir)
 
     def _write_out_bm(self, pdb_id, bm_reader_results, output_dir):
         result_bag = {
@@ -109,7 +109,7 @@ class PDBeBmManager:
         with open(bm_file, "w") as f:
             json.dump(result_bag, f, sort_keys=True, indent=4)
 
-    def _check_component_parsing(self, pdb_id, bm_reader_result):
+    def _check_component_parsing(self, bm_reader_result):
         """Checks components parsing and highlights issues encountered with
         the molecule: errors/warnings during the parsing process,
         unrecoverable sanitization issues
@@ -119,15 +119,15 @@ class PDBeBmManager:
         """
         component = bm_reader_result.component
         for warning in bm_reader_result.warnings:
-            logging.warning(f"{pdb_id} {component.id} {warning}")
+            logging.warning(f"{component.id} | {warning}")
 
         for error in bm_reader_result.errors:
-            logging.error(f"{pdb_id} {component.id} {error}")
+            logging.error(f"{component.id} | {error}")
 
         if not bm_reader_result.sanitized:
-            logging.warning(f"{pdb_id} {component.id} sanitization issue")
+            logging.warning(f"{component.id} | sanitization issue")
 
-    def _download_template(self, pdb_id: str, component: Component):
+    def _download_template(self, component: Component):
         """Attempts to download a pubchem template for the given component
 
         Args:
@@ -135,9 +135,9 @@ class PDBeBmManager:
         """
         component_downloaded = self.pubchem.process_template(component)
         if component_downloaded:
-            logging.debug(f"{pdb_id} {component.id} | downloaded new pubchem template.")
+            logging.debug(f"{component.id} | downloaded new pubchem template.")
 
-    def _generate_depictions(self, pdb_id: str, component: Component, out_dir: str):
+    def _generate_depictions(self, component: Component, out_dir: str):
         """Generate nice 2D depictions for the component and
         depiction annotations in JSON format. Presently depictions
         are generated in the following resolutions (100,200,300,400,500)
@@ -150,14 +150,14 @@ class PDBeBmManager:
         depiction_result = component.compute_2d(self.depictions)
 
         if depiction_result.source == DepictionSource.Failed:
-            logging.debug(f"{pdb_id} {component.id} failed to generate 2D image")
+            logging.debug(f"{component.id} | failed to generate 2D image")
         else:
             if depiction_result.score > 0.99:
                 logging.debug(
-                    f"{pdb_id} {component.id} collision free image could not be generated"
+                    f"{component.id} | collision free image could not be generated"
                 )
             logging.debug(
-                f"{pdb_id} {component.id} 2D generated using {depiction_result.source.name} with score {depiction_result.score}."
+                f"{component.id} | 2D generated using {depiction_result.source.name} with score {depiction_result.score}."
             )
 
         wedge_bonds = depiction_result.template_name != "cube"
@@ -244,7 +244,7 @@ def run():
         {item.strip() for item in args.discarded_ligands.split(",")}
     )
     helper.set_up_logger(args)
-    bpm = PDBeBmManager(
+    bm_manager = PDBeBmManager(
         args.pubchem_templates, args.general_templates, discarded_ligands
     )
-    bpm.process_entry(args.input_cif, args.pdb_id, args.output_dir)
+    bm_manager.process_entry(args.input_cif, args.pdb_id, args.output_dir)

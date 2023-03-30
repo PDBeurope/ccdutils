@@ -30,6 +30,7 @@ BMReaderResult = namedtuple(
 
 def read_pdb_updated_cif_file(
     path_to_cif: str,
+    pdb_id: str,
     to_discard: set[str] = config.DISCARDED_RESIDUES,
     sanitize: bool = True,
 ):
@@ -55,7 +56,7 @@ def read_pdb_updated_cif_file(
     for i, bm in enumerate(bms, start=1):
         rdkit_stream = io.StringIO()
         with redirect_stderr(rdkit_stream):
-            bm_id = f"bm{i}"
+            bm_id = f"{pdb_id}-bm{i}"
             reader_result = infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize)
             if reader_result:
                 rdkit_log = rdkit_stream.getvalue()

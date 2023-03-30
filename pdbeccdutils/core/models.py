@@ -26,6 +26,13 @@ from typing import Any, List, NamedTuple, Dict
 from rdkit import Chem
 
 
+class LogType(IntEnum):
+    ERROR = 1
+    WARNING = 2
+    DEPICTION_FAILED = 3
+    DEPICTION_SCORE = 4
+
+
 class DepictionSource(IntEnum):
     """Where does the depiction come from.
 
