@@ -7,7 +7,7 @@ from pdbeccdutils.core import bm_reader
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import EntryFailedException
-from pdbeccdutils.core.models import DepictionSource
+from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import config
 from pdbeccdutils.helpers import cif_tools, helper
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
@@ -67,18 +67,22 @@ class PDBeBmManager:
                 fixed_mmcif_file, pdb_id, sanitize=True
             )
             for bm_reader_result in bm_reader_results:
-                self.process_bm_component(pdb_id, bm_reader_result, output_dir)
+                component = bm_reader_result.component
+                bm_out_dir = os.path.join(output_dir, component.id)
+                os.makedirs(bm_out_dir, exist_ok=True)
+                self.process_bm_component(bm_reader_result, bm_out_dir)
             self._write_out_bm(pdb_id, bm_reader_results, output_dir)
         else:
             raise EntryFailedException(f"Preprocessing of {pdb_id} failed")
 
-    def process_bm_component(self, pdb_id, bm_reader_result, output_dir):
+    def process_bm_component(self, bm_reader_result, output_dir):
 
         component = bm_reader_result.component
         logging.info(f"{component.id} | processing...")
 
         # check parsing
         self._check_component_parsing(bm_reader_result)
+        self._generate_ideal_structure(component)
 
         # download templates if the user wants them.
         if self.pubchem is not None:
@@ -94,8 +98,6 @@ class PDBeBmManager:
         for bm_reader_result in bm_reader_results:
             component = bm_reader_result.component
             bm = bm_reader_result.bound_molecule
-            bm_out_dir = os.path.join(output_dir, component.id)
-            os.makedirs(bm_out_dir, exist_ok=True)
             result_bag["boundMolecules"].append(
                 {
                     "id": component.id,
@@ -136,6 +138,31 @@ class PDBeBmManager:
         component_downloaded = self.pubchem.process_template(component)
         if component_downloaded:
             logging.debug(f"{component.id} | downloaded new pubchem template.")
+
+    def _generate_ideal_structure(self, component: Component):
+        """Checks whether or not the component has degenerated ideal
+        coordinates. If so, new conformer is attempted to be generated.
+
+        Args:
+            component (Component): Component to be
+                processed.
+        Return:
+            bool: Whether the ideal coordinates have been successfully
+            recalculated, false otherwise.
+        """
+
+        result = component.compute_3d()
+        if result:
+            if component.has_degenerated_conformer(ConformerType.Computed):
+                logging.debug("has degenerated Computed coordinates.")
+
+        if component.has_degenerated_conformer(ConformerType.Model):
+            logging.debug("has degenerated Model coordinates.")
+
+        if not result:
+            logging.debug("error in generating 3D conformation.")
+
+        return result
 
     def _generate_depictions(self, component: Component, out_dir: str):
         """Generate nice 2D depictions for the component and

@@ -239,12 +239,14 @@ class PDBeChemManager:
         depiction_result = component.compute_2d(self.depictions)
 
         if depiction_result.source == DepictionSource.Failed:
-            logging.info("failed to generate 2D image.")
+            logging.debug(f"{component.id} | failed to generate 2D image.")
         else:
             if depiction_result.score > 0.99:
-                logging.info("collision free image could not be generated.")
-            logging.info(
-                f"2D generated using {depiction_result.source.name} with score {depiction_result.score}."
+                logging.debug(
+                    f"{component.id} | collision free image could not be generated."
+                )
+            logging.debug(
+                f"{component.id} | 2D generated using {depiction_result.source.name} with score {depiction_result.score}."
             )
 
         wedge_bonds = depiction_result.template_name != "cube"
