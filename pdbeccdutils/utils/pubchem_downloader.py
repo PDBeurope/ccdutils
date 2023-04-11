@@ -20,6 +20,8 @@ import os
 
 import numpy
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 from pdbeccdutils.core import ccd_reader
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -65,7 +67,7 @@ def download_template(destination: str, template_id: str, inchikey: str) -> bool
         return False
 
     inchi_url = f"{pubchem_api}/inchikey/{inchikey}/cids/json"
-    response = requests.get(inchi_url)
+    response = requests_retry_session().get(inchi_url)
 
     if response.status_code != 200:
         return False
@@ -74,7 +76,7 @@ def download_template(destination: str, template_id: str, inchikey: str) -> bool
     cid = json_file["IdentifierList"]["CID"][0]
 
     structure_url = f"{pubchem_api}/cid/{cid}/record/SDF/?record_type=2d&response_type=save&response_basename={template_id}.sdf"
-    response = requests.get(structure_url)
+    response = requests_retry_session().get(structure_url)
 
     if response.status_code != 200:
         return False
@@ -141,3 +143,25 @@ class PubChemDownloader:
             rescale_molecule(destination, 1.5)
 
         return downloaded
+
+
+def requests_retry_session(
+    retries=4,
+    backoff_factor=1,
+    status_forcelist=(429, 500, 502, 503, 504),
+    session=None,
+):
+
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
