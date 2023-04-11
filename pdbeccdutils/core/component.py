@@ -62,6 +62,7 @@ class Component:
         self.mol = mol
         self._mol_no_h = None
         self.mol2D = None
+        self.mol3D = None
         self.ccd_cif_block = ccd_cif_block
         self._fragments: Dict[str, SubstructureMapping] = {}
         self._scaffolds: Dict[str, SubstructureMapping] = {}
@@ -390,7 +391,10 @@ class Component:
         Returns:
             DepictionResult: Object with the details about depiction process.
         """
-        mol_copy = rdkit.Chem.RWMol(self.mol)
+        (mol_to_draw, conformer) = self._get_depiction_conformer()
+        mol_copy = rdkit.Chem.RWMol(mol_to_draw, confId=conformer.GetId())
+        print(mol_copy.GetConformer().GetProp("name"))
+
         if remove_hs:
             mol_copy = rdkit.Chem.RemoveHs(
                 mol_copy, updateExplicitCount=True, sanitize=False
@@ -531,13 +535,15 @@ class Component:
         else:
             options = rdkit.Chem.AllChem.ETKDGv2()
 
-        options.clearConfs = False
         conf_id = -1
 
         try:
-            conf_id = rdkit.Chem.AllChem.EmbedMolecule(self.mol, options)
+            self.mol3D = rdkit.Chem.AddHs(
+                self.mol
+            )  # For CCDs explicit H are present, but for bound-molecules H need to be added to create 3D conformer
+            conf_id = rdkit.Chem.AllChem.EmbedMolecule(self.mol3D, options)
             rdkit.Chem.AllChem.UFFOptimizeMolecule(
-                self.mol, confId=conf_id, maxIters=1000
+                self.mol3D, confId=conf_id, maxIters=1000
             )
 
         except RuntimeError:
@@ -546,36 +552,13 @@ class Component:
             pass  # sanitization issue here
 
         if conf_id != -1:
-            conformer = self.mol.GetConformer(conf_id)
+            conformer = self.mol3D.GetConformer(conf_id)
             conformer.SetProp("name", ConformerType.Computed.name)
             conformer.SetProp("coord_generation", f"ETKDG{version}")
 
             return True
 
         return False
-
-    def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
-        """
-        Determine if given conformer has missing coordinates or is
-        missing completelly from the rdkit.Mol object. This can
-        be used to determine, whether or not the coordinates should be
-        regenerated.
-
-        Args:
-            type (ConformerType): type of conformer
-                to be inspected.
-
-        Returns:
-            bool: True if more then 1 atom has coordinates [0, 0, 0]
-        """
-        ok_conformer = False
-
-        for c in self.mol.GetConformers():
-            if c.GetProp("name") == c_type.name:
-                ok_conformer = mol_tools.is_degenerate_conformer(c)
-                break
-
-        return ok_conformer
 
     def get_conformer(self, c_type) -> rdkit.Chem.rdchem.Conformer:
         """
@@ -590,14 +573,42 @@ class Component:
         Returns:
             rdkit.Chem.rdchem.Conformer: RDKit conformer object
         """
-        for c in self.mol.GetConformers():
+
+        if c_type == ConformerType.Computed:
             try:
+                return self.mol3D.GetConformer()
+            except Exception:
+                pass
+        else:
+            for c in self.mol.GetConformers():
                 if c.GetProp("name") == c_type.name:
                     return c
-            except KeyError:
-                pass
 
         raise ValueError(f"Conformer {c_type.name} does not exist.")
+
+    def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
+        """
+        Determine if given conformer has missing coordinates or is
+        missing completelly from the rdkit.Mol object. This can
+        be used to determine, whether or not the coordinates should be
+        regenerated.
+
+        Args:
+            type (ConformerType): type of conformer
+                to be inspected.
+
+        Returns:
+            bool: True if more than 1 atom has coordinates [0, 0, 0] or the Conformer is not present
+        """
+        degenerate_conformer = True
+
+        try:
+            conformer = self.get_conformer(c_type)
+            degenerate_conformer = mol_tools.is_degenerate_conformer(conformer)
+        except ValueError:
+            pass
+
+        return degenerate_conformer
 
     def locate_fragment(
         self, mol: rdkit.Chem.rdchem.Mol
@@ -758,3 +769,50 @@ class Component:
             res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
 
         return res
+
+    def _get_depiction_conformer(self):
+        """Returns nondegenerate conformer if possible and corresponding mol"""
+        conformer = None
+        mol_to_draw = self.mol
+        if not self.has_degenerated_conformer(
+            ConformerType.Ideal
+        ):  # Checks if Ideal conformer is nondegenerate
+            conformer = self.get_conformer(ConformerType.Ideal)
+            mol_to_draw = self.mol
+        else:
+            conformer = (
+                self._get_computed_conformer()
+            )  # Checks if Computed conformer is nondegenerate
+            if conformer:
+                mol_to_draw = self.mol3D
+            else:
+                if not self.has_degenerated_conformer(
+                    ConformerType.Model
+                ):  # Checks if Model conformer is nondegenerate
+                    conformer = self.get_conformer(ConformerType.Model)
+                else:
+                    try:
+                        conformer = self.get_conformer(
+                            ConformerType.Ideal
+                        )  # Returns degenerate Ideal Conformer if all conformers are degenerate
+                    except ValueError:
+                        conformer = self.get_conformer(
+                            ConformerType.Model
+                        )  # Returns degenerate Model Conformer if all conformers are degenerate and Ideal Conformer is not present
+
+        return (mol_to_draw, conformer)
+
+    def _get_computed_conformer(self):
+        """Returns 3D conformer if it is not degenerate"""
+        conformer = None
+        try:
+            computed_conf = self.get_conformer(ConformerType.Computed)
+            if not mol_tools.is_degenerate_conformer(computed_conf):
+                conformer = computed_conf
+        except ValueError:
+            if self.compute_3d():
+                computed_conf = self.get_conformer(ConformerType.Computed)
+                if not mol_tools.is_degenerate_conformer(computed_conf):
+                    conformer = computed_conf
+
+        return conformer

@@ -540,14 +540,18 @@ def _prepate_structure(component, remove_hs, conf_type):
     if conf_type == ConformerType.Depiction:
         conf_id = 0
     else:
-        for c in component.mol.GetConformers():
-            if c.GetProp("name") == conf_type.name:
-                conf_id = c.GetId()
-                break
+        conf_id = component.get_conformer(conf_type).GetId()
 
-    mol_to_save = (
-        component.mol2D if conf_type == ConformerType.Depiction else component.mol
-    )
+    if conf_type == ConformerType.Depiction:
+        mol_to_save = component.mol2D
+    elif conf_type == ConformerType.Computed:
+        mol_to_save = component.mol3D
+    else:
+        mol_to_save = component.mol
+
+    # mol_to_save = (
+    #     component.mol2D if conf_type == ConformerType.Depiction else component.mol
+    # )
 
     if remove_hs:
         mol_to_save = rdkit.Chem.RemoveHs(mol_to_save, sanitize=False)
@@ -898,12 +902,7 @@ def _get_atom_coord(component, at_id, conformer_type):
     Returns:
         rdkit.Geometry.rdGeometry.Point3D: 3D coordinates of the atom.
     """
-    conformer = None
-    for c in component.mol.GetConformers():
-        if c.GetProp("name") == conformer_type.name:
-            conformer = c
-            break
-
+    conformer = component.get_conformer(conformer_type)
     return conformer.GetAtomPosition(at_id)
 
 
