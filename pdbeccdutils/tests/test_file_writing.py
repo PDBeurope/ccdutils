@@ -6,6 +6,8 @@ import pytest
 from pdbeccdutils.core import ccd_writer
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.models import ConformerType
+from pdbeccdutils.core.fragment_library import FragmentLibrary
+from pdbeccdutils.core.exceptions import CCDUtilsError
 from gemmi import cif
 from rdkit import Chem
 
@@ -209,3 +211,43 @@ class TestFileWrites:
         assert component.id == cif_block.name
         for c in to_check:
             assert c in cif_block.get_mmcif_category_names()
+
+    @staticmethod
+    def test_fragment_writing(component: Component, tmpdir):
+        path = tmpdir.join(f"{component.id}.cif")
+        fragment_library = FragmentLibrary()
+        component.library_search(fragment_library)
+        ccd_writer.write_molecule(str(path), component)
+        cif_block = cif.read(str(path)).sole_block()
+        assert cif_block
+        assert component.id == cif_block.name
+        cif_categories = cif_block.get_mmcif_category_names()
+        if component.fragments:
+            assert "_pdbe_chem_comp_substructure." in cif_categories
+            substructure = cif_block.get_mmcif_category("_pdbe_chem_comp_substructure.")
+            for _, values in substructure.items():
+                for value in values:
+                    if value is not None:
+                        assert len(value) > 0
+
+    @staticmethod
+    def test_scaffold_writing(component: Component, tmpdir):
+        path = tmpdir.join(f"{component.id}.cif")
+        try:
+            component.get_scaffolds()
+            ccd_writer.write_molecule(str(path), component)
+            cif_block = cif.read(str(path)).sole_block()
+            assert cif_block
+            assert component.id == cif_block.name
+            cif_categories = cif_block.get_mmcif_category_names()
+            if component.scaffolds:
+                assert "_pdbe_chem_comp_substructure." in cif_categories
+                substructure = cif_block.get_mmcif_category(
+                    "_pdbe_chem_comp_substructure."
+                )
+                for _, values in substructure.items():
+                    for value in values:
+                        if value is not None:
+                            assert len(value) > 0
+        except CCDUtilsError:
+            assert True
