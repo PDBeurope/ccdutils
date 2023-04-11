@@ -39,7 +39,6 @@ from pdbeccdutils.helpers import cif_tools
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
-from rdkit.Chem.inchi import InchiReadWriteError
 
 
 def write_molecule(
@@ -1189,39 +1188,31 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
 
     for i, scaffold in enumerate(component.scaffolds):
         mol = rdkit.Chem.MolFromSmiles(scaffold.smiles)
-        try:
-            inchi = rdkit.Chem.MolToInchi(mol, treatWarningAsError=True)
-            inchi_key = rdkit.Chem.MolToInchiKey(mol)
-        except InchiReadWriteError:
-            inchi = None
-            inchi_key = None
+        inchi = rdkit.Chem.MolToInchi(mol)
+        inchikey = rdkit.Chem.MolToInchiKey(mol)
         new_row = [
             component.id,
             scaffold.name,
             f"S{i+1}",
             "scaffold",
             scaffold.smiles,
-            inchi,
-            inchi_key,
+            inchi if inchi else None,
+            inchikey if inchikey else None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
     for j, fragment in enumerate(component.fragments):
         mol = rdkit.Chem.MolFromSmiles(fragment.smiles)
-        try:
-            inchi = rdkit.Chem.MolToInchi(mol, treatWarningAsError=True)
-            inchi_key = rdkit.Chem.MolToInchiKey(mol)
-        except InchiReadWriteError:
-            inchi = None
-            inchi_key = None
+        inchi = rdkit.Chem.MolToInchi(mol)
+        inchikey = rdkit.Chem.MolToInchiKey(mol)
         new_row = [
             component.id,
             fragment.name,
             f"F{j+1}",
             "fragment",
             fragment.smiles,
-            inchi,
-            inchi_key,
+            inchi if inchi else None,
+            inchikey if inchikey else None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
