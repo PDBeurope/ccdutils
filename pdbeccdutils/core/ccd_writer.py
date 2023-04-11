@@ -1135,15 +1135,13 @@ def _add_sw_info_cif(cif_block_copy):
     category = "_software."
     sw_fields = ["name", "version", "description"]
     sw_loop = cif_block_copy.init_loop(category, sw_fields)
-    sw_loop.add_row(
-        cif.quote_list(["rdkit", rdkit.__version__, cif.quote("Core functionality.")])
-    )
+    sw_loop.add_row(cif.quote_list(["rdkit", rdkit.__version__, "Core functionality."]))
     sw_loop.add_row(
         cif.quote_list(
             [
                 "pdbeccdutils",
                 pdbeccdutils.__version__,
-                cif.quote("Wrapper to provide 2D templates and molecular fragments."),
+                "Wrapper to provide 2D templates and molecular fragments.",
             ]
         )
     )
