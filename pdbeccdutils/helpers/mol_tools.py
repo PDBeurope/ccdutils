@@ -57,7 +57,7 @@ def is_degenerate_conformer(conformer):
             if counter > 1:
                 return True
     except ValueError:  # Conformer does not exist
-        return False
+        return True
 
     return False
 
