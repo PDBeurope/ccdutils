@@ -21,6 +21,7 @@ from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from gemmi import cif
 from networkx import MultiDiGraph, connected_components
 from contextlib import redirect_stderr
+from rdkit import Chem
 
 
 BMReaderResult = namedtuple(
@@ -33,28 +34,31 @@ def read_pdb_updated_cif_file(
     pdb_id: str,
     to_discard: set[str] = config.DISCARDED_RESIDUES,
     sanitize: bool = True,
-):
+) -> list[BMReaderResult]:
     """
     Read in single wwPDB Model CIF and create internal
     representation of its bound-molecules with multiple components.
 
     Args:
-        path_to_cif (str): Path to the cif file
-        sanitize (bool): [Defaults: True]
+        path_to_cif : Path to the cif file
+        pdb_id : PDB ID/name of input structure
+        to_discard: Set of residues to be discarded
+        sanitize: True if the ligand needs to be sanitized
 
     Raises:
         ValueError: if file does not exist
 
     Returns:
-        A list of CCDResult representations of each bound-molecule.
+        A list of BMReaderResult representations of each bound-molecule.
     """
+
     if not os.path.isfile(path_to_cif):
         raise ValueError(f"File '{path_to_cif}' does not exists")
 
     biomolecule_result = []
     bms = infer_bound_molecules(path_to_cif, to_discard)
     for i, bm in enumerate(bms, start=1):
-        rdkit_stream = io.StringIO()
+        rdkit_stream = io.StringIO()  # redirecting rdkit logs
         with redirect_stderr(rdkit_stream):
             bm_id = f"{pdb_id}-bm{i}"
             reader_result = infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize)
@@ -74,7 +78,21 @@ def read_pdb_updated_cif_file(
     return biomolecule_result
 
 
-def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
+def infer_multiple_chem_comp(
+    path_to_cif: str, bm: models.BoundMolecule, bm_id: str, sanitize: bool = True
+) -> BMReaderResult:
+    """Creates Component objects for bound-molecules from input mmcif format
+
+    Args:
+        path_to_cif: Path to input structure
+        bm: bound-molecules identified from input structure
+        bm_id: ID of bound-molecule
+        sanitize: True if bound-molecule need to be sanitized
+
+    Returns:
+        BMReaderResult: Namedtuple containing Component representation of bound-molecule
+
+    """
 
     if bm.graph.number_of_nodes() <= 1:
         return
@@ -111,18 +129,18 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     return reader_result
 
 
-def _parse_pdb_mmcif(cif_block, bm):
+def _parse_pdb_mmcif(
+    cif_block: cif.Block, bm: models.BoundMolecule
+) -> tuple(rdkit.Chem.rchem.Mol, list[str], list[str]):
     """
-    Create internal representation of the molecule from mmcif format.
+    Parses atoms and bond information from mmcif and creates rdkit Mol object.
 
     Args:
-        cif_block (cif.Block): mmcif block object from gemmi
-        sanitize (bool): Whether or not the rdkit component should
-            be sanitized. Defaults to True.
+        cif_block: mmcif Block object from gemmi of input structure
+        bm: bound-molecule identified from input structure
 
     Returns:
-        CCDReaderResult: internal representation with the results
-            of parsing and Mol object.
+        (mol, warnings, errors): mol is rdkit Mol object, warnings and errors are list of WARTNINGS and ERRORS geenrated by rdkit
     """
     warnings = []
     errors = []
@@ -144,7 +162,15 @@ def _parse_pdb_mmcif(cif_block, bm):
     return (mol, warnings, errors)
 
 
-def _get_boundmolecule_atoms(cif_block, bm):
+def _get_boundmolecule_atoms(
+    cif_block: cif.Block, bm: models.BoundMolecule
+) -> dict[str, list[str]]:
+    """Returns bound-molecule atoms from _atom_site in mmcif
+
+    Args:
+        cif_block: mmcif Block object from gemmi of input structure
+        bm: bound-molecule identified from input structure
+    """
     if "_atom_site." not in cif_block.get_mmcif_category_names():
         return
 
@@ -164,7 +190,14 @@ def _get_boundmolecule_atoms(cif_block, bm):
     return bm_atoms
 
 
-def _parse_pdb_atoms(mol, atoms):
+def _parse_pdb_atoms(mol: rdkit.Chem.rchem.Mol, atoms: dict[str, list[str]]):
+    """Setup atoms of bound-molecules in the Component
+
+    Args:
+        mol: Rdkit Mol object of bound-molecule
+        atoms: atoms of bound-molecules
+    """
+
     for i in range(len(atoms["id"])):
         atom_id = atoms["label_atom_id"][i]
         chain = atoms["auth_asym_id"][i]
@@ -194,7 +227,13 @@ def _parse_pdb_atoms(mol, atoms):
         mol.AddAtom(atom)
 
 
-def _parse_pdb_conformers(mol, atoms):
+def _parse_pdb_conformers(mol: rdkit.Chem.rchem.Mol, atoms: dict[str, list[str]]):
+    """Setup model cooordinates in the rdkit Mol object.
+
+    Args:
+        mol: RDKit Mol object of bound-molecule
+        atoms: atoms of bound-molecule
+    """
     if not atoms:
         return
 
@@ -202,7 +241,15 @@ def _parse_pdb_conformers(mol, atoms):
     mol.AddConformer(model, assignId=True)
 
 
-def _setup_pdb_conformer(atoms):
+def _setup_pdb_conformer(atoms: dict[str, list[str]]) -> rdkit.Chem.rdchem.Conformer:
+    """Setup model conformer in the rdkit Mol object
+
+    Args:
+        atoms: atoms of bound-molecule
+
+    Returns:
+        Model Conformer of the component.
+    """
     if not atoms:
         return
 
@@ -218,7 +265,16 @@ def _setup_pdb_conformer(atoms):
     return conformer
 
 
-def _parse_pdb_bonds(mol, bm, cif_block, errors):
+def _parse_pdb_bonds(
+    mol: rdkit.Chem.rchem.Mol, bm: MultiDiGraph, cif_block: cif.Block, errors: list[str]
+):
+    """Setup bonds in the rdkit Mol object
+
+    Args:
+        mol: RDKit Mol object of bound-molecule
+        bm: bound-molecule
+        errors: errors encountered while parsing.
+    """
     if (
         "_atom_site." not in cif_block.get_mmcif_category_names()
         or "_chem_comp_bond." not in cif_block.get_mmcif_category_names()
@@ -297,6 +353,7 @@ def _remove_disconnected_hydrogens(mol):
         mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
             compound representation.
     """
+
     disconnected_hydrogen_indices = [
         atom.GetIdx()
         for atom in mol.GetAtoms()
@@ -306,6 +363,9 @@ def _remove_disconnected_hydrogens(mol):
 
     for atom in disconnected_hydrogen_indices:
         mol.RemoveAtom(atom)
+
+    mol.UpdatePropertyCache()
+    mol = Chem.AddHs(mol)
 
 
 def infer_bound_molecules(structure, to_discard):
