@@ -130,7 +130,7 @@ def infer_multiple_chem_comp(path_to_cif: str, bm: dict, sanitize: bool = True):
             formula=CalcMolFormula(comp.mol),
             modified_date="",
             pdbx_release_status="",
-            weight=round(comp.physchem_properties["exactmw"], 3),
+            weight="",
         )
         comp = Component(mol.GetMol(), cif_block, properties, descriptors)
         reader_result = ccd_reader.CCDReaderResult(

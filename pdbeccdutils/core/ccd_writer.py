@@ -1135,15 +1135,13 @@ def _add_sw_info_cif(cif_block_copy):
     category = "_software."
     sw_fields = ["name", "version", "description"]
     sw_loop = cif_block_copy.init_loop(category, sw_fields)
-    sw_loop.add_row(
-        cif.quote_list(["rdkit", rdkit.__version__, cif.quote("Core functionality.")])
-    )
+    sw_loop.add_row(cif.quote_list(["rdkit", rdkit.__version__, "Core functionality."]))
     sw_loop.add_row(
         cif.quote_list(
             [
                 "pdbeccdutils",
                 pdbeccdutils.__version__,
-                cif.quote("Wrapper to provide 2D templates and molecular fragments."),
+                "Wrapper to provide 2D templates and molecular fragments.",
             ]
         )
     )
@@ -1188,27 +1186,31 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
 
     for i, scaffold in enumerate(component.scaffolds):
         mol = rdkit.Chem.MolFromSmiles(scaffold.smiles)
+        inchi = rdkit.Chem.MolToInchi(mol)
+        inchikey = rdkit.Chem.MolToInchiKey(mol)
         new_row = [
             component.id,
             scaffold.name,
             f"S{i+1}",
             "scaffold",
             scaffold.smiles,
-            rdkit.Chem.MolToInchi(mol),
-            rdkit.Chem.MolToInchiKey(mol),
+            inchi if inchi else None,
+            inchikey if inchikey else None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
     for j, fragment in enumerate(component.fragments):
         mol = rdkit.Chem.MolFromSmiles(fragment.smiles)
+        inchi = rdkit.Chem.MolToInchi(mol)
+        inchikey = rdkit.Chem.MolToInchiKey(mol)
         new_row = [
             component.id,
             fragment.name,
             f"F{j+1}",
             "fragment",
             fragment.smiles,
-            rdkit.Chem.MolToInchi(mol),
-            rdkit.Chem.MolToInchiKey(mol),
+            inchi if inchi else None,
+            inchikey if inchikey else None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
