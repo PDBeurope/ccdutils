@@ -29,7 +29,6 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
-from pdbeccdutils.helpers import mol_tools
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (
     CCDProperties,
@@ -92,6 +91,16 @@ class Component:
             str: the _chem_comp.id or ''.
         """
         return self._cif_properties.id
+
+    @id.setter
+    def id(self, value):
+        """Set mapping for this component obtained with a different mean
+        but internal use of UniChem.
+
+        Args:
+            list[tuple[str]]: UniChem mappings
+        """
+        self._cif_properties.id = value
 
     @property
     def name(self) -> str:
@@ -570,10 +579,18 @@ class Component:
         """
         ok_conformer = False
 
-        for c in self.mol.GetConformers():
-            if c.GetProp("name") == c_type.name:
-                ok_conformer = mol_tools.is_degenerate_conformer(c)
-                break
+        if c_type == ConformerType.Computed:
+            try:
+                return self.mol3D.GetConformer()
+            except Exception:
+                pass
+        else:
+            for c in self.mol.GetConformers():
+                try:
+                    if c.GetProp("name") == c_type.name:
+                        return c
+                except KeyError:
+                    pass
 
         return ok_conformer
 
