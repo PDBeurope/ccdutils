@@ -22,13 +22,15 @@ Set of methods for molecular sanitization and work with conformers
 import re
 import sys
 from io import StringIO
+from pdbeccdutils.core.models import InChIFromRDKit
+from contextlib import redirect_stderr
 
 import numpy as np
 import rdkit
 
 empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
 METALS_SMART = (
-    "[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
+    "[Li,Na,K,Rb,Cs,Fr,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
     "Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]"
 )
 
@@ -184,3 +186,51 @@ def fix_conformer(conformer):
         if all(np.isnan(pos)):
             new_pos = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
             conformer.SetAtomPosition(index, new_pos)
+
+
+def inchi_from_mol(mol: rdkit.Chem.rdchem.Mol) -> str:
+    """Provides the InChI calculated by RDKit.
+
+    Args:
+        mol: rdkit.Chem.rdchem.Mol object
+
+    Returns:
+        str: the InChI or empty '' if there was an error finding it.
+    """
+    try:
+        rdkit_stream = StringIO()  # redirecting rdkit logs
+        with redirect_stderr(rdkit_stream):
+            inchi = rdkit.Chem.inchi.MolToInchi(mol)
+            warnings = ""
+            errors = ""
+            rdkit_log = rdkit_stream.getvalue()
+            if "WARNING" in rdkit_log:
+                start_index = re.search(r"\bWARNING\b:", rdkit_log).end()
+                warnings = rdkit_log[start_index:].strip()
+            elif "ERROR" in rdkit_log:
+                start_index = re.search(r"\bERROR\b:", rdkit_log).end()
+                errors = rdkit_log[start_index:].strip()
+
+            inchi_result = InChIFromRDKit(inchi=inchi, warnings=warnings, errors=errors)
+
+    except ValueError as e:
+        inchi_result = InChIFromRDKit(inchi="", warnings="", errors=e)
+
+    return inchi_result
+
+
+def inchikey_from_inchi(inchi: str) -> str:
+    """Provides the InChIKey calculated by RDKit from InChI.
+
+    Args:
+        inchi: InChI calulcated by RDKit
+
+    Returns:
+        str: the InChIKey or '' if there was an error finding it.
+    """
+
+    inchikey = rdkit.Chem.inchi.InchiToInchiKey(inchi)
+    if inchikey is None:
+        inchikey = ""
+
+    return inchikey
