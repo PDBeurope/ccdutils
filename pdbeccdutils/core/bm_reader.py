@@ -1,27 +1,20 @@
-import io
 import os
 import rdkit
-import re
+from collections import namedtuple
+from gemmi import cif
+from networkx import MultiDiGraph
 
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
-from pdbeccdutils.core import models
-from pdbeccdutils.core import ccd_reader
+from pdbeccdutils.core import ccd_reader, models
+from pdbeccdutils.core.boundmolecule import infer_bound_molecules
 from pdbeccdutils.utils import config
 from pdbeccdutils.core.component import Component
-from collections import namedtuple
-
 from pdbeccdutils.core.models import (
     CCDProperties,
     ConformerType,
     Descriptor,
-    Residue,
-    BoundMolecule,
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
-from gemmi import cif
-from networkx import MultiDiGraph, connected_components
-from contextlib import redirect_stderr
-from rdkit import Chem
 
 
 BMReaderResult = namedtuple(
@@ -29,11 +22,11 @@ BMReaderResult = namedtuple(
 )
 
 
-def read_pdb_updated_cif_file(
+def read_pdb_cif_file(
     path_to_cif: str,
-    pdb_id: str,
     to_discard: set[str] = config.DISCARDED_RESIDUES,
     sanitize: bool = True,
+    assembly: bool = False,
 ) -> list[BMReaderResult]:
     """
     Read in single wwPDB Model CIF and create internal
@@ -56,24 +49,12 @@ def read_pdb_updated_cif_file(
         raise ValueError(f"File '{path_to_cif}' does not exists")
 
     biomolecule_result = []
-    bms = infer_bound_molecules(path_to_cif, to_discard)
+    bms = infer_bound_molecules(path_to_cif, to_discard, assembly)
     for i, bm in enumerate(bms, start=1):
-        rdkit_stream = io.StringIO()  # redirecting rdkit logs
-        with redirect_stderr(rdkit_stream):
-            bm_id = f"{pdb_id}-bm{i}"
-            reader_result = infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize)
-            if reader_result:
-                rdkit_log = rdkit_stream.getvalue()
-                if "WARNING" in rdkit_log:
-                    start_index = re.search(r"\bWARNING\b:", rdkit_log).end()
-                    rdkit_log = rdkit_log[start_index:].strip()
-                    reader_result.warnings.append(rdkit_log)
-                elif "ERROR" in rdkit_log:
-                    start_index = re.search(r"\bERROR\b:", rdkit_log).end()
-                    rdkit_log = rdkit_log[start_index:].strip()
-                    reader_result.errors.append(rdkit_log)
-
-                biomolecule_result.append(reader_result)
+        bm_id = f"bm{i}"
+        reader_result = infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize)
+        if reader_result:
+            biomolecule_result.append(reader_result)
 
     return biomolecule_result
 
@@ -94,7 +75,7 @@ def infer_multiple_chem_comp(
 
     """
 
-    if bm.graph.number_of_nodes() <= 1:
+    if bm.graph.number_of_nodes() <= 1 or bm.id != bm.orig_id:
         return
 
     cif_block = cif.read(path_to_cif).sole_block()
@@ -103,21 +84,29 @@ def infer_multiple_chem_comp(
     if sanitize:
         sanitized = mol_tools.sanitize(mol)
 
-    comp = Component(mol.GetMol(), cif_block)
+    inchi_result = mol_tools.inchi_from_mol(mol)
+    if inchi_result.warnings:
+        warnings.append(inchi_result.warnings)
+    if inchi_result.errors:
+        errors.append(inchi_result.errors)
+
+    inchikey = mol_tools.inchikey_from_inchi(inchi_result.inchi)
     descriptors = [
-        Descriptor(type="InChI", program="rdkit", value=comp.inchi_from_rdkit),
-        Descriptor(type="InChIKey", program="rdkit", value=comp.inchikey_from_rdkit),
+        Descriptor(type="InChI", program="rdkit", value=inchi_result.inchi),
+        Descriptor(type="InChIKey", program="rdkit", value=inchikey),
     ]
-    bm_name = "_".join([residue.name for residue in bm.graph.nodes()])
+
     properties = CCDProperties(
         id=bm_id,
-        name=bm_name,
-        formula=CalcMolFormula(comp.mol),
+        name=bm.name,
+        formula=CalcMolFormula(mol),
         modified_date="",
         pdbx_release_status=models.ReleaseStatus.NOT_SET,
         weight="",
     )
+
     comp = Component(mol.GetMol(), cif_block, properties, descriptors)
+
     reader_result = BMReaderResult(
         warnings=warnings,
         errors=errors,
@@ -131,7 +120,7 @@ def infer_multiple_chem_comp(
 
 def _parse_pdb_mmcif(
     cif_block: cif.Block, bm: models.BoundMolecule
-) -> tuple(rdkit.Chem.rchem.Mol, list[str], list[str]):
+) -> tuple[rdkit.Chem.rdchem.Mol, list[str], list[str]]:
     """
     Parses atoms and bond information from mmcif and creates rdkit Mol object.
 
@@ -154,6 +143,7 @@ def _parse_pdb_mmcif(
             warnings.append(w)
 
     bm_atoms = _get_boundmolecule_atoms(cif_block, bm)
+
     _parse_pdb_atoms(mol, bm_atoms)
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
@@ -190,7 +180,7 @@ def _get_boundmolecule_atoms(
     return bm_atoms
 
 
-def _parse_pdb_atoms(mol: rdkit.Chem.rchem.Mol, atoms: dict[str, list[str]]):
+def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
     """Setup atoms of bound-molecules in the Component
 
     Args:
@@ -227,7 +217,7 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rchem.Mol, atoms: dict[str, list[str]]):
         mol.AddAtom(atom)
 
 
-def _parse_pdb_conformers(mol: rdkit.Chem.rchem.Mol, atoms: dict[str, list[str]]):
+def _parse_pdb_conformers(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
     """Setup model cooordinates in the rdkit Mol object.
 
     Args:
@@ -266,14 +256,17 @@ def _setup_pdb_conformer(atoms: dict[str, list[str]]) -> rdkit.Chem.rdchem.Confo
 
 
 def _parse_pdb_bonds(
-    mol: rdkit.Chem.rchem.Mol, bm: MultiDiGraph, cif_block: cif.Block, errors: list[str]
+    mol: rdkit.Chem.rdchem.Mol,
+    bm: MultiDiGraph,
+    cif_block: cif.Block,
+    errors: list[str],
 ):
     """Setup bonds in the rdkit Mol object
 
     Args:
         mol: RDKit Mol object of bound-molecule
         bm: bound-molecule
-        errors: errors encountered while parsing.
+        errors: list of errors encountered while parsing.
     """
     if (
         "_atom_site." not in cif_block.get_mmcif_category_names()
@@ -300,7 +293,17 @@ def _parse_pdb_bonds(
                 errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
 
-def _add_connections(mol, bm, errors):
+def _add_connections(
+    mol: rdkit.Chem.rdchem.Mol, bm: MultiDiGraph, errors: list[str]
+) -> None:
+    """Add bonds between CCDs in the bound-molecule
+
+    Args:
+        mol: RDKit Mol object of bound-molecule
+        bm: bound-molecule
+        errors: list of errors encountered while parsing
+
+    """
     for residue_1, residue_2, atoms in bm.edges(data=True):
         try:
             atom_1 = atoms["atom_id_1"]
@@ -318,7 +321,14 @@ def _add_connections(mol, bm, errors):
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
 
-def get_chem_comp_bonds(cif_block, residue):
+def get_chem_comp_bonds(cif_block: cif.Block, residue: str):
+    """Returns _chem_comp_bond associated with a residue
+
+    Args:
+        cif_block: gemmi.cif.Block object of protein mmCIF file
+        residue: CCD ID
+    """
+
     if "_chem_comp_bond." not in cif_block.get_mmcif_category_names():
         return
     chem_comp_bonds = cif_block.get_mmcif_category("_chem_comp_bond.")
@@ -350,7 +360,7 @@ def _remove_disconnected_hydrogens(mol):
     However we wouldn't want these hydrogens as they affect molecular properties.
 
     Args:
-        mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
+        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
             compound representation.
     """
 
@@ -363,222 +373,3 @@ def _remove_disconnected_hydrogens(mol):
 
     for atom in disconnected_hydrogen_indices:
         mol.RemoveAtom(atom)
-
-    mol.UpdatePropertyCache()
-    mol = Chem.AddHs(mol)
-
-
-def infer_bound_molecules(structure, to_discard):
-    """Identify bound molecules in the input protein structure.
-
-    Args:
-        structure (str): Path to the structure.
-        to_discard (list of str): List of residue names to be discarded
-    """
-
-    bms = parse_bound_molecules(structure, to_discard)
-    bound_molecules = []
-
-    for bm_nodes in connected_components(bms.to_undirected()):
-        subgraph = bms.subgraph(bm_nodes)
-        bm = BoundMolecule(subgraph)
-        bound_molecules.append(bm)
-
-    bound_molecules = sorted(bound_molecules, key=lambda l: -len(l.graph.nodes))
-    return bound_molecules
-
-
-def __add_connections(struct_conn, bms):
-    for i in range(len(struct_conn["id"])):
-        (ptnr1, atom1) = find_pntr_entry(struct_conn, bms.nodes, 1, i)
-        (ptnr2, atom2) = find_pntr_entry(struct_conn, bms.nodes, 2, i)
-
-        # we want covalent connections among ligands only.
-        if ptnr1 and ptnr2 and struct_conn["conn_type_id"][i] != "metalc":
-            add_edge = True
-            edge_data = bms.get_edge_data(ptnr1, ptnr2)
-            if edge_data:
-                for _, value in edge_data.items():
-                    if value["atom_id_1"] == atom1 and value["atom_id_2"] == atom2:
-                        add_edge = False
-            if add_edge:
-                bms.add_edge(ptnr1, ptnr2, atom_id_1=atom1, atom_id_2=atom2)
-
-
-def __add_con_branch_link(entity_branch_link, branch_scheme, bms):
-    entities = {}
-    for i in range(len(branch_scheme["entity_id"])):
-        if branch_scheme["entity_id"][i] not in entities:
-            entities[branch_scheme["entity_id"][i]] = [branch_scheme["pdb_asym_id"][i]]
-        elif (
-            branch_scheme["pdb_asym_id"][i]
-            not in entities[branch_scheme["entity_id"][i]]
-        ):
-            entities[branch_scheme["entity_id"][i]].append(
-                branch_scheme["pdb_asym_id"][i]
-            )
-
-    for i in range(len(entity_branch_link["link_id"])):
-        ent_id = entity_branch_link["entity_id"][i]
-        for chain in entities[ent_id]:
-            for node in bms.nodes:
-                prtnr1 = False
-                prtnr2 = False
-                atom1 = False
-                atom2 = False
-                if (
-                    node.name == entity_branch_link["comp_id_1"][i]
-                    and node.chain == chain
-                    and node.res_id == entity_branch_link["entity_branch_list_num_1"][i]
-                ):
-                    prtnr1 = node
-                    atom1 = entity_branch_link["atom_id_1"][i]
-                elif (
-                    node.name == entity_branch_link["comp_id_2"][i]
-                    and node.chain == chain
-                    and node.res_id == entity_branch_link["entity_branch_list_num_2"][i]
-                ):
-                    prtnr2 = node
-                    atom2 = entity_branch_link["atom_id_2"][i]
-            if prtnr1 and prtnr2 and atom1 and atom2:
-                add_edge = True
-                edge_data = bms.get_edge_data(prtnr1, prtnr2)
-                if edge_data:
-                    for _, value in edge_data.items():
-                        if value["atom_id_1"] == atom1 and value["atom_id_2"] == atom2:
-                            add_edge = False
-                if add_edge:
-                    bms.add_edge(prtnr1, prtnr2, atom_id_1=atom1, atom_id_2=atom2)
-                bms.add_edge(prtnr1, prtnr2, atom_id_1=atom1, atom_id_2=atom2)
-
-
-def parse_bound_molecules(path, to_discard):
-    """Parse information from the information about HETATMS from the
-    `_pdbx_nonpoly_scheme` and connectivity among them from `_struct_conn`.
-
-    Args:
-        path (str): Path to the mmCIF structure
-        to_discard (list of str): List of residue names to be discarded.
-
-    Returns:
-        MultiDiGraph: All the bound molecules in a given entry.
-    """
-    doc = cif.read(path)
-    cif_block = doc.sole_block()
-
-    if (
-        "_pdbx_nonpoly_scheme." not in cif_block.get_mmcif_category_names()
-        and "_pdbx_branch_scheme." not in cif_block.get_mmcif_category_names()
-    ):
-        return MultiDiGraph()
-
-    if "_pdbx_nonpoly_scheme." in cif_block.get_mmcif_category_names():
-        bms = parse_ligands_from_nonpoly_scheme(
-            cif_block.get_mmcif_category("_pdbx_nonpoly_scheme."), to_discard
-        )
-
-    else:
-        bms = MultiDiGraph()
-
-    if "_pdbx_branch_scheme." in cif_block.get_mmcif_category_names():
-        if bms:
-            bms = parse_ligands_from_branch_scheme(
-                cif_block.get_mmcif_category("_pdbx_branch_scheme."), to_discard, bms
-            )
-        else:
-            bms = parse_ligands_from_branch_scheme(
-                cif_block.get_mmcif_category("_pdbx_branch_scheme."),
-                to_discard,
-                MultiDiGraph(),
-            )
-
-    if "_struct_conn." in cif_block.get_mmcif_category_names():
-        __add_connections(cif_block.get_mmcif_category("_struct_conn."), bms)
-
-    if "_pdbx_branch_scheme." in cif_block.get_mmcif_category_names():
-        __add_con_branch_link(
-            cif_block.get_mmcif_category("_pdbx_entity_branch_link."),
-            cif_block.get_mmcif_category("_pdbx_branch_scheme."),
-            bms,
-        )
-
-    return bms
-
-
-def find_pntr_entry(struct_conn, residue_pool, partner, i):
-    """Helper method to find ligand residue in parsed ligands and check
-    its connections.
-
-    Just because it is chatty and used throughout the code quite often.
-
-    Args:
-        struct_conn (dict of str: str): struct_conn table.
-        residue_pool (List of Residue): List of all the parsed residues.
-        partner (str): Identification of the partner (should be 1 or 2)
-        i (int): Index in the struct_conn table
-    """
-    atom_name = struct_conn[f"ptnr{partner}_label_atom_id"][i]
-    for residue in residue_pool:
-        if (
-            residue.name == struct_conn[f"ptnr{partner}_label_comp_id"][i]
-            and residue.chain == struct_conn[f"ptnr{partner}_auth_asym_id"][i]
-            and residue.res_id == struct_conn[f"ptnr{partner}_auth_seq_id"][i]
-        ):
-            return (residue, atom_name)
-
-    return (None, atom_name)
-
-
-def parse_ligands_from_branch_scheme(branch_scheme, to_discard, g):
-    """Parse ligands from the mmcif file.
-
-    Args:
-        nonpoly_scheme (dict of str: list of str): mmcif _nonpoly_scheme
-            category.
-        to_discard (list of str): List of residue names to be discarded.
-
-    Returns:
-        MultiDiGraph: Ligands and their connectivity in a PDB entry
-    """
-
-    for i in range(len(branch_scheme["asym_id"])):
-        n = Residue(
-            branch_scheme["pdb_mon_id"][i],  # aka label_comp_id
-            branch_scheme["pdb_asym_id"][i],  # aka auth_asym_id
-            branch_scheme["num"][i],  # aka auth_seq_id
-            None,  # aka pdbx_PDB_ins_code
-            branch_scheme["entity_id"][i],
-        )
-
-        if n.name not in to_discard:
-            g.add_node(n)
-
-    return g
-
-
-def parse_ligands_from_nonpoly_scheme(nonpoly_scheme, to_discard):
-    """Parse ligands from the mmcif file.
-
-    Args:
-        nonpoly_scheme (dict of str: list of str): mmcif _nonpoly_scheme
-            category.
-        to_discard (list of str): List of residue names to be discarded.
-
-    Returns:
-        MultiDiGraph: Ligands and their connectivity in a PDB entry
-    """
-    g = MultiDiGraph()
-
-    for i in range(len(nonpoly_scheme["asym_id"])):
-        n = Residue(
-            nonpoly_scheme["pdb_mon_id"][i],  # aka label_comp_id
-            nonpoly_scheme["pdb_strand_id"][i],  # aka auth_asym_id
-            nonpoly_scheme["pdb_seq_num"][i],  # aka auth_seq_id
-            nonpoly_scheme["pdb_ins_code"][i],  # aka pdbx_PDB_ins_code
-            nonpoly_scheme["entity_id"][i],
-        )
-
-        if n.name not in to_discard:
-            g.add_node(n)
-
-    return g
