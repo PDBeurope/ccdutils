@@ -242,7 +242,7 @@ class DepictionManager:
         Depict ligand using user-provided templates
 
         Args:
-            mol (rdkit.Chem.rchem.Mol): Mol to be depicted
+            mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
 
         Returns:
             :obj:`list` of :obj:`DepictionResult`: Depictions with their
