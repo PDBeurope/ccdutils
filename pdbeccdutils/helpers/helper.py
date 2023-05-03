@@ -85,7 +85,7 @@ def set_up_logger(args: argparse.Namespace) -> logging.Logger:
         Application logger.
     """
     level = logging.DEBUG if args.debug else logging.INFO
-    frm = "{asctime}: {module}: {levelname}: {message}"
+    frm = "%(asctime)-15s: %(module)s: %(levelname)s: %(message)s"
     logging.basicConfig(level=level, format=frm, datefmt="%Y-%m-%d  %H:%M:%S")
 
     if not args.no_header:
