@@ -1193,8 +1193,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
             f"S{i+1}",
             "scaffold",
             scaffold.smiles,
-            inchi if inchi else None,
-            inchikey if inchikey else None,
+            inchi or None,
+            inchikey or None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
@@ -1208,8 +1208,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
             f"F{j+1}",
             "fragment",
             fragment.smiles,
-            inchi if inchi else None,
-            inchikey if inchikey else None,
+            inchi or None,
+            inchikey or None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
