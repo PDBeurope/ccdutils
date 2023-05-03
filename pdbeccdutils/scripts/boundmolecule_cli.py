@@ -1,3 +1,20 @@
+# software from PDBe: Protein Data Bank in Europe; http://pdbe.org
+#
+# Copyright 2018 EMBL - European Bioinformatics Institute
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
 import argparse
 import logging
 import os
@@ -14,9 +31,7 @@ from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
 
 
 class PDBeBmManager:
-    """Manager orchestrating computation and generation of all parts of the
-    PDBeBm update process.
-    """
+    """Pipeline to identify bound-molecules and process"""
 
     def __init__(
         self,
@@ -42,11 +57,12 @@ class PDBeBmManager:
         self.depictions = DepictionManager(pubchem_templates, general_templates)
         self.discarded = discarded_ligands
 
-    def process_entry(self, input_cif, pdb_id, output_dir):
-        """Process a single entry in the pdbeboundmolecule pipeline:
+    def process_entry(self, input_cif: str, pdb_id: str, output_dir: str):
+        """Process a single entry in the pipeline:
 
         Args:
             pdb_id (str): PDB id
+            output_dir: Path to output directory
         """
 
         bm_file = os.path.join(output_dir, "bound_molecules.json")
@@ -60,10 +76,16 @@ class PDBeBmManager:
         cif_tools.fix_updated_mmcif(input_cif, fixed_mmcif_file)
         self.process_boundmolecules(pdb_id, output_dir)
 
-    def process_boundmolecules(self, pdb_id, output_dir):
+    def process_boundmolecules(self, pdb_id: str, output_dir: str):
+        """Identifies and processes bound-molecules from a protein entry
+
+        Args:
+            pdb_id: PDB id
+            output_dir: Path to output directory
+        """
         fixed_mmcif_file = os.path.join(output_dir, f"{pdb_id}_processed.cif")
         if os.path.isfile(fixed_mmcif_file):
-            bm_reader_results = bm_reader.read_pdb_updated_cif_file(
+            bm_reader_results = bm_reader.read_pdb_cif_file(
                 fixed_mmcif_file, pdb_id, sanitize=True
             )
             for bm_reader_result in bm_reader_results:
@@ -75,7 +97,18 @@ class PDBeBmManager:
         else:
             raise EntryFailedException(f"Preprocessing of {pdb_id} failed")
 
-    def process_bm_component(self, bm_reader_result, output_dir):
+    def process_bm_component(
+        self, bm_reader_result: list[bm_reader.BMReaderResult], output_dir: str
+    ):
+        """Processes identified bound-molecules
+            * Checks components parsing and highlights issues encountered with the molecule
+            * Generates 3D conformer coordinates
+            * Generated 2D depictions
+
+        Args:
+            bm_reader_result: List of BMReaderResult
+            output_dir: Path to ooutput directory
+        """
 
         component = bm_reader_result.component
         logging.info(f"{component.id} | processing...")
@@ -90,7 +123,19 @@ class PDBeBmManager:
 
         self._generate_depictions(component, output_dir)
 
-    def _write_out_bm(self, pdb_id, bm_reader_results, output_dir):
+    def _write_out_bm(
+        self,
+        pdb_id: str,
+        bm_reader_results: list[bm_reader.BMReaderResult],
+        output_dir: str,
+    ):
+        """Writes out the details of bound-molecules
+
+        Args:
+            pdb_id: PDB ID
+            bm_reader_result: List of BMReaderResult
+            output_dir: Path to ooutput directory
+        """
         result_bag = {
             "entry": pdb_id,
             "boundMolecules": [],
@@ -111,7 +156,9 @@ class PDBeBmManager:
         with open(bm_file, "w") as f:
             json.dump(result_bag, f, sort_keys=True, indent=4)
 
-    def _check_component_parsing(self, bm_reader_result):
+    def _check_component_parsing(
+        self, bm_reader_result: list[bm_reader.BMReaderResult]
+    ):
         """Checks components parsing and highlights issues encountered with
         the molecule: errors/warnings during the parsing process,
         unrecoverable sanitization issues
@@ -140,8 +187,8 @@ class PDBeBmManager:
             logging.debug(f"{component.id} | downloaded new pubchem template.")
 
     def _generate_ideal_structure(self, component: Component):
-        """Checks whether or not the component has degenerated ideal
-        coordinates. If so, new conformer is attempted to be generated.
+        """Generates 3D conformer coordinates and checks if the molecule has
+        degenerated coordinates
 
         Args:
             component (Component): Component to be
