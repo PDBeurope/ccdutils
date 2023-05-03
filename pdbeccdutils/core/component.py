@@ -94,6 +94,16 @@ class Component:
         """
         return self._cif_properties.id
 
+    @id.setter
+    def id(self, value):
+        """Set mapping for this component obtained with a different mean
+        but internal use of UniChem.
+
+        Args:
+            list[tuple[str]]: UniChem mappings
+        """
+        self._cif_properties.id = value
+
     @property
     def name(self) -> str:
         """Supply the 'full name' of the PDB-CCD, for example 'ETHANOL'.
@@ -581,8 +591,11 @@ class Component:
                 pass
         else:
             for c in self.mol.GetConformers():
-                if c.GetProp("name") == c_type.name:
-                    return c
+                try:
+                    if c.GetProp("name") == c_type.name:
+                        return c
+                except KeyError:
+                    pass
 
         raise ValueError(f"Conformer {c_type.name} does not exist.")
 
