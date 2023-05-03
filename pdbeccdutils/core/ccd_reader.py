@@ -192,7 +192,7 @@ def _parse_pdb_atoms(mol, cif_block):
     Setup atoms in the component
 
     Args:
-        mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
+        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
             compound representation.
         cif_block (cif.Block): mmCIF block object from gemmi.
     """
