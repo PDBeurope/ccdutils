@@ -24,11 +24,11 @@ def component(request):
 
 @pytest.fixture(scope="session", params=sample_cifs_with_boundmolecules)
 def boundMolecules(request):
-    reader_list = bm_reader.read_pdb_updated_cif_file(request.param)
+    reader_list = bm_reader.read_pdb_cif_file(request.param)
     bm_components = []
     for reader_result in reader_list:
         c = reader_result.component
-        assert reader_result.warnings == []
+        assert reader_result.errors == []
         bm_components.append(c)
 
     return bm_components
