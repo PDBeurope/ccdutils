@@ -54,6 +54,27 @@ def find_atom_index(mol, residue_id, atom_id):
             return atom.GetIdx()
 
 
+def get_additional_fields(auth_asym_id: str) -> tuple[str, str]:
+    """Gets original auth_asym_id and assembly operator from auth_asym_id
+    in assembly file
+
+    Args:
+        auth_asym_id: auth_asym_id value form mmCIF file
+
+    Returns:
+        A tuple of (orig_auth_asym_id, operator), where orig_auth_asym_id is the auth_asym_id
+        in input structure and operator is the operator used by model-server
+
+    """
+    orig_auth_asym_id = auth_asym_id
+    operator = ""
+    if "_" in auth_asym_id:
+        orig_auth_asym_id = auth_asym_id.split("_")[0]
+        operator = "_" + auth_asym_id.split("_")[1]
+
+    return (orig_auth_asym_id, operator)
+
+
 def set_up_logger(args: argparse.Namespace) -> logging.Logger:
     """Sets up application level logging
 
