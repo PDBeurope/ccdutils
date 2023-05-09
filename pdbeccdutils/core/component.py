@@ -403,7 +403,6 @@ class Component:
         """
         (mol_to_draw, conformer) = self._get_depiction_conformer()
         mol_copy = rdkit.Chem.RWMol(mol_to_draw, confId=conformer.GetId())
-        print(mol_copy.GetConformer().GetProp("name"))
 
         if remove_hs:
             mol_copy = rdkit.Chem.RemoveHs(
