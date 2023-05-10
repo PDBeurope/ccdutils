@@ -1,0 +1,60 @@
+{
+    "au_fallback": false,
+    "boundMolecules": [
+        {
+            "composition": {
+                "connections": [],
+                "residues": [
+                    {
+                        "auth_asym_id": "A",
+                        "auth_seq_id": "501",
+                        "entity_id": "2",
+                        "id": "A501",
+                        "label_comp_id": "SO4",
+                        "operator": "",
+                        "orig_auth_asym_id": "A",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm1"
+        },
+        {
+            "composition": {
+                "connections": [],
+                "residues": [
+                    {
+                        "auth_asym_id": "A",
+                        "auth_seq_id": "502",
+                        "entity_id": "2",
+                        "id": "A502",
+                        "label_comp_id": "SO4",
+                        "operator": "",
+                        "orig_auth_asym_id": "A",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm2"
+        },
+        {
+            "composition": {
+                "connections": [],
+                "residues": [
+                    {
+                        "auth_asym_id": "A",
+                        "auth_seq_id": "701",
+                        "entity_id": "3",
+                        "id": "A701",
+                        "label_comp_id": "4PA",
+                        "operator": "",
+                        "orig_auth_asym_id": "A",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm3"
+        }
+    ],
+    "entry": "1tqh"
+}

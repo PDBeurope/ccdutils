@@ -34,7 +34,7 @@ test_cut_down_components_cif = os.path.join(
     tests_dir(), "components_cif", "cut_down_components.cif"
 )
 test_boundmolecules = os.path.join(
-    tests_dir(), "ccd_mmcif_test_files", "boundMolecule_sample"
+    tests_dir(), "updated_mmcif_test_files", "random_samples"
 )
 
 
@@ -42,6 +42,43 @@ def cif_filename(code):
     path = os.path.join(test_cif, f"{code}.cif")
 
     return path if os.path.isfile(path) else os.path.join(test_depiction, f"{code}.cif")
+
+
+def updated_mmcif_filename(pdb_id):
+    path = os.path.join(test_boundmolecules, pdb_id, f"{pdb_id}_processed.cif.gz")
+    if os.path.isfile(path):
+        return path
+
+
+def fixed_mmcif_filename(pdb_id):
+    path = os.path.join(test_boundmolecules, pdb_id, f"{pdb_id}_processed.cif.gz")
+    if os.path.isfile(path):
+        return path
+
+
+def bio_assembly_filename(pdb_id, au_fallback):
+    if not au_fallback:
+        path = os.path.join(test_boundmolecules, pdb_id, f"{pdb_id}_bio.cif.gz")
+    else:
+        path = os.path.join(test_boundmolecules, pdb_id, f"{pdb_id}_processed.cif.gz")
+    if os.path.isfile(path):
+        return path
+
+
+def bms_filename(pdb_id):
+    path = os.path.join(test_boundmolecules, pdb_id, "bound_molecules.json")
+    if os.path.isfile(path):
+        return path
+
+
+def remove_discarded_ligands(category, field, discarded_ligands):
+    new_category = {key: [] for key in category}
+    for i in range(len(category[field])):
+        if category[field][i] not in discarded_ligands:
+            for key in new_category:
+                new_category[key].append(category[key][i])
+
+    return new_category
 
 
 def unl_model():

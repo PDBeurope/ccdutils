@@ -1,0 +1,241 @@
+{
+    "au_fallback": false,
+    "boundMolecules": [
+        {
+            "composition": {
+                "connections": [
+                    [
+                        "F2",
+                        "F1"
+                    ],
+                    [
+                        "F2",
+                        "F3"
+                    ]
+                ],
+                "residues": [
+                    {
+                        "auth_asym_id": "F",
+                        "auth_seq_id": "1",
+                        "entity_id": "2",
+                        "id": "F1",
+                        "label_comp_id": "BGC",
+                        "operator": "",
+                        "orig_auth_asym_id": "F",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "F",
+                        "auth_seq_id": "2",
+                        "entity_id": "2",
+                        "id": "F2",
+                        "label_comp_id": "GAL",
+                        "operator": "",
+                        "orig_auth_asym_id": "F",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "F",
+                        "auth_seq_id": "3",
+                        "entity_id": "2",
+                        "id": "F3",
+                        "label_comp_id": "GLA",
+                        "operator": "",
+                        "orig_auth_asym_id": "F",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm1"
+        },
+        {
+            "composition": {
+                "connections": [
+                    [
+                        "G1",
+                        "G2"
+                    ],
+                    [
+                        "G2",
+                        "G3"
+                    ]
+                ],
+                "residues": [
+                    {
+                        "auth_asym_id": "G",
+                        "auth_seq_id": "1",
+                        "entity_id": "2",
+                        "id": "G1",
+                        "label_comp_id": "BGC",
+                        "operator": "",
+                        "orig_auth_asym_id": "G",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "G",
+                        "auth_seq_id": "2",
+                        "entity_id": "2",
+                        "id": "G2",
+                        "label_comp_id": "GAL",
+                        "operator": "",
+                        "orig_auth_asym_id": "G",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "G",
+                        "auth_seq_id": "3",
+                        "entity_id": "2",
+                        "id": "G3",
+                        "label_comp_id": "GLA",
+                        "operator": "",
+                        "orig_auth_asym_id": "G",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm2"
+        },
+        {
+            "composition": {
+                "connections": [
+                    [
+                        "H2",
+                        "H1"
+                    ],
+                    [
+                        "H2",
+                        "H3"
+                    ]
+                ],
+                "residues": [
+                    {
+                        "auth_asym_id": "H",
+                        "auth_seq_id": "1",
+                        "entity_id": "2",
+                        "id": "H1",
+                        "label_comp_id": "BGC",
+                        "operator": "",
+                        "orig_auth_asym_id": "H",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "H",
+                        "auth_seq_id": "2",
+                        "entity_id": "2",
+                        "id": "H2",
+                        "label_comp_id": "GAL",
+                        "operator": "",
+                        "orig_auth_asym_id": "H",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "H",
+                        "auth_seq_id": "3",
+                        "entity_id": "2",
+                        "id": "H3",
+                        "label_comp_id": "GLA",
+                        "operator": "",
+                        "orig_auth_asym_id": "H",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm3"
+        },
+        {
+            "composition": {
+                "connections": [
+                    [
+                        "I3",
+                        "I2"
+                    ],
+                    [
+                        "I1",
+                        "I2"
+                    ]
+                ],
+                "residues": [
+                    {
+                        "auth_asym_id": "I",
+                        "auth_seq_id": "1",
+                        "entity_id": "2",
+                        "id": "I1",
+                        "label_comp_id": "BGC",
+                        "operator": "",
+                        "orig_auth_asym_id": "I",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "I",
+                        "auth_seq_id": "2",
+                        "entity_id": "2",
+                        "id": "I2",
+                        "label_comp_id": "GAL",
+                        "operator": "",
+                        "orig_auth_asym_id": "I",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "I",
+                        "auth_seq_id": "3",
+                        "entity_id": "2",
+                        "id": "I3",
+                        "label_comp_id": "GLA",
+                        "operator": "",
+                        "orig_auth_asym_id": "I",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm4"
+        },
+        {
+            "composition": {
+                "connections": [
+                    [
+                        "J2",
+                        "J1"
+                    ],
+                    [
+                        "J2",
+                        "J3"
+                    ]
+                ],
+                "residues": [
+                    {
+                        "auth_asym_id": "J",
+                        "auth_seq_id": "1",
+                        "entity_id": "2",
+                        "id": "J1",
+                        "label_comp_id": "BGC",
+                        "operator": "",
+                        "orig_auth_asym_id": "J",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "J",
+                        "auth_seq_id": "2",
+                        "entity_id": "2",
+                        "id": "J2",
+                        "label_comp_id": "GAL",
+                        "operator": "",
+                        "orig_auth_asym_id": "J",
+                        "pdbx_PDB_ins_code": " "
+                    },
+                    {
+                        "auth_asym_id": "J",
+                        "auth_seq_id": "3",
+                        "entity_id": "2",
+                        "id": "J3",
+                        "label_comp_id": "GLA",
+                        "operator": "",
+                        "orig_auth_asym_id": "J",
+                        "pdbx_PDB_ins_code": " "
+                    }
+                ]
+            },
+            "id": "bm5"
+        }
+    ],
+    "entry": "1c4q"
+}
