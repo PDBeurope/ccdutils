@@ -157,11 +157,13 @@ class Descriptor(NamedTuple):
     Args:
         type (str): `_pdbx_chem_comp_descriptor.type` in CIF language.
         program (str): `_pdbx_chem_comp_descriptor.program` in CIF language.
+        program_version (str): `_pdbx_chem_comp_descriptor.program_version` in CIF language.
         value (str): `_pdbx_chem_comp_descriptor.descriptor` in CIF language.
     """
 
     type: str
     program: str
+    program_version: str
     value: str
 
 
