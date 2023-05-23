@@ -22,6 +22,7 @@ of proteins and creating Component representation of molecules.
 
 import os
 import rdkit
+from datetime import date
 from collections import namedtuple
 from gemmi import cif
 from networkx import MultiDiGraph
@@ -114,20 +115,43 @@ def infer_multiple_chem_comp(
 
     inchikey = mol_tools.inchikey_from_inchi(inchi_result.inchi)
     descriptors = [
-        Descriptor(type="InChI", program="rdkit", value=inchi_result.inchi),
-        Descriptor(type="InChIKey", program="rdkit", value=inchikey),
+        Descriptor(
+            type="SMILES",
+            program="rdkit",
+            program_version=rdkit.__version__,
+            value=rdkit.Chem.MolToSmiles(mol),
+        ),
+        Descriptor(
+            type="InChI",
+            program="rdkit",
+            program_version=rdkit.__version__,
+            value=inchi_result.inchi,
+        ),
+        Descriptor(
+            type="InChIKey",
+            program="rdkit",
+            program_version=rdkit.__version__,
+            value=inchikey,
+        ),
     ]
+
+    # define release category based on warnings or errors
+    pdbx_release_status = models.ReleaseStatus.NOT_SET
+    if warnings or errors:
+        pdbx_release_status = models.ReleaseStatus.HOLD
+    else:
+        pdbx_release_status = models.ReleaseStatus.REL
 
     properties = CCDProperties(
         id=bm_id,
         name=bm.name,
         formula=CalcMolFormula(mol),
-        modified_date="",
-        pdbx_release_status=models.ReleaseStatus.NOT_SET,
+        modified_date=date.today().strftime("%Y-%m-%d"),
+        pdbx_release_status=pdbx_release_status,
         weight="",
     )
 
-    comp = Component(mol.GetMol(), cif_block, properties, descriptors)
+    comp = Component(mol, cif_block, properties, descriptors)
 
     reader_result = BMReaderResult(
         warnings=warnings,
@@ -170,7 +194,7 @@ def _parse_pdb_mmcif(
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
     _add_connections(mol, bm, errors)
-    _remove_disconnected_hydrogens(mol)
+    mol = _handle_hydrogens(mol)
     return (mol, warnings, errors)
 
 
@@ -214,7 +238,7 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         atom_id = atoms["label_atom_id"][i]
         chain = atoms["auth_asym_id"][i]
         res_name = atoms["label_comp_id"][i]
-        res_id = atoms["auth_seq_id"][i]
+        res_id = int(atoms["auth_seq_id"][i])
         ins_code = (
             "" if not atoms["pdbx_PDB_ins_code"][i] else atoms["pdbx_PDB_ins_code"][i]
         )
@@ -230,8 +254,13 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
 
         atom = rdkit.Chem.Atom(element)
         atom.SetProp("name", atom_id)
-        atom.SetProp("residue", res_name)
         atom.SetProp("residue_id", residue_id)
+
+        res_info = rdkit.Chem.AtomPDBResidueInfo()
+        res_info.SetResidueName(res_name)
+        res_info.SetResidueNumber(res_id)
+        res_info.SetChainId(chain)
+        atom.SetMonomerInfo(res_info)
 
         if isotope is not None:
             atom.SetIsotope(isotope)
@@ -395,3 +424,21 @@ def _remove_disconnected_hydrogens(mol):
 
     for atom in disconnected_hydrogen_indices:
         mol.RemoveAtom(atom)
+
+
+def _handle_hydrogens(mol):
+
+    hydrogen_indices = [
+        atom.GetIdx() for atom in mol.GetAtoms() if atom.GetAtomicNum() == 1
+    ]
+
+    hydrogen_indices.sort(reverse=True)
+    for index in hydrogen_indices:
+        mol.RemoveAtom(index)
+
+    mol.UpdatePropertyCache(strict=False)
+    mol = rdkit.Chem.AddHs(mol, addCoords=True, addResidueInfo=True)
+    for atom in mol.GetAtoms():
+        if atom.GetAtomicNum() == 1:
+            atom.SetProp("name", atom.GetSymbol() + str(atom.GetIdx()))
+    return mol
