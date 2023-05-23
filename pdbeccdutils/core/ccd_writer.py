@@ -305,6 +305,28 @@ def to_xml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ide
     return xmls_tring.toprettyxml(indent="  ")
 
 
+def remove_hydrogens(cif_block_copy):
+    cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_atom.")
+    cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_bond.")
+
+    # scrap hydrogen atoms
+    h_names: List[str] = []
+    atom_table = cif_block_copy.find("_chem_comp_atom.", ["type_symbol", "atom_id"])
+    for i in range(len(atom_table) - 1, -1, -1):
+        if atom_table[i][0] == "H":
+            h_names.append(atom_table[i][1])
+            del atom_table[i]
+
+    # scrap bonds to hydrogen atoms
+    if "_chem_comp_bond." not in cif_block_copy.get_mmcif_category_names():
+        return
+
+    bond_table = cif_block_copy.find("_chem_comp_bond.", ["atom_id_1", "atom_id_2"])
+    for j in range(len(bond_table) - 1, -1, -1):
+        if (bond_table[j][0] in h_names) or (bond_table[j][1] in h_names):
+            del bond_table[j]
+
+
 def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
     """Converts structure to the PDB CIF format. Both model and ideal
     coordinates are stored. In case ideal coordinates are missing, rdkit
@@ -315,27 +337,6 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
         component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
     """
-
-    def remove_hydrogens(cif_block_copy):
-        cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_atom.")
-        cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_bond.")
-
-        # scrap hydrogen atoms
-        h_names: List[str] = []
-        atom_table = cif_block_copy.find("_chem_comp_atom.", ["type_symbol", "atom_id"])
-        for i in range(len(atom_table) - 1, -1, -1):
-            if atom_table[i][0] == "H":
-                h_names.append(atom_table[i][1])
-                del atom_table[i]
-
-        # scrap bonds to hydrogen atoms
-        if "_chem_comp_bond." not in cif_block_copy.get_mmcif_category_names():
-            return
-
-        bond_table = cif_block_copy.find("_chem_comp_bond.", ["atom_id_1", "atom_id_2"])
-        for j in range(len(bond_table) - 1, -1, -1):
-            if (bond_table[j][0] in h_names) or (bond_table[j][1] in h_names):
-                del bond_table[j]
 
     if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
         component.ccd_cif_block = _to_pdb_ccd_cif_block(component)
@@ -549,10 +550,6 @@ def _prepate_structure(component, remove_hs, conf_type):
     else:
         mol_to_save = component.mol
 
-    # mol_to_save = (
-    #     component.mol2D if conf_type == ConformerType.Depiction else component.mol
-    # )
-
     if remove_hs:
         mol_to_save = rdkit.Chem.RemoveHs(mol_to_save, sanitize=False)
         mol_to_save.UpdatePropertyCache(strict=False)
@@ -603,7 +600,6 @@ def _write_pdb_ccd_cif_info(cif_block, component):
         {
             "id": component.id,
             "type": "NON-POLYMER",
-            "pdbx_type": "HETAIN",
             "formula": cif.quote(component.formula)
             if component.formula
             else cif.quote(calc_formula),
