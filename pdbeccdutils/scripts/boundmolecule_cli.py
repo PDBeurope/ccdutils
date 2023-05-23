@@ -18,13 +18,16 @@
 import argparse
 import logging
 import os
+import traceback
 import json
-
-from pdbeccdutils.core import bm_reader
+from pathlib import Path
+from pdbeccdutils.core import bm_reader, bm_writer
+from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import EntryFailedException
 from pdbeccdutils.core.models import ConformerType, DepictionSource
+from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.utils import config
 from pdbeccdutils.helpers import cif_tools, helper
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
@@ -37,6 +40,7 @@ class PDBeBmManager:
         self,
         pubchem_templates=str(),
         general_templates=config.general_templates,
+        library_path=config.fragment_library,
         discarded_ligands=config.DISCARDED_RESIDUES,
     ):
         """Initialize manager
@@ -55,6 +59,10 @@ class PDBeBmManager:
 
         # helper class to get nice depictions
         self.depictions = DepictionManager(pubchem_templates, general_templates)
+
+        # Fragments library to get substructure matches
+        self.fragment_library = FragmentLibrary(library_path)
+
         self.discarded = discarded_ligands
 
     def process_entry(self, input_cif: str, pdb_id: str, output_dir: str):
@@ -89,12 +97,15 @@ class PDBeBmManager:
                 fixed_mmcif_file, pdb_id, sanitize=True
             )
             for bm_reader_result in bm_reader_results:
-                self.process_bm_component(pdb_id, bm_reader_result, output_dir)
+                component = bm_reader_result.component
+                bm_out_dir = os.path.join(output_dir, component.id)
+                os.makedirs(bm_out_dir, exist_ok=True)
+                self.process_single_component(bm_reader_result, bm_out_dir)
             self._write_out_bm(pdb_id, bm_reader_results, output_dir)
         else:
             raise EntryFailedException(f"Preprocessing of {pdb_id} failed")
 
-    def process_bm_component(
+    def process_single_component(
         self, bm_reader_result: list[bm_reader.BMReaderResult], output_dir: str
     ):
         """Processes identified bound-molecules
@@ -106,18 +117,33 @@ class PDBeBmManager:
             bm_reader_result: List of BMReaderResult
             output_dir: Path to ooutput directory
         """
+        try:
+            component = bm_reader_result.component
+            logging.info(f"{component.id} | processing...")
 
-        component = bm_reader_result.component
-        logging.info(f"{component.id} | processing...")
+            # check parsing
+            self._check_component_parsing(bm_reader_result)
+            self._generate_ideal_structure(component)
 
-        # check parsing
-        self._check_component_parsing(bm_reader_result)
+            # download templates if the user wants them.
+            if self.pubchem is not None:
+                self._download_template(component)
 
-        # download templates if the user wants them.
-        if self.pubchem is not None:
-            self._download_template(component)
+            # search fragment library
+            self._search_fragment_library(component)
 
-        self._generate_depictions(component, output_dir)
+            # get scaffolds
+            self._compute_component_scaffolds(component)
+
+            # write out files
+            self._generate_depictions(component, output_dir)
+            self._export_structure_formats(component, output_dir)
+            return True
+        except Exception:
+            logging.error(
+                f"{bm_reader_result.component.id} | FAILURE {traceback.format_exc()}."
+            )
+            return False
 
     def _write_out_bm(
         self,
@@ -251,6 +277,90 @@ class PDBeBmManager:
             os.path.join(out_dir, f"{component.id}_annotation.json"),
             wedge_bonds=wedge_bonds,
         )
+
+    def _search_fragment_library(self, component: Component):
+        """Search fragment library to find hits
+
+        Args:
+            component (Component): Component to be processed
+        """
+
+        matches = component.library_search(self.fragment_library)
+
+        if matches:
+            logging.debug(
+                f"{len(matches)} matches found in the library `{self.fragment_library.name}`."
+            )
+
+    def _compute_component_scaffolds(self, component: Component):
+        """Compute scaffolds for a given component.
+
+        Args:
+            component (Component): Component to be processed
+        """
+
+        try:
+            component.get_scaffolds()
+        except CCDUtilsError as e:
+            logging.error(str(e))
+
+            return
+
+        logging.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
+
+    def _export_structure_formats(self, component: Component, out_dir: Path):
+        """Writes out component in a different formats as required for the
+        PDBeChem FTP area.
+
+        Args:
+            component (Component): Component being processed.
+            out_dir (Path): Where the results should be written
+        """
+
+        self.__write_molecule(
+            out_dir / f"{component.id}_model.sdf",
+            component,
+            ConformerType.Model,
+        )
+
+        self.__write_molecule(
+            out_dir / f"{component.id}_model.pdb",
+            component,
+            ConformerType.Model,
+        )
+        self.__write_molecule(
+            out_dir / f"{component.id}.cml",
+            component,
+            ConformerType.Model,
+        )
+        self.__write_molecule(
+            out_dir / f"{component.id}.cif",
+            component,
+            ConformerType.AllConformers,
+        )
+
+    def __write_molecule(self, path, component, conformer_type):
+        """Write out deemed structure.
+
+        Args:
+            path (Path): Path where the molecule will be stored.
+            component (Component): Component to be written.
+            alt_names (bool): Whether or not molecule will be written with
+                alternate names.
+            conformer_type (Component): Conformer to be written.
+        """
+        try:
+            bm_writer.write_molecule(
+                path,
+                component,
+                remove_hs=False,
+                conf_type=conformer_type,
+            )
+        except Exception:
+            logging.error(f"error writing {path}.")
+
+            with open(path, "w") as f:
+                f.write("")
 
 
 def create_parser():
