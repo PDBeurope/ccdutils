@@ -371,11 +371,14 @@ def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
     if cat_name not in cif_block.get_mmcif_category_names():
         return descriptors
 
-    descriptors_block = cif_block.find(cat_name, [label, "type", "program"])
+    descriptors_block = cif_block.find(
+        cat_name, [label, "type", "program", "program_version"]
+    )
     for row in descriptors_block:
         d = Descriptor(
             type=row[f"{cat_name}type"],
             program=row[f"{cat_name}program"],
+            program_version=row[f"{cat_name}program_version"],
             value=row[f"{cat_name}{label}"],
         )
         descriptors.append(d)
