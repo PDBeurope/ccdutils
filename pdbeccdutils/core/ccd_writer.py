@@ -738,11 +738,17 @@ def _write_pdb_ccd_cif_descriptor(cif_block, component):
 
     label = "_pdbx_chem_comp_descriptor."
 
-    descriptor_fields = ["comp_id", "type", "program", "descriptor"]
+    descriptor_fields = ["comp_id", "type", "program", "program_version", "descriptor"]
     descriptor_loop = cif_block.init_loop(label, descriptor_fields)
 
     for entry in component.descriptors:
-        new_row = [component.id, entry.type, entry.program, entry.value]
+        new_row = [
+            component.id,
+            entry.type,
+            entry.program,
+            entry.program_version,
+            entry.value,
+        ]
         descriptor_loop.add_row(cif.quote_list(new_row))
 
 
