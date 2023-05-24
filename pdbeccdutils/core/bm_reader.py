@@ -427,6 +427,12 @@ def _remove_disconnected_hydrogens(mol):
 
 
 def _handle_hydrogens(mol):
+    """
+    Returns a rdkit.Chem.rdchem.Mol after adding hydrogens
+
+    Args:
+        mol: Rdkit Mol object
+    """
 
     hydrogen_indices = [
         atom.GetIdx() for atom in mol.GetAtoms() if atom.GetAtomicNum() == 1
