@@ -30,8 +30,6 @@ def write_molecule(
         component (Component): Component to be exported
         remove_hs (bool, optional): Defaults to True. Whether or not
             hydrogens should be removed.
-        alt_names (bool, optional): Defaults to False. Whether or not
-            alternate names should be exported.
         conf_type (ConformerType, optional):
             Defaults to ConformerType.Ideal. Conformer type to be
             exported.
@@ -80,8 +78,6 @@ def to_pdb_str(
     Args:
         Component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
-        alt_names (bool, optional): Defaults to False. Whether or not
-            alternate atom names should be exported.
         conf_type (ConformerType, optional): Defaults to ConformerType.Ideal.
 
     Returns:
@@ -368,7 +364,6 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
         "alt_atom_id",
         "type_symbol",
         "charge",
-        "pdbx_align",
         "pdbx_aromatic_flag",
         "pdbx_leaving_atom_flag",
         "pdbx_stereo_config",
@@ -392,7 +387,6 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
             _get_atom_name(atom),
             atom.GetSymbol(),
             str(atom.GetFormalCharge()),
-            None,
             "Y" if atom.GetIsAromatic() else "N",
             "N",
             ccd_writer._get_ccd_cif_chiral_type(atom),
