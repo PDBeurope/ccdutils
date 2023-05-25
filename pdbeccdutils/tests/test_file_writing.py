@@ -197,7 +197,7 @@ class TestFileWrites:
         path = tmpdir.join(f"{component.id}.cif")
         to_check = must_have_categories.copy()
 
-        component.ccd_cif_dict = None
+        component.ccd_cif_block = None
         ccd_writer.write_molecule(str(path), component, remove_hs=rem_hs)
         cif_block = cif.read(str(path)).sole_block()
 
