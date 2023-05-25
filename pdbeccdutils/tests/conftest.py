@@ -4,10 +4,9 @@ import pytest
 from pdbeccdutils.core import ccd_reader, bm_reader
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
-from pdbeccdutils.tests.tst_utilities import supply_list_of_cifs_with_boundmolecules
+from pdbeccdutils.tests.tst_utilities import updated_mmcif_filename
 
 sample_ccd_cifs = supply_list_of_sample_cifs()
-sample_cifs_with_boundmolecules = supply_list_of_cifs_with_boundmolecules()
 problematic_ids = ["UNL", "NA", "SY9", "10R", "ASX", "0KA"]
 
 
@@ -22,18 +21,25 @@ def component(request):
     return c
 
 
-@pytest.fixture(scope="session", params=sample_cifs_with_boundmolecules)
-def boundMolecules(request):
-    reader_list = bm_reader.read_pdb_cif_file(request.param)
-    bm_components = []
-    for reader_result in reader_list:
-        c = reader_result.component
-        assert reader_result.errors == []
-        bm_components.append(c)
-
-    return bm_components
-
-
 @pytest.fixture(scope="session")
 def library():
     return FragmentLibrary()
+
+
+@pytest.fixture(scope="session")
+def component_globotriose():
+    """
+    load 1c4q_processed.cif.gz and returns the
+    component object of globotriose
+
+    Returns:
+        pdbeccdutils.core.component.Component: component object for
+        globotriose
+    """
+    cif_file = updated_mmcif_filename("1c4q")
+    reader_result = bm_reader.read_pdb_cif_file(cif_file)[0]
+    assert reader_result.warnings == []
+    assert reader_result.errors == []
+    component = reader_result.component
+
+    return component
