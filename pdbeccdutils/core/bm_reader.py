@@ -140,7 +140,7 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
         id=bm_id,
         name=bm.name,
         formula=CalcMolFormula(mol),
-        modified_date=date.today().strftime("%Y-%m-%d"),
+        modified_date=date.today(),
         pdbx_release_status=pdbx_release_status,
         weight="",
     )
