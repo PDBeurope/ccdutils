@@ -3,6 +3,7 @@ import math
 from pathlib import Path
 import rdkit
 import gemmi
+from gemmi import cif
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 
@@ -270,7 +271,9 @@ def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
         remove_hs (bool, optional): Defaults to True.
     """
 
-    if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
+    if not isinstance(component.ccd_cif_block, gemmi.cif.Block) or (
+        component.id != component.ccd_cif_block.name
+    ):
         component.ccd_cif_block = _to_pdb_bm_cif_block(component)
 
     temp_doc = gemmi.cif.Document()
@@ -324,6 +327,7 @@ def _write_pdb_bm_cif_info(cif_block, component):
     calc_formula = rdkit.Chem.rdMolDescriptors.CalcMolFormula(component.mol)
     calc_weight = rdkit.Chem.rdMolDescriptors.CalcExactMolWt(component.mol)
     date = component.modified_date
+    mod_date = f"{date.year}-{date.month:02d}-{date.day:02d}"
 
     label = "_chem_comp."
     cif_block.set_pairs(
@@ -332,15 +336,13 @@ def _write_pdb_bm_cif_info(cif_block, component):
             "id": component.id,
             "type": "NON-POLYMER",
             "pdbx_type": "HETAIN",
-            "formula": gemmi.cif.quote(component.formula)
-            if component.formula
-            else gemmi.cif.quote(calc_formula),
+            "formula": component.formula or calc_formula,
             "formula_weight": f"{calc_weight:.3f}",
-            "pdbx_modified_date": date,
+            "pdbx_modified_date": mod_date,
             "pdbx_release_status": component.pdbx_release_status.name,
             "pdbx_processing_site": "PDBe",
         },
-        raw=True,
+        raw=False,
     )
 
 
@@ -383,8 +385,8 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
         res_info = atom.GetPDBResidueInfo()
         new_row = [
             component.id,
-            _get_atom_name(atom),
-            _get_atom_name(atom),
+            cif.as_string(_get_atom_name(atom)),
+            cif.as_string(_get_atom_name(atom)),
             atom.GetSymbol(),
             str(atom.GetFormalCharge()),
             "Y" if atom.GetIsAromatic() else "N",
@@ -399,7 +401,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
             str(atom.GetIdx() + 1),
         ]
 
-        atom_loop.add_row(gemmi.cif.quote_list(new_row))
+        atom_loop.add_row(cif.quote_list(new_row))
 
 
 def _write_pdb_bm_cif_bonds(cif_block, component):
@@ -432,8 +434,8 @@ def _write_pdb_bm_cif_bonds(cif_block, component):
 
         new_row = [
             component.id,
-            _get_atom_name(atom_a),
-            _get_atom_name(atom_b),
+            cif.as_string(_get_atom_name(atom_a)),
+            cif.as_string(_get_atom_name(atom_b)),
             ccd_writer._get_ccd_cif_bond_type(b),
             "Y" if b.GetIsAromatic() else "N",
             ccd_writer._get_ccd_cif_bond_stereo(b),
@@ -466,7 +468,7 @@ def _write_pdb_bm_cif_descriptor(cif_block, component):
             entry.program_version,
             entry.value,
         ]
-        descriptor_loop.add_row(gemmi.cif.quote_list(new_row))
+        descriptor_loop.add_row(cif.quote_list(new_row))
 
 
 def _get_atom_name(atom):
@@ -487,7 +489,6 @@ def _get_residue_number(component):
     for atom in component.mol.GetAtoms():
         res_info = atom.GetPDBResidueInfo()
         res_id = res_info.GetResidueNumber()
-        # res_id = atom.GetProp("residue_id")
         if res_id not in res_id_mapping:
             res_num += 1
             res_id_mapping[res_id] = res_num
