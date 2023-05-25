@@ -204,11 +204,11 @@ def _parse_pdb_atoms(mol, cif_block):
         ["atom_id", "type_symbol", "alt_atom_id", "pdbx_leaving_atom_flag", "charge"],
     )
     for row in atoms:
-        atom_id = row["_chem_comp_atom.atom_id"].strip('"')
-        element = row["_chem_comp_atom.type_symbol"].strip('"')
-        alt_atom_id = row["_chem_comp_atom.alt_atom_id"].strip('"')
-        leaving_atom = row["_chem_comp_atom.pdbx_leaving_atom_flag"].strip('"')
-        charge = row["_chem_comp_atom.charge"].strip('"')
+        atom_id = cif.as_string(row["_chem_comp_atom.atom_id"])
+        element = cif.as_string(row["_chem_comp_atom.type_symbol"])
+        alt_atom_id = cif.as_string(row["_chem_comp_atom.alt_atom_id"])
+        leaving_atom = cif.as_string(row["_chem_comp_atom.pdbx_leaving_atom_flag"])
+        charge = cif.as_string(row["_chem_comp_atom.charge"])
 
         element = element if len(element) == 1 else element[0] + element[1].lower()
         isotope = None
@@ -376,10 +376,10 @@ def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
     )
     for row in descriptors_block:
         d = Descriptor(
-            type=row[f"{cat_name}type"],
-            program=row[f"{cat_name}program"],
-            program_version=row[f"{cat_name}program_version"],
-            value=row[f"{cat_name}{label}"],
+            type=cif.as_string(row[f"{cat_name}type"]),
+            program=cif.as_string(row[f"{cat_name}program"]),
+            program_version=cif.as_string(row[f"{cat_name}program_version"]),
+            value=cif.as_string(row[f"{cat_name}{label}"]),
         )
         descriptors.append(d)
 
@@ -411,9 +411,9 @@ def _parse_pdb_properties(cif_block):
         weight = 0.0 if cif.is_null(formula_weight) else cif.as_number(formula_weight)
 
         properties = CCDProperties(
-            id=cif_block.find_value("_chem_comp.id"),
-            name=cif_block.find_value("_chem_comp.name").strip('"'),
-            formula=cif_block.find_value("_chem_comp.formula").strip('"'),
+            id=cif.as_string(cif_block.find_value("_chem_comp.id")),
+            name=cif.as_string(cif_block.find_value("_chem_comp.name")),
+            formula=cif.as_string(cif_block.find_value("_chem_comp.formula")),
             modified_date=d,
             pdbx_release_status=rel_status,
             weight=weight,

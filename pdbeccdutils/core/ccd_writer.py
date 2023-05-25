@@ -600,16 +600,14 @@ def _write_pdb_ccd_cif_info(cif_block, component):
         {
             "id": component.id,
             "type": "NON-POLYMER",
-            "formula": cif.quote(component.formula)
-            if component.formula
-            else cif.quote(calc_formula),
+            "formula": component.formula or calc_formula,
             "formula_weight": f"{calc_weight:.3f}",
             "three_letter_code": component.id,
             "pdbx_type": "HETAIN",
             "pdbx_modified_date": mod_date,
             "pdbx_release_status": component.pdbx_release_status.name,
         },
-        raw=True,
+        raw=False,
     )
 
 
@@ -667,7 +665,7 @@ def _write_pdb_ccd_cif_atoms(cif_block, component):
             _get_alt_atom_name(atom),
             atom.GetSymbol(),
             str(atom.GetFormalCharge()),
-            "?",
+            None,
             "Y" if atom.GetIsAromatic() else "N",
             "N",
             _get_ccd_cif_chiral_type(atom),
