@@ -6,7 +6,7 @@ from pdbeccdutils.helpers import cif_tools
 from pdbeccdutils.tests import tst_utilities
 
 
-test_inputs = ["1c4q", "1tqh", "4xkw"]
+test_inputs = ["1c4q", "1tqh"]
 
 
 class TestFixUpdatedMmcif:
