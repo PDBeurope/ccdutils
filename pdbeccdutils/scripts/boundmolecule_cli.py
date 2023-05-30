@@ -20,7 +20,6 @@ import logging
 import os
 import traceback
 import json
-from pathlib import Path
 from pdbeccdutils.core import bm_reader, bm_writer
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.component import Component
@@ -306,7 +305,7 @@ class PDBeBmManager:
 
         logging.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
 
-    def _export_structure_formats(self, component: Component, out_dir: Path):
+    def _export_structure_formats(self, component: Component, out_dir: str):
         """Writes out component in a different formats as required for the
         PDBeChem FTP area.
 
@@ -316,23 +315,23 @@ class PDBeBmManager:
         """
 
         self.__write_molecule(
-            out_dir / f"{component.id}_model.sdf",
+            os.path.join(out_dir, f"{component.id}_model.sdf"),
             component,
             ConformerType.Model,
         )
 
         self.__write_molecule(
-            out_dir / f"{component.id}_model.pdb",
+            os.path.join(out_dir, f"{component.id}_model.pdb"),
             component,
             ConformerType.Model,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}.cml",
+            os.path.join(out_dir, f"{component.id}.cml"),
             component,
             ConformerType.Model,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}.cif",
+            os.path.join(out_dir, f"{component.id}.cif"),
             component,
             ConformerType.AllConformers,
         )
