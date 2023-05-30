@@ -1,10 +1,12 @@
 import json
 import math
 from pathlib import Path
+
 import rdkit
 import gemmi
 from gemmi import cif
 from xml.dom import minidom
+from datetime import date as Date
 from xml.etree import ElementTree as ET
 
 import pdbeccdutils
@@ -21,7 +23,7 @@ def write_molecule(
     conf_type: ConformerType = ConformerType.Model,
 ):
     """Export molecule in a specified format. Presently supported formats
-    are: PDB CCD CIF (*.cif); Mol file (*.sdf); Chemical Markup language
+    are: PDB mmCIF (*.cif); Mol file (*.sdf); Chemical Markup language
     (*.cml); PDB file (*.pdb); XYZ file (*.xyz); XML (*.xml).
     ConformerType.AllConformers is presently supported only for PDB.
 
@@ -264,16 +266,14 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
 
 
 def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
-    """Converts structure to the PDB CIF format.
+    """Converts structure to the PDB mmCIF format.
     Args:
         path (str): Path to save cif file.
         component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
     """
 
-    if not isinstance(component.ccd_cif_block, gemmi.cif.Block) or (
-        component.id != component.ccd_cif_block.name
-    ):
+    if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
         component.ccd_cif_block = _to_pdb_bm_cif_block(component)
 
     temp_doc = gemmi.cif.Document()
@@ -327,7 +327,11 @@ def _write_pdb_bm_cif_info(cif_block, component):
     calc_formula = rdkit.Chem.rdMolDescriptors.CalcMolFormula(component.mol)
     calc_weight = rdkit.Chem.rdMolDescriptors.CalcExactMolWt(component.mol)
     date = component.modified_date
-    mod_date = f"{date.year}-{date.month:02d}-{date.day:02d}"
+    mod_date = (
+        f"{date.year}-{date.month:02d}-{date.day:02d}"
+        if isinstance(date, Date)
+        else date
+    )
 
     label = "_chem_comp."
     cif_block.set_pairs(
@@ -484,6 +488,15 @@ def _get_atom_name(atom):
 
 
 def _get_residue_number(component):
+    """Maps residue ids of chemcial components from protein
+    to bound-molecule
+
+    Args:
+        component: Component
+
+    Returns:
+        A dictionary of mappings of residue ids
+    """
     res_id_mapping = {}
     res_num = 0
     for atom in component.mol.GetAtoms():
