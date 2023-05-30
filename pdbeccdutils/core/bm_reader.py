@@ -28,7 +28,7 @@ from gemmi import cif
 from networkx import MultiDiGraph
 
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
-from pdbeccdutils.core import ccd_reader, models
+from pdbeccdutils.core import ccd_reader, models, bm_writer
 from pdbeccdutils.core.boundmolecule import infer_bound_molecules
 from pdbeccdutils.utils import config
 from pdbeccdutils.core.component import Component
@@ -151,7 +151,8 @@ def infer_multiple_chem_comp(
         weight="",
     )
 
-    comp = Component(mol, cif_block, properties, descriptors)
+    comp = Component(mol, None, properties, descriptors)
+    comp.ccd_cif_block = bm_writer._to_pdb_bm_cif_block(comp)
 
     reader_result = BMReaderResult(
         warnings=warnings,
