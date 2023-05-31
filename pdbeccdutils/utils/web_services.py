@@ -18,7 +18,7 @@
 """module handling UniChem mapping
 """
 
-import requests
+from pdbeccdutils.helpers import helper
 
 # these are the resources we agreed on providing as part of the PDBeChem
 agreed_resources = {
@@ -132,8 +132,9 @@ def _download_unichem_mapping(inchikey, resources):
     url = f"{url_prefix}/{inchikey}"
 
     try:
-        headers = {"Content-Type": "application/json"}
-        r = requests.get(url, headers)
+        r = helper.requests_retry_session().get(
+            url, headers={"Content-Type": "application/json"}
+        )
         jsonFile = r.json()
 
         for entity in jsonFile:
