@@ -22,6 +22,9 @@ import os
 import sys
 import argparse
 import logging
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 import rdkit
 
@@ -131,3 +134,25 @@ def check_args(args: argparse.Namespace) -> None:
 
     if not args.pdb_id:
         args.pdb_id = os.path.basename(args.input)[0:4]
+
+
+def requests_retry_session(
+    retries=4,
+    backoff_factor=1,
+    status_forcelist=(429, 500, 502, 503, 504),
+    session=None,
+):
+
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
