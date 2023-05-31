@@ -19,10 +19,10 @@
 import os
 
 import numpy
-import requests
 from pdbeccdutils.core import ccd_reader
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from pdbeccdutils.helpers import helper
 
 import logging
 
@@ -65,7 +65,7 @@ def download_template(destination: str, template_id: str, inchikey: str) -> bool
         return False
 
     inchi_url = f"{pubchem_api}/inchikey/{inchikey}/cids/json"
-    response = requests.get(inchi_url)
+    response = helper.requests_retry_session().get(inchi_url)
 
     if response.status_code != 200:
         return False
@@ -74,7 +74,7 @@ def download_template(destination: str, template_id: str, inchikey: str) -> bool
     cid = json_file["IdentifierList"]["CID"][0]
 
     structure_url = f"{pubchem_api}/cid/{cid}/record/SDF/?record_type=2d&response_type=save&response_basename={template_id}.sdf"
-    response = requests.get(structure_url)
+    response = helper.requests_retry_session().get(structure_url)
 
     if response.status_code != 200:
         return False

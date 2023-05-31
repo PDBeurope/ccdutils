@@ -13,7 +13,6 @@ from pdbeccdutils.scripts.boundmolecule_cli import (
 )
 
 
-@pytest.mark.bm
 class TestBoundmoleculeProcessig:
     """
     run boundmolecule_cli on test file:
