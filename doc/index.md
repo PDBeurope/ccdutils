@@ -10,6 +10,7 @@ Getting started with pdbeccdutils
 guide/intro
 guide/depictions
 guide/fragments
+guide/scaffolds
 guide/pipelines
 ```
 
