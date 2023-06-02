@@ -4,7 +4,7 @@
 
 # Fragments
 
-`pdbeccdutils` comes with the code to search components using common fragments. Presently, the fragment library contains some ~2k fragments which were manually currated at PDBe and collaborating resources (ENAMINE, DSI). Should you wish to check all the fragments which come with code, please check `pdbeccdutils/data/fragment_library.tsv` file.
+`pdbeccdutils` comes with the code to search components using common fragments. Presently, the fragment library contains 2158 fragments which were manually currated at PDBe and collaborating resources (ENAMINE, DSI). Should you wish to check all the fragments which come with code, please check `pdbeccdutils/data/fragment_library.tsv` file.
 
 Alternativelly fragments can be supplied in an external library (*.tsv) provided the library is formatted accordingly:
 
@@ -26,9 +26,8 @@ fragment_library = FragmentLibrary()
 matches = component.library_search(library)
 print(f'Matches found in the fragment library {matches}.')
 
-for k, v in component.fragments:
-    print(f'Fragment name {k} from source {v.source}')
-    print(f'Matches this substructure: {v}')
+for fragment in component.fragments:
+    print(f'Fragment name {fragment.name} from source {fragment.source}')
 ```
 
 ## PDBe supplied fragments
