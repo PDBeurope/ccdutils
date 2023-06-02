@@ -195,7 +195,8 @@ def _parse_pdb_mmcif(
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
     _add_connections(mol, bm, errors)
-    mol = _handle_hydrogens(mol)
+    _remove_disconnected_hydrogens(mol)
+    # mol = _handle_hydrogens(mol)
     return (mol, warnings, errors)
 
 
@@ -253,8 +254,10 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         elif element == "X":
             element = "*"
 
+        atom_name = f"{element}{i}"
         atom = rdkit.Chem.Atom(element)
-        atom.SetProp("name", atom_id)
+        atom.SetProp("name", atom_name)
+        atom.SetProp("component_atom_id", atom_id)
         atom.SetProp("residue_id", residue_id)
 
         res_info = rdkit.Chem.AtomPDBResidueInfo()
