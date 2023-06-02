@@ -14,6 +14,7 @@ from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
 from pdbeccdutils.core import ccd_writer
+from pdbeccdutils.helpers import mol_tools
 
 
 def write_molecule(
@@ -99,7 +100,7 @@ def to_pdb_str(
     info.SetIsHeteroAtom(True)
 
     for atom in mol_to_save.GetAtoms():
-        flag = _get_atom_name(atom)
+        flag = ccd_writer._get_atom_name(atom)
         atom_name = f"{flag:<4}"  # make sure it is 4 characters
         info.SetName(atom_name)
         atom.SetMonomerInfo(info)
@@ -168,7 +169,7 @@ def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Mod
 
     for atom in mol_to_save.GetAtoms():
         element = atom.GetSymbol()
-        a_name = _get_atom_name(atom)
+        a_name = ccd_writer._get_atom_name(atom)
         coords = conformer.GetAtomPosition(atom.GetIdx())
 
         a_entry = ET.SubElement(
@@ -180,8 +181,8 @@ def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Mod
 
     bond_array = ET.SubElement(mol, "bondArray")
     for bond in mol_to_save.GetBonds():
-        atom_1 = _get_atom_name(bond.GetBeginAtom())
-        atom_2 = _get_atom_name(bond.GetEndAtom())
+        atom_1 = ccd_writer._get_atom_name(bond.GetBeginAtom())
+        atom_2 = ccd_writer._get_atom_name(bond.GetEndAtom())
         bond_order = ccd_writer._get_cml_bond_type(bond.GetBondType())
 
         bond_entry = ET.SubElement(bond_array, "bond")
@@ -389,8 +390,8 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
         res_info = atom.GetPDBResidueInfo()
         new_row = [
             component.id,
-            cif.as_string(_get_atom_name(atom)),
-            cif.as_string(_get_atom_name(atom)),
+            cif.as_string(ccd_writer._get_atom_name(atom)),
+            cif.as_string(ccd_writer._get_atom_name(atom)),
             atom.GetSymbol(),
             str(atom.GetFormalCharge()),
             "Y" if atom.GetIsAromatic() else "N",
@@ -401,7 +402,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
             f"{model_atom.z:.3f}",
             res_info.GetResidueName(),
             residue_numbers[res_info.GetResidueNumber()],
-            ccd_writer._get_atom_name(atom),
+            mol_tools.get_component_atom_id(atom),
             str(atom.GetIdx() + 1),
         ]
 
@@ -438,8 +439,8 @@ def _write_pdb_bm_cif_bonds(cif_block, component):
 
         new_row = [
             component.id,
-            cif.as_string(_get_atom_name(atom_a)),
-            cif.as_string(_get_atom_name(atom_b)),
+            cif.as_string(ccd_writer._get_atom_name(atom_a)),
+            cif.as_string(ccd_writer._get_atom_name(atom_b)),
             ccd_writer._get_ccd_cif_bond_type(b),
             "Y" if b.GetIsAromatic() else "N",
             ccd_writer._get_ccd_cif_bond_stereo(b),
