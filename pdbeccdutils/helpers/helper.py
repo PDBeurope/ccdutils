@@ -53,7 +53,10 @@ def bond_pdb_order(value_order):
 
 def find_atom_index(mol, residue_id, atom_id):
     for atom in mol.GetAtoms():
-        if atom.GetProp("residue_id") == residue_id and atom.GetProp("name") == atom_id:
+        if (
+            atom.GetProp("residue_id") == residue_id
+            and atom.GetProp("component_atom_id") == atom_id
+        ):
             return atom.GetIdx()
 
 
