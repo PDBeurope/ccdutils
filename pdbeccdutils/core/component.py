@@ -148,8 +148,9 @@ class Component:
 
     @property
     def modified_date(self) -> date:
-        """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
-        Obtained from PDB-CCD's _pdbx_chem_comp_descriptor:
+        """Supply the pdbx_modified_date for the PDB-CCD
+        Obtained from PDB-CCD's _chem_comp.pdbx_modified_date:
+
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html
 
@@ -160,8 +161,9 @@ class Component:
 
     @property
     def descriptors(self) -> List[Descriptor]:
-        """Supply the pdbx_modified_date for the PDB-CCD
-        Obtained from PDB-CCD's _chem_comp.pdbx_modified_date:
+        """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
+        Obtained from PDB-CCD's _pdbx_chem_comp_descriptor:
+
 
         http://mmcif.rcsb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.program_version.html
 
