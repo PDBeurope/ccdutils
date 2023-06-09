@@ -107,7 +107,7 @@ def to_pdb_str(
 
     pdb_title = [
         f"HEADER    {conf_type.name} coordinates",
-        f" for PDB-BM {component.id}",
+        f" for PDB-CLC {component.id}",
         f"COMPND    {component.id}",
         f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
         f"AUTHOR    RDKit {rdkit.__version__}",
@@ -210,7 +210,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     """
     conformer_ids = []
     content = [
-        f"HEADER    {conf_name} coordinates for PDB-BM {component_id}",
+        f"HEADER    {conf_name} coordinates for PDB-CLC {component_id}",
         f"COMPND    {component_id}",
         f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
         f"AUTHOR    RDKit {rdkit.__version__}",
