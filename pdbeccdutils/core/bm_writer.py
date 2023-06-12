@@ -91,19 +91,14 @@ def to_pdb_str(
         component, remove_hs, conf_type
     )
 
-    info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
-    info.SetResidueName(f"{component.id:>3}")
-    info.SetTempFactor(20.0)
-    info.SetOccupancy(1.0)
-    info.SetChainId("A")
-    info.SetResidueNumber(1)
-    info.SetIsHeteroAtom(True)
-
     for atom in mol_to_save.GetAtoms():
         flag = ccd_writer._get_atom_name(atom)
         atom_name = f"{flag:<4}"  # make sure it is 4 characters
-        info.SetName(atom_name)
-        atom.SetMonomerInfo(info)
+        res_info = atom.GetPDBResidueInfo()
+        res_info.SetName(atom_name)
+        res_info.SetTempFactor(20.0)
+        res_info.SetOccupancy(1.0)
+        res_info.SetChainId("A")
 
     pdb_title = [
         f"HEADER    {conf_type.name} coordinates",
@@ -226,14 +221,15 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
 
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
+            res_info = atom.GetPDBResidueInfo()
 
             s = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}".format(
                 "HETATM",
                 i + 1,
                 atom.GetProp("name"),
-                component_id,
+                res_info.GetResidueName(),
                 "A",
-                1,
+                res_info.GetResidueNumber(),
                 " ",
                 rdkit_conformer.GetAtomPosition(i).x,
                 rdkit_conformer.GetAtomPosition(i).y,
@@ -501,8 +497,7 @@ def _get_residue_number(component):
     res_id_mapping = {}
     res_num = 0
     for atom in component.mol.GetAtoms():
-        res_info = atom.GetPDBResidueInfo()
-        res_id = res_info.GetResidueNumber()
+        res_id = atom.GetProp("res_id")
         if res_id not in res_id_mapping:
             res_num += 1
             res_id_mapping[res_id] = res_num
