@@ -228,7 +228,7 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         atom_id = atoms["label_atom_id"][i]
         chain = atoms["auth_asym_id"][i]
         res_name = atoms["label_comp_id"][i]
-        res_id = int(atoms["auth_seq_id"][i])
+        res_id = atoms["auth_seq_id"][i]
         ins_code = (
             "" if not atoms["pdbx_PDB_ins_code"][i] else atoms["pdbx_PDB_ins_code"][i]
         )
@@ -247,11 +247,11 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         atom.SetProp("name", atom_name)
         atom.SetProp("component_atom_id", atom_id)
         atom.SetProp("residue_id", residue_id)
+        atoms.SetProp("res_id", res_id)
 
         res_info = rdkit.Chem.AtomPDBResidueInfo()
         res_info.SetResidueName(res_name)
-        res_info.SetResidueNumber(res_id)
-        res_info.SetChainId(chain)
+        res_info.SetIsHeteroAtom(True)
         atom.SetMonomerInfo(res_info)
 
         if isotope is not None:
