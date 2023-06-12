@@ -36,7 +36,7 @@ from pathlib import Path
 
 import pdbeccdutils
 import rdkit
-from pdbeccdutils.core import ccd_reader, ccd_writer
+from pdbeccdutils.core import ccd_reader, ccd_writer, prd_reader, prd_writer
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
@@ -65,6 +65,7 @@ class PDBeChemManager:
         pubchem_templates="",
         general_templates=config.general_templates,
         library_path=config.fragment_library,
+        procedure="ccd",
     ):
         """Initialize manager
 
@@ -86,6 +87,8 @@ class PDBeChemManager:
         # Fragments library to get substructure matches
         self.fragment_library = FragmentLibrary(library_path)
 
+        self.procedure = procedure
+
     def run(self, components_path, out_dir):
         """Process components
 
@@ -94,7 +97,10 @@ class PDBeChemManager:
             out_dir (Path): Path to the out_dir
         """
         logging.info("Reading in components...")
-        data = ccd_reader.read_pdb_components_file(components_path)
+        if self.procedure == "ccd":
+            data = ccd_reader.read_pdb_components_file(components_path)
+        else:
+            data = prd_reader.read_pdb_components_file(components_path)
 
         for key, ccd_reader_result in data.items():
             ccd_out = out_dir / key[0] / key
@@ -338,13 +344,22 @@ class PDBeChemManager:
             conformer_type (Component): Conformer to be written.
         """
         try:
-            ccd_writer.write_molecule(
-                path,
-                component,
-                remove_hs=False,
-                alt_names=alt_names,
-                conf_type=conformer_type,
-            )
+            if self.procedure == "ccd":
+                ccd_writer.write_molecule(
+                    path,
+                    component,
+                    remove_hs=False,
+                    alt_names=alt_names,
+                    conf_type=conformer_type,
+                )
+            else:
+                prd_writer.write_molecule(
+                    path,
+                    component,
+                    remove_hs=False,
+                    alt_names=alt_names,
+                    conf_type=conformer_type,
+                )
         except Exception:
             logging.error(f"error writing {path}.")
 
@@ -397,6 +412,26 @@ def create_parser():
     parser.add_argument(
         "--debug", action="store_true", help="Turn on debug message logging output"
     )
+
+    # region parse procedure
+    procedure = parser.add_mutually_exclusive_group()
+    procedure.add_argument(
+        "--ccd",
+        action="store_const",
+        const="ccd",
+        dest="procedure",
+        help="Pipeline is going to process CCD mmCIF files.",
+    )
+    procedure.add_argument(
+        "--prd",
+        action="store_const",
+        const="prd",
+        dest="procedure",
+        help="Pipeline is going to process PRD mmCIF files.",
+    )
+
+    procedure.set_defaults(procedure="ccd")
+    # endregion parse procedure
 
     return parser
 
