@@ -482,7 +482,7 @@ def read_bm_components_file(
     `components.cif` file.
 
     Args:
-        path_to_cif (str): Path to the `components.cif` file with
+        path_to_cif (str): Path to the `clc-all.cif` file with
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
