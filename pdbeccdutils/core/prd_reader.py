@@ -25,7 +25,6 @@ from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import (
     CCDProperties,
-    Descriptor,
     ReleaseStatus,
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools
@@ -77,7 +76,7 @@ def read_pdb_components_file(
     `components.cif` file.
 
     Args:
-        path_to_cif (str): Path to the `components.cif` file with
+        path_to_cif (str): Path to the `prdcc-all.cif` file with
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
@@ -140,10 +139,10 @@ def _parse_pdb_mmcif(cif_block, sanitize=True):
     if sanitize:
         sanitized = mol_tools.sanitize(mol)
 
-    descriptors = _parse_pdb_descriptors(
+    descriptors = ccd_reader._parse_pdb_descriptors(
         cif_block, "_pdbx_chem_comp_descriptor.", "descriptor"
     )
-    descriptors += _parse_pdb_descriptors(
+    descriptors += ccd_reader._parse_pdb_descriptors(
         cif_block, "_pdbx_chem_comp_identifier.", "identifier"
     )
     properties = _parse_pdb_properties(cif_block)
@@ -228,39 +227,6 @@ def _parse_pdb_atoms(mol, cif_block):
         mol.AddAtom(atom)
 
 
-def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
-    """Parse useful information from _pdbx_chem_comp_* category
-
-    Args:
-        cif_block (cif.Block): mmCIF Block object from gemmi
-        cat_name (str): mmcif category with the
-            descriptors info.
-        label (str, optional): Defaults to 'descriptor'. Name of the
-            category to be parsed.
-
-    Returns:
-        Descriptor: namedtuple with the property info
-    """
-    descriptors = []
-
-    if cat_name not in cif_block.get_mmcif_category_names():
-        return descriptors
-
-    descriptors_block = cif_block.find(
-        cat_name, [label, "type", "program", "program_version"]
-    )
-    for row in descriptors_block:
-        d = Descriptor(
-            type=cif.as_string(row[f"{cat_name}type"]),
-            program=cif.as_string(row[f"{cat_name}program"]),
-            program_version=cif.as_string(row[f"{cat_name}program_version"]),
-            value=cif.as_string(row[f"{cat_name}{label}"]),
-        )
-        descriptors.append(d)
-
-    return descriptors
-
-
 def _parse_pdb_properties(cif_block):
     """Parse useful information from _chem_comp category
 
@@ -279,7 +245,9 @@ def _parse_pdb_properties(cif_block):
         weight = 0.0 if cif.is_null(formula_weight) else cif.as_number(formula_weight)
 
         properties = CCDProperties(
-            id=f'{cif.as_string(cif_block.find_value("_chem_comp.id"))}_CC',
+            id=cif_tools.get_prd_cc_code(
+                cif.as_string(cif_block.find_value("_chem_comp.id"))
+            ),
             name=cif.as_string(cif_block.find_value("_chem_comp.name")),
             formula=cif.as_string(cif_block.find_value("_chem_comp.formula")),
             modified_date="",
