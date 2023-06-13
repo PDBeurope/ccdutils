@@ -8,6 +8,7 @@ from gemmi import cif
 from xml.dom import minidom
 from datetime import date as Date
 from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement
 
 import pdbeccdutils
 from pdbeccdutils.core.component import Component
@@ -190,6 +191,46 @@ def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Mod
     pretty = minidom.parseString(cml)
 
     return pretty.toprettyxml(indent="  ")
+
+
+def to_xml_xml(component):
+    """Converts structure to the XML format and returns its XML repr.
+
+    Args:
+        component (Component): Component to be exported.
+
+    Returns:
+        xml.etree.ElementTree.Element: XML object
+    """
+    root = Element("chemComp")
+
+    id_e = SubElement(root, "id")
+    formula_e = SubElement(root, "formula")
+    s_smiles_e = SubElement(root, "stereoSmiles")
+    n_smiles_e = SubElement(root, "nonStereoSmiles")
+    inchi_e = SubElement(root, "inchi")
+
+    id_e.text = component.id
+    formula_e.text = component.formula
+    s_smiles_e.text = next(
+        (
+            x.value
+            for x in component.descriptors
+            if x.type == "SMILES_CANONICAL" and x.program == "RDKit"
+        ),
+        "",
+    )
+    n_smiles_e.text = next(
+        (
+            x.value
+            for x in component.descriptors
+            if x.type == "SMILES" and x.program == "RDKit"
+        ),
+        "",
+    )
+    inchi_e.text = component.inchi
+
+    return root
 
 
 def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
