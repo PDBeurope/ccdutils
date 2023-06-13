@@ -90,11 +90,13 @@ def to_pdb_str(
     (mol_to_save, conf_id, conf_type) = ccd_writer._prepate_structure(
         component, remove_hs, conf_type
     )
-
+    residue_numbers = _get_residue_number(mol_to_save)
     for atom in mol_to_save.GetAtoms():
         flag = ccd_writer._get_atom_name(atom)
         atom_name = f"{flag:<4}"  # make sure it is 4 characters
         res_info = atom.GetPDBResidueInfo()
+        res_num = residue_numbers[atom.GetProp("res_id")]
+        res_info.SetResidueNumber(res_num)
         res_info.SetName(atom_name)
         res_info.SetTempFactor(20.0)
         res_info.SetOccupancy(1.0)
@@ -216,9 +218,9 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     else:
         conformer_ids = [conf_id]
 
+    residue_numbers = _get_residue_number(mol)
     for m in conformer_ids:
         rdkit_conformer = mol.GetConformer(m)
-
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
             res_info = atom.GetPDBResidueInfo()
@@ -229,7 +231,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
                 atom.GetProp("name"),
                 res_info.GetResidueName(),
                 "A",
-                res_info.GetResidueNumber(),
+                residue_numbers[atom.GetProp("res_id")],
                 " ",
                 rdkit_conformer.GetAtomPosition(i).x,
                 rdkit_conformer.GetAtomPosition(i).y,
@@ -379,7 +381,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
         "pdbx_ordinal",
     ]
     atom_loop = cif_block.init_loop(label, atom_fields)
-    residue_numbers = _get_residue_number(component)
+    residue_numbers = _get_residue_number(component.mol)
     for atom in component.mol.GetAtoms():
         at_id = atom.GetIdx()
         model_atom = ccd_writer._get_atom_coord(component, at_id, ConformerType.Model)
@@ -397,7 +399,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
             f"{model_atom.y:.3f}",
             f"{model_atom.z:.3f}",
             res_info.GetResidueName(),
-            residue_numbers[res_info.GetResidueNumber()],
+            residue_numbers[atom.GetProp("res_id")],
             mol_tools.get_component_atom_id(atom),
             str(atom.GetIdx() + 1),
         ]
@@ -472,19 +474,7 @@ def _write_pdb_bm_cif_descriptor(cif_block, component):
         descriptor_loop.add_row(cif.quote_list(new_row))
 
 
-def _get_atom_name(atom):
-    """Gets atom name. If not set ElementSymbol + Id is used.
-
-    Args:
-        atom (rdkit.Chem.rdchem.Atom): rdkit atom.
-
-    Returns:
-        str: Name of the atom.
-    """
-    return atom.GetSymbol() + str(atom.GetIdx())
-
-
-def _get_residue_number(component):
+def _get_residue_number(mol):
     """Maps residue ids of chemcial components from protein
     to bound-molecule
 
@@ -496,7 +486,7 @@ def _get_residue_number(component):
     """
     res_id_mapping = {}
     res_num = 0
-    for atom in component.mol.GetAtoms():
+    for atom in mol.GetAtoms():
         res_id = atom.GetProp("res_id")
         if res_id not in res_id_mapping:
             res_num += 1
