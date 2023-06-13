@@ -399,9 +399,7 @@ class Component:
         Returns:
             DepictionResult: Object with the details about depiction process.
         """
-        (mol_to_draw, conformer) = self._get_depiction_conformer()
-        mol_copy = rdkit.Chem.RWMol(mol_to_draw, confId=conformer.GetId())
-
+        mol_copy = rdkit.Chem.RWMol(self.mol)
         if remove_hs:
             mol_copy = rdkit.Chem.RemoveHs(
                 mol_copy, updateExplicitCount=True, sanitize=False
