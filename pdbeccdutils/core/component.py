@@ -29,6 +29,7 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.helpers import mol_tools
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (
     CCDProperties,
@@ -565,21 +566,18 @@ class Component:
 
         return False
 
-    def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
-        """
-        Determine if given conformer has missing coordinates or is
-        missing completelly from the rdkit.Mol object. This can
-        be used to determine, whether or not the coordinates should be
-        regenerated.
+    def get_conformer(self, c_type) -> rdkit.Chem.rdchem.Conformer:
+        """Retrieve an rdkit object for a deemed conformer.
 
         Args:
-            type (ConformerType): type of conformer
-                to be inspected.
+            c_type (ConformerType): Conformer type to be retrieved.
+
+        Raises:
+            ValueError: If conformer does not exist
 
         Returns:
-            bool: True if more then 1 atom has coordinates [0, 0, 0]
+            rdkit.Chem.rdchem.Conformer: RDKit conformer object
         """
-        ok_conformer = False
 
         if c_type == ConformerType.Computed:
             try:
@@ -594,29 +592,30 @@ class Component:
                 except KeyError:
                     pass
 
-        return ok_conformer
+        raise ValueError(f"Conformer {c_type.name} does not exist.")
 
-    def get_conformer(self, c_type) -> rdkit.Chem.rdchem.Conformer:
-        """
-        Retrieve an rdkit object for a deemed conformer.
+    def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
+        """Determine if given conformer has missing coordinates or is
+        missing completelly from the rdkit.Mol object. This can
+        be used to determine, whether or not the coordinates should be
+        regenerated.
 
         Args:
-            c_type (ConformerType): Conformer type to be retrieved.
-
-        Raises:
-            ValueError: If conformer does not exist
+            type (ConformerType): type of conformer
+                to be inspected.
 
         Returns:
-            rdkit.Chem.rdchem.Conformer: RDKit conformer object
+            bool: True if more than 1 atom has coordinates [0, 0, 0] or the Conformer is not present
         """
-        for c in self.mol.GetConformers():
-            try:
-                if c.GetProp("name") == c_type.name:
-                    return c
-            except KeyError:
-                pass
+        degenerate_conformer = True
 
-        raise ValueError(f"Conformer {c_type.name} does not exist.")
+        try:
+            conformer = self.get_conformer(c_type)
+            degenerate_conformer = mol_tools.is_degenerate_conformer(conformer)
+        except ValueError:
+            pass
+
+        return degenerate_conformer
 
     def locate_fragment(
         self, mol: rdkit.Chem.rdchem.Mol
