@@ -244,10 +244,7 @@ def inchikey_from_inchi(inchi: str) -> str:
     """
 
     inchikey = rdkit.Chem.inchi.InchiToInchiKey(inchi)
-    if inchikey is None:
-        inchikey = ""
-
-    return inchikey
+    return inchikey if inchikey else None
 
 
 def mol_from_inchi(inchi: str) -> MolFromRDKit:
