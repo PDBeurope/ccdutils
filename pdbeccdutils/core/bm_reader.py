@@ -260,7 +260,7 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         atom.SetProp("name", atom_name)
         atom.SetProp("component_atom_id", atom_id)
         atom.SetProp("residue_id", residue_id)
-        atoms.SetProp("res_id", res_id)
+        atom.SetProp("res_id", res_id)
         # _atom_site.auth_seq_id is not necessary to be a number (https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_atom_site.auth_seq_id.html)
 
         res_info = rdkit.Chem.AtomPDBResidueInfo()
