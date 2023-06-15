@@ -90,7 +90,7 @@ def __add_con_branch_link(
     """
     entities = {}
     for i in range(len(branch_scheme["entity_id"])):
-        if entities.get(branch_scheme["entity_id"][i]):
+        if not entities.get(branch_scheme["entity_id"][i]):
             entities[branch_scheme["entity_id"][i]] = [branch_scheme["pdb_asym_id"][i]]
         elif (
             branch_scheme["pdb_asym_id"][i]
