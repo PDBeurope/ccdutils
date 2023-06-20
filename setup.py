@@ -34,12 +34,12 @@ setup(
     packages=find_namespace_packages(),
     zip_safe=False,
     include_package_data=True,
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     install_requires=["Pillow", "scipy", "numpy", "requests", "gemmi", "networkx"],
     extras_require={
         "tests": ["pytest", "pytest-cov", "pre-commit"],
         "docs": [
-            "sphinx",
+            "sphinx<7.0.0",
             "sphinx_rtd_theme",
             "sphinx-autodoc-typehints",
             "sphinx-markdown-tables",
@@ -56,9 +56,6 @@ setup(
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
