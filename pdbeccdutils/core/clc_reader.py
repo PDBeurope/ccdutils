@@ -159,7 +159,7 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     )
 
     comp = Component(mol, None, properties, descriptors)
-    comp.ccd_cif_block = clc_writer._to_pdb_bm_cif_block(comp)
+    comp.ccd_cif_block = clc_writer._to_pdb_clc_cif_block(comp)
 
     reader_result = CLCReaderResult(
         warnings=warnings,

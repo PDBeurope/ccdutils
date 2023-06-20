@@ -52,7 +52,7 @@ def write_molecule(
     elif extension == "pdb":
         str_representation = to_pdb_str(component, remove_hs, conf_type)
     elif extension in ("mmcif", "cif"):
-        to_pdb_bm_cif_file(path, component, remove_hs)
+        to_pdb_clc_cif_file(path, component, remove_hs)
         return
     elif extension == "cml":
         str_representation = to_cml_str(component, remove_hs, conf_type)
@@ -305,7 +305,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     return "\n".join(content)
 
 
-def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
+def to_pdb_clc_cif_file(path, component: Component, remove_hs=True):
     """Converts structure to the PDB mmCIF format.
     Args:
         path (str): Path to save cif file.
@@ -314,7 +314,7 @@ def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
     """
 
     if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
-        component.ccd_cif_block = _to_pdb_bm_cif_block(component)
+        component.ccd_cif_block = _to_pdb_clc_cif_block(component)
 
     temp_doc = gemmi.cif.Document()
     cif_block_copy = temp_doc.add_copied_block(component.ccd_cif_block)
@@ -332,7 +332,7 @@ def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
     temp_doc.write_file(path, gemmi.cif.Style.Pdbx)
 
 
-def _to_pdb_bm_cif_block(component):
+def _to_pdb_clc_cif_block(component):
     """Export component to the PDB CCD CIF file.
 
     Args:
@@ -347,15 +347,15 @@ def _to_pdb_bm_cif_block(component):
     doc = gemmi.cif.Document()
     cif_block = doc.add_new_block(component.id)
 
-    _write_pdb_bm_cif_info(cif_block, component)
-    _write_pdb_bm_cif_atoms(cif_block, component)
-    _write_pdb_bm_cif_bonds(cif_block, component)
-    _write_pdb_bm_cif_descriptor(cif_block, component)
+    _write_pdb_clc_cif_info(cif_block, component)
+    _write_pdb_clc_cif_atoms(cif_block, component)
+    _write_pdb_clc_cif_bonds(cif_block, component)
+    _write_pdb_clc_cif_descriptor(cif_block, component)
 
     return cif_block
 
 
-def _write_pdb_bm_cif_info(cif_block, component):
+def _write_pdb_clc_cif_info(cif_block, component):
     """Writes _chem_comp namespace with general information about the
     component
 
@@ -390,7 +390,7 @@ def _write_pdb_bm_cif_info(cif_block, component):
     )
 
 
-def _write_pdb_bm_cif_atoms(cif_block, component):
+def _write_pdb_clc_cif_atoms(cif_block, component):
     """Writes the _chem_comp_atom namespace with atom details.
     Controlled dictionary:
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_atom.html
@@ -448,7 +448,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
         atom_loop.add_row(cif.quote_list(new_row))
 
 
-def _write_pdb_bm_cif_bonds(cif_block, component):
+def _write_pdb_clc_cif_bonds(cif_block, component):
     """Writes the _chem_comp_bond namespace with atom details.
     Controlled dictionary:
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_bond.html
@@ -488,7 +488,7 @@ def _write_pdb_bm_cif_bonds(cif_block, component):
         bond_loop.add_row(gemmi.cif.quote_list(new_row))
 
 
-def _write_pdb_bm_cif_descriptor(cif_block, component):
+def _write_pdb_clc_cif_descriptor(cif_block, component):
     """Writes the _pdbx_chem_comp_descriptor namespace with details.
 
     Args:
