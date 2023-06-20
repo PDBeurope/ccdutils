@@ -43,9 +43,9 @@ def bond_pdb_order(value_order):
     """
     if value_order.casefold() == "sing":
         return rdkit.Chem.rdchem.BondType(1)
-    if value_order.casefold() == "DOUB".casefold():
+    if value_order.casefold() == "doub":
         return rdkit.Chem.rdchem.BondType(2)
-    if value_order.casefold() == "TRIP".casefold():
+    if value_order.casefold() == "trip":
         return rdkit.Chem.rdchem.BondType(3)
 
     return None
