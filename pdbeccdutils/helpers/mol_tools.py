@@ -22,13 +22,15 @@ Set of methods for molecular sanitization and work with conformers
 import re
 import sys
 from io import StringIO
+from pdbeccdutils.core.models import InChIFromRDKit, MolFromRDKit, ConformerType
+from contextlib import redirect_stderr
 
 import numpy as np
 import rdkit
 
 empty_coords = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
 METALS_SMART = (
-    "[Li,Na,K,Rb,Cs,F,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
+    "[Li,Na,K,Rb,Cs,Fr,Be,Mg,Ca,Sr,Ba,Ra,Sc,Ti,V,Cr,Mn,Fe,Co,Ni,Cu,Zn,Al,Ga,Y,Zr,Nb,Mo,"
     "Tc,Ru,Rh,Pd,Ag,Cd,In,Sn,Hf,Ta,W,Re,Os,Ir,Pt,Au,Hg,Tl,Pb,Bi]"
 )
 
@@ -56,8 +58,8 @@ def is_degenerate_conformer(conformer):
 
             if counter > 1:
                 return True
-    except ValueError:  # Conformer does not exist
-        return False
+    except Exception:  # Conformer does not exist
+        return True
 
     return False
 
@@ -87,13 +89,19 @@ def sanitize(rwmol):
 
         # find correct conformer to assign stereochemistry
         # ideal conformer comes first
-        conformers = rwmol.GetConformers()
-        conformer_id = -1
 
-        if is_degenerate_conformer(conformers[0]):
-            conformer_id = conformers[1].GetId()
-        else:
-            conformer_id = conformers[0].GetId()
+        conformer_id = -1
+        conformer_types = [ConformerType.Ideal, ConformerType.Model]
+        for conf_type in conformer_types:
+            conformer = get_conformer(rwmol, conf_type)
+            if not is_degenerate_conformer(conformer):
+                conformer_id = conformer.GetId()
+
+        # conformers = rwmol.GetConformers()
+        # if is_degenerate_conformer(conformers[0]):
+        #     conformer_id = conformers[1].GetId()
+        # else:
+        #     conformer_id = conformers[0].GetId()
 
         rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(rwmol, conformer_id)
 
@@ -102,6 +110,13 @@ def sanitize(rwmol):
         return False
 
     return success
+
+
+def get_conformer(rwmol, c_type):
+    """Returns requested Conformer from mol"""
+    for conformer in rwmol.GetConformers():
+        if conformer.GetProp("name") == c_type.name:
+            return conformer
 
 
 def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
@@ -184,3 +199,97 @@ def fix_conformer(conformer):
         if all(np.isnan(pos)):
             new_pos = rdkit.Chem.rdGeometry.Point3D(0, 0, 0)
             conformer.SetAtomPosition(index, new_pos)
+
+
+def inchi_from_mol(mol: rdkit.Chem.rdchem.Mol) -> InChIFromRDKit:
+    """Provides the InChI calculated by RDKit.
+
+    Args:
+        mol: rdkit.Chem.rdchem.Mol object
+
+    Returns:
+        InChIFromRDKit: NamedTuple containing inchi, warnings and errors
+        generated.
+    """
+    try:
+        rdkit_stream = StringIO()  # redirecting rdkit logs
+        with redirect_stderr(rdkit_stream):
+            inchi = rdkit.Chem.inchi.MolToInchi(mol)
+            warnings = None
+            errors = None
+            rdkit_log = rdkit_stream.getvalue()
+            if "WARNING" in rdkit_log:
+                start_index = re.search(r"\bWARNING\b:", rdkit_log).end()
+                warnings = rdkit_log[start_index:].strip()
+            elif "ERROR" in rdkit_log:
+                start_index = re.search(r"\bERROR\b:", rdkit_log).end()
+                errors = rdkit_log[start_index:].strip()
+
+            inchi_result = InChIFromRDKit(inchi=inchi, warnings=warnings, errors=errors)
+
+    except ValueError as e:
+        inchi_result = InChIFromRDKit(inchi=None, warnings=None, errors=e)
+
+    return inchi_result
+
+
+def inchikey_from_inchi(inchi: str) -> str:
+    """Provides the InChIKey calculated by RDKit from InChI.
+
+    Args:
+        inchi: InChI calulcated by RDKit
+
+    Returns:
+        str: the InChIKey or '' if there was an error finding it.
+    """
+
+    inchikey = rdkit.Chem.inchi.InchiToInchiKey(inchi)
+    return inchikey if inchikey else None
+
+
+def mol_from_inchi(inchi: str) -> MolFromRDKit:
+    """Generates rdkit.Chem.rdchem.Mol object from InChI.
+
+    Args:
+        inchi: InChI descriptor of a molecule
+
+    Returns:
+        MolFromRDKit: NamedTuple containing mol, warnings and errors
+        generated.
+    """
+    try:
+        rdkit_stream = StringIO()  # redirecting rdkit logs
+        with redirect_stderr(rdkit_stream):
+            mol = rdkit.Chem.MolFromInchi(inchi)
+            warnings = None
+            errors = None
+            rdkit_log = rdkit_stream.getvalue()
+            if "WARNING" in rdkit_log:
+                start_index = re.search(r"\bWARNING\b:", rdkit_log).end()
+                warnings = rdkit_log[start_index:].strip()
+            elif "ERROR" in rdkit_log:
+                start_index = re.search(r"\bERROR\b:", rdkit_log).end()
+                errors = rdkit_log[start_index:].strip()
+
+            mol_result = MolFromRDKit(mol=mol, warnings=warnings, errors=errors)
+
+    except ValueError as e:
+        mol_result = InChIFromRDKit(mol=None, warnings=None, errors=e)
+
+    return mol_result
+
+
+def get_component_atom_id(atom):
+    """Gets component atom id. If not set ElementSymbol + Id is used.
+
+    Args:
+        atom (rdkit.Chem.rdchem.Atom): rdkit atom.
+
+    Returns:
+        str: Name of the atom.
+    """
+    return (
+        atom.GetProp("component_atom_id")
+        if atom.HasProp("component_atom_id")
+        else atom.GetSymbol() + str(atom.GetIdx())
+    )

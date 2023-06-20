@@ -68,7 +68,7 @@ class DepictionManager:
         self.coordgen_params.templateFileDir = config.coordgen_templates
 
         self.pubchem_templates = (
-            pubchem_templates_path if os.path.isdir(pubchem_templates_path) else ""
+            pubchem_templates_path if os.path.isdir(str(pubchem_templates_path)) else ""
         )
         self.templates: Dict[str, rdkit.Chem.rdchem.Mol] = OrderedDict()
 
@@ -127,7 +127,10 @@ class DepictionManager:
             return to_return
 
         return DepictionResult(
-            source=DepictionSource.Failed, template_name="", mol=None, score=1000
+            source=DepictionSource.Failed,
+            template_name="",
+            mol=None,
+            score=float("inf"),
         )
 
     def _get_pubchem_template_path(self, het_id):
@@ -193,7 +196,10 @@ class DepictionManager:
             )
         except Exception:
             return DepictionResult(
-                source=DepictionSource.Failed, template_name=None, mol=None, score=1000
+                source=DepictionSource.Failed,
+                template_name=None,
+                mol=None,
+                score=float("inf"),
             )
 
     def _get_2D_by_pubchem(self, code, mol):
@@ -225,7 +231,10 @@ class DepictionManager:
             print(str(e), file=sys.stderr)
 
         return DepictionResult(
-            source=DepictionSource.Failed, template_name=None, mol=None, score=1000
+            source=DepictionSource.Failed,
+            template_name=None,
+            mol=None,
+            score=float("inf"),
         )
 
     def _get_2D_by_template(self, mol):
@@ -233,7 +242,7 @@ class DepictionManager:
         Depict ligand using user-provided templates
 
         Args:
-            mol (rdkit.Chem.rchem.Mol): Mol to be depicted
+            mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
 
         Returns:
             :obj:`list` of :obj:`DepictionResult`: Depictions with their

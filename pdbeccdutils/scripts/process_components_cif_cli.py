@@ -239,11 +239,11 @@ class PDBeChemManager:
         depiction_result = component.compute_2d(self.depictions)
 
         if depiction_result.source == DepictionSource.Failed:
-            logging.debug("failed to generate 2D image.")
+            logging.info("failed to generate 2D image.")
         else:
             if depiction_result.score > 0.99:
-                logging.debug("collision free image could not be generated.")
-            logging.debug(
+                logging.info("collision free image could not be generated.")
+            logging.info(
                 f"2D generated using {depiction_result.source.name} with score {depiction_result.score}."
             )
 

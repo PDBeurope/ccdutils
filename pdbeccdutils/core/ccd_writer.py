@@ -305,6 +305,28 @@ def to_xml_str(component: Component, remove_hs=True, conf_type=ConformerType.Ide
     return xmls_tring.toprettyxml(indent="  ")
 
 
+def remove_hydrogens(cif_block_copy):
+    cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_atom.")
+    cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_bond.")
+
+    # scrap hydrogen atoms
+    h_names: List[str] = []
+    atom_table = cif_block_copy.find("_chem_comp_atom.", ["type_symbol", "atom_id"])
+    for i in range(len(atom_table) - 1, -1, -1):
+        if atom_table[i][0] == "H":
+            h_names.append(atom_table[i][1])
+            del atom_table[i]
+
+    # scrap bonds to hydrogen atoms
+    if "_chem_comp_bond." not in cif_block_copy.get_mmcif_category_names():
+        return
+
+    bond_table = cif_block_copy.find("_chem_comp_bond.", ["atom_id_1", "atom_id_2"])
+    for j in range(len(bond_table) - 1, -1, -1):
+        if (bond_table[j][0] in h_names) or (bond_table[j][1] in h_names):
+            del bond_table[j]
+
+
 def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
     """Converts structure to the PDB CIF format. Both model and ideal
     coordinates are stored. In case ideal coordinates are missing, rdkit
@@ -315,27 +337,6 @@ def to_pdb_ccd_cif_file(path, component: Component, remove_hs=True):
         component (Component): Component to be exported.
         remove_hs (bool, optional): Defaults to True.
     """
-
-    def remove_hydrogens(cif_block_copy):
-        cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_atom.")
-        cif_tools.preprocess_cif_category(cif_block_copy, "_chem_comp_bond.")
-
-        # scrap hydrogen atoms
-        h_names: List[str] = []
-        atom_table = cif_block_copy.find("_chem_comp_atom.", ["type_symbol", "atom_id"])
-        for i in range(len(atom_table) - 1, -1, -1):
-            if atom_table[i][0] == "H":
-                h_names.append(atom_table[i][1])
-                del atom_table[i]
-
-        # scrap bonds to hydrogen atoms
-        if "_chem_comp_bond." not in cif_block_copy.get_mmcif_category_names():
-            return
-
-        bond_table = cif_block_copy.find("_chem_comp_bond.", ["atom_id_1", "atom_id_2"])
-        for j in range(len(bond_table) - 1, -1, -1):
-            if (bond_table[j][0] in h_names) or (bond_table[j][1] in h_names):
-                del bond_table[j]
 
     if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
         component.ccd_cif_block = _to_pdb_ccd_cif_block(component)
@@ -599,17 +600,14 @@ def _write_pdb_ccd_cif_info(cif_block, component):
         {
             "id": component.id,
             "type": "NON-POLYMER",
-            "pdbx_type": "HETAIN",
-            "formula": cif.quote(component.formula)
-            if component.formula
-            else cif.quote(calc_formula),
+            "formula": component.formula or calc_formula,
             "formula_weight": f"{calc_weight:.3f}",
             "three_letter_code": component.id,
             "pdbx_type": "HETAIN",
             "pdbx_modified_date": mod_date,
             "pdbx_release_status": component.pdbx_release_status.name,
         },
-        raw=True,
+        raw=False,
     )
 
 
@@ -667,7 +665,7 @@ def _write_pdb_ccd_cif_atoms(cif_block, component):
             _get_alt_atom_name(atom),
             atom.GetSymbol(),
             str(atom.GetFormalCharge()),
-            "?",
+            None,
             "Y" if atom.GetIsAromatic() else "N",
             "N",
             _get_ccd_cif_chiral_type(atom),
@@ -738,11 +736,17 @@ def _write_pdb_ccd_cif_descriptor(cif_block, component):
 
     label = "_pdbx_chem_comp_descriptor."
 
-    descriptor_fields = ["comp_id", "type", "program", "descriptor"]
+    descriptor_fields = ["comp_id", "type", "program", "program_version", "descriptor"]
     descriptor_loop = cif_block.init_loop(label, descriptor_fields)
 
     for entry in component.descriptors:
-        new_row = [component.id, entry.type, entry.program, entry.value]
+        new_row = [
+            component.id,
+            entry.type,
+            entry.program,
+            entry.program_version,
+            entry.value,
+        ]
         descriptor_loop.add_row(cif.quote_list(new_row))
 
 
@@ -1194,8 +1198,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
             f"S{i+1}",
             "scaffold",
             scaffold.smiles,
-            inchi if inchi else None,
-            inchikey if inchikey else None,
+            inchi or None,
+            inchikey or None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
@@ -1209,8 +1213,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
             f"F{j+1}",
             "fragment",
             fragment.smiles,
-            inchi if inchi else None,
-            inchikey if inchikey else None,
+            inchi or None,
+            inchikey or None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 

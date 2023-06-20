@@ -39,7 +39,7 @@ from pdbeccdutils.core.models import (
     Descriptor,
     ReleaseStatus,
 )
-from pdbeccdutils.helpers import cif_tools, conversions, mol_tools
+from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from gemmi import cif
 
 # categories that need to be 'fixed'
@@ -192,7 +192,7 @@ def _parse_pdb_atoms(mol, cif_block):
     Setup atoms in the component
 
     Args:
-        mol (rdkit.Chem.rchem.Mol): Rdkit Mol object with the
+        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
             compound representation.
         cif_block (cif.Block): mmCIF block object from gemmi.
     """
@@ -204,11 +204,11 @@ def _parse_pdb_atoms(mol, cif_block):
         ["atom_id", "type_symbol", "alt_atom_id", "pdbx_leaving_atom_flag", "charge"],
     )
     for row in atoms:
-        atom_id = row["_chem_comp_atom.atom_id"].strip('"')
-        element = row["_chem_comp_atom.type_symbol"].strip('"')
-        alt_atom_id = row["_chem_comp_atom.alt_atom_id"].strip('"')
-        leaving_atom = row["_chem_comp_atom.pdbx_leaving_atom_flag"].strip('"')
-        charge = row["_chem_comp_atom.charge"].strip('"')
+        atom_id = cif.as_string(row["_chem_comp_atom.atom_id"])
+        element = cif.as_string(row["_chem_comp_atom.type_symbol"])
+        alt_atom_id = cif.as_string(row["_chem_comp_atom.alt_atom_id"])
+        leaving_atom = cif.as_string(row["_chem_comp_atom.pdbx_leaving_atom_flag"])
+        charge = cif.as_string(row["_chem_comp_atom.charge"])
 
         element = element if len(element) == 1 else element[0] + element[1].lower()
         isotope = None
@@ -321,7 +321,7 @@ def _parse_pdb_bonds(mol, cif_block, errors):
             atom_1_id = atoms_ids.index(atom_1)
             atom_2 = row["_chem_comp_bond.atom_id_2"]
             atom_2_id = atoms_ids.index(atom_2)
-            bond_order = _bond_pdb_order(row["_chem_comp_bond.value_order"])
+            bond_order = helper.bond_pdb_order(row["_chem_comp_bond.value_order"])
 
             mol.AddBond(atom_1_id, atom_2_id, bond_order)
         except ValueError:
@@ -371,12 +371,15 @@ def _parse_pdb_descriptors(cif_block, cat_name, label="descriptor"):
     if cat_name not in cif_block.get_mmcif_category_names():
         return descriptors
 
-    descriptors_block = cif_block.find(cat_name, [label, "type", "program"])
+    descriptors_block = cif_block.find(
+        cat_name, [label, "type", "program", "program_version"]
+    )
     for row in descriptors_block:
         d = Descriptor(
-            type=row[f"{cat_name}type"],
-            program=row[f"{cat_name}program"],
-            value=row[f"{cat_name}{label}"],
+            type=cif.as_string(row[f"{cat_name}type"]),
+            program=cif.as_string(row[f"{cat_name}program"]),
+            program_version=cif.as_string(row[f"{cat_name}program_version"]),
+            value=cif.as_string(row[f"{cat_name}{label}"]),
         )
         descriptors.append(d)
 
@@ -408,34 +411,14 @@ def _parse_pdb_properties(cif_block):
         weight = 0.0 if cif.is_null(formula_weight) else cif.as_number(formula_weight)
 
         properties = CCDProperties(
-            id=cif_block.find_value("_chem_comp.id"),
-            name=cif_block.find_value("_chem_comp.name").strip('"'),
-            formula=cif_block.find_value("_chem_comp.formula").strip('"'),
+            id=cif.as_string(cif_block.find_value("_chem_comp.id")),
+            name=cif.as_string(cif_block.find_value("_chem_comp.name")),
+            formula=cif.as_string(cif_block.find_value("_chem_comp.formula")),
             modified_date=d,
             pdbx_release_status=rel_status,
             weight=weight,
         )
     return properties
-
-
-def _bond_pdb_order(value_order):
-    """
-    Transpils mmcif bond order into rdkit language
-
-    Args:
-        value_order (str): bond type as a str
-
-    Returns:
-        rdkit.Chem.rdchem.BondType: -- bond type
-    """
-    if value_order == "SING":
-        return rdkit.Chem.rdchem.BondType(1)
-    if value_order == "DOUB":
-        return rdkit.Chem.rdchem.BondType(2)
-    if value_order == "TRIP":
-        return rdkit.Chem.rdchem.BondType(3)
-
-    return None
 
 
 # endregion parse mmcif

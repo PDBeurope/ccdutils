@@ -4,6 +4,8 @@
 
 # Introduction
 
+`pdbeccdutils` is an open-source python package for processing and analyzing small molecules in PDB. Small-molecule data in PDB is available as [Chemical Component Dictionary (CCD)](http://www.wwpdb.org/data/ccd) or [Biologically Interesting Molecule reference Dictioanry (BIRD)](http://www.wwpdb.org/data/bird) in PDBX/mmCIF format. `pdbeccdutils` supports small molecule data in CCD/BIRD dictionaries and provide interoperability to RDKit. It also offers various features, such as generating 2D depictions, matching common fragments to specific molecules, identifying all the covalently attached chemical components in a macromolecule structure, and calcualting similarity between small molecules using Parity method.
+
 The `pdbeccdutils` is under development and new functionality is added regularly as well as its functionality is being revised and updated. When properly installed all the code should have documentation. All the *public* methods do have [static typing](http://mypy-lang.org/) introduced in Python 3.5. All the interfaces should be well documented.
 
 ## Installation
@@ -32,28 +34,30 @@ Below you can find a few typical use cases.
 
 ### A single component file
 
-```python
-from pdbeccdutils.core import ccd_reader
-
-component = ccd_reader.read_pdb_cif_file('HEM.cif').component
-rdkit_mol = component.mol
-```
-
-The `rdkit.Chem.rdchem.Mol` object is sanitized already.
-
-### Chemical component dictionary
-
-Chemical component dictionary can be read in a single command and `rdkit.Chem.rdchem.Mol` representations obtained immediately. Resulting data structure of `ccd_reader.read_pdb_components_file` function is `Dict<str,pdbeccdutils.core.Component>` keyed on component ID as provided by the `data_XXX` element in the respective mmCIF file.
+Structure reading can be done using `ccd_reader.py` module located in the `pdbeccdutils.core` module. By default, the molecules comes sanitized using an augmented RDKit sanitization procedure. However, this option can be turned off by specifying optional parameter `sanitize=False` to the function
 
 ```python
 from pdbeccdutils.core import ccd_reader
 
-parsed_components = ccd_reader.read_pdb_components_file('components.cif')
-ccd_components = [v.component for k, v in parsed_components.items()]
-rdkit_mols = [k for k in components.mol]
+ccd_reader_result = ccd_reader.read_pdb_cif_file('HEM.cif')
+ccd_reader_result
 ```
+CCDReaderResult contains a list of possible warnings and errors that were encountered during the structure parsing. There is also a convenience method that allows reading in multiple chemical components provided they are listed in different data blocks in a single mmCIF file at the same time.
 
-The `rdkit.Chem.rdchem.Mol` objects are sanitized already!
+### Component
+
+Component is a wrapper around `rdkit.Chem.rdchem.Mol` object providing streamlined access to all metadata information from CCD/BIRD files
+
+```python
+component = ccd_reader_result.component
+component
+```
+```python
+component.inchikey
+```
+```python
+component.formula
+```
 
 ### Bound-molecule from PDB model files
 
