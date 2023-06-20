@@ -11,7 +11,7 @@ guide/intro
 guide/depictions
 guide/fragments
 guide/scaffolds
-guide/similariy
+guide/similarity
 guide/pipelines
 ```
 
