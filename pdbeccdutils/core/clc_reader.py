@@ -30,7 +30,7 @@ from networkx import MultiDiGraph
 
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from pdbeccdutils.core.exceptions import CCDUtilsError
-from pdbeccdutils.core import ccd_reader, models, bm_writer
+from pdbeccdutils.core import ccd_reader, clc_writer, models
 from pdbeccdutils.core.boundmolecule import infer_bound_molecules
 from pdbeccdutils.utils import config
 from pdbeccdutils.core.component import Component
@@ -53,8 +53,8 @@ preprocessable_categories = [
 ]
 
 
-BMReaderResult = namedtuple(
-    "BMReaderResult", ccd_reader.CCDReaderResult._fields + ("bound_molecule",)
+CLCReaderResult = namedtuple(
+    "CLCReaderResult", ccd_reader.CCDReaderResult._fields + ("bound_molecule",)
 )
 
 
@@ -63,7 +63,7 @@ def read_pdb_cif_file(
     to_discard: set[str] = config.DISCARDED_RESIDUES,
     sanitize: bool = True,
     assembly: bool = False,
-) -> list[BMReaderResult]:
+) -> list[CLCReaderResult]:
     """
     Read in single wwPDB Model CIF and create internal
     representation of its bound-molecules with multiple components.
@@ -101,7 +101,7 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
         sanitize: True if bound-molecule need to be sanitized
 
     Returns:
-        BMReaderResult: Namedtuple containing Component representation of bound-molecule
+        CLCReaderResult: Namedtuple containing Component representation of bound-molecule
 
     """
 
@@ -159,9 +159,9 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     )
 
     comp = Component(mol, None, properties, descriptors)
-    comp.ccd_cif_block = bm_writer._to_pdb_bm_cif_block(comp)
+    comp.ccd_cif_block = clc_writer._to_pdb_bm_cif_block(comp)
 
-    reader_result = BMReaderResult(
+    reader_result = CLCReaderResult(
         warnings=warnings,
         errors=errors,
         component=comp,
@@ -447,7 +447,7 @@ def _handle_hydrogens(mol):
     return mol
 
 
-def read_bm_cif_file(
+def read_clc_cif_file(
     path_to_cif: str, sanitize: bool = True
 ) -> ccd_reader.CCDReaderResult:
     """
@@ -471,10 +471,10 @@ def read_bm_cif_file(
     doc = cif.read(path_to_cif)
     cif_block = doc.sole_block()
 
-    return _parse_bm_mmcif(cif_block, sanitize)
+    return _parse_clc_mmcif(cif_block, sanitize)
 
 
-def read_bm_components_file(
+def read_clc_components_file(
     path_to_cif: str, sanitize: bool = True
 ) -> dict[str, ccd_reader.CCDReaderResult]:
     """
@@ -501,7 +501,7 @@ def read_bm_components_file(
 
     for block in cif.read(path_to_cif):
         try:
-            result_bag[block.name] = _parse_bm_mmcif(block, sanitize)
+            result_bag[block.name] = _parse_clc_mmcif(block, sanitize)
         except CCDUtilsError as e:
             logging.error(
                 f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
@@ -513,7 +513,7 @@ def read_bm_components_file(
 # region parse mmcif
 
 
-def _parse_bm_mmcif(cif_block, sanitize=True):
+def _parse_clc_mmcif(cif_block, sanitize=True):
     """
     Create internal representation of the molecule from mmcif format.
 
@@ -537,8 +537,8 @@ def _parse_bm_mmcif(cif_block, sanitize=True):
         if w:
             warnings.append(w)
 
-    _parse_bm_atoms(mol, cif_block)
-    _parse_bm_conformers(mol, cif_block)
+    _parse_clc_atoms(mol, cif_block)
+    _parse_clc_conformers(mol, cif_block)
     ccd_reader._parse_pdb_bonds(mol, cif_block, errors)
     ccd_reader._handle_implicit_hydrogens(mol)
 
@@ -551,7 +551,7 @@ def _parse_bm_mmcif(cif_block, sanitize=True):
     descriptors += ccd_reader._parse_pdb_descriptors(
         cif_block, "_pdbx_chem_comp_identifier.", "identifier"
     )
-    properties = _parse_bm_properties(cif_block)
+    properties = _parse_clc_properties(cif_block)
 
     comp = Component(mol.GetMol(), cif_block, properties, descriptors)
     reader_result = ccd_reader.CCDReaderResult(
@@ -561,7 +561,7 @@ def _parse_bm_mmcif(cif_block, sanitize=True):
     return reader_result
 
 
-def _parse_bm_atoms(mol, cif_block):
+def _parse_clc_atoms(mol, cif_block):
     """
     Setup atoms in the component
 
@@ -624,7 +624,7 @@ def _parse_bm_atoms(mol, cif_block):
         mol.AddAtom(atom)
 
 
-def _parse_bm_conformers(mol, cif_block):
+def _parse_clc_conformers(mol, cif_block):
     """Setup model cooordinates in the rdkit Mol object.
 
     Args:
@@ -648,7 +648,7 @@ def _parse_bm_conformers(mol, cif_block):
     mol.AddConformer(model, assignId=True)
 
 
-def _parse_bm_properties(cif_block):
+def _parse_clc_properties(cif_block):
     """Parse useful information from _chem_comp category
 
     Args:
