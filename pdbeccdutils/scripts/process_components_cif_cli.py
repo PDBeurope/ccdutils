@@ -31,7 +31,6 @@ https://gitlab.ebi.ac.uk/pdbe/release/pdbechem
 import argparse
 import logging
 import os
-import traceback
 from pathlib import Path
 
 import pdbeccdutils
@@ -121,33 +120,26 @@ class PDBeChemManager:
         Return:
             bool: Whether or not all the files were succesfully written.
         """
-        try:
-            component = ccd_reader_result.component
-            logging.info(f"{component.id} | processing...")
+        component = ccd_reader_result.component
+        logging.info(f"{component.id} | processing...")
 
-            # check parsing and conformer degeneration
-            self._check_component_parsing(ccd_reader_result)
-            self._generate_ideal_structure(component)
+        # check parsing and conformer degeneration
+        self._check_component_parsing(ccd_reader_result)
+        self._generate_ideal_structure(component)
 
-            # download templates if the user wants them.
-            if self.pubchem is not None:
-                self._download_template(component)
+        # download templates if the user wants them.
+        if self.pubchem is not None:
+            self._download_template(component)
 
-            # search fragment library
-            self._search_fragment_library(component)
+        # search fragment library
+        self._search_fragment_library(component)
 
-            # get scaffolds
-            self._compute_component_scaffolds(component)
+        # get scaffolds
+        self._compute_component_scaffolds(component)
 
-            # write out files
-            self._generate_depictions(component, out_dir)
-            self._export_structure_formats(component, out_dir)
-            return True
-        except Exception:
-            logging.error(
-                f"{ccd_reader_result.component.id} | FAILURE {traceback.format_exc()}."
-            )
-            return False
+        # write out files
+        self._generate_depictions(component, out_dir)
+        self._export_structure_formats(component, out_dir)
 
     def _check_component_parsing(self, ccd_reader_result):
         """Checks components parsing and highlights issues encountered with
@@ -195,10 +187,10 @@ class PDBeChemManager:
         result = component.compute_3d()
 
         if component.has_degenerated_conformer(ConformerType.Ideal):
-            logging.debug("has degenerated ideal coordinates.")
+            logging.debug(f"{component.id} has degenerated ideal coordinates.")
 
         if not result:
-            logging.debug("error in generating 3D conformation.")
+            logging.debug(f"{component.id} has error in generating 3D conformation.")
 
         return result
 

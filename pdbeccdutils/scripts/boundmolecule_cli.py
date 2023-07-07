@@ -18,7 +18,6 @@
 import argparse
 import logging
 import os
-import traceback
 import json
 from pdbeccdutils.core import clc_reader, clc_writer
 from pdbeccdutils.core.exceptions import CCDUtilsError
@@ -105,7 +104,7 @@ class PDBeBmManager:
             raise EntryFailedException(f"Preprocessing of {pdb_id} failed")
 
     def process_single_component(
-        self, clc_reader_result: list[clc_reader.CLCReaderResult], output_dir: str
+        self, clc_reader_result: clc_reader.CLCReaderResult, output_dir: str
     ):
         """Processes identified bound-molecules
             * Checks components parsing and highlights issues encountered with the molecule
@@ -116,33 +115,26 @@ class PDBeBmManager:
             clc_reader_result: List of CLCReaderResult
             output_dir: Path to ooutput directory
         """
-        try:
-            component = clc_reader_result.component
-            logging.info(f"{component.id} | processing...")
+        component = clc_reader_result.component
+        logging.info(f"{component.id} | processing...")
 
-            # check parsing
-            self._check_component_parsing(clc_reader_result)
-            self._generate_ideal_structure(component)
+        # check parsing
+        self._check_component_parsing(clc_reader_result)
+        self._generate_ideal_structure(component)
 
-            # download templates if the user wants them.
-            if self.pubchem is not None:
-                self._download_template(component)
+        # download templates if the user wants them.
+        if self.pubchem is not None:
+            self._download_template(component)
 
-            # search fragment library
-            self._search_fragment_library(component)
+        # search fragment library
+        self._search_fragment_library(component)
 
-            # get scaffolds
-            self._compute_component_scaffolds(component)
+        # get scaffolds
+        self._compute_component_scaffolds(component)
 
-            # write out files
-            self._generate_depictions(component, output_dir)
-            self._export_structure_formats(component, output_dir)
-            return True
-        except Exception:
-            logging.error(
-                f"{clc_reader_result.component.id} | FAILURE {traceback.format_exc()}."
-            )
-            return False
+        # write out files
+        self._generate_depictions(component, output_dir)
+        self._export_structure_formats(component, output_dir)
 
     def _write_out_bm(
         self,
@@ -199,7 +191,7 @@ class PDBeBmManager:
         if not clc_reader_result.sanitized:
             logging.warning(f"{component.id} sanitization issue")
 
-    def _download_template(self, pdb_id: str, component: Component):
+    def _download_template(self, component: Component):
         """Attempts to download a pubchem template for the given component
 
         Args:
@@ -224,13 +216,13 @@ class PDBeBmManager:
         result = component.compute_3d()
         if result:
             if component.has_degenerated_conformer(ConformerType.Computed):
-                logging.debug("has degenerated Computed coordinates.")
+                logging.debug(f"{component.id} has degenerated Computed coordinates.")
 
         if component.has_degenerated_conformer(ConformerType.Model):
-            logging.debug("has degenerated Model coordinates.")
+            logging.debug(f"{component.id} has degenerated Model coordinates.")
 
         if not result:
-            logging.debug("error in generating 3D conformation.")
+            logging.debug(f"{component.id} has error in generating 3D conformation.")
 
         return result
 
