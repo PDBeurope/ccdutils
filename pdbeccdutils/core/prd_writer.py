@@ -294,7 +294,7 @@ def _write_pdb_ccd_cif_atoms(cif_block, component):
             f"{ideal_atom.y:.3f}",
             f"{ideal_atom.z:.3f}",
             res_info.GetResidueName(),
-            _get_res_id(atom),
+            _get_residue_id(atom),
             _get_component_atom_id(atom),
             _get_res_type(atom),
             _get_ref_id(atom),
@@ -357,13 +357,13 @@ def _get_component_atom_id(atom):
     )
 
 
-def _get_res_id(atom):
-    """Returns res id. If not returns None
+def _get_residue_id(atom):
+    """Returns residue id. If not returns None
 
     Args:
         atom (rdkit.Chem.rdchem.Atom): rdkit atom.
     """
-    return atom.GetProp("res_id") if atom.HasProp("res_id") else None
+    return atom.GetProp("residue_id") if atom.HasProp("residue_id") else None
 
 
 # region fallbacks

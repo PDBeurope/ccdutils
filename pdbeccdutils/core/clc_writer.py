@@ -96,7 +96,7 @@ def to_pdb_str(
         flag = ccd_writer._get_atom_name(atom)
         atom_name = f"{flag:<4}"  # make sure it is 4 characters
         res_info = atom.GetPDBResidueInfo()
-        res_num = residue_numbers[atom.GetProp("res_id")]
+        res_num = residue_numbers[atom.GetProp("residue_id")]
         res_info.SetResidueNumber(res_num)
         res_info.SetName(atom_name)
         res_info.SetTempFactor(20.0)
@@ -272,7 +272,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
                 atom.GetProp("name"),
                 res_info.GetResidueName(),
                 "A",
-                residue_numbers[atom.GetProp("res_id")],
+                residue_numbers[atom.GetProp("residue_id")],
                 " ",
                 rdkit_conformer.GetAtomPosition(i).x,
                 rdkit_conformer.GetAtomPosition(i).y,
@@ -440,7 +440,7 @@ def _write_pdb_clc_cif_atoms(cif_block, component):
             f"{model_atom.y:.3f}",
             f"{model_atom.z:.3f}",
             res_info.GetResidueName(),
-            residue_numbers[atom.GetProp("res_id")],
+            residue_numbers[atom.GetProp("residue_id")],
             mol_tools.get_component_atom_id(atom),
             str(atom.GetIdx() + 1),
         ]
@@ -525,12 +525,12 @@ def _get_residue_number(mol):
     Returns:
         A dictionary of mappings of residue ids
     """
-    res_id_mapping = {}
+    residue_id_mapping = {}
     res_num = 0
     for atom in mol.GetAtoms():
-        res_id = atom.GetProp("res_id")
-        if res_id not in res_id_mapping:
+        residue_id = atom.GetProp("residue_id")
+        if residue_id not in residue_id_mapping:
             res_num += 1
-            res_id_mapping[res_id] = res_num
+            residue_id_mapping[residue_id] = res_num
 
-    return res_id_mapping
+    return residue_id_mapping

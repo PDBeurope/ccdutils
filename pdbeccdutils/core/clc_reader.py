@@ -204,8 +204,8 @@ def _parse_pdb_mmcif(
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
     _add_connections(mol, bm, errors)
-    _remove_disconnected_hydrogens(mol)
-    # mol = _handle_hydrogens(mol)
+    # _remove_disconnected_hydrogens(mol)
+    mol = _handle_hydrogens(mol)
     return (mol, warnings, errors)
 
 
@@ -260,7 +260,6 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         atom.SetProp("name", atom_name)
         atom.SetProp("component_atom_id", atom_id)
         atom.SetProp("residue_id", residue_id)
-        atom.SetProp("res_id", res_id)
         # _atom_site.auth_seq_id is not necessary to be a number (https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_atom_site.auth_seq_id.html)
 
         res_info = rdkit.Chem.AtomPDBResidueInfo()
@@ -443,7 +442,13 @@ def _handle_hydrogens(mol):
     mol = rdkit.Chem.AddHs(mol, addCoords=True, addResidueInfo=True)
     for atom in mol.GetAtoms():
         if atom.GetAtomicNum() == 1:
-            atom.SetProp("name", atom.GetSymbol() + str(atom.GetIdx()))
+            atom_id = atom.GetSymbol() + str(atom.GetIdx())
+            atom.SetProp("name", atom_id)
+            atom.SetProp("component_atom_id", atom_id)
+            for bond in atom.GetBonds():
+                other = bond.GetOtherAtom(atom)
+                residue_id = other.GetProp("residue_id")
+                atom.SetProp("residue_id", residue_id)
     return mol
 
 
@@ -594,7 +599,7 @@ def _parse_clc_atoms(mol, cif_block):
         charge = cif.as_string(row["_chem_comp_atom.charge"])
         comp_atom_id = cif.as_string(row["_chem_comp_atom.pdbx_component_atom_id"])
         res_name = cif.as_string(row["_chem_comp_atom.pdbx_component_comp_id"])
-        res_id = cif.as_string(row["_chem_comp_atom.pdbx_residue_numbering"])
+        residue_id = cif.as_string(row["_chem_comp_atom.pdbx_residue_numbering"])
 
         element = element if len(element) == 1 else element[0] + element[1].lower()
         isotope = None
@@ -610,7 +615,7 @@ def _parse_clc_atoms(mol, cif_block):
         atom.SetProp("alt_name", alt_atom_id)
         atom.SetBoolProp("leaving_atom", leaving_atom == "Y")
         atom.SetProp("component_atom_id", comp_atom_id)
-        atom.SetProp("res_id", res_id)
+        atom.SetProp("residue_id", residue_id)
         atom.SetFormalCharge(conversions.str_to_int(charge))
 
         res_info = rdkit.Chem.AtomPDBResidueInfo()

@@ -191,7 +191,7 @@ def _parse_pdb_atoms(mol, cif_block):
         charge = cif.as_string(row["_chem_comp_atom.charge"])
         comp_atom_id = cif.as_string(row["_chem_comp_atom.pdbx_component_atom_id"])
         res_name = cif.as_string(row["_chem_comp_atom.pdbx_component_comp_id"])
-        res_id = cif.as_string(row["_chem_comp_atom.pdbx_residue_numbering"])
+        residue_id = cif.as_string(row["_chem_comp_atom.pdbx_residue_numbering"])
         res_type = cif.as_string(row["_chem_comp_atom.pdbx_polymer_type"])
         ref_id = cif.as_string(row["_chem_comp_atom.pdbx_ref_id"])
         comp_id = cif.as_string(row["_chem_comp_atom.pdbx_component_id"])
@@ -213,7 +213,7 @@ def _parse_pdb_atoms(mol, cif_block):
         atom.SetProp("ref_id", ref_id)
         atom.SetProp("comp_id", comp_id)
         atom.SetProp("res_type", res_type)
-        atom.SetProp("res_id", res_id)
+        atom.SetProp("residue_id", residue_id)
         atom.SetFormalCharge(conversions.str_to_int(charge))
 
         res_info = rdkit.Chem.AtomPDBResidueInfo()
