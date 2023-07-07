@@ -38,6 +38,7 @@ from pdbeccdutils.core.models import (
     ReleaseStatus,
     ScaffoldingMethod,
     SubstructureMapping,
+    Subcomponent,
 )
 from pdbeccdutils.helpers import conversions, drawing
 from pdbeccdutils.utils import web_services
@@ -753,6 +754,23 @@ class Component:
             raise CCDUtilsError(
                 f"Computing scaffolds using method {scaffolding_method.name} failed."
             )
+
+    def get_subcomponents(self):
+        subcomponents = []
+        res_ids_seen = []
+        for atom in self.mol.GetAtoms():
+            if not atom.HasProp("residue_id"):
+                continue
+            else:
+                res_id = atom.GetProp("residue_id")
+                if res_id not in res_ids_seen:
+                    res_info = atom.GetPDBResidueInfo()
+                    res_name = res_info.GetResidueName()
+                    subcomponent = Subcomponent(res_name, res_id)
+                    subcomponents.append(subcomponent)
+                    res_ids_seen.append(res_id)
+
+        return subcomponents
 
     def _id_to_name_mapping(self, struct_mapping):
         """Lists matched scaffolds and atom names
