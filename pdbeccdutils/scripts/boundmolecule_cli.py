@@ -183,13 +183,13 @@ class PDBeBmManager:
         """
         component = clc_reader_result.component
         for warning in clc_reader_result.warnings:
-            logging.warning(f"{component.id} {warning}")
+            logging.warning(f"{component.id} | {warning}")
 
         for error in clc_reader_result.errors:
-            logging.error(f"{component.id} {error}")
+            logging.error(f"{component.id} | {error}")
 
         if not clc_reader_result.sanitized:
-            logging.warning(f"{component.id} sanitization issue")
+            logging.warning(f"{component.id} | sanitization issue")
 
     def _download_template(self, component: Component):
         """Attempts to download a pubchem template for the given component
