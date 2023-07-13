@@ -280,7 +280,7 @@ def mol_from_inchi(inchi: str) -> MolFromRDKit:
 
 
 def get_component_atom_id(atom):
-    """Gets component atom id. If not set ElementSymbol + Id is used.
+    """Gets component atom id.
 
     Args:
         atom (rdkit.Chem.rdchem.Atom): rdkit atom.
@@ -289,7 +289,23 @@ def get_component_atom_id(atom):
         str: Name of the atom.
     """
     return (
-        atom.GetProp("component_atom_id")
-        if atom.HasProp("component_atom_id")
-        else atom.GetSymbol() + str(atom.GetIdx())
+        atom.GetProp("component_atom_id") if atom.HasProp("component_atom_id") else None
     )
+
+
+def correct_atom_coords(conformer, atom_id):
+    """Replace nan values of atom coordinates with zero
+
+    Args:
+        conformer: conformer of mol
+        atom_id: id of atom to be corrected
+
+    """
+    atom_position = conformer.GetAtomPosition(atom_id)
+    atom_coords_list = [
+        atom_position[i] if not np.isnan(atom_position[i]) else 0.0 for i in range(3)
+    ]
+    atom_coords = rdkit.Chem.rdGeometry.Point3D(
+        atom_coords_list[0], atom_coords_list[1], atom_coords_list[2]
+    )
+    conformer.SetAtomPosition(atom_id, atom_coords)

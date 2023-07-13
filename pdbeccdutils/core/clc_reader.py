@@ -440,11 +440,12 @@ def _handle_hydrogens(mol):
 
     mol.UpdatePropertyCache(strict=False)
     mol = rdkit.Chem.AddHs(mol, addCoords=True, addResidueInfo=True)
+    conformer = mol.GetConformer()
     for atom in mol.GetAtoms():
         if atom.GetAtomicNum() == 1:
             atom_id = atom.GetSymbol() + str(atom.GetIdx())
             atom.SetProp("name", atom_id)
-            atom.SetProp("component_atom_id", atom_id)
+            mol_tools.correct_atom_coords(conformer, atom.GetIdx())
             for bond in atom.GetBonds():
                 other = bond.GetOtherAtom(atom)
                 residue_id = other.GetProp("residue_id")
