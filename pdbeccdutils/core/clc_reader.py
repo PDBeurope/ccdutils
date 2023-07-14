@@ -30,7 +30,7 @@ from networkx import MultiDiGraph
 
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from pdbeccdutils.core.exceptions import CCDUtilsError
-from pdbeccdutils.core import ccd_reader, clc_writer, models
+from pdbeccdutils.core import ccd_reader, models
 from pdbeccdutils.core.boundmolecule import infer_bound_molecules
 from pdbeccdutils.utils import config
 from pdbeccdutils.core.component import Component
@@ -159,7 +159,6 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     )
 
     comp = Component(mol, None, properties, descriptors)
-    comp.ccd_cif_block = clc_writer._to_pdb_clc_cif_block(comp)
 
     reader_result = CLCReaderResult(
         warnings=warnings,
@@ -204,7 +203,6 @@ def _parse_pdb_mmcif(
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
     _add_connections(mol, bm, errors)
-    # _remove_disconnected_hydrogens(mol)
     mol = _handle_hydrogens(mol)
     return (mol, warnings, errors)
 
@@ -399,27 +397,6 @@ def get_chem_comp_bonds(cif_block: cif.Block, residue: str):
 
     residue_bonds = ResidueBonds(residue, atom_id_1, atom_id_2, value_order)
     return residue_bonds
-
-
-def _remove_disconnected_hydrogens(mol):
-    """
-    Delete hydrogens without neighbours (degree = 0).
-    RDKit works but gives warning for these ("WARNING: not removing hydrogen atom without neighbors").
-    However we wouldn't want these hydrogens as they affect molecular properties.
-
-    Args:
-        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
-            compound representation.
-    """
-    disconnected_hydrogen_indices = [
-        atom.GetIdx()
-        for atom in mol.GetAtoms()
-        if atom.GetAtomicNum() == 1 and atom.GetDegree() == 0
-    ]
-    disconnected_hydrogen_indices.sort(reverse=True)
-
-    for atom in disconnected_hydrogen_indices:
-        mol.RemoveAtom(atom)
 
 
 def _handle_hydrogens(mol):
