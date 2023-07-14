@@ -29,6 +29,7 @@ from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.utils import config
 from pdbeccdutils.helpers import cif_tools, helper
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
+from pdbeccdutils.core.boundmolecule import infer_bound_molecules
 
 
 class PDBeBmManager:
@@ -91,15 +92,27 @@ class PDBeBmManager:
         """
         fixed_mmcif_file = os.path.join(output_dir, f"{pdb_id}_processed.cif")
         if os.path.isfile(fixed_mmcif_file):
-            clc_reader_results = clc_reader.read_pdb_cif_file(
-                fixed_mmcif_file, pdb_id, sanitize=True
+            clc_reader_results = []
+            bms = infer_bound_molecules(
+                fixed_mmcif_file, self.discarded, assembly=False
             )
-            for clc_reader_result in clc_reader_results:
+            for i, bm in enumerate(bms, start=1):
+                bm_id = f"bm{i}"
+                reader_result = clc_reader.infer_multiple_chem_comp(
+                    fixed_mmcif_file, bm, bm_id, sanitize=True
+                )
+                if reader_result:
+                    clc_reader_results.append(reader_result)
+
+            for i, clc_reader_result in enumerate(clc_reader_results, start=1):
+                clc_id = f"CLC_{i}"
                 component = clc_reader_result.component
-                bm_out_dir = os.path.join(output_dir, component.id)
-                os.makedirs(bm_out_dir, exist_ok=True)
-                self.process_single_component(clc_reader_result, bm_out_dir)
-            self._write_out_bm(pdb_id, clc_reader_results, output_dir)
+                component.id = clc_id
+                clc_out_dir = os.path.join(output_dir, component.id)
+                os.makedirs(clc_out_dir, exist_ok=True)
+                self.process_single_component(clc_reader_result, clc_out_dir)
+
+            self._write_out_bm(pdb_id, bms, clc_reader_results, output_dir)
         else:
             raise EntryFailedException(f"Preprocessing of {pdb_id} failed")
 
@@ -139,6 +152,7 @@ class PDBeBmManager:
     def _write_out_bm(
         self,
         pdb_id: str,
+        bound_molecules,
         clc_reader_results: list[clc_reader.CLCReaderResult],
         output_dir: str,
     ):
@@ -153,20 +167,24 @@ class PDBeBmManager:
             "entry": pdb_id,
             "boundMolecules": [],
         }
-        for clc_reader_result in clc_reader_results:
-            component = clc_reader_result.component
-            bm = clc_reader_result.bound_molecule
-            bm_out_dir = os.path.join(output_dir, component.id)
-            os.makedirs(bm_out_dir, exist_ok=True)
+
+        for i, bm in enumerate(bound_molecules, start=1):
+            bm_id = f"bm{i}"
+            inchi = ""
+            inchikey = ""
+            for clc_reader_result in clc_reader_results:
+                component = clc_reader_result.component
+                if bm.is_equivalent(clc_reader_result.bound_molecule):
+                    inchi = component.inchi
+                    inchikey = component.inchikey
             result_bag["boundMolecules"].append(
                 {
-                    "id": component.id,
+                    "id": bm_id,
                     "composition": bm.to_dict(),
-                    "inchi": component.inchi,
-                    "inchikey": component.inchikey,
+                    "inchi": inchi,
+                    "inchikey": inchikey,
                 }
             )
-
         bm_file = os.path.join(output_dir, "bound_molecules.json")
         with open(bm_file, "w") as f:
             json.dump(result_bag, f, sort_keys=True, indent=4)
@@ -382,6 +400,13 @@ def create_parser():
     )
 
     parser.add_argument(
+        "-fl",
+        "--fragment-library",
+        default=config.fragment_library,
+        help="Use this fragment library in place of the one supplied with the code.",
+    )
+
+    parser.add_argument(
         "-o",
         "--output-dir",
         help="Create an output directory with files suitable for PDBeChem ftp directory",
@@ -418,6 +443,9 @@ def run():
     )
     helper.set_up_logger(args)
     bpm = PDBeBmManager(
-        args.pubchem_templates, args.general_templates, discarded_ligands
+        args.pubchem_templates,
+        args.general_templates,
+        args.fragment_library,
+        discarded_ligands,
     )
     bpm.process_entry(args.input_cif, args.pdb_id, args.output_dir)

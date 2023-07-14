@@ -95,20 +95,17 @@ class PDBeChemManager:
             components_path (Path): Path to the components.cif file.
             out_dir (Path): Path to the out_dir
         """
-        logging.info("Reading in components...")
+        logging.info("Reading in component")
         if self.procedure == "ccd":
-            data = ccd_reader.read_pdb_components_file(components_path)
+            ccd_reader_result = ccd_reader.read_pdb_cif_file(components_path)
         else:
-            data = prd_reader.read_pdb_components_file(components_path)
+            ccd_reader_result = prd_reader.read_pdb_cif_file(components_path)
 
-        for key, ccd_reader_result in data.items():
-            ccd_out = out_dir / key[0] / key
-            os.makedirs(ccd_out, exist_ok=True)
-            self.process_single_component(ccd_reader_result, ccd_out)
-
-            data[key] = None
-
-        logging.debug("All is done!")
+        component = ccd_reader_result.component
+        component_output_dir = Path(out_dir, component.id)
+        os.makedirs(component_output_dir, exist_ok=True)
+        self.process_single_component(ccd_reader_result, component_output_dir)
+        logging.info(f"Processing of {component.id} is complete")
 
     def process_single_component(self, ccd_reader_result, out_dir):
         """Process single PDB-CCD component.
@@ -369,9 +366,7 @@ def create_parser():
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
 
-    parser.add_argument(
-        "components_cif", help="Input PDB-CCD components.cif file (must be specified)"
-    )
+    parser.add_argument("-i", "--input-cif", help="Input PDB-CCD/PDB-PRD cif file")
     parser.add_argument(
         "-g",
         "--general-templates",
@@ -390,7 +385,7 @@ def create_parser():
         "--output-dir",
         type=is_valid_path,
         required=True,
-        help="Create an output directory with files suitable for PDBeChem ftp directory",
+        help="Path to output directory",
     )
     parser.add_argument(
         "-fl",
@@ -448,9 +443,12 @@ def main():
         logging.info(f'{"":5s}{k:25s}{v}')
 
     pdbechem = PDBeChemManager(
-        args.pubchem_templates, args.general_templates, args.fragment_library
+        args.pubchem_templates,
+        args.general_templates,
+        args.fragment_library,
+        args.procedure,
     )
-    pdbechem.run(args.components_cif, args.output_dir)
+    pdbechem.run(args.input_cif, args.output_dir)
 
 
 if __name__ == "__main__":
