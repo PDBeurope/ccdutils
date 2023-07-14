@@ -17,7 +17,7 @@ from pdbeccdutils.scripts.process_components_cif_cli import (
     PDBeChemManager,
     create_parser,
 )
-from pdbeccdutils.tests.tst_utilities import test_cut_down_components_cif
+from pdbeccdutils.tests.tst_utilities import cif_filename
 
 
 class TestCommandLineArgs:
@@ -38,7 +38,7 @@ class TestCommandLineArgs:
             parser.parse_args(["-o foo", "/////impossible_to_open_file", "--debug"])
 
 
-class TestCutDownComponentsCif:
+class ProcessComponentsCif:
     """
     run process_components_cif_cli on test file:
 
@@ -55,11 +55,12 @@ class TestCutDownComponentsCif:
     CHEM_COMP_IDS = ["000", "001", "002", "003", "004", "ZPN"]
 
     @pytest.fixture(scope="class")
-    def pipeline_wd(self, tmpdir_factory):
+    @pytest.mark.parametrize("chem_comp_id", CHEM_COMP_IDS)
+    def pipeline_wd(self, tmpdir_factory, chem_comp_id):
         wd = tmpdir_factory.mktemp("pdbechem_test")
 
         parser = create_parser()
-        args = parser.parse_args(["-o", str(wd), test_cut_down_components_cif])
+        args = parser.parse_args(["-o", str(wd), cif_filename(chem_comp_id)])
 
         m = PDBeChemManager()
         m.run(args.components_cif, args.output_dir)
