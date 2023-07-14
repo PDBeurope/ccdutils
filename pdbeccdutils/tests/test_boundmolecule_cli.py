@@ -18,7 +18,7 @@ class TestBoundmoleculeProcessig:
     run boundmolecule_cli on test file:
     """
 
-    BM_IDS = ["bm1", "bm2", "bm3", "bm4", "bm5"]
+    CLC_IDS = ["CLC_1", "CLC_2", "CLC_3", "CLC_4", "CLC_5"]
 
     @pytest.fixture(scope="class")
     def pipeline_wd(self, tmpdir_factory):
@@ -32,9 +32,9 @@ class TestBoundmoleculeProcessig:
         return args.output_dir
 
     @staticmethod
-    @pytest.mark.parametrize("bm_id", BM_IDS)
-    def test_subdir_tree_created(pipeline_wd, bm_id):
-        path = os.path.join(pipeline_wd, bm_id)
+    @pytest.mark.parametrize("clc_id", CLC_IDS)
+    def test_subdir_tree_created(pipeline_wd, clc_id):
+        path = os.path.join(pipeline_wd, clc_id)
         assert os.path.isdir(path)
 
     @staticmethod
@@ -50,23 +50,23 @@ class TestBoundmoleculeProcessig:
         assert os.path.getsize(file) > 0
 
     @staticmethod
-    @pytest.mark.parametrize("bm_id", BM_IDS)
-    def test_all_bm_files_created(pipeline_wd: str, bm_id):
-        path = os.path.join(pipeline_wd, bm_id)
+    @pytest.mark.parametrize("clc_id", CLC_IDS)
+    def test_all_bm_files_created(pipeline_wd: str, clc_id):
+        path = os.path.join(pipeline_wd, clc_id)
         files = os.listdir(path)
         assert len(files) == 15
 
         for f in files:
-            file_pointer = os.path.join(pipeline_wd, bm_id, f)
+            file_pointer = os.path.join(pipeline_wd, clc_id, f)
             assert os.path.getsize(file_pointer) > 0
 
     @staticmethod
-    @pytest.mark.parametrize("bm_id", BM_IDS)
-    def test_images_with_names_created(pipeline_wd: str, bm_id):
+    @pytest.mark.parametrize("clc_id", CLC_IDS)
+    def test_images_with_names_created(pipeline_wd: str, clc_id):
         """Test if the depictions with names contain certain atom labels
         as expected.
         """
-        path = os.path.join(pipeline_wd, bm_id, f"{bm_id}_100_names.svg")
+        path = os.path.join(pipeline_wd, clc_id, f"{clc_id}_100_names.svg")
         xml = ET.parse(path)
         path_elements = xml.findall("svg:path", svg_namespace)
 
@@ -78,22 +78,22 @@ class TestBoundmoleculeProcessig:
         assert False  # this compound should have had label
 
     @staticmethod
-    @pytest.mark.parametrize("bm_id", BM_IDS)
-    def test_cif_files(pipeline_wd: str, bm_id):
+    @pytest.mark.parametrize("clc_id", CLC_IDS)
+    def test_cif_files(pipeline_wd: str, clc_id):
         """Test if the CIF file is parsable."""
-        path = os.path.join(pipeline_wd, bm_id, f"{bm_id}.cif")
+        path = os.path.join(pipeline_wd, clc_id, f"{clc_id}.cif")
         cif_block = cif.read(path).sole_block()
 
         assert cif_block
-        assert cif_block.name == bm_id
+        assert cif_block.name == clc_id
 
     @staticmethod
-    @pytest.mark.parametrize("bm_id", BM_IDS)
-    def test_cml_files(pipeline_wd: str, bm_id):
+    @pytest.mark.parametrize("clc_id", CLC_IDS)
+    def test_cml_files(pipeline_wd: str, clc_id):
         """Test if the CML file is parsable. Each of the tested compounds
         should contain element with type C.
         """
-        path = os.path.join(pipeline_wd, bm_id, f"{bm_id}.cml")
+        path = os.path.join(pipeline_wd, clc_id, f"{clc_id}.cml")
 
         xml_root = ET.parse(str(path)).getroot()
         atoms = xml_root.find("molecule").find("atomArray").findall("atom")
@@ -101,13 +101,13 @@ class TestBoundmoleculeProcessig:
         assert any(a.attrib["elementType"] == "C" for a in atoms)
 
     @staticmethod
-    @pytest.mark.parametrize("bm_id", BM_IDS)
-    def test_annotation_file(pipeline_wd: str, bm_id):
+    @pytest.mark.parametrize("clc_id", CLC_IDS)
+    def test_annotation_file(pipeline_wd: str, clc_id):
         """Test if the annotation.json is parsable. Each of the tested compounds
         should contain some data.
         """
 
-        file = os.path.join(pipeline_wd, bm_id, f"{bm_id}_annotation.json")
+        file = os.path.join(pipeline_wd, clc_id, f"{clc_id}_annotation.json")
 
         assert os.path.isfile(file)
 
