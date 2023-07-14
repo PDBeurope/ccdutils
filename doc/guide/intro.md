@@ -4,7 +4,7 @@
 
 # Introduction
 
-`pdbeccdutils` is an open-source python package for processing and analyzing small molecules in PDB. Small-molecule data in PDB is available as [Chemical Component Dictionary (CCD)](http://www.wwpdb.org/data/ccd) or [Biologically Interesting Molecule reference Dictioanry (BIRD)](http://www.wwpdb.org/data/bird) in PDBX/mmCIF format. `pdbeccdutils` provides streamlined access to all metadata of small molecules in PDB and offers a set of convenient methods to compute various properties of small molecules using RDKIt such as 2D depictions, 3D conformers, physicochemical properties, matching common fragments and scaffolds, mapping to small-molecule databases using UniChem. `pdbeccdutils` also provides methods for identifying all the covalently attached chemical components in a macromolecular structure and calculating similarity among small molecules
+`pdbeccdutils` is an open-source python package for processing and analyzing small molecules in PDB. Small-molecule data in PDB is available as [Chemical Component Dictionary (CCD)](http://www.wwpdb.org/data/ccd) or [Biologically Interesting Molecule reference Dictioanry (BIRD)](http://www.wwpdb.org/data/bird) in PDBX/mmCIF format. `pdbeccdutils` provides streamlined access to all metadata of small molecules in PDB and offers a set of convenient methods to compute various properties of small molecules using RDKIt such as 2D depictions, 3D conformers, physicochemical properties, matching common fragments and scaffolds, mapping to small-molecule databases using UniChem. `pdbeccdutils` also provides methods for identifying all the covalently attached chemical components in a macromolecular structure and calculating similarity among small molecules using [PARITY method](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5890617/)
 
 **Note**
 The `pdbeccdutils` is under development and new functionality is added regularly as well as its functionality is being revised and updated. When properly installed all the code should have documentation. All the *public* methods do have [static typing](http://mypy-lang.org/) introduced in Python 3.5. All the interfaces should be well documented.
@@ -27,7 +27,7 @@ If you want to contribute to the project please fork it first and then do a pull
 
 # Getting started
 
-The core structural representation of small-molecules in `pdbecccdutils` package is a `Component` object, which is a wrapper around the default `rdkit.Chem.rdchem.Mol` object (object property `mol`) providing most of the functionality and access to its properties. Both `Ideal` and `Model` conformers are stored in the `mol` attribute and `Computed` and `Depiction` conformers are stroted in `mol3D` and `mol2D` attributes of `Component`. `pdbeccdutils.core.models.ConformerType` object allows accessing all of them.
+The core structural representation of small-molecules in `pdbecccdutils` package is a `Component` object, which is a wrapper around the default `rdkit.Chem.rdchem.Mol` object (object property `mol`) providing most of the functionality and access to its properties. `Ideal`, `Model` and `Computed` conformers are stored in the `mol` attribute and `Depiction` conformers are stroted in `mol2D` attributes of the `Component`. `pdbeccdutils.core.models.ConformerType` object allows accessing all of them.
 
 Below you can find a few typical use cases.
 
@@ -41,7 +41,7 @@ from pdbeccdutils.core import ccd_reader
 ccd_reader_result = ccd_reader.read_pdb_cif_file('HEM.cif')
 ccd_reader_result
 ```
-CCDReaderResult contains a list of possible warnings and errors that were encountered during the structure parsing. There is also a convenience method that allows reading in multiple chemical components provided they are listed in different data blocks in a single mmCIF file at the same time.
+CCDReaderResult contains a list of possible warnings and errors that were encountered during the structure parsing. There is also a convenience method that allows reading in multiple chemical components, provided they are listed in different data blocks in a single mmCIF file.
 
 ## Reading PRD mmCIF files
 
@@ -56,7 +56,7 @@ prd_reader_result
 
 ### Component
 
-Component is a wrapper around `rdkit.Chem.rdchem.Mol` object providing streamlined access to all metadata information from CCD/BIRD files
+Component is a wrapper around `rdkit.Chem.rdchem.Mol` object providing streamlined access to all metadata information from CCD/PRD files
 
 ```python
 component = ccd_reader_result.component
@@ -71,17 +71,17 @@ component.formula
 
 ## Infer Covalently Linked Components (CLC) from PDB model files
 
-Several small and large ligands in PDB are split into individual CCDs. Such splitting of ligands to individual CCDs makes it difficult to correctly identify ligands in PDB and their interactions with macromolecules as well as mapping to other small-molecule databases. `pdbecccdutils` provides `clc_reader` module to infer all covalenty linked components in single PDB model file.
+CLCs are large, complex multi-component ligands typically represented as individual components represented by individual CCDs as part of the PDB deposition and annotation process. To provide a precise and chemically complete representation of these multi-component ligands, we created CLCs encompassing the entire set of individual components.This improvement ensures researchers can analyse and interpret the interactions of these biologically relevant ligands more accurately. `pdbecccdutils` provides `clc_reader` module to infer all covalenty linked components in a single PDB model file.
 
 ```python
 from pdbeccdutils.core import clc_reader
 
-clcs = clc_reader.read_pdb_updated_cif_file('/path/to/xxxx_updated.cif',sanitize=True)
+clcs = clc_reader.read_pdb_cif_file('/path/to/xxxx_updated.cif',sanitize=True)
 clc_components = [clc.component for clc in clcs]
 rdkit_mols = [k.mol for k in clc_components]
 ```
 
-The result of `clc_reader.read_pdb_updated_cif_file` function is a list of instances of `CLCReaderResult`, with each instance representing a single Covalently Linked Components (CLC). The `Component` Object of `CLCReaderResult` can then be used to probe the properties of each CLC.
+The result of `clc_reader.read_pdb_cif_file` function is a list of instances of `CLCReaderResult`, with each instance representing a single Covalently Linked Components (CLC). The `Component` Object of `CLCReaderResult` can then be used to access the properties of each CLC.
 
 
 ## Reading CLC mmCIF files
@@ -90,7 +90,7 @@ CLC structures can be read using `clc_reader.py` module located in `pdbeccdutils
 
 ```python
 from pdbeccdutils.core import clc_reader
-clc_reader_result = clc_reader.read_pdb_cif_file('CLC_00004.cif')
+clc_reader_result = clc_reader.read_clc_cif_file('CLC_00004.cif')
 clc_reader_result
 ```
 
