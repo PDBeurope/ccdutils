@@ -580,18 +580,12 @@ class Component:
             rdkit.Chem.rdchem.Conformer: RDKit conformer object
         """
 
-        if c_type == ConformerType.Computed:
+        for c in self.mol.GetConformers():
             try:
-                return self.mol3D.GetConformer()
-            except Exception:
+                if c.GetProp("name") == c_type.name:
+                    return c
+            except KeyError:
                 pass
-        else:
-            for c in self.mol.GetConformers():
-                try:
-                    if c.GetProp("name") == c_type.name:
-                        return c
-                except KeyError:
-                    pass
 
         raise ValueError(f"Conformer {c_type.name} does not exist.")
 
