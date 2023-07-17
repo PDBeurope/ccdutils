@@ -4,13 +4,15 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pdbeccdutils: Small molecules chemistry toolkit &mdash; pdbeccdutils 0.7.2 documentation</title>
+  <title>pdbeccdutils: A small molecules chemistry toolkit using RDKit for the Protein Data Bank &mdash; pdbeccdutils 0.7.2 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -49,13 +51,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guide/intro.html#getting-started">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#a-single-component-file">A single component file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#chemical-component-dictionary">Chemical component dictionary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#bound-molecule-from-pdb-model-files">Bound-molecule from PDB model files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-prd-mmcif-files">Reading PRD mmCIF files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#component">Component</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#writing-ccd-files">Writing CCD files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#infer-covalently-linked-components-clc-from-pdb-model-files">Infer Covalently Linked Components (CLC) from PDB model files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-clc-mmcif-files">Reading CLC mmCIF files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#writing-ccd-prd-clc-files">Writing CCD/PRD/CLC files</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guide/depictions.html">Depictions</a></li>
@@ -64,15 +67,14 @@
 <li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="guide/scaffolds.html">Scaffolds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide/similarity.html">Similarity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/pipelines.html">Pipelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#pdbechem">PDBeChem</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="guide/pipelines.html#ftp-area-content">FTP area content</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#processing-of-ccd-prd">Processing of CCD/PRD</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="guide/pipelines.html#data-enrichment-process">Data enrichment process</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#cofactors">Cofactors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#reactants">Reactants</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#similarities">Similarities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#processing-of-boundmolecules-from-pdb-model-files">Processing of boundmolecules from PDB model files</a></li>
 </ul>
 </li>
 </ul>
@@ -104,6 +106,42 @@
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.write_molecule"><code class="docutils literal notranslate"><span class="pre">write_molecule()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_reader">pdbeccdutils.core.prd_reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_reader.read_pdb_cif_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_reader.read_pdb_components_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_components_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_writer">pdbeccdutils.core.prd_writer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.to_pdb_ccd_cif_file"><code class="docutils literal notranslate"><span class="pre">to_pdb_ccd_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.to_pdb_str"><code class="docutils literal notranslate"><span class="pre">to_pdb_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.write_molecule"><code class="docutils literal notranslate"><span class="pre">write_molecule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_reader">pdbeccdutils.core.clc_reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult"><code class="docutils literal notranslate"><span class="pre">CLCReaderResult</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.get_chem_comp_bonds"><code class="docutils literal notranslate"><span class="pre">get_chem_comp_bonds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.infer_multiple_chem_comp"><code class="docutils literal notranslate"><span class="pre">infer_multiple_chem_comp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_clc_cif_file"><code class="docutils literal notranslate"><span class="pre">read_clc_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_clc_components_file"><code class="docutils literal notranslate"><span class="pre">read_clc_components_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_pdb_cif_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_cif_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_writer">pdbeccdutils.core.clc_writer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_cml_str"><code class="docutils literal notranslate"><span class="pre">to_cml_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_pdb_clc_cif_file"><code class="docutils literal notranslate"><span class="pre">to_pdb_clc_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_pdb_str"><code class="docutils literal notranslate"><span class="pre">to_pdb_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_xml_xml"><code class="docutils literal notranslate"><span class="pre">to_xml_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.write_molecule"><code class="docutils literal notranslate"><span class="pre">write_molecule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.boundmolecule">pdbeccdutils.core.boundmolecule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.find_pntr_entry"><code class="docutils literal notranslate"><span class="pre">find_pntr_entry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.infer_bound_molecules"><code class="docutils literal notranslate"><span class="pre">infer_bound_molecules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_bound_molecules"><code class="docutils literal notranslate"><span class="pre">parse_bound_molecules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_ligands_from_branch_scheme"><code class="docutils literal notranslate"><span class="pre">parse_ligands_from_branch_scheme()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_ligands_from_nonpoly_scheme"><code class="docutils literal notranslate"><span class="pre">parse_ligands_from_nonpoly_scheme()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.depictions">pdbeccdutils.core.depictions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionManager"><code class="docutils literal notranslate"><span class="pre">DepictionManager</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionValidator"><code class="docutils literal notranslate"><span class="pre">DepictionValidator</span></code></a></li>
@@ -114,27 +152,35 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.models">pdbeccdutils.core.models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.AssemblyResidue"><code class="docutils literal notranslate"><span class="pre">AssemblyResidue</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.CCDProperties"><code class="docutils literal notranslate"><span class="pre">CCDProperties</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ConformerType"><code class="docutils literal notranslate"><span class="pre">ConformerType</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionResult"><code class="docutils literal notranslate"><span class="pre">DepictionResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionSource"><code class="docutils literal notranslate"><span class="pre">DepictionSource</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Descriptor"><code class="docutils literal notranslate"><span class="pre">Descriptor</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.FragmentEntry"><code class="docutils literal notranslate"><span class="pre">FragmentEntry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit"><code class="docutils literal notranslate"><span class="pre">InChIFromRDKit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.LogType"><code class="docutils literal notranslate"><span class="pre">LogType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit"><code class="docutils literal notranslate"><span class="pre">MolFromRDKit</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult"><code class="docutils literal notranslate"><span class="pre">ParityResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ReleaseStatus"><code class="docutils literal notranslate"><span class="pre">ReleaseStatus</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Residue"><code class="docutils literal notranslate"><span class="pre">Residue</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ScaffoldingMethod"><code class="docutils literal notranslate"><span class="pre">ScaffoldingMethod</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Subcomponent"><code class="docutils literal notranslate"><span class="pre">Subcomponent</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.SubstructureMapping"><code class="docutils literal notranslate"><span class="pre">SubstructureMapping</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.exceptions">pdbeccdutils.core.exceptions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.exceptions.CCDUtilsError"><code class="docutils literal notranslate"><span class="pre">CCDUtilsError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.exceptions.EntryFailedException"><code class="docutils literal notranslate"><span class="pre">EntryFailedException</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.helpers.html">helpers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.cif_tools">pdbeccdutils.helpers.cif_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.fix_updated_mmcif"><code class="docutils literal notranslate"><span class="pre">fix_updated_mmcif()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_prd_cc_code"><code class="docutils literal notranslate"><span class="pre">get_prd_cc_code()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.preprocess_cif_category"><code class="docutils literal notranslate"><span class="pre">preprocess_cif_category()</span></code></a></li>
 </ul>
 </li>
@@ -152,13 +198,23 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.helper">pdbeccdutils.helpers.helper</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.find_element_in_list"><code class="docutils literal notranslate"><span class="pre">find_element_in_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.bond_pdb_order"><code class="docutils literal notranslate"><span class="pre">bond_pdb_order()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.check_args"><code class="docutils literal notranslate"><span class="pre">check_args()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.get_additional_fields"><code class="docutils literal notranslate"><span class="pre">get_additional_fields()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.set_up_logger"><code class="docutils literal notranslate"><span class="pre">set_up_logger()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.validate_path_exists"><code class="docutils literal notranslate"><span class="pre">validate_path_exists()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.mol_tools">pdbeccdutils.helpers.mol_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.correct_atom_coords"><code class="docutils literal notranslate"><span class="pre">correct_atom_coords()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_component_atom_id"><code class="docutils literal notranslate"><span class="pre">get_component_atom_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_conformer"><code class="docutils literal notranslate"><span class="pre">get_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchi_from_mol"><code class="docutils literal notranslate"><span class="pre">inchi_from_mol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi"><code class="docutils literal notranslate"><span class="pre">inchikey_from_inchi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.mol_from_inchi"><code class="docutils literal notranslate"><span class="pre">mol_from_inchi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
@@ -209,7 +265,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">pdbeccdutils: Small molecules chemistry toolkit</li>
+      <li class="breadcrumb-item active">pdbeccdutils: A small molecules chemistry toolkit using RDKit for the Protein Data Bank</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -219,8 +275,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pdbeccdutils-small-molecules-chemistry-toolkit">
-<h1>pdbeccdutils: Small molecules chemistry toolkit<a class="headerlink" href="#pdbeccdutils-small-molecules-chemistry-toolkit" title="Permalink to this heading"></a></h1>
+  <section id="pdbeccdutils-a-small-molecules-chemistry-toolkit-using-rdkit-for-the-protein-data-bank">
+<h1>pdbeccdutils: A small molecules chemistry toolkit using RDKit for the Protein Data Bank<a class="headerlink" href="#pdbeccdutils-a-small-molecules-chemistry-toolkit-using-rdkit-for-the-protein-data-bank" title="Permalink to this heading"></a></h1>
 <section id="user-guide">
 <h2>User guide<a class="headerlink" href="#user-guide" title="Permalink to this heading"></a></h2>
 <p>Getting started with pdbeccdutils</p>
@@ -230,6 +286,8 @@
 <li class="toctree-l1"><a class="reference internal" href="guide/intro.html#getting-started">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/depictions.html">Depictions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/fragments.html">Fragments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide/scaffolds.html">Scaffolds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide/similarity.html">Similarity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/pipelines.html">Pipelines</a></li>
 </ul>
 </div>

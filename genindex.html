@@ -10,6 +10,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -47,13 +49,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guide/intro.html#getting-started">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#a-single-component-file">A single component file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#chemical-component-dictionary">Chemical component dictionary</a></li>
-<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#bound-molecule-from-pdb-model-files">Bound-molecule from PDB model files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-prd-mmcif-files">Reading PRD mmCIF files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="guide/intro.html#component">Component</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#writing-ccd-files">Writing CCD files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#infer-covalently-linked-components-clc-from-pdb-model-files">Infer Covalently Linked Components (CLC) from PDB model files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#reading-clc-mmcif-files">Reading CLC mmCIF files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/intro.html#writing-ccd-prd-clc-files">Writing CCD/PRD/CLC files</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guide/depictions.html">Depictions</a></li>
@@ -62,15 +65,14 @@
 <li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="guide/scaffolds.html">Scaffolds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide/similarity.html">Similarity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/pipelines.html">Pipelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#pdbechem">PDBeChem</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="guide/pipelines.html#ftp-area-content">FTP area content</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#processing-of-ccd-prd">Processing of CCD/PRD</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="guide/pipelines.html#data-enrichment-process">Data enrichment process</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#cofactors">Cofactors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#reactants">Reactants</a></li>
-<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#similarities">Similarities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/pipelines.html#processing-of-boundmolecules-from-pdb-model-files">Processing of boundmolecules from PDB model files</a></li>
 </ul>
 </li>
 </ul>
@@ -102,6 +104,42 @@
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.write_molecule"><code class="docutils literal notranslate"><span class="pre">write_molecule()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_reader">pdbeccdutils.core.prd_reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_reader.read_pdb_cif_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_reader.read_pdb_components_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_components_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_writer">pdbeccdutils.core.prd_writer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.to_pdb_ccd_cif_file"><code class="docutils literal notranslate"><span class="pre">to_pdb_ccd_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.to_pdb_str"><code class="docutils literal notranslate"><span class="pre">to_pdb_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.write_molecule"><code class="docutils literal notranslate"><span class="pre">write_molecule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_reader">pdbeccdutils.core.clc_reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult"><code class="docutils literal notranslate"><span class="pre">CLCReaderResult</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.get_chem_comp_bonds"><code class="docutils literal notranslate"><span class="pre">get_chem_comp_bonds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.infer_multiple_chem_comp"><code class="docutils literal notranslate"><span class="pre">infer_multiple_chem_comp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_clc_cif_file"><code class="docutils literal notranslate"><span class="pre">read_clc_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_clc_components_file"><code class="docutils literal notranslate"><span class="pre">read_clc_components_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_pdb_cif_file"><code class="docutils literal notranslate"><span class="pre">read_pdb_cif_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_writer">pdbeccdutils.core.clc_writer</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_cml_str"><code class="docutils literal notranslate"><span class="pre">to_cml_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_pdb_clc_cif_file"><code class="docutils literal notranslate"><span class="pre">to_pdb_clc_cif_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_pdb_str"><code class="docutils literal notranslate"><span class="pre">to_pdb_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_xml_xml"><code class="docutils literal notranslate"><span class="pre">to_xml_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.write_molecule"><code class="docutils literal notranslate"><span class="pre">write_molecule()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.boundmolecule">pdbeccdutils.core.boundmolecule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.find_pntr_entry"><code class="docutils literal notranslate"><span class="pre">find_pntr_entry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.infer_bound_molecules"><code class="docutils literal notranslate"><span class="pre">infer_bound_molecules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_bound_molecules"><code class="docutils literal notranslate"><span class="pre">parse_bound_molecules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_ligands_from_branch_scheme"><code class="docutils literal notranslate"><span class="pre">parse_ligands_from_branch_scheme()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_ligands_from_nonpoly_scheme"><code class="docutils literal notranslate"><span class="pre">parse_ligands_from_nonpoly_scheme()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.depictions">pdbeccdutils.core.depictions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionManager"><code class="docutils literal notranslate"><span class="pre">DepictionManager</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionValidator"><code class="docutils literal notranslate"><span class="pre">DepictionValidator</span></code></a></li>
@@ -112,27 +150,35 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.models">pdbeccdutils.core.models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.AssemblyResidue"><code class="docutils literal notranslate"><span class="pre">AssemblyResidue</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.CCDProperties"><code class="docutils literal notranslate"><span class="pre">CCDProperties</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ConformerType"><code class="docutils literal notranslate"><span class="pre">ConformerType</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionResult"><code class="docutils literal notranslate"><span class="pre">DepictionResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionSource"><code class="docutils literal notranslate"><span class="pre">DepictionSource</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Descriptor"><code class="docutils literal notranslate"><span class="pre">Descriptor</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.FragmentEntry"><code class="docutils literal notranslate"><span class="pre">FragmentEntry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit"><code class="docutils literal notranslate"><span class="pre">InChIFromRDKit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.LogType"><code class="docutils literal notranslate"><span class="pre">LogType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit"><code class="docutils literal notranslate"><span class="pre">MolFromRDKit</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult"><code class="docutils literal notranslate"><span class="pre">ParityResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ReleaseStatus"><code class="docutils literal notranslate"><span class="pre">ReleaseStatus</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Residue"><code class="docutils literal notranslate"><span class="pre">Residue</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ScaffoldingMethod"><code class="docutils literal notranslate"><span class="pre">ScaffoldingMethod</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Subcomponent"><code class="docutils literal notranslate"><span class="pre">Subcomponent</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.SubstructureMapping"><code class="docutils literal notranslate"><span class="pre">SubstructureMapping</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.core.html#module-pdbeccdutils.core.exceptions">pdbeccdutils.core.exceptions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.exceptions.CCDUtilsError"><code class="docutils literal notranslate"><span class="pre">CCDUtilsError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.exceptions.EntryFailedException"><code class="docutils literal notranslate"><span class="pre">EntryFailedException</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.helpers.html">helpers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.cif_tools">pdbeccdutils.helpers.cif_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.fix_updated_mmcif"><code class="docutils literal notranslate"><span class="pre">fix_updated_mmcif()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_prd_cc_code"><code class="docutils literal notranslate"><span class="pre">get_prd_cc_code()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.preprocess_cif_category"><code class="docutils literal notranslate"><span class="pre">preprocess_cif_category()</span></code></a></li>
 </ul>
 </li>
@@ -150,13 +196,23 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.helper">pdbeccdutils.helpers.helper</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.find_element_in_list"><code class="docutils literal notranslate"><span class="pre">find_element_in_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.bond_pdb_order"><code class="docutils literal notranslate"><span class="pre">bond_pdb_order()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.check_args"><code class="docutils literal notranslate"><span class="pre">check_args()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.get_additional_fields"><code class="docutils literal notranslate"><span class="pre">get_additional_fields()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.set_up_logger"><code class="docutils literal notranslate"><span class="pre">set_up_logger()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.validate_path_exists"><code class="docutils literal notranslate"><span class="pre">validate_path_exists()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.mol_tools">pdbeccdutils.helpers.mol_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.correct_atom_coords"><code class="docutils literal notranslate"><span class="pre">correct_atom_coords()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_component_atom_id"><code class="docutils literal notranslate"><span class="pre">get_component_atom_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_conformer"><code class="docutils literal notranslate"><span class="pre">get_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchi_from_mol"><code class="docutils literal notranslate"><span class="pre">inchi_from_mol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi"><code class="docutils literal notranslate"><span class="pre">inchikey_from_inchi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.mol_from_inchi"><code class="docutils literal notranslate"><span class="pre">mol_from_inchi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
@@ -221,6 +277,7 @@
 
 <div class="genindex-jumpbox">
  <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
@@ -247,7 +304,21 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.AssemblyResidue">AssemblyResidue (class in pdbeccdutils.core.models)</a>
+</li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.atoms_ids">atoms_ids (pdbeccdutils.core.component.Component property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.bond_pdb_order">bond_pdb_order() (in module pdbeccdutils.helpers.helper)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult.bound_molecule">bound_molecule (pdbeccdutils.core.clc_reader.CLCReaderResult attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -259,21 +330,29 @@
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.exceptions.CCDUtilsError">CCDUtilsError</a>
 </li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.check_args">check_args() (in module pdbeccdutils.helpers.helper)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult">CLCReaderResult (class in pdbeccdutils.core.clc_reader)</a>
+</li>
       <li><a href="pdbeccdutils.computations.html#pdbeccdutils.computations.parity_method.compare_molecules">compare_molecules() (in module pdbeccdutils.computations.parity_method)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component">Component (class in pdbeccdutils.core.component)</a>
 </li>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.compute_2d">compute_2d() (pdbeccdutils.core.component.Component method)</a>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult.component">component (pdbeccdutils.core.clc_reader.CLCReaderResult attribute)</a>
 </li>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.compute_3d">compute_3d() (pdbeccdutils.core.component.Component method)</a>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.compute_2d">compute_2d() (pdbeccdutils.core.component.Component method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.compute_3d">compute_3d() (pdbeccdutils.core.component.Component method)</a>
+</li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ConformerType.Computed">Computed (pdbeccdutils.core.models.ConformerType attribute)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ConformerType">ConformerType (class in pdbeccdutils.core.models)</a>
 </li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.convert_svg">convert_svg() (in module pdbeccdutils.helpers.drawing)</a>
+</li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.correct_atom_coords">correct_atom_coords() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionValidator.count_bond_collisions">count_bond_collisions() (pdbeccdutils.core.depictions.DepictionValidator method)</a>
 </li>
@@ -291,14 +370,18 @@
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ConformerType.Depiction">Depiction (pdbeccdutils.core.models.ConformerType attribute)</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.LogType.DEPICTION_FAILED">DEPICTION_FAILED (pdbeccdutils.core.models.LogType attribute)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.LogType.DEPICTION_SCORE">DEPICTION_SCORE (pdbeccdutils.core.models.LogType attribute)</a>
+</li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionValidator.depiction_score">depiction_score() (pdbeccdutils.core.depictions.DepictionValidator method)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionManager">DepictionManager (class in pdbeccdutils.core.depictions)</a>
 </li>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionResult">DepictionResult (class in pdbeccdutils.core.models)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionResult">DepictionResult (class in pdbeccdutils.core.models)</a>
+</li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionSource">DepictionSource (class in pdbeccdutils.core.models)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.depictions.DepictionValidator">DepictionValidator (class in pdbeccdutils.core.depictions)</a>
@@ -317,10 +400,22 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.export_2d_annotation">export_2d_annotation() (pdbeccdutils.core.component.Component method)</a>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.exceptions.EntryFailedException">EntryFailedException</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.LogType.ERROR">ERROR (pdbeccdutils.core.models.LogType attribute)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult.errors">errors (pdbeccdutils.core.clc_reader.CLCReaderResult attribute)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit.errors">(pdbeccdutils.core.models.InChIFromRDKit attribute)</a>
+</li>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit.errors">(pdbeccdutils.core.models.MolFromRDKit attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.export_2d_annotation">export_2d_annotation() (pdbeccdutils.core.component.Component method)</a>
+</li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.export_2d_svg">export_2d_svg() (pdbeccdutils.core.component.Component method)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.external_mappings">external_mappings (pdbeccdutils.core.component.Component property)</a>
@@ -333,11 +428,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.fetch_external_mappings">fetch_external_mappings() (pdbeccdutils.core.component.Component method)</a>
 </li>
-      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.find_element_in_list">find_element_in_list() (in module pdbeccdutils.helpers.helper)</a>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.find_pntr_entry">find_pntr_entry() (in module pdbeccdutils.core.boundmolecule)</a>
 </li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer">fix_conformer() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule">fix_molecule() (in module pdbeccdutils.helpers.mol_tools)</a>
+</li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.fix_updated_mmcif">fix_updated_mmcif() (in module pdbeccdutils.helpers.cif_tools)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -359,15 +456,27 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.fragment_library.FragmentLibrary.generate_conformers">generate_conformers() (pdbeccdutils.core.fragment_library.FragmentLibrary method)</a>
 </li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.get_additional_fields">get_additional_fields() (in module pdbeccdutils.helpers.helper)</a>
+</li>
       <li><a href="pdbeccdutils.utils.html#pdbeccdutils.utils.web_services.get_agreed_unichem_mapping">get_agreed_unichem_mapping() (in module pdbeccdutils.utils.web_services)</a>
 </li>
       <li><a href="pdbeccdutils.utils.html#pdbeccdutils.utils.web_services.get_all_unichem_mapping">get_all_unichem_mapping() (in module pdbeccdutils.utils.web_services)</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.get_chem_comp_bonds">get_chem_comp_bonds() (in module pdbeccdutils.core.clc_reader)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.get_conformer">get_conformer() (pdbeccdutils.core.component.Component method)</a>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_component_atom_id">get_component_atom_id() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_conformer">get_conformer() (in module pdbeccdutils.helpers.mol_tools)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.get_conformer">(pdbeccdutils.core.component.Component method)</a>
+</li>
+      </ul></li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.get_drawing_scale">get_drawing_scale() (in module pdbeccdutils.helpers.drawing)</a>
+</li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_prd_cc_code">get_prd_cc_code() (in module pdbeccdutils.helpers.cif_tools)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.get_scaffolds">get_scaffolds() (pdbeccdutils.core.component.Component method)</a>
 </li>
@@ -396,16 +505,30 @@
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ConformerType.Ideal">Ideal (pdbeccdutils.core.models.ConformerType attribute)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.inchi">inchi (pdbeccdutils.core.component.Component property)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit.inchi">(pdbeccdutils.core.models.InChIFromRDKit attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchi_from_mol">inchi_from_mol() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.inchi_from_rdkit">inchi_from_rdkit (pdbeccdutils.core.component.Component property)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit">InChIFromRDKit (class in pdbeccdutils.core.models)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.inchikey">inchikey (pdbeccdutils.core.component.Component property)</a>
 </li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi">inchikey_from_inchi() (in module pdbeccdutils.helpers.mol_tools)</a>
+</li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.inchikey_from_rdkit">inchikey_from_rdkit (pdbeccdutils.core.component.Component property)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.inchikey_from_rdkit_matches_ccd">inchikey_from_rdkit_matches_ccd() (pdbeccdutils.core.component.Component method)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.infer_bound_molecules">infer_bound_molecules() (in module pdbeccdutils.core.boundmolecule)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.infer_multiple_chem_comp">infer_multiple_chem_comp() (in module pdbeccdutils.core.clc_reader)</a>
 </li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer">is_degenerate_conformer() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
@@ -417,11 +540,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.library_search">library_search() (pdbeccdutils.core.component.Component method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.listit">listit() (in module pdbeccdutils.helpers.conversions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.locate_fragment">locate_fragment() (pdbeccdutils.core.component.Component method)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.LogType">LogType (class in pdbeccdutils.core.models)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -447,7 +572,13 @@
 </li>
         <li><a href="pdbeccdutils.computations.html#module-pdbeccdutils.computations.parity_method">pdbeccdutils.computations.parity_method</a>
 </li>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.boundmolecule">pdbeccdutils.core.boundmolecule</a>
+</li>
         <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.ccd_writer">pdbeccdutils.core.ccd_writer</a>
+</li>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_reader">pdbeccdutils.core.clc_reader</a>
+</li>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_writer">pdbeccdutils.core.clc_writer</a>
 </li>
         <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.component">pdbeccdutils.core.component</a>
 </li>
@@ -458,6 +589,10 @@
         <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.fragment_library">pdbeccdutils.core.fragment_library</a>
 </li>
         <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.models">pdbeccdutils.core.models</a>
+</li>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_reader">pdbeccdutils.core.prd_reader</a>
+</li>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_writer">pdbeccdutils.core.prd_writer</a>
 </li>
         <li><a href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.cif_tools">pdbeccdutils.helpers.cif_tools</a>
 </li>
@@ -481,8 +616,16 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionResult.mol">mol (pdbeccdutils.core.models.DepictionResult attribute)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit.mol">(pdbeccdutils.core.models.MolFromRDKit attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.mol_from_inchi">mol_from_inchi() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.mol_no_h">mol_no_h (pdbeccdutils.core.component.Component property)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit">MolFromRDKit (class in pdbeccdutils.core.models)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -504,6 +647,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult">ParityResult (class in pdbeccdutils.core.models)</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_bound_molecules">parse_bound_molecules() (in module pdbeccdutils.core.boundmolecule)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_ligands_from_branch_scheme">parse_ligands_from_branch_scheme() (in module pdbeccdutils.core.boundmolecule)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.boundmolecule.parse_ligands_from_nonpoly_scheme">parse_ligands_from_nonpoly_scheme() (in module pdbeccdutils.core.boundmolecule)</a>
+</li>
       <li>
     pdbeccdutils
 
@@ -519,10 +668,31 @@
 </li>
       </ul></li>
       <li>
+    pdbeccdutils.core.boundmolecule
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.boundmolecule">module</a>
+</li>
+      </ul></li>
+      <li>
     pdbeccdutils.core.ccd_writer
 
       <ul>
         <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.ccd_writer">module</a>
+</li>
+      </ul></li>
+      <li>
+    pdbeccdutils.core.clc_reader
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_reader">module</a>
+</li>
+      </ul></li>
+      <li>
+    pdbeccdutils.core.clc_writer
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.clc_writer">module</a>
 </li>
       </ul></li>
       <li>
@@ -561,6 +731,22 @@
 </li>
       </ul></li>
       <li>
+    pdbeccdutils.core.prd_reader
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_reader">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    pdbeccdutils.core.prd_writer
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#module-pdbeccdutils.core.prd_writer">module</a>
+</li>
+      </ul></li>
+      <li>
     pdbeccdutils.helpers.cif_tools
 
       <ul>
@@ -574,8 +760,6 @@
         <li><a href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.conversions">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pdbeccdutils.helpers.drawing
 
@@ -639,6 +823,8 @@
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Descriptor.program">program (pdbeccdutils.core.models.Descriptor attribute)</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Descriptor.program_version">program_version (pdbeccdutils.core.models.Descriptor attribute)</a>
+</li>
       <li><a href="pdbeccdutils.utils.html#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader">PubChemDownloader (class in pdbeccdutils.utils.pubchem_downloader)</a>
 </li>
   </ul></td>
@@ -647,12 +833,24 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_clc_cif_file">read_clc_cif_file() (in module pdbeccdutils.core.clc_reader)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_clc_components_file">read_clc_components_file() (in module pdbeccdutils.core.clc_reader)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.read_pdb_cif_file">read_pdb_cif_file() (in module pdbeccdutils.core.clc_reader)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.prd_reader.read_pdb_cif_file">(in module pdbeccdutils.core.prd_reader)</a>
+</li>
+      </ul></li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.prd_reader.read_pdb_components_file">read_pdb_components_file() (in module pdbeccdutils.core.prd_reader)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.component.Component.released">released (pdbeccdutils.core.component.Component property)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ReleaseStatus">ReleaseStatus (class in pdbeccdutils.core.models)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.utils.html#pdbeccdutils.utils.pubchem_downloader.rescale_molecule">rescale_molecule() (in module pdbeccdutils.utils.pubchem_downloader)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Residue">Residue (class in pdbeccdutils.core.models)</a>
@@ -667,6 +865,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize">sanitize() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult.sanitized">sanitized (pdbeccdutils.core.clc_reader.CLCReaderResult attribute)</a>
+</li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.drawing.save_no_image">save_no_image() (in module pdbeccdutils.helpers.drawing)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ScaffoldingMethod">ScaffoldingMethod (class in pdbeccdutils.core.models)</a>
@@ -677,6 +877,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.set_up_logger">set_up_logger() (in module pdbeccdutils.helpers.helper)</a>
+</li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult.similarity_score">similarity_score (pdbeccdutils.core.models.ParityResult attribute)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionResult.source">source (pdbeccdutils.core.models.DepictionResult attribute)</a>
@@ -684,6 +886,8 @@
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_float">str_to_float() (in module pdbeccdutils.helpers.conversions)</a>
 </li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_int">str_to_int() (in module pdbeccdutils.helpers.conversions)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Subcomponent">Subcomponent (class in pdbeccdutils.core.models)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.SubstructureMapping">SubstructureMapping (class in pdbeccdutils.core.models)</a>
 </li>
@@ -698,27 +902,51 @@
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Residue.to_arpeggio">to_arpeggio() (pdbeccdutils.core.models.Residue method)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_cml_str">to_cml_str() (in module pdbeccdutils.core.ccd_writer)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_cml_str">(in module pdbeccdutils.core.clc_writer)</a>
 </li>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Residue.to_dict">to_dict() (pdbeccdutils.core.models.Residue method)</a>
+      </ul></li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.AssemblyResidue.to_dict">to_dict() (pdbeccdutils.core.models.AssemblyResidue method)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Residue.to_dict">(pdbeccdutils.core.models.Residue method)</a>
 </li>
+      </ul></li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.fragment_library.FragmentLibrary.to_image">to_image() (pdbeccdutils.core.fragment_library.FragmentLibrary method)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_json_dict">to_json_dict() (in module pdbeccdutils.core.ccd_writer)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_json_str">to_json_str() (in module pdbeccdutils.core.ccd_writer)</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_pdb_ccd_cif_file">to_pdb_ccd_cif_file() (in module pdbeccdutils.core.ccd_writer)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.to_pdb_ccd_cif_file">(in module pdbeccdutils.core.prd_writer)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_pdb_ccd_cif_file">to_pdb_ccd_cif_file() (in module pdbeccdutils.core.ccd_writer)</a>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_pdb_clc_cif_file">to_pdb_clc_cif_file() (in module pdbeccdutils.core.clc_writer)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_pdb_str">to_pdb_str() (in module pdbeccdutils.core.ccd_writer)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_pdb_str">(in module pdbeccdutils.core.clc_writer)</a>
 </li>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.to_pdb_str">(in module pdbeccdutils.core.prd_writer)</a>
+</li>
+      </ul></li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_sdf_str">to_sdf_str() (in module pdbeccdutils.core.ccd_writer)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_xml_str">to_xml_str() (in module pdbeccdutils.core.ccd_writer)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_xml_xml">to_xml_xml() (in module pdbeccdutils.core.ccd_writer)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.to_xml_xml">(in module pdbeccdutils.core.clc_writer)</a>
 </li>
+      </ul></li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.to_xyz_str">to_xyz_str() (in module pdbeccdutils.core.ccd_writer)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Descriptor.type">type (pdbeccdutils.core.models.Descriptor attribute)</a>
@@ -741,6 +969,10 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.helper.validate_path_exists">validate_path_exists() (in module pdbeccdutils.helpers.helper)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.Descriptor.value">value (pdbeccdutils.core.models.Descriptor attribute)</a>
 </li>
   </ul></td>
@@ -749,8 +981,26 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.write_molecule">write_molecule() (in module pdbeccdutils.core.ccd_writer)</a>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.LogType.WARNING">WARNING (pdbeccdutils.core.models.LogType attribute)</a>
 </li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult.warnings">warnings (pdbeccdutils.core.clc_reader.CLCReaderResult attribute)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit.warnings">(pdbeccdutils.core.models.InChIFromRDKit attribute)</a>
+</li>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit.warnings">(pdbeccdutils.core.models.MolFromRDKit attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.ccd_writer.write_molecule">write_molecule() (in module pdbeccdutils.core.ccd_writer)</a>
+
+      <ul>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_writer.write_molecule">(in module pdbeccdutils.core.clc_writer)</a>
+</li>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.prd_writer.write_molecule">(in module pdbeccdutils.core.prd_writer)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 

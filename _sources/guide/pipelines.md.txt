@@ -4,15 +4,18 @@
 
 # Pipelines
 
-Presently there are four pipelines in the production based on the `pdbeccdutils` code.
+`pdbeccdutils` can be used to process standard ligand definitions defined by [CCD](http://www.wwpdb.org/data/ccd) or [BIRD](https://www.wwpdb.org/data/bird) dictionaries, identify boundmolecules from PDB model files and infer Covalently Linked Components (CLC). The packages comes with two pipelines, one to process CCD/PRDs and an another one to process boundmolecules from PDB model files
 
-## PDBeChem
+## Processing of CCD/PRD
 
-This pipeline generates all the chemistry data consumed on the PDBe pages. It can process standard ligand definitions defined by [CCD](http://www.wwpdb.org/data/ccd) or [BIRD](https://www.wwpdb.org/data/bird) dictionaries.
+`process_components_cif` entry point can be used to run the pipeline to process a CCD or PRD. The pipeline enriches (data-enrichment-process) the information in standard wwPDB CCD/PRD files, generates 2D images and exports to multiple file formats.
 
-### FTP area content
+To find all the input options, use:
 
-Following files are generated in the tree-like structure (A/ATP/...) in our [FTP area](http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/).
+```bash
+process_components_cif -h
+```
+For example, following files are generated for ATP
 
 * `ATP.cif` - Standard wwPDB CCD file with the [data enrichments](data-enrichment-process) | `mmCIF`.
 * `ATP_ideal.pdb` - ideal cooordinates | `PDB`.
@@ -23,32 +26,44 @@ Following files are generated in the tree-like structure (A/ATP/...) in our [FTP
 * `ATP_N_names.svg` - 2D depiction in N x N resolution with atom names. Where N in (100,200,300,400,500) pixels.
 * `ATP_model.sdf` - model coordinates | `MOL`
 * `ATP_ideal.sdf` - ideal cooordinates | `MOL`.
-* `ATP.cml` - component representation | `CML`.
-* `ATP_annotation.json` - 2D depiction in 'natural format' (i.e. 50px per 1Å) with some additional annotation. This file is consumed by the protein-ligand interaction viewer.
+* `ATP.cml` - model coordinates | `CML`.
+* `ATP_annotation.json` - 2D depiction in JSON format with some additional annotation.
 
-On the top of that these files are generated:
-
-* `chem_comp.list` - List of processed ids
-* `chem_comp_list.xml` - XML file with some additional metadata per entry.
-* `components.cif` - Aggregated files with all the CCD information.
-* `pdbechem.tar.gz` - The archive in the `*.tar.gz` format:
 
 (data-enrichment-process)=
 ### Data enrichment process
 
-Aside from the standard content of the wwPDB CCD files. PDBeChem adds the following information in the `mmCIF` files. See example for [ATP](http://ftp.ebi.ac.uk/pub/databases/msd/pdbechem_v2/A/ATP/ATP.cif):
+Aside from the standard content of the wwPDB CCD files, `process_components_cif` pipeline adds the following information in the `mmCIF` files.
 
-* ID mapping to some popular resources like ChEMBL, ChEBI, DrugBank, etc. The curated list is available in the pdbeccdutils package.(`pdbeccdutils.utils.web_services.agreed_resources`).
-* ChEMBL synonyms.
-* DrugBank details - summary, synonyms, international brands, taxonomy, and known targets.
 * 2D coordinations of the ligand.
 * RDKit regenerated 3D conformer.
 * Information about scaffold and fragments found in the entry.
 
 
-## [Cofactors](https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/cofactors.html)
+## Processing of boundmolecules from PDB model files
 
+Most of the structures in PDB has atleast one small molecule bound to it. Many of these small molecules are ligands of biological significance, such as cofactors, metabolites, carbohydrates, or lipids. `read_boundmolecule` entry point can be used to run the pipeline to identify these boundmolecules from PDB entries and assign them as Covalently Linked Components (CLC) if they are composed of individual components represented by individual CCDs.
 
-## [Reactants](https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/reactants.html)
+To find all the input options, use:
 
-## [Similarities](https://pdbe.gitdocs.ebi.ac.uk/release/relic/documentation/similarities.html)
+```bash
+read_boundmolecule -h
+```
+For example, the pipeline generates the following files in PDB entry 1d83
+
+* `1d83_processed.cif` - The input structure of 1d83 after removing alternate conformers
+* `bound_molecules.json` - Details of boundmolecules found in the input structure
+* `CLC_1` - Folder containing details of CLC identified from input structure
+* `CLC_2` - Folder containing details of CLC identified from input structure
+
+In each folder of CLCs identified from an input structure, the following files are stored:
+
+* `CLC_K.cif` - CIF files of CLC after [data enrichments](data-enrichment-process) | `mmCIF`.
+* `CLC_K_model.pdb` - model cooordinates | `PDB`.
+* `CLC_K_N.svg` - 2D depiction in N x N resolution. Where N is (100,200,300,400,500) pixels.
+* `CLC_K_N_names.svg` - 2D depiction in N x N resolution with atom names. Where N in (100,200,300,400,500) pixels.
+* `CLC_K_model.sdf` - model coordinates | `MOL`
+* `CLC_K.cml` - component representation | `CML`.
+* `CLC_K_annotation.json` - 2D depiction in 'natural format' (i.e. 50px per 1Å) with some additional annotation.
+
+Where K is a positive interger representing the K<sup>th</sup> CLC identified from an input structure

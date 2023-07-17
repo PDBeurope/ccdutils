@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Introduction &mdash; pdbeccdutils 0.7.2 documentation</title>
+  <title>Scaffolds &mdash; pdbeccdutils 0.7.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Depictions" href="depictions.html" />
-    <link rel="prev" title="pdbeccdutils: A small molecules chemistry toolkit using RDKit for the Protein Data Bank" href="../index.html" /> 
+    <link rel="next" title="Similarity" href="similarity.html" />
+    <link rel="prev" title="Fragments" href="fragments.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,19 +47,19 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#installation">Installation</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#getting-started">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#reading-ccd-mmcif-files">Reading CCD mmCIF files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reading-prd-mmcif-files">Reading PRD mmCIF files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#component">Component</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#getting-started">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#reading-ccd-mmcif-files">Reading CCD mmCIF files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#reading-prd-mmcif-files">Reading PRD mmCIF files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="intro.html#component">Component</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#infer-covalently-linked-components-clc-from-pdb-model-files">Infer Covalently Linked Components (CLC) from PDB model files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reading-clc-mmcif-files">Reading CLC mmCIF files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#writing-ccd-prd-clc-files">Writing CCD/PRD/CLC files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#infer-covalently-linked-components-clc-from-pdb-model-files">Infer Covalently Linked Components (CLC) from PDB model files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#reading-clc-mmcif-files">Reading CLC mmCIF files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#writing-ccd-prd-clc-files">Writing CCD/PRD/CLC files</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="depictions.html">Depictions</a></li>
@@ -68,7 +68,7 @@
 <li class="toctree-l2"><a class="reference internal" href="fragments.html#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="scaffolds.html">Scaffolds</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scaffolds</a></li>
 <li class="toctree-l1"><a class="reference internal" href="similarity.html">Similarity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pipelines.html#processing-of-ccd-prd">Processing of CCD/PRD</a><ul>
@@ -266,9 +266,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Introduction</li>
+      <li class="breadcrumb-item active">Scaffolds</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/guide/intro.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/guide/scaffolds.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -276,119 +276,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="introduction">
-<span id="intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> is an open-source python package for processing and analyzing small molecules in PDB. Small-molecule data in PDB is available as <a class="reference external" href="http://www.wwpdb.org/data/ccd">Chemical Component Dictionary (CCD)</a> or <a class="reference external" href="http://www.wwpdb.org/data/bird">Biologically Interesting Molecule reference Dictioanry (BIRD)</a> in PDBX/mmCIF format. <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> provides streamlined access to all metadata of small molecules in PDB and offers a set of convenient methods to compute various properties of small molecules using RDKIt such as 2D depictions, 3D conformers, physicochemical properties, matching common fragments and scaffolds, mapping to small-molecule databases using UniChem. <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> also provides methods for identifying all the covalently attached chemical components in a macromolecular structure and calculating similarity among small molecules using <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5890617/">PARITY method</a></p>
-<p><strong>Note</strong>
-The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> is under development and new functionality is added regularly as well as its functionality is being revised and updated. When properly installed all the code should have documentation. All the <em>public</em> methods do have <a class="reference external" href="http://mypy-lang.org/">static typing</a> introduced in Python 3.5. All the interfaces should be well documented.</p>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> can be presently obtained from <a class="reference external" href="https://pypi.org/project/pdbeccdutils/">PYPI</a> using the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install pdbeccdutils</span>
-</pre></div>
-</div>
-<p>Alternativelly, you can install the reposotory from <a class="reference external" href="https://github.com/PDBeurope/ccdutils">Github</a> using the following command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install git+https://github.com/PDBeurope/ccdutils.git@master#egg=pdbeccdutils</span>
-</pre></div>
-</div>
-<p>If you want to contribute to the project please fork it first and then do a pull request.</p>
-</section>
-</section>
-<section id="getting-started">
-<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
-<p>The core structural representation of small-molecules in <code class="docutils literal notranslate"><span class="pre">pdbecccdutils</span></code> package is a <code class="docutils literal notranslate"><span class="pre">Component</span></code> object, which is a wrapper around the default <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> object (object property <code class="docutils literal notranslate"><span class="pre">mol</span></code>) providing most of the functionality and access to its properties. <code class="docutils literal notranslate"><span class="pre">Ideal</span></code>, <code class="docutils literal notranslate"><span class="pre">Model</span></code> and <code class="docutils literal notranslate"><span class="pre">Computed</span></code> conformers are stored in the <code class="docutils literal notranslate"><span class="pre">mol</span></code> attribute and <code class="docutils literal notranslate"><span class="pre">Depiction</span></code> conformers are stroted in <code class="docutils literal notranslate"><span class="pre">mol2D</span></code> attributes of the <code class="docutils literal notranslate"><span class="pre">Component</span></code>. <code class="docutils literal notranslate"><span class="pre">pdbeccdutils.core.models.ConformerType</span></code> object allows accessing all of them.</p>
-<p>Below you can find a few typical use cases.</p>
-<section id="reading-ccd-mmcif-files">
-<h2>Reading CCD mmCIF files<a class="headerlink" href="#reading-ccd-mmcif-files" title="Permalink to this heading"></a></h2>
-<p>CCD structures can be read using <code class="docutils literal notranslate"><span class="pre">ccd_reader.py</span></code> module located in the <code class="docutils literal notranslate"><span class="pre">pdbeccdutils.core</span></code> module. By default, the molecules comes sanitized using an augmented RDKit sanitization procedure. However, this option can be turned off by specifying optional parameter <code class="docutils literal notranslate"><span class="pre">sanitize=False</span></code> to the function</p>
+  <section id="scaffolds">
+<span id="id1"></span><h1>Scaffolds<a class="headerlink" href="#scaffolds" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> helps to search for scaffolds of small molecules in PDB using RDKit. Presently, the following scaffold identification methods from RDKit are supported: <code class="docutils literal notranslate"><span class="pre">MurckoScaffold</span></code>, <code class="docutils literal notranslate"><span class="pre">MurckoGeneric</span></code>, <code class="docutils literal notranslate"><span class="pre">Brics</span></code></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_reader</span>
 
-<span class="n">ccd_reader_result</span> <span class="o">=</span> <span class="n">ccd_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;HEM.cif&#39;</span><span class="p">)</span>
-<span class="n">ccd_reader_result</span>
+<span class="n">component</span> <span class="o">=</span> <span class="n">ccd_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;HEM.cif&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">component</span>
+<span class="n">component</span><span class="o">.</span><span class="n">get_scaffolds</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>CCDReaderResult contains a list of possible warnings and errors that were encountered during the structure parsing. There is also a convenience method that allows reading in multiple chemical components, provided they are listed in different data blocks in a single mmCIF file.</p>
-</section>
-<section id="reading-prd-mmcif-files">
-<h2>Reading PRD mmCIF files<a class="headerlink" href="#reading-prd-mmcif-files" title="Permalink to this heading"></a></h2>
-<p>PRD structures can be read using <code class="docutils literal notranslate"><span class="pre">prd_reader.py</span></code> module located in <code class="docutils literal notranslate"><span class="pre">pdbeccdutils.core</span></code> module.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">prd_reader</span>
-
-<span class="n">prd_reader_result</span> <span class="o">=</span> <span class="n">prd_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;PRDCC_000204.cif&#39;</span><span class="p">)</span>
-<span class="n">prd_reader_result</span>
-</pre></div>
-</div>
-<section id="component">
-<h3>Component<a class="headerlink" href="#component" title="Permalink to this heading"></a></h3>
-<p>Component is a wrapper around <code class="docutils literal notranslate"><span class="pre">rdkit.Chem.rdchem.Mol</span></code> object providing streamlined access to all metadata information from CCD/PRD files</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">component</span> <span class="o">=</span> <span class="n">ccd_reader_result</span><span class="o">.</span><span class="n">component</span>
-<span class="n">component</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">component</span><span class="o">.</span><span class="n">inchikey</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">component</span><span class="o">.</span><span class="n">formula</span>
-</pre></div>
-</div>
-</section>
-</section>
-<section id="infer-covalently-linked-components-clc-from-pdb-model-files">
-<h2>Infer Covalently Linked Components (CLC) from PDB model files<a class="headerlink" href="#infer-covalently-linked-components-clc-from-pdb-model-files" title="Permalink to this heading"></a></h2>
-<p>CLCs are large, complex multi-component ligands typically represented as individual components represented by individual CCDs as part of the PDB deposition and annotation process. To provide a precise and chemically complete representation of these multi-component ligands, we created CLCs encompassing the entire set of individual components.This improvement ensures researchers can analyse and interpret the interactions of these biologically relevant ligands more accurately. <code class="docutils literal notranslate"><span class="pre">pdbecccdutils</span></code> provides <code class="docutils literal notranslate"><span class="pre">clc_reader</span></code> module to infer all covalenty linked components in a single PDB model file.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">clc_reader</span>
-
-<span class="n">clcs</span> <span class="o">=</span> <span class="n">clc_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;/path/to/xxxx_updated.cif&#39;</span><span class="p">,</span><span class="n">sanitize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">clc_components</span> <span class="o">=</span> <span class="p">[</span><span class="n">clc</span><span class="o">.</span><span class="n">component</span> <span class="k">for</span> <span class="n">clc</span> <span class="ow">in</span> <span class="n">clcs</span><span class="p">]</span>
-<span class="n">rdkit_mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">mol</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">clc_components</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>The result of <code class="docutils literal notranslate"><span class="pre">clc_reader.read_pdb_cif_file</span></code> function is a list of instances of <code class="docutils literal notranslate"><span class="pre">CLCReaderResult</span></code>, with each instance representing a single Covalently Linked Components (CLC). The <code class="docutils literal notranslate"><span class="pre">Component</span></code> Object of <code class="docutils literal notranslate"><span class="pre">CLCReaderResult</span></code> can then be used to access the properties of each CLC.</p>
-</section>
-<section id="reading-clc-mmcif-files">
-<h2>Reading CLC mmCIF files<a class="headerlink" href="#reading-clc-mmcif-files" title="Permalink to this heading"></a></h2>
-<p>CLC structures can be read using <code class="docutils literal notranslate"><span class="pre">clc_reader.py</span></code> module located in <code class="docutils literal notranslate"><span class="pre">pdbeccdutils.core</span></code> module.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">clc_reader</span>
-<span class="n">clc_reader_result</span> <span class="o">=</span> <span class="n">clc_reader</span><span class="o">.</span><span class="n">read_clc_cif_file</span><span class="p">(</span><span class="s1">&#39;CLC_00004.cif&#39;</span><span class="p">)</span>
-<span class="n">clc_reader_result</span>
-</pre></div>
-</div>
-</section>
-<section id="writing-ccd-prd-clc-files">
-<h2>Writing CCD/PRD/CLC files<a class="headerlink" href="#writing-ccd-prd-clc-files" title="Permalink to this heading"></a></h2>
-<p>CCD/PRD/CLC molecules represented as Component objects in <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> can be exported to different file formats such as mmCIF, SDF, PDB, CML, XML</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_writer</span><span class="p">,</span> <span class="n">prd_writer</span><span class="p">,</span> <span class="n">clc_writer</span>
-<span class="kn">from</span> <span class="nn">pdbeccdutils.core.models</span> <span class="kn">import</span> <span class="n">ConformerType</span>
-
-<span class="n">ccd_component</span> <span class="o">=</span> <span class="n">ccd_reader_result</span><span class="o">.</span><span class="n">component</span>
-<span class="n">prd_component</span> <span class="o">=</span> <span class="n">prd_reader_result</span><span class="o">.</span><span class="n">component</span>
-<span class="n">clc_component</span> <span class="o">=</span> <span class="n">clc_reader_result</span><span class="o">.</span><span class="n">component</span>
-
-<span class="c1"># write idealized coordinates in the SDF format.</span>
-<span class="n">ccd_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;HEM.sdf&#39;</span><span class="p">,</span> <span class="n">ccd_component</span><span class="p">)</span>
-<span class="n">prd_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;PRDCC_000204.sdf&#39;</span><span class="p">,</span> <span class="n">prd_component</span><span class="p">)</span>
-<span class="n">clc_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;CLC_00004.sdf&#39;</span><span class="p">,</span> <span class="n">clc_component</span><span class="p">)</span>
-
-<span class="c1"># write model coordinates in the PDB format without hydrogens</span>
-<span class="n">ccd_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;HEM.pdb&#39;</span><span class="p">,</span> <span class="n">ccd_component</span><span class="p">,</span> <span class="n">remove_hs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">conf_type</span><span class="o">=</span><span class="n">ConformerType</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
-<span class="n">prd_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;PRDCC_000204.pdb&#39;</span><span class="p">,</span> <span class="n">prd_component</span><span class="p">,</span> <span class="n">remove_hs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">conf_type</span><span class="o">=</span><span class="n">ConformerType</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
-<span class="n">clc_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;CLC_00004.pdb&#39;</span><span class="p">,</span> <span class="n">clc_component</span><span class="p">,</span> <span class="n">remove_hs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">conf_type</span><span class="o">=</span><span class="n">ConformerType</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
-
-<span class="c1"># write model coordinates in the mmCIF format with hydrogens</span>
-<span class="n">ccd_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;HEM.cif&#39;</span><span class="p">,</span> <span class="n">ccd_component</span><span class="p">,</span> <span class="n">conf_type</span><span class="o">=</span><span class="n">ConformerType</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
-<span class="n">prd_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;PRDCC_000204.cif&#39;</span><span class="p">,</span> <span class="n">prd_component</span><span class="p">,</span> <span class="n">conf_type</span><span class="o">=</span><span class="n">ConformerType</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
-<span class="n">clc_writer</span><span class="o">.</span><span class="n">write_molecule</span><span class="p">(</span><span class="s1">&#39;CLC_00004.cif&#39;</span><span class="p">,</span> <span class="n">clc_component</span><span class="p">,</span> <span class="n">conf_type</span><span class="o">=</span><span class="n">ConformerType</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="pdbeccdutils: A small molecules chemistry toolkit using RDKit for the Protein Data Bank" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="depictions.html" class="btn btn-neutral float-right" title="Depictions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="fragments.html" class="btn btn-neutral float-left" title="Fragments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="similarity.html" class="btn btn-neutral float-right" title="Similarity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
