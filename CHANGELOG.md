@@ -1,6 +1,6 @@
 # Changelog
 
-## RELEASE 0.7.1 - July 26, 2023
+## RELEASE 0.8.0 - July 26, 2023
 
 ### Features
 * Added clc_reader and clc_writer to read and write Covalently Linked Components (CLCs)
