@@ -1,11 +1,18 @@
 # Changelog
 
+## RELEASE 0.7.1 - July 26, 2023
+
+### Features
+* Added clc_reader and clc_writer to read and write Covalently Linked Components (CLCs)
+* Added prd_reader and prd_writer to read and write Protein Reference Dictionarys (PRDs)
+* Added boundmolecule_cli, a pipeline to infer CLCs from PDB model files
+
 ## RELEASE 0.7.0 - February 26, 2023
 
 ### Features
 * Replaced pdbecif with gemmi for mmcif parsing
 * Support for rdkit 2022.09.x
-* Component representation of bound-molecules with multiple components
+* Component representation of Covalently Linked Components (complex multi-component ligands typically represented as individual components represented by individual CCDs)
 
 ### Breaking changes
 * Removed ccd_cif_dict (dict) property of Component. Please use ccd_cif_block (gemmi.cif.Block) to access data from mmcif file

@@ -8,7 +8,7 @@
 
 ## Processing of CCD/PRD
 
-`process_components_cif` entry point can be used to run the pipeline to process CCD or PRD. The pipeline enriches (data-enrichment-process) the information in standard wwPDB CCD/PRD files, generates 2D images and exports to multiple file formats.
+`process_components_cif` entry point can be used to run the pipeline to process a CCD or PRD. The pipeline enriches (data-enrichment-process) the information in standard wwPDB CCD/PRD files, generates 2D images and exports to multiple file formats.
 
 To find all the input options, use:
 
@@ -26,8 +26,8 @@ For example, following files are generated for ATP
 * `ATP_N_names.svg` - 2D depiction in N x N resolution with atom names. Where N in (100,200,300,400,500) pixels.
 * `ATP_model.sdf` - model coordinates | `MOL`
 * `ATP_ideal.sdf` - ideal cooordinates | `MOL`.
-* `ATP.cml` - component representation | `CML`.
-* `ATP_annotation.json` - 2D depiction in 'natural format' (i.e. 50px per 1Å) with some additional annotation.
+* `ATP.cml` - model coordinates | `CML`.
+* `ATP_annotation.json` - 2D depiction in JSON format with some additional annotation.
 
 
 (data-enrichment-process)=
