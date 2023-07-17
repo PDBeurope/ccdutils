@@ -8,6 +8,7 @@ from gemmi import cif
 from xml.dom import minidom
 from datetime import date as Date
 from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement
 
 import pdbeccdutils
 from pdbeccdutils.core.component import Component
@@ -51,7 +52,7 @@ def write_molecule(
     elif extension == "pdb":
         str_representation = to_pdb_str(component, remove_hs, conf_type)
     elif extension in ("mmcif", "cif"):
-        to_pdb_bm_cif_file(path, component, remove_hs)
+        to_pdb_clc_cif_file(path, component, remove_hs)
         return
     elif extension == "cml":
         str_representation = to_cml_str(component, remove_hs, conf_type)
@@ -90,24 +91,21 @@ def to_pdb_str(
     (mol_to_save, conf_id, conf_type) = ccd_writer._prepate_structure(
         component, remove_hs, conf_type
     )
-
-    info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
-    info.SetResidueName(f"{component.id:>3}")
-    info.SetTempFactor(20.0)
-    info.SetOccupancy(1.0)
-    info.SetChainId("A")
-    info.SetResidueNumber(1)
-    info.SetIsHeteroAtom(True)
-
+    residue_numbers = _get_residue_number(mol_to_save)
     for atom in mol_to_save.GetAtoms():
         flag = ccd_writer._get_atom_name(atom)
         atom_name = f"{flag:<4}"  # make sure it is 4 characters
-        info.SetName(atom_name)
-        atom.SetMonomerInfo(info)
+        res_info = atom.GetPDBResidueInfo()
+        res_num = residue_numbers[atom.GetProp("residue_id")]
+        res_info.SetResidueNumber(res_num)
+        res_info.SetName(atom_name)
+        res_info.SetTempFactor(20.0)
+        res_info.SetOccupancy(1.0)
+        res_info.SetChainId("A")
 
     pdb_title = [
         f"HEADER    {conf_type.name} coordinates",
-        f" for PDB-BM {component.id}",
+        f" for PDB-CLC {component.id}",
         f"COMPND    {component.id}",
         f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
         f"AUTHOR    RDKit {rdkit.__version__}",
@@ -195,6 +193,46 @@ def to_cml_str(component: Component, remove_hs=True, conf_type=ConformerType.Mod
     return pretty.toprettyxml(indent="  ")
 
 
+def to_xml_xml(component):
+    """Converts structure to the XML format and returns its XML repr.
+
+    Args:
+        component (Component): Component to be exported.
+
+    Returns:
+        xml.etree.ElementTree.Element: XML object
+    """
+    root = Element("chemComp")
+
+    id_e = SubElement(root, "id")
+    formula_e = SubElement(root, "formula")
+    s_smiles_e = SubElement(root, "stereoSmiles")
+    n_smiles_e = SubElement(root, "nonStereoSmiles")
+    inchi_e = SubElement(root, "inchi")
+
+    id_e.text = component.id
+    formula_e.text = component.formula
+    s_smiles_e.text = next(
+        (
+            x.value
+            for x in component.descriptors
+            if x.type == "SMILES_CANONICAL" and x.program == "RDKit"
+        ),
+        "",
+    )
+    n_smiles_e.text = next(
+        (
+            x.value
+            for x in component.descriptors
+            if x.type == "SMILES" and x.program == "RDKit"
+        ),
+        "",
+    )
+    inchi_e.text = component.inchi
+
+    return root
+
+
 def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     """Fallback method to generate PDB file in case the default one in
     RDKit fails.
@@ -210,7 +248,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     """
     conformer_ids = []
     content = [
-        f"HEADER    {conf_name} coordinates for PDB-BM {component_id}",
+        f"HEADER    {conf_name} coordinates for PDB-CLC {component_id}",
         f"COMPND    {component_id}",
         f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
         f"AUTHOR    RDKit {rdkit.__version__}",
@@ -221,19 +259,20 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     else:
         conformer_ids = [conf_id]
 
+    residue_numbers = _get_residue_number(mol)
     for m in conformer_ids:
         rdkit_conformer = mol.GetConformer(m)
-
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
+            res_info = atom.GetPDBResidueInfo()
 
             s = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}".format(
                 "HETATM",
                 i + 1,
                 atom.GetProp("name"),
-                component_id,
+                res_info.GetResidueName(),
                 "A",
-                1,
+                residue_numbers[atom.GetProp("residue_id")],
                 " ",
                 rdkit_conformer.GetAtomPosition(i).x,
                 rdkit_conformer.GetAtomPosition(i).y,
@@ -266,7 +305,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     return "\n".join(content)
 
 
-def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
+def to_pdb_clc_cif_file(path, component: Component, remove_hs=True):
     """Converts structure to the PDB mmCIF format.
     Args:
         path (str): Path to save cif file.
@@ -275,7 +314,7 @@ def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
     """
 
     if not isinstance(component.ccd_cif_block, gemmi.cif.Block):
-        component.ccd_cif_block = _to_pdb_bm_cif_block(component)
+        component.ccd_cif_block = _to_pdb_clc_cif_block(component)
 
     temp_doc = gemmi.cif.Document()
     cif_block_copy = temp_doc.add_copied_block(component.ccd_cif_block)
@@ -293,7 +332,7 @@ def to_pdb_bm_cif_file(path, component: Component, remove_hs=True):
     temp_doc.write_file(path, gemmi.cif.Style.Pdbx)
 
 
-def _to_pdb_bm_cif_block(component):
+def _to_pdb_clc_cif_block(component):
     """Export component to the PDB CCD CIF file.
 
     Args:
@@ -308,15 +347,15 @@ def _to_pdb_bm_cif_block(component):
     doc = gemmi.cif.Document()
     cif_block = doc.add_new_block(component.id)
 
-    _write_pdb_bm_cif_info(cif_block, component)
-    _write_pdb_bm_cif_atoms(cif_block, component)
-    _write_pdb_bm_cif_bonds(cif_block, component)
-    _write_pdb_bm_cif_descriptor(cif_block, component)
+    _write_pdb_clc_cif_info(cif_block, component)
+    _write_pdb_clc_cif_atoms(cif_block, component)
+    _write_pdb_clc_cif_bonds(cif_block, component)
+    _write_pdb_clc_cif_descriptor(cif_block, component)
 
     return cif_block
 
 
-def _write_pdb_bm_cif_info(cif_block, component):
+def _write_pdb_clc_cif_info(cif_block, component):
     """Writes _chem_comp namespace with general information about the
     component
 
@@ -351,7 +390,7 @@ def _write_pdb_bm_cif_info(cif_block, component):
     )
 
 
-def _write_pdb_bm_cif_atoms(cif_block, component):
+def _write_pdb_clc_cif_atoms(cif_block, component):
     """Writes the _chem_comp_atom namespace with atom details.
     Controlled dictionary:
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_atom.html
@@ -383,7 +422,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
         "pdbx_ordinal",
     ]
     atom_loop = cif_block.init_loop(label, atom_fields)
-    residue_numbers = _get_residue_number(component)
+    residue_numbers = _get_residue_number(component.mol)
     for atom in component.mol.GetAtoms():
         at_id = atom.GetIdx()
         model_atom = ccd_writer._get_atom_coord(component, at_id, ConformerType.Model)
@@ -401,7 +440,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
             f"{model_atom.y:.3f}",
             f"{model_atom.z:.3f}",
             res_info.GetResidueName(),
-            residue_numbers[res_info.GetResidueNumber()],
+            residue_numbers[atom.GetProp("residue_id")],
             mol_tools.get_component_atom_id(atom),
             str(atom.GetIdx() + 1),
         ]
@@ -409,7 +448,7 @@ def _write_pdb_bm_cif_atoms(cif_block, component):
         atom_loop.add_row(cif.quote_list(new_row))
 
 
-def _write_pdb_bm_cif_bonds(cif_block, component):
+def _write_pdb_clc_cif_bonds(cif_block, component):
     """Writes the _chem_comp_bond namespace with atom details.
     Controlled dictionary:
     http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/chem_comp_bond.html
@@ -449,7 +488,7 @@ def _write_pdb_bm_cif_bonds(cif_block, component):
         bond_loop.add_row(gemmi.cif.quote_list(new_row))
 
 
-def _write_pdb_bm_cif_descriptor(cif_block, component):
+def _write_pdb_clc_cif_descriptor(cif_block, component):
     """Writes the _pdbx_chem_comp_descriptor namespace with details.
 
     Args:
@@ -476,19 +515,7 @@ def _write_pdb_bm_cif_descriptor(cif_block, component):
         descriptor_loop.add_row(cif.quote_list(new_row))
 
 
-def _get_atom_name(atom):
-    """Gets atom name. If not set ElementSymbol + Id is used.
-
-    Args:
-        atom (rdkit.Chem.rdchem.Atom): rdkit atom.
-
-    Returns:
-        str: Name of the atom.
-    """
-    return atom.GetSymbol() + str(atom.GetIdx())
-
-
-def _get_residue_number(component):
+def _get_residue_number(mol):
     """Maps residue ids of chemcial components from protein
     to bound-molecule
 
@@ -498,13 +525,12 @@ def _get_residue_number(component):
     Returns:
         A dictionary of mappings of residue ids
     """
-    res_id_mapping = {}
+    residue_id_mapping = {}
     res_num = 0
-    for atom in component.mol.GetAtoms():
-        res_info = atom.GetPDBResidueInfo()
-        res_id = res_info.GetResidueNumber()
-        if res_id not in res_id_mapping:
+    for atom in mol.GetAtoms():
+        residue_id = atom.GetProp("residue_id")
+        if residue_id not in residue_id_mapping:
             res_num += 1
-            res_id_mapping[res_id] = res_num
+            residue_id_mapping[residue_id] = res_num
 
-    return res_id_mapping
+    return residue_id_mapping

@@ -29,6 +29,7 @@ from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from pdbeccdutils.core.depictions import DepictionManager, DepictionResult
 from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.helpers import mol_tools
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import (
     CCDProperties,
@@ -37,6 +38,7 @@ from pdbeccdutils.core.models import (
     ReleaseStatus,
     ScaffoldingMethod,
     SubstructureMapping,
+    Subcomponent,
 )
 from pdbeccdutils.helpers import conversions, drawing
 from pdbeccdutils.utils import web_services
@@ -146,8 +148,9 @@ class Component:
 
     @property
     def modified_date(self) -> date:
-        """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
-        Obtained from PDB-CCD's _pdbx_chem_comp_descriptor:
+        """Supply the pdbx_modified_date for the PDB-CCD
+        Obtained from PDB-CCD's _chem_comp.pdbx_modified_date:
+
 
         http://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_chem_comp.pdbx_modified_date.html
 
@@ -158,8 +161,9 @@ class Component:
 
     @property
     def descriptors(self) -> List[Descriptor]:
-        """Supply the pdbx_modified_date for the PDB-CCD
-        Obtained from PDB-CCD's _chem_comp.pdbx_modified_date:
+        """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
+        Obtained from PDB-CCD's _pdbx_chem_comp_descriptor:
+
 
         http://mmcif.rcsb.org/dictionaries/mmcif_pdbx.dic/Items/_pdbx_chem_comp_descriptor.program_version.html
 
@@ -563,40 +567,8 @@ class Component:
 
         return False
 
-    def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
-        """
-        Determine if given conformer has missing coordinates or is
-        missing completelly from the rdkit.Mol object. This can
-        be used to determine, whether or not the coordinates should be
-        regenerated.
-
-        Args:
-            type (ConformerType): type of conformer
-                to be inspected.
-
-        Returns:
-            bool: True if more then 1 atom has coordinates [0, 0, 0]
-        """
-        ok_conformer = False
-
-        if c_type == ConformerType.Computed:
-            try:
-                return self.mol3D.GetConformer()
-            except Exception:
-                pass
-        else:
-            for c in self.mol.GetConformers():
-                try:
-                    if c.GetProp("name") == c_type.name:
-                        return c
-                except KeyError:
-                    pass
-
-        return ok_conformer
-
     def get_conformer(self, c_type) -> rdkit.Chem.rdchem.Conformer:
-        """
-        Retrieve an rdkit object for a deemed conformer.
+        """Retrieve an rdkit object for a deemed conformer.
 
         Args:
             c_type (ConformerType): Conformer type to be retrieved.
@@ -607,6 +579,7 @@ class Component:
         Returns:
             rdkit.Chem.rdchem.Conformer: RDKit conformer object
         """
+
         for c in self.mol.GetConformers():
             try:
                 if c.GetProp("name") == c_type.name:
@@ -615,6 +588,29 @@ class Component:
                 pass
 
         raise ValueError(f"Conformer {c_type.name} does not exist.")
+
+    def has_degenerated_conformer(self, c_type: ConformerType) -> bool:
+        """Determine if given conformer has missing coordinates or is
+        missing completelly from the rdkit.Mol object. This can
+        be used to determine, whether or not the coordinates should be
+        regenerated.
+
+        Args:
+            type (ConformerType): type of conformer
+                to be inspected.
+
+        Returns:
+            bool: True if more than 1 atom has coordinates [0, 0, 0] or the Conformer is not present
+        """
+        degenerate_conformer = True
+
+        try:
+            conformer = self.get_conformer(c_type)
+            degenerate_conformer = mol_tools.is_degenerate_conformer(conformer)
+        except ValueError:
+            pass
+
+        return degenerate_conformer
 
     def locate_fragment(
         self, mol: rdkit.Chem.rdchem.Mol
@@ -752,6 +748,23 @@ class Component:
             raise CCDUtilsError(
                 f"Computing scaffolds using method {scaffolding_method.name} failed."
             )
+
+    def get_subcomponents(self):
+        subcomponents = []
+        res_ids_seen = []
+        for atom in self.mol.GetAtoms():
+            if not atom.HasProp("residue_id"):
+                continue
+            else:
+                res_id = atom.GetProp("residue_id")
+                if res_id not in res_ids_seen:
+                    res_info = atom.GetPDBResidueInfo()
+                    res_name = res_info.GetResidueName()
+                    subcomponent = Subcomponent(res_name, res_id)
+                    subcomponents.append(subcomponent)
+                    res_ids_seen.append(res_id)
+
+        return subcomponents
 
     def _id_to_name_mapping(self, struct_mapping):
         """Lists matched scaffolds and atom names

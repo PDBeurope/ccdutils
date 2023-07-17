@@ -22,26 +22,39 @@ of proteins and creating Component representation of molecules.
 
 import os
 import rdkit
+import logging
 from datetime import date
 from collections import namedtuple
 from gemmi import cif
 from networkx import MultiDiGraph
 
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
-from pdbeccdutils.core import ccd_reader, models, bm_writer
+from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.core import ccd_reader, models
 from pdbeccdutils.core.boundmolecule import infer_bound_molecules
 from pdbeccdutils.utils import config
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.models import (
     CCDProperties,
     ConformerType,
+    ReleaseStatus,
     Descriptor,
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 
+# categories that need to be 'fixed'
+# str => list[str]
 
-BMReaderResult = namedtuple(
-    "BMReaderResult", ccd_reader.CCDReaderResult._fields + ("bound_molecule",)
+preprocessable_categories = [
+    "_chem_comp_atom.",
+    "_chem_comp_bond.",
+    "_pdbx_chem_comp_descriptor.",
+    "_chem_comp.",
+]
+
+
+CLCReaderResult = namedtuple(
+    "CLCReaderResult", ccd_reader.CCDReaderResult._fields + ("bound_molecule",)
 )
 
 
@@ -50,7 +63,7 @@ def read_pdb_cif_file(
     to_discard: set[str] = config.DISCARDED_RESIDUES,
     sanitize: bool = True,
     assembly: bool = False,
-) -> list[BMReaderResult]:
+) -> list[CLCReaderResult]:
     """
     Read in single wwPDB Model CIF and create internal
     representation of its bound-molecules with multiple components.
@@ -88,7 +101,7 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
         sanitize: True if bound-molecule need to be sanitized
 
     Returns:
-        BMReaderResult: Namedtuple containing Component representation of bound-molecule
+        CLCReaderResult: Namedtuple containing Component representation of bound-molecule
 
     """
 
@@ -146,9 +159,8 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     )
 
     comp = Component(mol, None, properties, descriptors)
-    comp.ccd_cif_block = bm_writer._to_pdb_bm_cif_block(comp)
 
-    reader_result = BMReaderResult(
+    reader_result = CLCReaderResult(
         warnings=warnings,
         errors=errors,
         component=comp,
@@ -191,8 +203,7 @@ def _parse_pdb_mmcif(
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
     _add_connections(mol, bm, errors)
-    _remove_disconnected_hydrogens(mol)
-    # mol = _handle_hydrogens(mol)
+    mol = _handle_hydrogens(mol)
     return (mol, warnings, errors)
 
 
@@ -228,7 +239,7 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         atom_id = atoms["label_atom_id"][i]
         chain = atoms["auth_asym_id"][i]
         res_name = atoms["label_comp_id"][i]
-        res_id = int(atoms["auth_seq_id"][i])
+        res_id = atoms["auth_seq_id"][i]
         ins_code = (
             "" if not atoms["pdbx_PDB_ins_code"][i] else atoms["pdbx_PDB_ins_code"][i]
         )
@@ -247,11 +258,11 @@ def _parse_pdb_atoms(mol: rdkit.Chem.rdchem.Mol, atoms: dict[str, list[str]]):
         atom.SetProp("name", atom_name)
         atom.SetProp("component_atom_id", atom_id)
         atom.SetProp("residue_id", residue_id)
+        # _atom_site.auth_seq_id is not necessary to be a number (https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_atom_site.auth_seq_id.html)
 
         res_info = rdkit.Chem.AtomPDBResidueInfo()
         res_info.SetResidueName(res_name)
-        res_info.SetResidueNumber(res_id)
-        res_info.SetChainId(chain)
+        res_info.SetIsHeteroAtom(True)
         atom.SetMonomerInfo(res_info)
 
         if isotope is not None:
@@ -388,27 +399,6 @@ def get_chem_comp_bonds(cif_block: cif.Block, residue: str):
     return residue_bonds
 
 
-def _remove_disconnected_hydrogens(mol):
-    """
-    Delete hydrogens without neighbours (degree = 0).
-    RDKit works but gives warning for these ("WARNING: not removing hydrogen atom without neighbors").
-    However we wouldn't want these hydrogens as they affect molecular properties.
-
-    Args:
-        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
-            compound representation.
-    """
-    disconnected_hydrogen_indices = [
-        atom.GetIdx()
-        for atom in mol.GetAtoms()
-        if atom.GetAtomicNum() == 1 and atom.GetDegree() == 0
-    ]
-    disconnected_hydrogen_indices.sort(reverse=True)
-
-    for atom in disconnected_hydrogen_indices:
-        mol.RemoveAtom(atom)
-
-
 def _handle_hydrogens(mol):
     """
     Returns a rdkit.Chem.rdchem.Mol after adding hydrogens
@@ -427,7 +417,253 @@ def _handle_hydrogens(mol):
 
     mol.UpdatePropertyCache(strict=False)
     mol = rdkit.Chem.AddHs(mol, addCoords=True, addResidueInfo=True)
+    conformer = mol.GetConformer()
     for atom in mol.GetAtoms():
         if atom.GetAtomicNum() == 1:
-            atom.SetProp("name", atom.GetSymbol() + str(atom.GetIdx()))
+            atom_id = atom.GetSymbol() + str(atom.GetIdx())
+            atom.SetProp("name", atom_id)
+            mol_tools.correct_atom_coords(conformer, atom.GetIdx())
+            for bond in atom.GetBonds():
+                other = bond.GetOtherAtom(atom)
+                residue_id = other.GetProp("residue_id")
+                atom.SetProp("residue_id", residue_id)
     return mol
+
+
+def read_clc_cif_file(
+    path_to_cif: str, sanitize: bool = True
+) -> ccd_reader.CCDReaderResult:
+    """
+    Read in single CLC CIF component and create its internal
+    representation.
+
+    Args:
+        path_to_cif (str): Path to the cif file
+        sanitize (bool): [Defaults: True]
+
+    Raises:
+        ValueError: if file does not exist
+
+    Returns:
+        CCDReaderResult: Results of the parsing altogether with
+        the internal representation of the component.
+    """
+    if not os.path.isfile(path_to_cif):
+        raise ValueError("File '{}' does not exists".format(path_to_cif))
+
+    doc = cif.read(path_to_cif)
+    cif_block = doc.sole_block()
+
+    return _parse_clc_mmcif(cif_block, sanitize)
+
+
+def read_clc_components_file(
+    path_to_cif: str, sanitize: bool = True
+) -> dict[str, ccd_reader.CCDReaderResult]:
+    """
+    Process multiple compounds stored in the wwPDB CCD
+    `components.cif` file.
+
+    Args:
+        path_to_cif (str): Path to the `clc-all.cif` file with
+            multiple ligands in it.
+        sanitize (bool): Whether or not the components should be sanitized
+            Defaults to True.
+
+    Raises:
+        ValueError: if the file does not exist.
+
+    Returns:
+        dict[str, CCDReaderResult]: Internal representation of all
+        the components in the `components.cif` file.
+    """
+    if not os.path.isfile(path_to_cif):
+        raise ValueError("File '{}' does not exists".format(path_to_cif))
+
+    result_bag = {}
+
+    for block in cif.read(path_to_cif):
+        try:
+            result_bag[block.name] = _parse_clc_mmcif(block, sanitize)
+        except CCDUtilsError as e:
+            logging.error(
+                f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
+            )
+
+    return result_bag
+
+
+# region parse mmcif
+
+
+def _parse_clc_mmcif(cif_block, sanitize=True):
+    """
+    Create internal representation of the molecule from mmcif format.
+
+    Args:
+        cif_block (cif.Block): mmcif block object from gemmi
+        sanitize (bool): Whether or not the rdkit component should
+            be sanitized. Defaults to True.
+
+    Returns:
+        CCDReaderResult: internal representation with the results
+            of parsing and Mol object.
+    """
+    warnings = []
+    errors = []
+    sanitized = False
+    mol = rdkit.Chem.RWMol()
+
+    for c in preprocessable_categories:
+        w = cif_tools.preprocess_cif_category(cif_block, c)
+
+        if w:
+            warnings.append(w)
+
+    _parse_clc_atoms(mol, cif_block)
+    _parse_clc_conformers(mol, cif_block)
+    ccd_reader._parse_pdb_bonds(mol, cif_block, errors)
+    ccd_reader._handle_implicit_hydrogens(mol)
+
+    if sanitize:
+        sanitized = mol_tools.sanitize(mol)
+
+    descriptors = ccd_reader._parse_pdb_descriptors(
+        cif_block, "_pdbx_chem_comp_descriptor.", "descriptor"
+    )
+    descriptors += ccd_reader._parse_pdb_descriptors(
+        cif_block, "_pdbx_chem_comp_identifier.", "identifier"
+    )
+    properties = _parse_clc_properties(cif_block)
+
+    comp = Component(mol.GetMol(), cif_block, properties, descriptors)
+    reader_result = ccd_reader.CCDReaderResult(
+        warnings=warnings, errors=errors, component=comp, sanitized=sanitized
+    )
+
+    return reader_result
+
+
+def _parse_clc_atoms(mol, cif_block):
+    """
+    Setup atoms in the component
+
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): Rdkit Mol object with the
+            compound representation.
+        cif_block (cif.Block): mmCIF block object from gemmi.
+    """
+    if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
+        return
+
+    atoms = cif_block.find(
+        "_chem_comp_atom.",
+        [
+            "atom_id",
+            "type_symbol",
+            "alt_atom_id",
+            "pdbx_leaving_atom_flag",
+            "charge",
+            "pdbx_component_comp_id",
+            "pdbx_residue_numbering",
+            "pdbx_component_atom_id",
+        ],
+    )
+    for row in atoms:
+        atom_id = cif.as_string(row["_chem_comp_atom.atom_id"])
+        element = cif.as_string(row["_chem_comp_atom.type_symbol"])
+        alt_atom_id = cif.as_string(row["_chem_comp_atom.alt_atom_id"])
+        leaving_atom = cif.as_string(row["_chem_comp_atom.pdbx_leaving_atom_flag"])
+        charge = cif.as_string(row["_chem_comp_atom.charge"])
+        comp_atom_id = cif.as_string(row["_chem_comp_atom.pdbx_component_atom_id"])
+        res_name = cif.as_string(row["_chem_comp_atom.pdbx_component_comp_id"])
+        residue_id = cif.as_string(row["_chem_comp_atom.pdbx_residue_numbering"])
+
+        element = element if len(element) == 1 else element[0] + element[1].lower()
+        isotope = None
+
+        if element == "D":
+            element = "H"
+            isotope = 2
+        elif element == "X":
+            element = "*"
+
+        atom = rdkit.Chem.Atom(element)
+        atom.SetProp("name", atom_id)
+        atom.SetProp("alt_name", alt_atom_id)
+        atom.SetBoolProp("leaving_atom", leaving_atom == "Y")
+        atom.SetProp("component_atom_id", comp_atom_id)
+        atom.SetProp("residue_id", residue_id)
+        atom.SetFormalCharge(conversions.str_to_int(charge))
+
+        res_info = rdkit.Chem.AtomPDBResidueInfo()
+        res_info.SetResidueName(res_name)
+        res_info.SetIsHeteroAtom(True)
+        atom.SetMonomerInfo(res_info)
+
+        if isotope is not None:
+            atom.SetIsotope(isotope)
+
+        mol.AddAtom(atom)
+
+
+def _parse_clc_conformers(mol, cif_block):
+    """Setup model cooordinates in the rdkit Mol object.
+
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): RDKit Mol object with the compound
+            representation.
+        cif_block (cif.Block): mmCIF block object from gemmi.
+    """
+
+    if "_chem_comp_atom." not in cif_block.get_mmcif_category_names():
+        return
+
+    required_fields = [
+        "model_Cartn_x",
+        "model_Cartn_y",
+        "model_Cartn_z",
+    ]
+    atoms = cif_block.find("_chem_comp_atom.", required_fields)
+    model = ccd_reader._setup_pdb_conformer(
+        atoms, "model_Cartn_{}", ConformerType.Model.name
+    )
+    mol.AddConformer(model, assignId=True)
+
+
+def _parse_clc_properties(cif_block):
+    """Parse useful information from _chem_comp category
+
+    Args:
+        cif_block (cif.Block): mmcif block object from gemmi
+
+    Returns:
+        Properties: dataclass with the CCD properties.
+    """
+    properties = None
+    if "_chem_comp." in cif_block.get_mmcif_category_names():
+        mod_date = cif_block.find_value("_chem_comp.pdbx_modified_date")
+        if cif.is_null(mod_date):
+            d = date(1970, 1, 1)
+        else:
+            mod_date = mod_date.split("-")
+            d = date(int(mod_date[0]), int(mod_date[1]), int(mod_date[2]))
+
+        rel_status = ReleaseStatus.from_str(
+            cif_block.find_value("_chem_comp.pdbx_release_status")
+        )
+        formula_weight = cif_block.find_value("_chem_comp.formula_weight")
+        weight = 0.0 if cif.is_null(formula_weight) else cif.as_number(formula_weight)
+
+        properties = CCDProperties(
+            id=cif.as_string(cif_block.find_value("_chem_comp.id")),
+            name="",
+            formula=cif.as_string(cif_block.find_value("_chem_comp.formula")),
+            modified_date=d,
+            pdbx_release_status=rel_status,
+            weight=weight,
+        )
+    return properties
+
+
+# endregion parse mmcif

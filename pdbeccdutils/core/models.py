@@ -268,6 +268,30 @@ class SubstructureMapping:
     mappings: List[List[Any]]
 
 
+class Subcomponent:
+    """Represents a subcompoent in a component
+
+    Args:
+        name: Name of the subcomponent
+        id: Id of the subcomponent
+    """
+
+    def __init__(self, name, id):
+        self.name = name
+        self.id = id
+
+    def __eq__(self, other) -> bool:
+        """Checks the equality of two Subcomponent objects
+
+        Returns:
+            True if id of the BoundMolecules are same else False
+        """
+        if (self.name == other.name) and (self.id == other.id):
+            return False
+
+        return True
+
+
 class BoundMolecule:
     def __init__(self, graph):
         self.graph = graph

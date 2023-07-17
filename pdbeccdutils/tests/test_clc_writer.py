@@ -1,6 +1,6 @@
 import pytest
 import os
-from pdbeccdutils.core import bm_writer
+from pdbeccdutils.core import clc_writer
 from pdbeccdutils.core.component import Component
 from rdkit import Chem
 from gemmi import cif
@@ -20,7 +20,7 @@ class TestBMWriter:
         path = tmpdir.join(f"{component_globotriose.id}.cif")
         to_check = must_have_categories.copy()
 
-        bm_writer.write_molecule(str(path), component_globotriose, remove_hs=rem_hs)
+        clc_writer.write_molecule(str(path), component_globotriose, remove_hs=rem_hs)
         cif_block = cif.read(str(path)).sole_block()
 
         assert cif_block
@@ -34,7 +34,7 @@ class TestBMWriter:
         wd = tmpdir_factory.mktemp("pdb_test")
         suffix = "" if rem_hs else "H"
         pdb_file = os.path.join(wd, f"{component_globotriose.id}{suffix}.pdb")
-        bm_writer.write_molecule(
+        clc_writer.write_molecule(
             pdb_file,
             component_globotriose,
             remove_hs=rem_hs,

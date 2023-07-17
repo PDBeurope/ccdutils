@@ -1361,7 +1361,7 @@ def _add_rdkit_conformer_cif(component, cif_block_copy, remove_hs):
     try:
         conformer = component.get_conformer(ConformerType.Computed)
     except ValueError:
-        logging.warning(f"Computed conformer for {component.id} does not exist.")
+        logging.warning(f"{component.id} | Computed conformer does not exist.")
         return  # no conformer nothing to write, we quit
 
     category = "_pdbe_chem_comp_rdkit_conformer."

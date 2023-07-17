@@ -18,9 +18,8 @@
 import argparse
 import logging
 import os
-import traceback
 import json
-from pdbeccdutils.core import bm_reader, bm_writer
+from pdbeccdutils.core import clc_reader, clc_writer
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
@@ -30,6 +29,7 @@ from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.utils import config
 from pdbeccdutils.helpers import cif_tools, helper
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
+from pdbeccdutils.core.boundmolecule import infer_bound_molecules
 
 
 class PDBeBmManager:
@@ -92,20 +92,32 @@ class PDBeBmManager:
         """
         fixed_mmcif_file = os.path.join(output_dir, f"{pdb_id}_processed.cif")
         if os.path.isfile(fixed_mmcif_file):
-            bm_reader_results = bm_reader.read_pdb_cif_file(
-                fixed_mmcif_file, pdb_id, sanitize=True
+            clc_reader_results = []
+            bms = infer_bound_molecules(
+                fixed_mmcif_file, self.discarded, assembly=False
             )
-            for bm_reader_result in bm_reader_results:
-                component = bm_reader_result.component
-                bm_out_dir = os.path.join(output_dir, component.id)
-                os.makedirs(bm_out_dir, exist_ok=True)
-                self.process_single_component(bm_reader_result, bm_out_dir)
-            self._write_out_bm(pdb_id, bm_reader_results, output_dir)
+            for i, bm in enumerate(bms, start=1):
+                bm_id = f"bm{i}"
+                reader_result = clc_reader.infer_multiple_chem_comp(
+                    fixed_mmcif_file, bm, bm_id, sanitize=True
+                )
+                if reader_result:
+                    clc_reader_results.append(reader_result)
+
+            for i, clc_reader_result in enumerate(clc_reader_results, start=1):
+                clc_id = f"CLC_{i}"
+                component = clc_reader_result.component
+                component.id = clc_id
+                clc_out_dir = os.path.join(output_dir, component.id)
+                os.makedirs(clc_out_dir, exist_ok=True)
+                self.process_single_component(clc_reader_result, clc_out_dir)
+
+            self._write_out_bm(pdb_id, bms, clc_reader_results, output_dir)
         else:
             raise EntryFailedException(f"Preprocessing of {pdb_id} failed")
 
     def process_single_component(
-        self, bm_reader_result: list[bm_reader.BMReaderResult], output_dir: str
+        self, clc_reader_result: clc_reader.CLCReaderResult, output_dir: str
     ):
         """Processes identified bound-molecules
             * Checks components parsing and highlights issues encountered with the molecule
@@ -113,74 +125,72 @@ class PDBeBmManager:
             * Generated 2D depictions
 
         Args:
-            bm_reader_result: List of BMReaderResult
+            clc_reader_result: List of CLCReaderResult
             output_dir: Path to ooutput directory
         """
-        try:
-            component = bm_reader_result.component
-            logging.info(f"{component.id} | processing...")
+        component = clc_reader_result.component
+        logging.info(f"{component.id} | processing...")
 
-            # check parsing
-            self._check_component_parsing(bm_reader_result)
-            self._generate_ideal_structure(component)
+        # check parsing
+        self._check_component_parsing(clc_reader_result)
+        self._generate_ideal_structure(component)
 
-            # download templates if the user wants them.
-            if self.pubchem is not None:
-                self._download_template(component)
+        # download templates if the user wants them.
+        if self.pubchem is not None:
+            self._download_template(component)
 
-            # search fragment library
-            self._search_fragment_library(component)
+        # search fragment library
+        self._search_fragment_library(component)
 
-            # get scaffolds
-            self._compute_component_scaffolds(component)
+        # get scaffolds
+        self._compute_component_scaffolds(component)
 
-            # write out files
-            self._generate_depictions(component, output_dir)
-            self._export_structure_formats(component, output_dir)
-            return True
-        except Exception:
-            logging.error(
-                f"{bm_reader_result.component.id} | FAILURE {traceback.format_exc()}."
-            )
-            return False
+        # write out files
+        self._generate_depictions(component, output_dir)
+        self._export_structure_formats(component, output_dir)
 
     def _write_out_bm(
         self,
         pdb_id: str,
-        bm_reader_results: list[bm_reader.BMReaderResult],
+        bound_molecules,
+        clc_reader_results: list[clc_reader.CLCReaderResult],
         output_dir: str,
     ):
         """Writes out the details of bound-molecules
 
         Args:
             pdb_id: PDB ID
-            bm_reader_result: List of BMReaderResult
+            clc_reader_result: List of CLCReaderResult
             output_dir: Path to ooutput directory
         """
         result_bag = {
             "entry": pdb_id,
             "boundMolecules": [],
         }
-        for bm_reader_result in bm_reader_results:
-            component = bm_reader_result.component
-            bm = bm_reader_result.bound_molecule
-            bm_out_dir = os.path.join(output_dir, component.id)
-            os.makedirs(bm_out_dir, exist_ok=True)
+
+        for i, bm in enumerate(bound_molecules, start=1):
+            bm_id = f"bm{i}"
+            inchi = ""
+            inchikey = ""
+            for clc_reader_result in clc_reader_results:
+                component = clc_reader_result.component
+                if bm.is_equivalent(clc_reader_result.bound_molecule):
+                    inchi = component.inchi
+                    inchikey = component.inchikey
             result_bag["boundMolecules"].append(
                 {
-                    "id": component.id,
+                    "id": bm_id,
                     "composition": bm.to_dict(),
-                    "inchi": component.inchi,
-                    "inchikey": component.inchikey,
+                    "inchi": inchi,
+                    "inchikey": inchikey,
                 }
             )
-
         bm_file = os.path.join(output_dir, "bound_molecules.json")
         with open(bm_file, "w") as f:
             json.dump(result_bag, f, sort_keys=True, indent=4)
 
     def _check_component_parsing(
-        self, bm_reader_result: list[bm_reader.BMReaderResult]
+        self, clc_reader_result: list[clc_reader.CLCReaderResult]
     ):
         """Checks components parsing and highlights issues encountered with
         the molecule: errors/warnings during the parsing process,
@@ -189,17 +199,17 @@ class PDBeBmManager:
         Args:
             ccd_reader_result (CCDReaderResult): Output of the parsing process.
         """
-        component = bm_reader_result.component
-        for warning in bm_reader_result.warnings:
-            logging.warning(f"{component.id} {warning}")
+        component = clc_reader_result.component
+        for warning in clc_reader_result.warnings:
+            logging.warning(f"{component.id} | {warning}")
 
-        for error in bm_reader_result.errors:
-            logging.error(f"{component.id} {error}")
+        for error in clc_reader_result.errors:
+            logging.error(f"{component.id} | {error}")
 
-        if not bm_reader_result.sanitized:
-            logging.warning(f"{component.id} sanitization issue")
+        if not clc_reader_result.sanitized:
+            logging.warning(f"{component.id} | sanitization issue")
 
-    def _download_template(self, pdb_id: str, component: Component):
+    def _download_template(self, component: Component):
         """Attempts to download a pubchem template for the given component
 
         Args:
@@ -224,13 +234,13 @@ class PDBeBmManager:
         result = component.compute_3d()
         if result:
             if component.has_degenerated_conformer(ConformerType.Computed):
-                logging.debug("has degenerated Computed coordinates.")
+                logging.debug(f"{component.id} has degenerated Computed coordinates.")
 
         if component.has_degenerated_conformer(ConformerType.Model):
-            logging.debug("has degenerated Model coordinates.")
+            logging.debug(f"{component.id} has degenerated Model coordinates.")
 
         if not result:
-            logging.debug("error in generating 3D conformation.")
+            logging.debug(f"{component.id} has error in generating 3D conformation.")
 
         return result
 
@@ -349,7 +359,7 @@ class PDBeBmManager:
             conformer_type (Component): Conformer to be written.
         """
         try:
-            bm_writer.write_molecule(
+            clc_writer.write_molecule(
                 path,
                 component,
                 remove_hs=False,
@@ -390,6 +400,13 @@ def create_parser():
     )
 
     parser.add_argument(
+        "-fl",
+        "--fragment-library",
+        default=config.fragment_library,
+        help="Use this fragment library in place of the one supplied with the code.",
+    )
+
+    parser.add_argument(
         "-o",
         "--output-dir",
         help="Create an output directory with files suitable for PDBeChem ftp directory",
@@ -426,6 +443,9 @@ def run():
     )
     helper.set_up_logger(args)
     bpm = PDBeBmManager(
-        args.pubchem_templates, args.general_templates, discarded_ligands
+        args.pubchem_templates,
+        args.general_templates,
+        args.fragment_library,
+        discarded_ligands,
     )
     bpm.process_entry(args.input_cif, args.pdb_id, args.output_dir)

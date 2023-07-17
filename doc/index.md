@@ -1,4 +1,4 @@
-# pdbeccdutils: Small molecules chemistry toolkit
+# pdbeccdutils: A small molecules chemistry toolkit using RDKit for the Protein Data Bank
 
 ## User guide
 
@@ -11,6 +11,7 @@ guide/intro
 guide/depictions
 guide/fragments
 guide/scaffolds
+guide/similarity
 guide/pipelines
 ```
 

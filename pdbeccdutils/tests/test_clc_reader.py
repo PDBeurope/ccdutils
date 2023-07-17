@@ -2,24 +2,24 @@
 load 6lq4_updated.cif from file and test important cif item.
 """
 import pytest
-from pdbeccdutils.core import bm_reader
+from pdbeccdutils.core import clc_reader
 from pdbeccdutils.core.models import ReleaseStatus
 from pdbeccdutils.tests.tst_utilities import updated_mmcif_filename
 
 
-def test_bm_reader_wo_bm():
+def test_clc_reader_wo_clc():
     path_to_cif = updated_mmcif_filename("1tqh")
-    bm_reader_result = bm_reader.read_pdb_cif_file(path_to_cif)
-    assert bm_reader_result == []
+    clc_reader_result = clc_reader.read_pdb_cif_file(path_to_cif)
+    assert clc_reader_result == []
 
 
-def test_bm_reader_with_bm():
+def test_clc_reader_with_clc():
     path_to_cif = updated_mmcif_filename("1c4q")
-    bm_reader_result = bm_reader.read_pdb_cif_file(path_to_cif)
-    assert len(bm_reader_result) > 0
+    clc_reader_result = clc_reader.read_pdb_cif_file(path_to_cif)
+    assert len(clc_reader_result) > 0
 
 
-boundmolecule_items = [
+clc_items = [
     ("formula", "C18H32O16"),
     ("pdbx_release_status", ReleaseStatus.REL),
     ("inchikey", "FYGDTMLNYKFZSV-SKWQFERISA-N"),
@@ -31,7 +31,7 @@ boundmolecule_items = [
 ]
 
 
-@pytest.mark.parametrize("attribute, expected", boundmolecule_items)
-def boundmolecule_items(attribute, expected, component_globotriose):
+@pytest.mark.parametrize("attribute, expected", clc_items)
+def clc_items(attribute, expected, component_globotriose):
     assert hasattr(component_globotriose, attribute)
     assert getattr(component_globotriose, attribute) == expected

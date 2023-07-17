@@ -1,7 +1,7 @@
 """Common fixtures shared among all the tests
 """
 import pytest
-from pdbeccdutils.core import ccd_reader, bm_reader
+from pdbeccdutils.core import ccd_reader, clc_reader
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.tests.tst_utilities import supply_list_of_sample_cifs
 from pdbeccdutils.tests.tst_utilities import updated_mmcif_filename
@@ -37,7 +37,7 @@ def component_globotriose():
         globotriose
     """
     cif_file = updated_mmcif_filename("1c4q")
-    reader_result = bm_reader.read_pdb_cif_file(cif_file)[0]
+    reader_result = clc_reader.read_pdb_cif_file(cif_file)[0]
     assert reader_result.warnings == []
     assert reader_result.errors == []
     component = reader_result.component

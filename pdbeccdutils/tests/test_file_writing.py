@@ -251,3 +251,25 @@ class TestFileWrites:
                             assert len(value) > 0
         except CCDUtilsError:
             assert True
+
+    @staticmethod
+    def test_rdkit_conformer_writing(component: Component, tmpdir):
+        path = tmpdir.join(f"{component.id}.cif")
+        try:
+            rdkit_conformer_generated = component.compute_3d()
+            ccd_writer.write_molecule(str(path), component)
+            cif_block = cif.read(str(path)).sole_block()
+            assert cif_block
+            assert component.id == cif_block.name
+            cif_categories = cif_block.get_mmcif_category_names()
+            if rdkit_conformer_generated:
+                assert "_pdbe_chem_comp_rdkit_conformer." in cif_categories
+                rdkit_conformer = cif_block.get_mmcif_category(
+                    "_pdbe_chem_comp_rdkit_conformer."
+                )
+                for _, values in rdkit_conformer.items():
+                    for value in values:
+                        if value is not None:
+                            assert len(value) > 0
+        except CCDUtilsError:
+            assert True

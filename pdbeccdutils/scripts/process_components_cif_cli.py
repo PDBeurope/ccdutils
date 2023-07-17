@@ -31,12 +31,11 @@ https://gitlab.ebi.ac.uk/pdbe/release/pdbechem
 import argparse
 import logging
 import os
-import traceback
 from pathlib import Path
 
 import pdbeccdutils
 import rdkit
-from pdbeccdutils.core import ccd_reader, ccd_writer
+from pdbeccdutils.core import ccd_reader, ccd_writer, prd_reader, prd_writer
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
@@ -65,6 +64,7 @@ class PDBeChemManager:
         pubchem_templates="",
         general_templates=config.general_templates,
         library_path=config.fragment_library,
+        procedure="ccd",
     ):
         """Initialize manager
 
@@ -86,6 +86,8 @@ class PDBeChemManager:
         # Fragments library to get substructure matches
         self.fragment_library = FragmentLibrary(library_path)
 
+        self.procedure = procedure
+
     def run(self, components_path, out_dir):
         """Process components
 
@@ -93,17 +95,17 @@ class PDBeChemManager:
             components_path (Path): Path to the components.cif file.
             out_dir (Path): Path to the out_dir
         """
-        logging.info("Reading in components...")
-        data = ccd_reader.read_pdb_components_file(components_path)
+        logging.info("Reading in component")
+        if self.procedure == "ccd":
+            ccd_reader_result = ccd_reader.read_pdb_cif_file(components_path)
+        else:
+            ccd_reader_result = prd_reader.read_pdb_cif_file(components_path)
 
-        for key, ccd_reader_result in data.items():
-            ccd_out = out_dir / key[0] / key
-            os.makedirs(ccd_out, exist_ok=True)
-            self.process_single_component(ccd_reader_result, ccd_out)
-
-            data[key] = None
-
-        logging.debug("All is done!")
+        component = ccd_reader_result.component
+        component_output_dir = Path(out_dir, component.id)
+        os.makedirs(component_output_dir, exist_ok=True)
+        self.process_single_component(ccd_reader_result, component_output_dir)
+        logging.info(f"Processing of {component.id} is complete")
 
     def process_single_component(self, ccd_reader_result, out_dir):
         """Process single PDB-CCD component.
@@ -115,33 +117,26 @@ class PDBeChemManager:
         Return:
             bool: Whether or not all the files were succesfully written.
         """
-        try:
-            component = ccd_reader_result.component
-            logging.info(f"{component.id} | processing...")
+        component = ccd_reader_result.component
+        logging.info(f"{component.id} | processing...")
 
-            # check parsing and conformer degeneration
-            self._check_component_parsing(ccd_reader_result)
-            self._generate_ideal_structure(component)
+        # check parsing and conformer degeneration
+        self._check_component_parsing(ccd_reader_result)
+        self._generate_ideal_structure(component)
 
-            # download templates if the user wants them.
-            if self.pubchem is not None:
-                self._download_template(component)
+        # download templates if the user wants them.
+        if self.pubchem is not None:
+            self._download_template(component)
 
-            # search fragment library
-            self._search_fragment_library(component)
+        # search fragment library
+        self._search_fragment_library(component)
 
-            # get scaffolds
-            self._compute_component_scaffolds(component)
+        # get scaffolds
+        self._compute_component_scaffolds(component)
 
-            # write out files
-            self._generate_depictions(component, out_dir)
-            self._export_structure_formats(component, out_dir)
-            return True
-        except Exception:
-            logging.error(
-                f"{ccd_reader_result.component.id} | FAILURE {traceback.format_exc()}."
-            )
-            return False
+        # write out files
+        self._generate_depictions(component, out_dir)
+        self._export_structure_formats(component, out_dir)
 
     def _check_component_parsing(self, ccd_reader_result):
         """Checks components parsing and highlights issues encountered with
@@ -189,10 +184,10 @@ class PDBeChemManager:
         result = component.compute_3d()
 
         if component.has_degenerated_conformer(ConformerType.Ideal):
-            logging.debug("has degenerated ideal coordinates.")
+            logging.debug(f"{component.id} has degenerated ideal coordinates.")
 
         if not result:
-            logging.debug("error in generating 3D conformation.")
+            logging.debug(f"{component.id} has error in generating 3D conformation.")
 
         return result
 
@@ -336,13 +331,22 @@ class PDBeChemManager:
             conformer_type (Component): Conformer to be written.
         """
         try:
-            ccd_writer.write_molecule(
-                path,
-                component,
-                remove_hs=False,
-                alt_names=alt_names,
-                conf_type=conformer_type,
-            )
+            if self.procedure == "ccd":
+                ccd_writer.write_molecule(
+                    path,
+                    component,
+                    remove_hs=False,
+                    alt_names=alt_names,
+                    conf_type=conformer_type,
+                )
+            else:
+                prd_writer.write_molecule(
+                    path,
+                    component,
+                    remove_hs=False,
+                    alt_names=alt_names,
+                    conf_type=conformer_type,
+                )
         except Exception:
             logging.error(f"error writing {path}.")
 
@@ -362,9 +366,7 @@ def create_parser():
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
 
-    parser.add_argument(
-        "components_cif", help="Input PDB-CCD components.cif file (must be specified)"
-    )
+    parser.add_argument("-i", "--input-cif", help="Input PDB-CCD/PDB-PRD cif file")
     parser.add_argument(
         "-g",
         "--general-templates",
@@ -383,7 +385,7 @@ def create_parser():
         "--output-dir",
         type=is_valid_path,
         required=True,
-        help="Create an output directory with files suitable for PDBeChem ftp directory",
+        help="Path to output directory",
     )
     parser.add_argument(
         "-fl",
@@ -395,6 +397,26 @@ def create_parser():
     parser.add_argument(
         "--debug", action="store_true", help="Turn on debug message logging output"
     )
+
+    # region parse procedure
+    procedure = parser.add_mutually_exclusive_group()
+    procedure.add_argument(
+        "--ccd",
+        action="store_const",
+        const="ccd",
+        dest="procedure",
+        help="Pipeline is going to process CCD mmCIF files.",
+    )
+    procedure.add_argument(
+        "--prd",
+        action="store_const",
+        const="prd",
+        dest="procedure",
+        help="Pipeline is going to process PRD mmCIF files.",
+    )
+
+    procedure.set_defaults(procedure="ccd")
+    # endregion parse procedure
 
     return parser
 
@@ -421,9 +443,12 @@ def main():
         logging.info(f'{"":5s}{k:25s}{v}')
 
     pdbechem = PDBeChemManager(
-        args.pubchem_templates, args.general_templates, args.fragment_library
+        args.pubchem_templates,
+        args.general_templates,
+        args.fragment_library,
+        args.procedure,
     )
-    pdbechem.run(args.components_cif, args.output_dir)
+    pdbechem.run(args.input_cif, args.output_dir)
 
 
 if __name__ == "__main__":

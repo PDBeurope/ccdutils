@@ -22,6 +22,41 @@
     :members:
 ```
 
+## pdbeccdutils.core.prd_reader
+
+```{eval-rst}
+.. automodule:: pdbeccdutils.core.prd_reader
+    :members:
+```
+
+## pdbeccdutils.core.prd_writer
+
+```{eval-rst}
+.. automodule:: pdbeccdutils.core.prd_writer
+    :members:
+```
+
+## pdbeccdutils.core.clc_reader
+
+```{eval-rst}
+.. automodule:: pdbeccdutils.core.clc_reader
+    :members:
+```
+
+## pdbeccdutils.core.clc_writer
+
+```{eval-rst}
+.. automodule:: pdbeccdutils.core.clc_writer
+    :members:
+```
+
+## pdbeccdutils.core.boundmolecule
+
+```{eval-rst}
+.. automodule:: pdbeccdutils.core.boundmolecule
+    :members:
+```
+
 ## pdbeccdutils.core.depictions
 
 ```{eval-rst}
