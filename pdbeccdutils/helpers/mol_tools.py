@@ -161,20 +161,17 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
             rdkit.Chem.SanitizeMol(
                 rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
             )
-
-            for metal_index, atom_index in metal_atom_bonds:
+            for metal_index, other_index in metal_atom_bonds:
                 metal_atom = rwmol.GetAtomWithIdx(metal_index)
-                erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
-
-                # change the bond type to dative
-                bond = rwmol.GetBondBetweenAtoms(
-                    metal_atom.GetIdx(), erroneous_atom.GetIdx()
-                )
-                bond.SetBondType(rdkit.Chem.BondType.SINGLE)
-
-                if erroneous_atom.GetExplicitValence() == valency:
-                    erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
-                    metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
+                other_atom = rwmol.GetAtomWithIdx(other_index)
+                # alter the bond to be dative towards the metal
+                if other_atom.GetExplicitValence() == valency:
+                    rwmol.RemoveBond(metal_atom.GetIdx(),
+                                     other_atom.GetIdx())
+                    rwmol.AddBond(other_atom.GetIdx(),
+                                  metal_atom.GetIdx(),
+                                  rdkit.Chem.BondType.DATIVE)
+            rwmol.UpdatePropertyCache()  # regenerates valence records
 
         attempts -= 1
 
