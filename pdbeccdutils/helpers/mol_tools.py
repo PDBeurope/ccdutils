@@ -164,13 +164,13 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
             for metal_index, other_index in metal_atom_bonds:
                 metal_atom = rwmol.GetAtomWithIdx(metal_index)
                 other_atom = rwmol.GetAtomWithIdx(other_index)
-                # alter the bond to be dative towards the metal
+                # alter the bond to zero order - results in dotted line
                 if other_atom.GetExplicitValence() == valency:
                     rwmol.RemoveBond(metal_atom.GetIdx(),
                                      other_atom.GetIdx())
                     rwmol.AddBond(other_atom.GetIdx(),
                                   metal_atom.GetIdx(),
-                                  rdkit.Chem.BondType.DATIVE)
+                                  rdkit.Chem.BondType.ZERO)
             rwmol.UpdatePropertyCache()  # regenerates valence records
 
         attempts -= 1
