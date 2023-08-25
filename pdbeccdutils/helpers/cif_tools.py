@@ -216,14 +216,3 @@ def _filter_pdbx_nonpoly_scheme(
                 new_nonpoly_scheme[key].append(nonpoly_scheme[key][i])
 
     return new_nonpoly_scheme
-
-
-def get_prd_cc_code(prd_code: str):
-    """Returns PRDCC code from PRD code
-
-    Args:
-        prd_code: ID of PRD
-    """
-    prefix, code = prd_code.split("_")
-    prdcc_code = f"{prefix}CC_{code}"
-    return prdcc_code
