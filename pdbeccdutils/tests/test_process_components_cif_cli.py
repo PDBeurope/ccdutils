@@ -10,15 +10,24 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from gemmi import cif
 
 import pytest
 from pdbeccdutils.helpers.drawing import svg_namespace
+from pdbeccdutils.helpers.cif_tools import get_prd_code
 from pdbeccdutils.scripts.process_components_cif_cli import (
     PDBeChemManager,
     create_parser,
 )
-from pdbeccdutils.tests.tst_utilities import cif_filename
+from pdbeccdutils.tests.tst_utilities import cif_filename, prd_cif_filename
 
+CHEM_COMP_IDS = ["00O"]
+CHEM_COMP_NAMES = {"00O":{"name": "HB1",
+                          "alt_name": "H8"},
+                   "007": {"name": "H1C1",
+                           "alt_name": "1H1C"}
+}
+PRDCC_IDS = ["PRDCC_000103"]
 
 class TestCommandLineArgs:
     @staticmethod
@@ -38,59 +47,59 @@ class TestCommandLineArgs:
             parser.parse_args(["-o foo", "/////impossible_to_open_file", "--debug"])
 
 
-class ProcessComponentsCif:
+@pytest.fixture(scope="session", params=CHEM_COMP_IDS)
+def ccd_prd_pipeline_data(tmpdir_factory, request):
+    wd = tmpdir_factory.mktemp("pdbechem_ccd_test")
+    parser = create_parser()
+    chem_comp_id = request.param
+    args = parser.parse_args(["-o", str(wd), "-i", cif_filename(chem_comp_id)])
+
+    m = PDBeChemManager()
+    m.run(args.input_cif, args.output_dir)
+    return args.output_dir, chem_comp_id
+
+@pytest.fixture(scope="session", params=PRDCC_IDS)
+def prd_pipeline_data(tmpdir_factory, request):
+    wd = tmpdir_factory.mktemp("pdbechem_prd_test")
+    prdcc_id = request.param
+    parser = create_parser()
+    args = parser.parse_args(["-o", str(wd), "-i", prd_cif_filename(prdcc_id), "--prd"])
+
+    m = PDBeChemManager(procedure = args.procedure)
+    m.run(args.input_cif, args.output_dir)
+    
+    return args.output_dir, prdcc_id
+
+class TestProcessComponentsCif:
     """
-    run process_components_cif_cli on test file:
-
-    cut_down_components.cif
-
-    that is a cutdown components cif with just the first 5 chemical
-    components definitions.
+    run process_components_cif_cli on CCD test file
 
     use pytest fixture to do the run once but then have separate tests
     for the creation of each directory file that is required in the
     ftp area.
     """
 
-    CHEM_COMP_IDS = ["000", "001", "002", "003", "004", "ZPN"]
-
-    @pytest.fixture(scope="class")
-    @pytest.mark.parametrize("chem_comp_id", CHEM_COMP_IDS)
-    def pipeline_wd(self, tmpdir_factory, chem_comp_id):
-        wd = tmpdir_factory.mktemp("pdbechem_test")
-
-        parser = create_parser()
-        args = parser.parse_args(["-o", str(wd), cif_filename(chem_comp_id)])
-
-        m = PDBeChemManager()
-        m.run(args.components_cif, args.output_dir)
-
-        return args.output_dir
-
     @staticmethod
-    @pytest.mark.parametrize("chem_comp_id", CHEM_COMP_IDS)
-    def test_subdir_tree_created(pipeline_wd, chem_comp_id):
-        path = pipeline_wd / chem_comp_id[0] / chem_comp_id
+    def test_subdir_tree_created(ccd_prd_pipeline_data):
+        path = ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1]
         assert path.is_dir()
-
+    
     @staticmethod
-    @pytest.mark.parametrize("chem_comp_id", CHEM_COMP_IDS)
-    def test_all_files_created(pipeline_wd: Path, chem_comp_id):
-        path = pipeline_wd / chem_comp_id[0] / chem_comp_id
+    def test_all_files_created(ccd_prd_pipeline_data):
+        path = ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1]
         files = os.listdir(path)
         assert len(files) == 19
 
         for f in files:
             file_pointer = path / f
             assert file_pointer.stat().st_size > 0
-
+    
     @staticmethod
-    @pytest.mark.parametrize("id_", ["000", "001", "002", "003", "004"])
-    def test_images_with_names_created(pipeline_wd: Path, id_):
+    def test_images_with_names_created(ccd_prd_pipeline_data):
         """Test if the depictions with names contain certain atom labels
         as expected.
         """
-        path = pipeline_wd / id_[0] / id_ / f"{id_}_100_names.svg"
+        path = ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1] / f"{ccd_prd_pipeline_data[1]}_100_names.svg"
         xml = ET.parse(path)
         path_elements = xml.findall("svg:path", svg_namespace)
 
@@ -102,23 +111,22 @@ class ProcessComponentsCif:
         assert False  # this compound should have had label
 
     @staticmethod
-    @pytest.mark.parametrize(
-        "id_,name,alt_name",
-        [("001", "H021", "1H02"), ("002", "H121", "1H12"), ("003", "H121", "1H12")],
-    )
-    def test_correct_atom_naming_in_files(pipeline_wd: Path, id_, name, alt_name):
+    def test_correct_atom_naming_in_files(ccd_prd_pipeline_data):
         """Test if alternate names are used for exported model/ideal
         pdb files.
         """
         alts = [
-            pipeline_wd / id_[0] / id_ / f"{id_}_ideal_alt.pdb",
-            pipeline_wd / id_[0] / id_ / f"{id_}_model_alt.pdb",
+            ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1] / f"{ccd_prd_pipeline_data[1]}_ideal_alt.pdb",
+            ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1] / f"{ccd_prd_pipeline_data[1]}_model_alt.pdb",
         ]
         regular = [
-            pipeline_wd / id_[0] / id_ / f"{id_}_ideal.pdb",
-            pipeline_wd / id_[0] / id_ / f"{id_}_model.pdb",
+            ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1] / f"{ccd_prd_pipeline_data[1]}_ideal.pdb",
+            ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1] / f"{ccd_prd_pipeline_data[1]}_model.pdb",
         ]
 
+        name = CHEM_COMP_NAMES[ccd_prd_pipeline_data[1]]["name"]
+        alt_name = CHEM_COMP_NAMES[ccd_prd_pipeline_data[1]]["alt_name"]
+        
         for i in alts:
             with open(i) as f:
                 str_repr = f.read()
@@ -130,12 +138,19 @@ class ProcessComponentsCif:
                 assert name in str_repr and alt_name not in str_repr
 
     @staticmethod
-    @pytest.mark.parametrize("chem_comp_id", CHEM_COMP_IDS)
-    def test_cml_files(pipeline_wd: Path, chem_comp_id):
+    def test_cif_files(ccd_prd_pipeline_data):
+        """Test if the CIF file is parsable. 
+        """
+        path = ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1] / f"{ccd_prd_pipeline_data[1]}.cif"
+        cif_block = cif.read(str(path)).sole_block()
+        assert cif_block.name == ccd_prd_pipeline_data[1]    
+
+    @staticmethod
+    def test_cml_files(ccd_prd_pipeline_data):
         """Test if the CML file is parsable. Each of the tested compounds
         should contain element with type C.
         """
-        path = pipeline_wd / chem_comp_id[0] / chem_comp_id / f"{chem_comp_id}.cml"
+        path = ccd_prd_pipeline_data[0] / ccd_prd_pipeline_data[1][0] / ccd_prd_pipeline_data[1] / f"{ccd_prd_pipeline_data[1]}.cml"
 
         xml_root = ET.parse(str(path)).getroot()
         atoms = xml_root.find("molecule").find("atomArray").findall("atom")
@@ -143,17 +158,16 @@ class ProcessComponentsCif:
         assert any(a.attrib["elementType"] == "C" for a in atoms)
 
     @staticmethod
-    @pytest.mark.parametrize("chem_comp_id", CHEM_COMP_IDS)
-    def test_annotation_file(pipeline_wd: Path, chem_comp_id):
+    def test_annotation_file(ccd_prd_pipeline_data):
         """Test if the annotation.json is parsable. Each of the tested compounds
         should contain some data.
         """
 
         path = (
-            pipeline_wd
-            / chem_comp_id[0]
-            / chem_comp_id
-            / f"{chem_comp_id}_annotation.json"
+            ccd_prd_pipeline_data[0]
+            / ccd_prd_pipeline_data[1][0]
+            / ccd_prd_pipeline_data[1]
+            / f"{ccd_prd_pipeline_data[1]}_annotation.json"
         )
 
         assert path.is_file()
@@ -165,3 +179,44 @@ class ProcessComponentsCif:
             assert data["atoms"]
             assert data["bonds"]
             assert data["resolution"]
+
+
+class TestProcessPRDCif:
+    """
+    run process_components_cif_cli on PRD test file
+    """
+
+    @staticmethod
+    def test_subdir_tree_created(prd_pipeline_data):
+        path = prd_pipeline_data[0] / prd_pipeline_data[1][-1] / prd_pipeline_data[1]
+        assert path.is_dir()
+
+    @staticmethod
+    def test_all_files_created(prd_pipeline_data):
+        path = prd_pipeline_data[0] / prd_pipeline_data[1][-1] / prd_pipeline_data[1]
+        files = os.listdir(path)
+        assert len(files) == 19
+
+        for f in files:
+            file_pointer = path / f
+            assert file_pointer.stat().st_size > 0
+    
+    @staticmethod
+    def test_cif_files(prd_pipeline_data):
+        """Test if the CIF file is parsable. 
+        """
+        path = prd_pipeline_data[0] / prd_pipeline_data[1][-1] / prd_pipeline_data[1] / f"{prd_pipeline_data[1]}.cif"
+        cif_block = cif.read(str(path)).sole_block()
+        assert cif_block.name == get_prd_code(prd_pipeline_data[1]) 
+
+    @staticmethod
+    def test_cif_enriched_field_comp_id(prd_pipeline_data):
+        """Test if the comp_id of enriched fields in CIF is same as comp_id of file. 
+        """
+        path = prd_pipeline_data[0] / prd_pipeline_data[1][-1] / prd_pipeline_data[1] / f"{prd_pipeline_data[1]}.cif"
+        cif_block = cif.read(str(path)).sole_block()
+        enriched_field = '_pdbe_chem_comp_atom_depiction.'
+        if enriched_field in cif_block.get_mmcif_category_names():
+            enriched_field_block = cif_block.find([enriched_field, 'comp_id'])
+            for row in enriched_field_block:
+                assert row['comp_id'] == cif_block.name
