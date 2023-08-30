@@ -39,6 +39,7 @@ from pdbeccdutils.core import ccd_reader, ccd_writer, prd_reader, prd_writer
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
+from pdbeccdutils.helpers.cif_tools import get_ccd_cif_enriched_dir, get_prd_cif_enriched_dir, get_prdcc_code
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import config
@@ -97,22 +98,28 @@ class PDBeChemManager:
         """
         logging.info("Reading in component")
         if self.procedure == "ccd":
-            ccd_reader_result = ccd_reader.read_pdb_cif_file(components_path)
-        else:
-            ccd_reader_result = prd_reader.read_pdb_cif_file(components_path)
+            reader_result = ccd_reader.read_pdb_cif_file(components_path)
+            component = reader_result.component
+            component_output_dir = get_ccd_cif_enriched_dir(component.id, out_dir)
+            outfile_prefix = component.id
 
-        component = ccd_reader_result.component
-        component_output_dir = Path(out_dir, component.id)
+        else:
+            reader_result = prd_reader.read_pdb_cif_file(components_path)
+            component = reader_result.component
+            component_output_dir = get_prd_cif_enriched_dir(component.id, out_dir)
+            outfile_prefix = get_prdcc_code(component.id)
+
         os.makedirs(component_output_dir, exist_ok=True)
-        self.process_single_component(ccd_reader_result, component_output_dir)
+        self.process_single_component(reader_result, component_output_dir, outfile_prefix)
         logging.info(f"Processing of {component.id} is complete")
 
-    def process_single_component(self, ccd_reader_result, out_dir):
+    def process_single_component(self, ccd_reader_result, out_dir, outfile_prefix):
         """Process single PDB-CCD component.
 
         Args:
             ccd_reader_result (CCDReaderResult): pdbeccdutils parser output.
             out_dir (Path): Out directory
+            outfile_prefix: Prefix of output filename
 
         Return:
             bool: Whether or not all the files were succesfully written.
@@ -135,8 +142,8 @@ class PDBeChemManager:
         self._compute_component_scaffolds(component)
 
         # write out files
-        self._generate_depictions(component, out_dir)
-        self._export_structure_formats(component, out_dir)
+        self._generate_depictions(component, out_dir, outfile_prefix)
+        self._export_structure_formats(component, out_dir, outfile_prefix)
 
     def _check_component_parsing(self, ccd_reader_result):
         """Checks components parsing and highlights issues encountered with
@@ -221,7 +228,7 @@ class PDBeChemManager:
 
         logging.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
 
-    def _generate_depictions(self, component: Component, out_dir: str):
+    def _generate_depictions(self, component: Component, out_dir: str, outfile_prefix: str):
         """Generate nice 2D depictions for the component and
         depiction annotations in JSON format. Presently depictions
         are generated in the following resolutions (100,200,300,400,500)
@@ -230,6 +237,7 @@ class PDBeChemManager:
         Args:
             component (Component): Component to be depicted.
             out_dir (str): Where the depictions should be stored.
+            outfile_prefix (str): Prefix of output filename
         """
         depiction_result = component.compute_2d(self.depictions)
 
@@ -246,75 +254,76 @@ class PDBeChemManager:
 
         for i in range(100, 600, 100):
             component.export_2d_svg(
-                os.path.join(out_dir, f"{component.id}_{i}.svg"),
+                os.path.join(out_dir, f"{outfile_prefix}_{i}.svg"),
                 width=i,
                 wedge_bonds=wedge_bonds,
             )
             component.export_2d_svg(
-                os.path.join(out_dir, f"{component.id}_{i}_names.svg"),
+                os.path.join(out_dir, f"{outfile_prefix}_{i}_names.svg"),
                 width=i,
                 names=True,
                 wedge_bonds=wedge_bonds,
             )
 
         component.export_2d_annotation(
-            os.path.join(out_dir, f"{component.id}_annotation.json"),
+            os.path.join(out_dir, f"{outfile_prefix}_annotation.json"),
             wedge_bonds=wedge_bonds,
         )
 
-    def _export_structure_formats(self, component: Component, out_dir: Path):
+    def _export_structure_formats(self, component: Component, out_dir: Path, outfile_prefix: str):
         """Writes out component in a different formats as required for the
         PDBeChem FTP area.
 
         Args:
             component (Component): Component being processed.
             out_dir (Path): Where the results should be written
+            outfile_prefix (str): Prefix of output filename
         """
 
         self.__write_molecule(
-            out_dir / f"{component.id}_model.sdf",
+            out_dir / f"{outfile_prefix}_model.sdf",
             component,
             False,
             ConformerType.Model,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}_ideal.sdf",
+            out_dir / f"{outfile_prefix}_ideal.sdf",
             component,
             False,
             ConformerType.Ideal,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}_ideal_alt.pdb",
+            out_dir / f"{outfile_prefix}_ideal_alt.pdb",
             component,
             True,
             ConformerType.Ideal,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}_model_alt.pdb",
+            out_dir / f"{outfile_prefix}_model_alt.pdb",
             component,
             True,
             ConformerType.Model,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}_ideal.pdb",
+            out_dir / f"{outfile_prefix}_ideal.pdb",
             component,
             False,
             ConformerType.Ideal,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}_model.pdb",
+            out_dir / f"{outfile_prefix}_model.pdb",
             component,
             False,
             ConformerType.Model,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}.cml",
+            out_dir / f"{outfile_prefix}.cml",
             component,
             False,
             ConformerType.Model,
         )
         self.__write_molecule(
-            out_dir / f"{component.id}.cif",
+            out_dir / f"{outfile_prefix}.cif",
             component,
             False,
             ConformerType.AllConformers,

@@ -21,6 +21,7 @@ Set of methods to format data for gemmi parser
 
 import gemmi
 from gemmi import cif
+from pathlib import Path
 
 
 def preprocess_cif_category(cif_block, label):
@@ -216,3 +217,41 @@ def _filter_pdbx_nonpoly_scheme(
                 new_nonpoly_scheme[key].append(nonpoly_scheme[key][i])
 
     return new_nonpoly_scheme
+
+def get_prd_code(prdcc_code: str):
+    """Returns PRD code from PRDCC code
+
+    Args:
+        prdcc_code: ID of PRD
+    """
+    prefix, code = prdcc_code.split("_")
+    if prefix == "PRD":
+        return prdcc_code
+    
+    prd_code = f"{prefix.rstrip('CC')}_{code}"
+    return prd_code
+
+def get_prdcc_code(prd_code: str):
+    """Returns PRDCC code from PRD code
+
+    Args:
+        prdcc_code: ID of PRD
+    """
+    prefix, code = prd_code.split("_")
+    if prefix == "PRDCC":
+        return prd_code
+    
+    prdcc_code = f"{prefix}CC_{code}"
+    return prdcc_code
+
+def get_ccd_cif_enriched_dir(het_code, base_dir):
+    """Path to enriched CCD CIF file directory for specified hetcode."""
+    return Path(base_dir, het_code[0], het_code)
+
+def get_prd_cif_enriched_dir(prdcc_code, base_dir):
+    """Path to enriched PRD CIF file directory for specified PRD/PRDCC code."""
+    prefix, code = prdcc_code.split("_")
+    if prefix == "PRD":
+        prdcc_code = f"{prefix}CC_{code}"
+    one_letter_code = prdcc_code[-1]
+    return Path(base_dir, one_letter_code, prdcc_code)
