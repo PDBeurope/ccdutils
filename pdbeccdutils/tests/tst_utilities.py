@@ -42,11 +42,13 @@ def cif_filename(code):
 
     return path if os.path.isfile(path) else os.path.join(test_depiction, f"{code}.cif")
 
+
 def prd_cif_filename(code):
     path = os.path.join(prd_test_cif, f"{code}.cif")
     if os.path.isfile(path):
-        return path 
-    
+        return path
+
+
 def updated_mmcif_filename(pdb_id):
     path = os.path.join(test_boundmolecules, pdb_id, f"{pdb_id}_processed.cif.gz")
     if os.path.isfile(path):

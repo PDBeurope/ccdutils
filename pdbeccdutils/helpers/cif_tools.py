@@ -218,6 +218,7 @@ def _filter_pdbx_nonpoly_scheme(
 
     return new_nonpoly_scheme
 
+
 def get_prd_code(prdcc_code: str):
     """Returns PRD code from PRDCC code
 
@@ -227,9 +228,10 @@ def get_prd_code(prdcc_code: str):
     prefix, code = prdcc_code.split("_")
     if prefix == "PRD":
         return prdcc_code
-    
+
     prd_code = f"{prefix.rstrip('CC')}_{code}"
     return prd_code
+
 
 def get_prdcc_code(prd_code: str):
     """Returns PRDCC code from PRD code
@@ -240,13 +242,15 @@ def get_prdcc_code(prd_code: str):
     prefix, code = prd_code.split("_")
     if prefix == "PRDCC":
         return prd_code
-    
+
     prdcc_code = f"{prefix}CC_{code}"
     return prdcc_code
+
 
 def get_ccd_cif_enriched_dir(het_code, base_dir):
     """Path to enriched CCD CIF file directory for specified hetcode."""
     return Path(base_dir, het_code[0], het_code)
+
 
 def get_prd_cif_enriched_dir(prdcc_code, base_dir):
     """Path to enriched PRD CIF file directory for specified PRD/PRDCC code."""

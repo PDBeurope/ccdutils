@@ -39,7 +39,11 @@ from pdbeccdutils.core import ccd_reader, ccd_writer, prd_reader, prd_writer
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.depictions import DepictionManager
 from pdbeccdutils.core.exceptions import CCDUtilsError
-from pdbeccdutils.helpers.cif_tools import get_ccd_cif_enriched_dir, get_prd_cif_enriched_dir, get_prdcc_code
+from pdbeccdutils.helpers.cif_tools import (
+    get_ccd_cif_enriched_dir,
+    get_prd_cif_enriched_dir,
+    get_prdcc_code,
+)
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 from pdbeccdutils.core.models import ConformerType, DepictionSource
 from pdbeccdutils.utils import config
@@ -110,7 +114,9 @@ class PDBeChemManager:
             outfile_prefix = get_prdcc_code(component.id)
 
         os.makedirs(component_output_dir, exist_ok=True)
-        self.process_single_component(reader_result, component_output_dir, outfile_prefix)
+        self.process_single_component(
+            reader_result, component_output_dir, outfile_prefix
+        )
         logging.info(f"Processing of {component.id} is complete")
 
     def process_single_component(self, ccd_reader_result, out_dir, outfile_prefix):
@@ -228,7 +234,9 @@ class PDBeChemManager:
 
         logging.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
 
-    def _generate_depictions(self, component: Component, out_dir: str, outfile_prefix: str):
+    def _generate_depictions(
+        self, component: Component, out_dir: str, outfile_prefix: str
+    ):
         """Generate nice 2D depictions for the component and
         depiction annotations in JSON format. Presently depictions
         are generated in the following resolutions (100,200,300,400,500)
@@ -270,7 +278,9 @@ class PDBeChemManager:
             wedge_bonds=wedge_bonds,
         )
 
-    def _export_structure_formats(self, component: Component, out_dir: Path, outfile_prefix: str):
+    def _export_structure_formats(
+        self, component: Component, out_dir: Path, outfile_prefix: str
+    ):
         """Writes out component in a different formats as required for the
         PDBeChem FTP area.
 
