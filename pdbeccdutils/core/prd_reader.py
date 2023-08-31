@@ -245,9 +245,7 @@ def _parse_pdb_properties(cif_block):
         weight = 0.0 if cif.is_null(formula_weight) else cif.as_number(formula_weight)
 
         properties = CCDProperties(
-            id=cif_tools.get_prd_cc_code(
-                cif.as_string(cif_block.find_value("_chem_comp.id"))
-            ),
+            id=cif.as_string(cif_block.find_value("_chem_comp.id")),
             name=cif.as_string(cif_block.find_value("_chem_comp.name")),
             formula=cif.as_string(cif_block.find_value("_chem_comp.formula")),
             modified_date="",

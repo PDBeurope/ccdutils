@@ -29,10 +29,8 @@ def tests_dir():
 
 
 test_cif = os.path.join(tests_dir(), "ccd_mmcif_test_files", "random_sample")
+prd_test_cif = os.path.join(tests_dir(), "prd_mmcif_test_files")
 test_depiction = os.path.join(tests_dir(), "ccd_mmcif_test_files", "depiction_test")
-test_cut_down_components_cif = os.path.join(
-    tests_dir(), "components_cif", "cut_down_components.cif"
-)
 test_boundmolecules = os.path.join(
     tests_dir(),
     "updated_mmcif_test_files",
@@ -43,6 +41,12 @@ def cif_filename(code):
     path = os.path.join(test_cif, f"{code}.cif")
 
     return path if os.path.isfile(path) else os.path.join(test_depiction, f"{code}.cif")
+
+
+def prd_cif_filename(code):
+    path = os.path.join(prd_test_cif, f"{code}.cif")
+    if os.path.isfile(path):
+        return path
 
 
 def updated_mmcif_filename(pdb_id):
