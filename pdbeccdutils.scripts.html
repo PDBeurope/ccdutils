@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>scripts &mdash; pdbeccdutils 0.8.0 documentation</title>
+  <title>scripts &mdash; pdbeccdutils 0.8.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -35,7 +35,7 @@
               <img src="_static/logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.8.0
+                0.8.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -180,7 +180,10 @@
 <li class="toctree-l2"><a class="reference internal" href="pdbeccdutils.helpers.html">helpers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="pdbeccdutils.helpers.html#module-pdbeccdutils.helpers.cif_tools">pdbeccdutils.helpers.cif_tools</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.fix_updated_mmcif"><code class="docutils literal notranslate"><span class="pre">fix_updated_mmcif()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_prd_cc_code"><code class="docutils literal notranslate"><span class="pre">get_prd_cc_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_ccd_cif_enriched_dir"><code class="docutils literal notranslate"><span class="pre">get_ccd_cif_enriched_dir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_prd_cif_enriched_dir"><code class="docutils literal notranslate"><span class="pre">get_prd_cif_enriched_dir()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_prd_code"><code class="docutils literal notranslate"><span class="pre">get_prd_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.get_prdcc_code"><code class="docutils literal notranslate"><span class="pre">get_prdcc_code()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.cif_tools.preprocess_cif_category"><code class="docutils literal notranslate"><span class="pre">preprocess_cif_category()</span></code></a></li>
 </ul>
 </li>
@@ -296,13 +299,14 @@ More detailed description can be found here:</p>
 PDBeChem update process.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.process_single_component">
-<span class="sig-name descname"><span class="pre">process_single_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccd_reader_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.process_single_component" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">process_single_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccd_reader_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_prefix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.scripts.process_components_cif_cli.PDBeChemManager.process_single_component" title="Permalink to this definition"></a></dt>
 <dd><p>Process single PDB-CCD component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ccd_reader_result</strong> (<em>CCDReaderResult</em>) – pdbeccdutils parser output.</p></li>
 <li><p><strong>out_dir</strong> (<em>Path</em>) – Out directory</p></li>
+<li><p><strong>outfile_prefix</strong> – Prefix of output filename</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
