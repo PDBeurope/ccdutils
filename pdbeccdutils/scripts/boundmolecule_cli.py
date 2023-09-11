@@ -108,16 +108,22 @@ class PDBeBmManager:
                 clc_id = f"CLC_{i}"
                 component = clc_reader_result.component
                 component.id = clc_id
+                outfile_prefix = component.id
                 clc_out_dir = os.path.join(output_dir, component.id)
                 os.makedirs(clc_out_dir, exist_ok=True)
-                self.process_single_component(clc_reader_result, clc_out_dir)
+                self.process_single_component(
+                    clc_reader_result, clc_out_dir, outfile_prefix
+                )
 
             self._write_out_bm(pdb_id, bms, clc_reader_results, output_dir)
         else:
             raise EntryFailedException(f"Preprocessing of {pdb_id} failed")
 
     def process_single_component(
-        self, clc_reader_result: clc_reader.CLCReaderResult, output_dir: str
+        self,
+        clc_reader_result: clc_reader.CLCReaderResult,
+        output_dir: str,
+        outfile_prefix: str,
     ):
         """Processes identified bound-molecules
             * Checks components parsing and highlights issues encountered with the molecule
@@ -127,6 +133,7 @@ class PDBeBmManager:
         Args:
             clc_reader_result: List of CLCReaderResult
             output_dir: Path to ooutput directory
+            outfile_prefix: Prefix of output filename
         """
         component = clc_reader_result.component
         logging.info(f"{component.id} | processing...")
@@ -146,8 +153,8 @@ class PDBeBmManager:
         self._compute_component_scaffolds(component)
 
         # write out files
-        self._generate_depictions(component, output_dir)
-        self._export_structure_formats(component, output_dir)
+        self._generate_depictions(component, output_dir, outfile_prefix)
+        self._export_structure_formats(component, output_dir, outfile_prefix)
 
     def _write_out_bm(
         self,
@@ -244,7 +251,9 @@ class PDBeBmManager:
 
         return result
 
-    def _generate_depictions(self, component: Component, out_dir: str):
+    def _generate_depictions(
+        self, component: Component, out_dir: str, outfile_prefix: str
+    ):
         """Generate nice 2D depictions for the component and
         depiction annotations in JSON format. Presently depictions
         are generated in the following resolutions (100,200,300,400,500)
@@ -253,6 +262,7 @@ class PDBeBmManager:
         Args:
             component (Component): Component to be depicted.
             out_dir (str): Where the depictions should be stored.
+            outfile_prefix (str): Prefix of output filename
         """
         depiction_result = component.compute_2d(self.depictions)
 
@@ -271,19 +281,19 @@ class PDBeBmManager:
 
         for i in range(100, 600, 100):
             component.export_2d_svg(
-                os.path.join(out_dir, f"{component.id}_{i}.svg"),
+                os.path.join(out_dir, f"{outfile_prefix}_{i}.svg"),
                 width=i,
                 wedge_bonds=wedge_bonds,
             )
             component.export_2d_svg(
-                os.path.join(out_dir, f"{component.id}_{i}_names.svg"),
+                os.path.join(out_dir, f"{outfile_prefix}_{i}_names.svg"),
                 width=i,
                 names=True,
                 wedge_bonds=wedge_bonds,
             )
 
         component.export_2d_annotation(
-            os.path.join(out_dir, f"{component.id}_annotation.json"),
+            os.path.join(out_dir, f"{outfile_prefix}_annotation.json"),
             wedge_bonds=wedge_bonds,
         )
 
@@ -317,33 +327,36 @@ class PDBeBmManager:
 
         logging.debug(f"{len(component.scaffolds)} scaffold(s) were found.")
 
-    def _export_structure_formats(self, component: Component, out_dir: str):
+    def _export_structure_formats(
+        self, component: Component, out_dir: str, outfile_prefix: str
+    ):
         """Writes out component in a different formats as required for the
         PDBeChem FTP area.
 
         Args:
             component (Component): Component being processed.
-            out_dir (Path): Where the results should be written
+            out_dir (Path): Where the results should be written.
+            outfile_prefix (str): Prefix of output filename
         """
 
         self.__write_molecule(
-            os.path.join(out_dir, f"{component.id}_model.sdf"),
+            os.path.join(out_dir, f"{outfile_prefix}_model.sdf"),
             component,
             ConformerType.Model,
         )
 
         self.__write_molecule(
-            os.path.join(out_dir, f"{component.id}_model.pdb"),
+            os.path.join(out_dir, f"{outfile_prefix}_model.pdb"),
             component,
             ConformerType.Model,
         )
         self.__write_molecule(
-            os.path.join(out_dir, f"{component.id}.cml"),
+            os.path.join(out_dir, f"{outfile_prefix}.cml"),
             component,
             ConformerType.Model,
         )
         self.__write_molecule(
-            os.path.join(out_dir, f"{component.id}.cif"),
+            os.path.join(out_dir, f"{outfile_prefix}.cif"),
             component,
             ConformerType.AllConformers,
         )
