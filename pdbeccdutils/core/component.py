@@ -96,11 +96,10 @@ class Component:
 
     @id.setter
     def id(self, value):
-        """Set mapping for this component obtained with a different mean
-        but internal use of UniChem.
+        """Set id of the component.
 
         Args:
-            list[tuple[str]]: UniChem mappings
+            value: Id of the component to be used
         """
         self._cif_properties.id = value
 
@@ -146,6 +145,15 @@ class Component:
         """
         return self._cif_properties.pdbx_release_status
 
+    @pdbx_release_status.setter
+    def pdbx_release_status(self, value: ReleaseStatus):
+        """Set the release_status of component
+
+        Args:
+            value: ReleaseStatus object
+        """
+        self._cif_properties.pdbx_release_status = value
+    
     @property
     def modified_date(self) -> date:
         """Supply the pdbx_modified_date for the PDB-CCD
