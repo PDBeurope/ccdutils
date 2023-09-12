@@ -167,6 +167,15 @@ class Component:
         """
         return self._cif_properties.modified_date
 
+    @modified_date.setter
+    def modified_date(self, value: date):
+        """ Set pdbx_modified_date for the component
+
+        Args:
+            value: pdbx_modified_date 
+        """
+        self._cif_properties.modified_date = value
+
     @property
     def descriptors(self) -> List[Descriptor]:
         """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
