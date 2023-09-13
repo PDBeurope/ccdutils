@@ -153,7 +153,7 @@ class Component:
             value: ReleaseStatus object
         """
         self._cif_properties.pdbx_release_status = value
-    
+
     @property
     def modified_date(self) -> date:
         """Supply the pdbx_modified_date for the PDB-CCD
@@ -169,10 +169,10 @@ class Component:
 
     @modified_date.setter
     def modified_date(self, value: date):
-        """ Set pdbx_modified_date for the component
+        """Set pdbx_modified_date for the component
 
         Args:
-            value: pdbx_modified_date 
+            value: pdbx_modified_date
         """
         self._cif_properties.modified_date = value
 
