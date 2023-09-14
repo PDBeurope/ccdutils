@@ -144,7 +144,7 @@ class Component:
             status (this includes NOT_SET if no value is defined).
         """
         return self._cif_properties.pdbx_release_status
-    
+
     @pdbx_release_status.setter
     def pdbx_release_status(self, value: ReleaseStatus):
         """Set the release_status of component
@@ -153,7 +153,7 @@ class Component:
             value: ReleaseStatus object
         """
         self._cif_properties.pdbx_release_status = value
-    
+
     @property
     def modified_date(self) -> date:
         """Supply the pdbx_modified_date for the PDB-CCD
@@ -175,7 +175,7 @@ class Component:
             value: pdbx_modified_date
         """
         self._cif_properties.modified_date = value
-    
+
     @property
     def descriptors(self) -> List[Descriptor]:
         """Supply the _pdbx_chem_comp_descriptor category for the PDB-CCD
