@@ -37,7 +37,7 @@ agreed_resources = {
     "38": ("Rhea", "Rhea"),
 }
 
-# list taken from https://www.ebi.ac.uk/unichem/ucquery/listSources
+# list taken from https://www.ebi.ac.uk/unichem/sources
 all_resource = {
     "1": ("ChEMBL", "ChEMBL"),
     "2": ("DrugBank", "DrugBank"),
@@ -49,10 +49,6 @@ all_resource = {
     "8": ("NIH", "NIH Clinical Collection"),
     "9": ("ZINC", "ZINC"),
     "10": ("eMolecules", "eMolecules"),
-    "11": (
-        "IBM",
-        "IBM strategic IP insight platform and the National Institutes of Health",
-    ),
     "12": ("atlas", "Gene Expression Atlas"),
     "14": ("fdasrs", "FDA/USP Substance Registration System (SRS)"),
     "15": ("SureChEMBL", "SureChEMBL"),
@@ -81,6 +77,11 @@ all_resource = {
     "38": ("Rhea", "Rhea"),
     "39": ("ChemicalBook", "ChemicalBook"),
     "41": ("SwissLipids", "SwissLipids"),
+    "45": ("DailyMed", "DailyMed"),
+    "46": ("ClinicalTrials", "ClinicalTrials"),
+    "47": ("rxnorm", "rxnorm"),
+    "48": ("MedChemExpress", "MedChemExpress"),
+    "49": ("Probes And Drugs", "Probes And Drugs"),
 }
 
 url_prefix = "https://www.ebi.ac.uk/unichem/rest/inchikey"
