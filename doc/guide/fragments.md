@@ -14,20 +14,40 @@ Alternativelly fragments can be supplied in an external library (*.tsv) provided
 | phenanthrene | SMARTS | [#6]1:[#6]:[#6]:[#6]2:[#6](:[#6]:1):[#6]:[#6]:[#6]1:[#6]:2:[#6]:[#6]:[#6]:[#6]:1 | | unchecked | | PDBe |
 
 
-## Basic use case
+## identifying fragments of a chemical component
 
 ```python
 from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.core.fragment_library import FragmentLibrary
 
-component = ccd_reader.read_pdb_cif_file('HEM.cif').component
+component = ccd_reader.read_pdb_cif_file('HEL.cif').component
 fragment_library = FragmentLibrary()
 
-matches = component.library_search(library)
+matches = component.library_search(fragment_library)
 print(f'Matches found in the fragment library {matches}.')
 
-for fragment in component.fragments:
-    print(f'Fragment name {fragment.name} from source {fragment.source}')
+fragment_mols = [Chem.MolFromSmiles(fragment.smiles) for fragment in component.fragments]
+img = Draw.MolsToGridImage(fragment_mols, legends = [fragment.name for fragment in component.fragments])
+img
+```
+<div align='center'>
+    <img src='../_static/fragment_example.svg' />  
+</div>
+
+## Identifying all chemical components with penicillin fragment
+
+```python
+fragment_library = FragmentLibrary()
+ccd_dict = ccd_reader.read_pdb_components_file('components.cif')
+ccd_with_penicillin_fragment = []
+for ccd_id in ccd_dict.keys():
+    component = ccd_dict[ccd_id].component
+    frag_matches = component.library_search(fragment_library)
+    for fragment in component.fragments:
+        if fragment.name == 'penicillin':
+            ccd_with_penicillin_fragment.append(ccd_id)
+
+ccd_with_penicillin_fragment
 ```
 
 ## PDBe supplied fragments
