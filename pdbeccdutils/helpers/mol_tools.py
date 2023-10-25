@@ -83,6 +83,9 @@ def sanitize(rwmol):
         success = fix_molecule(mol_copy)
 
         if not success:
+            rdkit.Chem.SanitizeMol(
+                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+            )
             return SanitisationResult(mol=rwmol, status=False) 
 
         rdkit.Chem.Kekulize(mol_copy)
@@ -108,6 +111,9 @@ def sanitize(rwmol):
 
     except Exception as e:
         print(e, file=sys.stderr)
+        rdkit.Chem.SanitizeMol(
+                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+            )
         return SanitisationResult(mol=rwmol, status=False) 
 
     return SanitisationResult(mol=mol_copy, status=success) 
