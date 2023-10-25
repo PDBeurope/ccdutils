@@ -148,6 +148,18 @@ class DepictionResult(NamedTuple):
     mol: Chem.rdchem.Mol
     score: float
 
+class SanitisationResult(NamedTuple):
+    """
+    Sanitisation result details.
+
+    Args:
+        mol: rdkit.Chem.rdchem.RWMol 
+        status: Status of sanitisation process.
+    """
+    
+    mol: Chem.rdchem.Mol
+    status: str
+
 
 class Descriptor(NamedTuple):
     """
