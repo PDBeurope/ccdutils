@@ -14,7 +14,7 @@ Alternativelly fragments can be supplied in an external library (*.tsv) provided
 | phenanthrene | SMARTS | [#6]1:[#6]:[#6]:[#6]2:[#6](:[#6]:1):[#6]:[#6]:[#6]1:[#6]:2:[#6]:[#6]:[#6]:[#6]:1 | | unchecked | | PDBe |
 
 
-## identifying fragments of a chemical component
+## Identifying fragments of a chemical component
 
 ```python
 from pdbeccdutils.core import ccd_reader
@@ -30,9 +30,8 @@ fragment_mols = [Chem.MolFromSmiles(fragment.smiles) for fragment in component.f
 img = Draw.MolsToGridImage(fragment_mols, legends = [fragment.name for fragment in component.fragments])
 img
 ```
-<div align='center'>
-    <img src='../_static/fragment_example.svg' />  
-</div>
+<img src='../_static/fragment_example.svg' style="display:block margin-bottom:5px" />  
+
 
 ## Identifying all chemical components with penicillin fragment
 
@@ -48,12 +47,12 @@ for ccd_id in ccd_dict.keys():
             ccd_with_penicillin_fragment.append(ccd_id)
 
 ccd_with_penicillin_fragment
-```
 
+['0RN', 'AIC', 'APV', 'CXN', 'HEL', 'IP1', 'MII', 'NFN', 'PN1', 'PNN', 'PNV', 'SOX', 'TAZ', 'WPP', 'X1E']
+```
 ## PDBe supplied fragments
 
 Below you can find actual fragment structures comming with the pdbeccdutil's `FragmentsLibrary` from the PDBe resource:
 
-<div align='center'>
-    <img src='../_static/pdbe_fragments.svg' />  
-</div>
+<img src='../_static/pdbe_fragments.svg' style="display:block"/>
+
