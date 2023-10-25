@@ -112,7 +112,8 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     (mol, warnings, errors) = _parse_pdb_mmcif(cif_block, bm.graph)
     sanitized = False
     if sanitize:
-        sanitized = mol_tools.sanitize(mol)
+        sanitized_result = mol_tools.sanitize(mol)
+        mol,sanitized = sanitized_result.mol, sanitized_result.status
 
     inchi_result = mol_tools.inchi_from_mol(mol)
     if inchi_result.warnings:
