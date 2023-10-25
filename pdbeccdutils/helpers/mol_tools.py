@@ -22,7 +22,7 @@ Set of methods for molecular sanitization and work with conformers
 import re
 import sys
 from io import StringIO
-from pdbeccdutils.core.models import InChIFromRDKit, MolFromRDKit, ConformerType
+from pdbeccdutils.core.models import InChIFromRDKit, MolFromRDKit, ConformerType, SanitisationResult
 from contextlib import redirect_stderr
 
 import numpy as np
@@ -79,12 +79,13 @@ def sanitize(rwmol):
     success = False
 
     try:
-        success = fix_molecule(rwmol)
+        mol_copy = rdkit.Chem.RWMol(rwmol)
+        success = fix_molecule(mol_copy)
 
         if not success:
-            return False
+            return SanitisationResult(mol=rwmol, status=False) 
 
-        rdkit.Chem.Kekulize(rwmol)
+        rdkit.Chem.Kekulize(mol_copy)
         # rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
 
         # find correct conformer to assign stereochemistry
@@ -93,7 +94,7 @@ def sanitize(rwmol):
         conformer_id = -1
         conformer_types = [ConformerType.Ideal, ConformerType.Model]
         for conf_type in conformer_types:
-            conformer = get_conformer(rwmol, conf_type)
+            conformer = get_conformer(mol_copy, conf_type)
             if not is_degenerate_conformer(conformer):
                 conformer_id = conformer.GetId()
 
@@ -103,13 +104,13 @@ def sanitize(rwmol):
         # else:
         #     conformer_id = conformers[0].GetId()
 
-        rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(rwmol, conformer_id)
+        rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
 
     except Exception as e:
         print(e, file=sys.stderr)
-        return False
+        return SanitisationResult(mol=rwmol, status=False) 
 
-    return success
+    return SanitisationResult(mol=mol_copy, status=success) 
 
 
 def get_conformer(rwmol, c_type):
