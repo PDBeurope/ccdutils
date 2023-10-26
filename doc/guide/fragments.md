@@ -55,4 +55,3 @@ ccd_with_penicillin_fragment
 Below you can find actual fragment structures comming with the pdbeccdutil's `FragmentsLibrary` from the PDBe resource:
 
 <img src='../_static/pdbe_fragments.svg' style="display:block"/>
-

@@ -22,7 +22,12 @@ Set of methods for molecular sanitization and work with conformers
 import re
 import sys
 from io import StringIO
-from pdbeccdutils.core.models import InChIFromRDKit, MolFromRDKit, ConformerType, SanitisationResult
+from pdbeccdutils.core.models import (
+    InChIFromRDKit,
+    MolFromRDKit,
+    ConformerType,
+    SanitisationResult,
+)
 from contextlib import redirect_stderr
 
 import numpy as np
@@ -86,7 +91,7 @@ def sanitize(rwmol):
             rdkit.Chem.SanitizeMol(
                 rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
             )
-            return SanitisationResult(mol=rwmol, status=False) 
+            return SanitisationResult(mol=rwmol, status=False)
 
         rdkit.Chem.Kekulize(mol_copy)
         # rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
@@ -112,11 +117,11 @@ def sanitize(rwmol):
     except Exception as e:
         print(e, file=sys.stderr)
         rdkit.Chem.SanitizeMol(
-                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-            )
-        return SanitisationResult(mol=rwmol, status=False) 
+            rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+        )
+        return SanitisationResult(mol=rwmol, status=False)
 
-    return SanitisationResult(mol=mol_copy, status=success) 
+    return SanitisationResult(mol=mol_copy, status=success)
 
 
 def get_conformer(rwmol, c_type):
