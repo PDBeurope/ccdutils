@@ -149,6 +149,19 @@ class DepictionResult(NamedTuple):
     score: float
 
 
+class SanitisationResult(NamedTuple):
+    """
+    Sanitisation result details.
+
+    Args:
+        mol: rdkit.Chem.rdchem.RWMol
+        status: Status of sanitisation process.
+    """
+
+    mol: Chem.rdchem.Mol
+    status: str
+
+
 class Descriptor(NamedTuple):
     """
     Descriptor obtained from the cif file. This is essentially
