@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; pdbeccdutils 0.8.3 documentation</title>
+  <title>Index &mdash; pdbeccdutils 0.8.4 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -33,7 +33,7 @@
               <img src="_static/logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.8.3
+                0.8.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -61,7 +61,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="guide/depictions.html">Depictions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/fragments.html">Fragments</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#basic-use-case">Basic use case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#identifying-fragments-of-a-chemical-component">Identifying fragments of a chemical component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#identifying-all-chemical-components-with-penicillin-fragment">Identifying all chemical components with penicillin fragment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="guide/fragments.html#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
 </ul>
 </li>
@@ -163,6 +164,7 @@
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult"><code class="docutils literal notranslate"><span class="pre">ParityResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ReleaseStatus"><code class="docutils literal notranslate"><span class="pre">ReleaseStatus</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Residue"><code class="docutils literal notranslate"><span class="pre">Residue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.SanitisationResult"><code class="docutils literal notranslate"><span class="pre">SanitisationResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.ScaffoldingMethod"><code class="docutils literal notranslate"><span class="pre">ScaffoldingMethod</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.Subcomponent"><code class="docutils literal notranslate"><span class="pre">Subcomponent</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.SubstructureMapping"><code class="docutils literal notranslate"><span class="pre">SubstructureMapping</span></code></a></li>
@@ -629,6 +631,8 @@
       <ul>
         <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit.mol">(pdbeccdutils.core.models.MolFromRDKit attribute)</a>
 </li>
+        <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.SanitisationResult.mol">(pdbeccdutils.core.models.SanitisationResult attribute)</a>
+</li>
       </ul></li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.mol_from_inchi">mol_from_inchi() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
@@ -872,6 +876,8 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.SanitisationResult">SanitisationResult (class in pdbeccdutils.core.models)</a>
+</li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize">sanitize() (in module pdbeccdutils.helpers.mol_tools)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.clc_reader.CLCReaderResult.sanitized">sanitized (pdbeccdutils.core.clc_reader.CLCReaderResult attribute)</a>
@@ -891,6 +897,8 @@
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult.similarity_score">similarity_score (pdbeccdutils.core.models.ParityResult attribute)</a>
 </li>
       <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.DepictionResult.source">source (pdbeccdutils.core.models.DepictionResult attribute)</a>
+</li>
+      <li><a href="pdbeccdutils.core.html#pdbeccdutils.core.models.SanitisationResult.status">status (pdbeccdutils.core.models.SanitisationResult attribute)</a>
 </li>
       <li><a href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.conversions.str_to_float">str_to_float() (in module pdbeccdutils.helpers.conversions)</a>
 </li>

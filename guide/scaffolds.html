@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scaffolds &mdash; pdbeccdutils 0.8.3 documentation</title>
+  <title>Scaffolds &mdash; pdbeccdutils 0.8.4 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -36,7 +36,7 @@
               <img src="../_static/logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.8.3
+                0.8.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -64,7 +64,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="depictions.html">Depictions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fragments.html">Fragments</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="fragments.html#basic-use-case">Basic use case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fragments.html#identifying-fragments-of-a-chemical-component">Identifying fragments of a chemical component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fragments.html#identifying-all-chemical-components-with-penicillin-fragment">Identifying all chemical components with penicillin fragment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="fragments.html#pdbe-supplied-fragments">PDBe supplied fragments</a></li>
 </ul>
 </li>
@@ -166,6 +167,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.models.ParityResult"><code class="docutils literal notranslate"><span class="pre">ParityResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.models.ReleaseStatus"><code class="docutils literal notranslate"><span class="pre">ReleaseStatus</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.models.Residue"><code class="docutils literal notranslate"><span class="pre">Residue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.models.SanitisationResult"><code class="docutils literal notranslate"><span class="pre">SanitisationResult</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.models.ScaffoldingMethod"><code class="docutils literal notranslate"><span class="pre">ScaffoldingMethod</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.models.Subcomponent"><code class="docutils literal notranslate"><span class="pre">Subcomponent</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.core.html#pdbeccdutils.core.models.SubstructureMapping"><code class="docutils literal notranslate"><span class="pre">SubstructureMapping</span></code></a></li>
@@ -283,11 +285,20 @@
 <span id="id1"></span><h1>Scaffolds<a class="headerlink" href="#scaffolds" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> helps to search for scaffolds of small molecules in PDB using RDKit. Presently, the following scaffold identification methods from RDKit are supported: <code class="docutils literal notranslate"><span class="pre">MurckoScaffold</span></code>, <code class="docutils literal notranslate"><span class="pre">MurckoGeneric</span></code>, <code class="docutils literal notranslate"><span class="pre">Brics</span></code></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_reader</span>
+<span class="kn">from</span> <span class="nn">pdbeccdutils.core.models</span> <span class="kn">import</span> <span class="n">ScaffoldingMethod</span>
+<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Draw</span>
 
-<span class="n">component</span> <span class="o">=</span> <span class="n">ccd_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;HEM.cif&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">component</span>
-<span class="n">component</span><span class="o">.</span><span class="n">get_scaffolds</span><span class="p">()</span>
+<span class="n">component</span> <span class="o">=</span> <span class="n">ccd_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;CVV.cif&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">component</span>
+<span class="n">scaffolds</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_scaffolds</span><span class="p">(</span><span class="n">scaffolding_method</span><span class="o">=</span><span class="n">ScaffoldingMethod</span><span class="o">.</span><span class="n">Brics</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">Draw</span><span class="o">.</span><span class="n">MolsToGridImage</span><span class="p">(</span><span class="n">scaffolds</span><span class="p">,</span> <span class="n">legends</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;scaffold </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">scaffolds</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">img</span>
 </pre></div>
 </div>
+<p float="left">
+    <img src="../_static/scaffold_example.svg" width="49%" />
+    <img src="../_static/codeine.svg" width="49%" />
+</p>
+<p>The figure shows the scaffolds identified by pdbeccdutils using the BRICS fragmentation rule for the chemical component CVV when bound to the human kappa opioid receptor (PDB entry 6b73). Interestingly, scaffold 3 is an exact match to the scaffold of Codeine (ChEMBL485), a known analgesic that targets various opioid receptors, and its biological activity is well-documented in ChEMBL. Although the PDB does not contain the structure of Codeine, the shared scaffold between Codeine and CCD component CVV suggests that Codeine may interact with the Human kappa opioid receptor in a similar manner to CVV</p>
 </section>
 
 
