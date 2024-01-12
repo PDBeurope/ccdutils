@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Tuple
 
 import rdkit
 import gemmi
-from rdkit.Chem import BRICS, Draw
+from rdkit.Chem import BRICS, Draw, BondType
 from rdkit.Chem.rdMolDescriptors import Properties
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
@@ -512,9 +512,30 @@ class Component:
                 options.atomLabels[i] = atom_name
                 a.SetProp("molFileAlias", atom_name)
 
+        self._change_all_dative_bonds_to_zero()
+
         drawing.draw_molecule(
             self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight
         )
+
+        self._change_all_dative_bonds_to_zero(reverse=True)
+
+    def _change_all_dative_bonds_to_zero(self, reverse: bool = False) -> None:
+        """
+        alters all bonds that are dative to zero order so that they will be
+        drawn with dotted lines rather than arrows
+
+        Args:
+            reverse (bool): alter zero order bonds back to dative
+        """
+        from_type = BondType.DATIVE
+        to_type = BondType.ZERO
+        if reverse:
+            from_type = BondType.ZERO
+            to_type = BondType.DATIVE
+        for bond in self.mol2D.GetBonds():
+            if bond.GetBondType() == from_type:
+                bond.SetBondType(to_type)
 
     def export_2d_annotation(self, file_name: str, wedge_bonds: bool = True) -> None:
         """Generates 2D depiction in JSON format with annotation of
