@@ -308,11 +308,30 @@ class Subcomponent:
 class BoundMolecule:
     def __init__(self, graph):
         self.graph = graph
-        self.id = "-".join(x.id for x in graph.nodes)
-        self.orig_id = "-".join(
-            x.orig_id if isinstance(x, AssemblyResidue) else x.id for x in graph.nodes
+        self.nodes = sorted(self.graph, key=lambda l: (int(l.res_id), l.chain))
+
+    @property
+    def id(self) -> str:
+        """Returns Id of boundmolecule as combination of
+        chain and residue ids
+        """
+        return "-".join(x.id for x in self.nodes)
+
+    @property
+    def orig_id(self) -> str:
+        """Returns id of boundmolecule without
+        symmetry operator
+        """
+        return "-".join(
+            x.orig_id if isinstance(x, AssemblyResidue) else x.id for x in self.nodes
         )
-        self.name = "_".join(x.name for x in graph.nodes)
+
+    @property
+    def name(self) -> str:
+        """Returns name of boundmolecule as a
+        combination of residue names
+        """
+        return "_".join(x.name for x in self.nodes)
 
     def __eq__(self, other) -> bool:
         """Checks the equality of two BoundMolecule objects
