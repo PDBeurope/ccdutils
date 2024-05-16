@@ -132,23 +132,12 @@ def to_pdb_str(
         atom_name = f"{flag:<4}"  # make sure it is 4 characters
         info.SetName(atom_name)
         atom.SetMonomerInfo(info)
-
-    pdb_title = [
-        f"HEADER    {conf_type.name} coordinates",
-        f" for PDB-CCD {component.id}",
-        f"COMPND    {component.id}",
-        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
-        f"AUTHOR    RDKit {rdkit.__version__}",
-    ]
-
-    try:
-        pdb_body = rdkit.Chem.MolToPDBBlock(mol_to_save, conf_id)
-    except Exception:
-        pdb_body = _to_pdb_str_fallback(
+    
+    pdb_body = _to_pdb_str_fallback(
             mol_to_save, component.id, conf_id, conf_type.name
         )
-
-    return "\n".join(pdb_title + [pdb_body])
+    
+    return (pdb_body)
 
 
 def to_sdf_str(
@@ -987,7 +976,8 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
     """
     conformer_ids = []
     content = [
-        f"HEADER    {conf_name} coordinates for PDB-CCD {component_id}",
+        f"HEADER    {conf_name} coordinates",
+        f" for PDB-CCD {component_id}",
         f"COMPND    {component_id}",
         f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
         f"AUTHOR    RDKit {rdkit.__version__}",
@@ -1003,8 +993,15 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
 
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
-
-            s = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}".format(
+            atom_name = atom.GetProp("name")
+            atom_symbol = atom.GetSymbol()
+            #Atom name spans from column 13-16. For 4 letter atom names and 2 letter atom symbol it starts from column 13 
+            # and for others column starts from 14 
+            col_align = "{:<6}{:>5}  {:<3} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}"
+            if len(atom_name)==4 or len(atom_symbol)==2:
+                col_align = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}"
+                
+            s = col_align.format(
                 "HETATM",
                 i + 1,
                 atom.GetProp("name"),
