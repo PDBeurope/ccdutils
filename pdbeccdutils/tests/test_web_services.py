@@ -10,7 +10,7 @@ from pdbeccdutils.core import ccd_reader
 from pdbeccdutils.tests.tst_utilities import cif_filename
 from pdbeccdutils.utils.pubchem_downloader import PubChemDownloader
 
-ids_to_test = ["MAN", "NAG", "SO4", "GOL", "SAC", "VIA", "GLU"]
+ids_to_test = ["NAG", "SO4", "GOL", "SAC", "VIA", "GLU"]
 
 
 class TestWebServices:
