@@ -85,7 +85,7 @@ class TestFileWrites:
                 rdkit_mol = component.mol_no_h if remove_h else component.mol
 
                 pdb_repr = ccd_writer._to_pdb_str_fallback(
-                    rdkit_mol, component.id, conf_id
+                    rdkit_mol, component.id, conf_id, False
                 )
 
                 assert pdb_repr

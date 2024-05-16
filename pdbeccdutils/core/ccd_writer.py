@@ -119,23 +119,29 @@ def to_pdb_str(
         component, remove_hs, conf_type
     )
 
-    info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
-    info.SetResidueName(f"{component.id:>3}")
-    info.SetTempFactor(20.0)
-    info.SetOccupancy(1.0)
-    info.SetChainId("A")
-    info.SetResidueNumber(1)
-    info.SetIsHeteroAtom(True)
+    # info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
+    # info.SetResidueName(f"{component.id:>3}")
+    # info.SetTempFactor(20.0)
+    # info.SetOccupancy(1.0)
+    # info.SetChainId("A")
+    # info.SetResidueNumber(1)
+    # info.SetIsHeteroAtom(True)
+    pdb_title = [
+        f"HEADER    {conf_type.name} coordinates",
+        f" for PDB-CCD {component.id}",
+        f"COMPND    {component.id}",
+        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
+        f"AUTHOR    RDKit {rdkit.__version__}",
+    ]
+    # for atom in mol_to_save.GetAtoms():
+    #     flag = _get_alt_atom_name(atom) if alt_names else _get_atom_name(atom)
+    #     atom_name = f"{flag:<4}"  # make sure it is 4 characters
+    #     info.SetName(atom_name)
+    #     atom.SetMonomerInfo(info)
 
-    for atom in mol_to_save.GetAtoms():
-        flag = _get_alt_atom_name(atom) if alt_names else _get_atom_name(atom)
-        atom_name = f"{flag:<4}"  # make sure it is 4 characters
-        info.SetName(atom_name)
-        atom.SetMonomerInfo(info)
+    pdb_body = _to_pdb_str_fallback(mol_to_save, component.id, conf_id, alt_names)
 
-    pdb_body = _to_pdb_str_fallback(mol_to_save, component.id, conf_id, conf_type.name)
-
-    return pdb_body
+    return "\n".join(pdb_title + [pdb_body])
 
 
 def to_sdf_str(
@@ -959,7 +965,7 @@ def _to_sdf_str_fallback(mol, ccd_id, conformers):
     return content
 
 
-def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
+def _to_pdb_str_fallback(mol, component_id, conf_id, alt_names):
     """Fallback method to generate PDB file in case the default one in
     RDKit fails.
 
@@ -973,25 +979,19 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
         str: String representation the component in the PDB format.
     """
     conformer_ids = []
-    content = [
-        f"HEADER    {conf_name} coordinates",
-        f" for PDB-CCD {component_id}",
-        f"COMPND    {component_id}",
-        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
-        f"AUTHOR    RDKit {rdkit.__version__}",
-    ]
 
     if conf_id == -1:
         conformer_ids = [c.GetId() for c in mol.GetConformers()]
     else:
         conformer_ids = [conf_id]
 
+    content = []
     for m in conformer_ids:
         rdkit_conformer = mol.GetConformer(m)
 
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
-            atom_name = atom.GetProp("name")
+            atom_name = _get_alt_atom_name(atom) if alt_names else _get_atom_name(atom)
             atom_symbol = atom.GetSymbol()
             # Atom name spans from column 13-16. For 4 letter atom names and 2 letter atom symbol it starts from column 13
             # and for others column starts from 14
@@ -1002,7 +1002,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
             s = col_align.format(
                 "HETATM",
                 i + 1,
-                atom.GetProp("name"),
+                atom_name,
                 component_id,
                 "A",
                 1,
