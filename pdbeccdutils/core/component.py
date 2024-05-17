@@ -227,10 +227,12 @@ class Component:
             str: the InChI or empty '' if there was an error finding it.
         """
         if not self._inchi_from_rdkit:
-            try:
-                self._inchi_from_rdkit = rdkit.Chem.inchi.MolToInchi(self.mol)
-            except ValueError:
+            inchi_result = mol_tools.inchi_from_mol(self.mol)
+            if inchi_result.errors:
                 self._inchi_from_rdkit = ""
+            else:
+                self._inchi_from_rdkit = inchi_result.inchi
+
         return self._inchi_from_rdkit
 
     @property
@@ -421,6 +423,8 @@ class Component:
             DepictionResult: Object with the details about depiction process.
         """
         mol_copy = rdkit.Chem.RWMol(self.mol)
+        # alters Dative Bond type to Zero Bond type for depiction
+        mol_tools.change_bonds_type(mol_copy, BondType.DATIVE, BondType.ZERO)
         if remove_hs:
             mol_copy = rdkit.Chem.RemoveHs(
                 mol_copy, updateExplicitCount=True, sanitize=False
@@ -511,8 +515,6 @@ class Component:
                 atom_name = get_atom_name(a)
                 options.atomLabels[i] = atom_name
                 a.SetProp("molFileAlias", atom_name)
-
-        self._change_all_dative_bonds_to_zero()
 
         drawing.draw_molecule(
             self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight
