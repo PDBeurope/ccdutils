@@ -270,13 +270,13 @@ class SubstructureMapping:
 
     Args:
         name (str): Name of the substructure.
-        smiles (str): SMILES representation of the substructure
+        mol (Chem.rdchem.Mol): RDKit Mol object
         source (str): Where does this fragment come from.
         mapping (List[List[Any]]): Mappings with atom names or indices.
     """
 
     name: str
-    smiles: str
+    mol: Chem.rdchem.Mol
     source: str
     mappings: List[List[Any]]
 

@@ -679,9 +679,7 @@ class Component:
 
                 key = f"{fragment_library.name}_{v.name}"
                 if key not in self._fragments:
-                    temp[key] = SubstructureMapping(
-                        v.name, rdkit.Chem.MolToSmiles(v.mol), v.source, matches
-                    )
+                    temp[key] = SubstructureMapping(v.name, v.mol, v.source, matches)
 
             except Exception:
                 logging.warning(f"Error mapping fragment {v.name}.")
@@ -722,7 +720,8 @@ class Component:
                 brics_hits = [self.mol_no_h.GetSubstructMatches(i) for i in brics_mols]
 
                 for index, brics_hit in enumerate(brics_hits):
-                    smiles = rdkit.Chem.MolToSmiles(brics_mols[index])
+                    brics_mol = brics_mols[index]
+                    smiles = rdkit.Chem.MolToSmiles(brics_mol)
                     name = scaffolding_method.name
                     source = "RDKit scaffolds"
                     key = f"{name}_{smiles}"
@@ -733,7 +732,7 @@ class Component:
 
                     if key not in self._scaffolds:
                         self._scaffolds[key] = SubstructureMapping(
-                            name, smiles, source, brics_hit
+                            name, brics_mol, source, brics_hit
                         )
 
                 return brics_mols
@@ -760,7 +759,7 @@ class Component:
                     self._scaffolds[name].mappings.append(mapping)
                 else:
                     self._scaffolds[name] = SubstructureMapping(
-                        name, smiles, source, [mapping]
+                        name, s, source, [mapping]
                     )
 
             return scaffolds
@@ -806,6 +805,6 @@ class Component:
             for m in v.mappings:
                 atom_names = [self.mol.GetAtomWithIdx(idx).GetProp("name") for idx in m]
                 mappings.append(atom_names)
-            res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
+            res.append(SubstructureMapping(v.name, v.mol, v.source, mappings))
 
         return res

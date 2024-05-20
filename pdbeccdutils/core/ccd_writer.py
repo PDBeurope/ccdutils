@@ -35,7 +35,7 @@ import pdbeccdutils
 import rdkit
 import gemmi
 from gemmi import cif
-from pdbeccdutils.helpers import cif_tools
+from pdbeccdutils.helpers import cif_tools, mol_tools
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
@@ -119,13 +119,6 @@ def to_pdb_str(
         component, remove_hs, conf_type
     )
 
-    # info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
-    # info.SetResidueName(f"{component.id:>3}")
-    # info.SetTempFactor(20.0)
-    # info.SetOccupancy(1.0)
-    # info.SetChainId("A")
-    # info.SetResidueNumber(1)
-    # info.SetIsHeteroAtom(True)
     pdb_title = [
         f"HEADER    {conf_type.name} coordinates",
         f" for PDB-CCD {component.id}",
@@ -133,11 +126,6 @@ def to_pdb_str(
         f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
         f"AUTHOR    RDKit {rdkit.__version__}",
     ]
-    # for atom in mol_to_save.GetAtoms():
-    #     flag = _get_alt_atom_name(atom) if alt_names else _get_atom_name(atom)
-    #     atom_name = f"{flag:<4}"  # make sure it is 4 characters
-    #     info.SetName(atom_name)
-    #     atom.SetMonomerInfo(info)
 
     pdb_body = _to_pdb_str_fallback(mol_to_save, component.id, conf_id, alt_names)
 
@@ -966,14 +954,13 @@ def _to_sdf_str_fallback(mol, ccd_id, conformers):
 
 
 def _to_pdb_str_fallback(mol, component_id, conf_id, alt_names):
-    """Fallback method to generate PDB file in case the default one in
-    RDKit fails.
+    """Method to generate PDB file
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule to be written.
         component_id (str): Component id.
         conf_id (int): conformer id to be written.
-        conf_name (str): conformer name to be written.
+        alt_names (bool): atom names or alternate names.
 
     Returns:
         str: String representation the component in the PDB format.
@@ -1184,30 +1171,30 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
     )
 
     for i, scaffold in enumerate(component.scaffolds):
-        mol = rdkit.Chem.MolFromSmiles(scaffold.smiles)
-        inchi = rdkit.Chem.MolToInchi(mol)
-        inchikey = rdkit.Chem.MolToInchiKey(mol)
+        smiles = rdkit.Chem.MolToSmiles(scaffold.mol)
+        inchi = mol_tools.inchi_from_mol(scaffold.mol).inchi
+        inchikey = mol_tools.inchikey_from_inchi(inchi)
         new_row = [
             component.id,
             scaffold.name,
             f"S{i+1}",
             "scaffold",
-            scaffold.smiles,
+            smiles,
             inchi or None,
             inchikey or None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
     for j, fragment in enumerate(component.fragments):
-        mol = rdkit.Chem.MolFromSmiles(fragment.smiles)
-        inchi = rdkit.Chem.MolToInchi(mol)
-        inchikey = rdkit.Chem.MolToInchiKey(mol)
+        smiles = rdkit.Chem.MolToSmiles(fragment.mol)
+        inchi = mol_tools.inchi_from_mol(fragment.mol).inchi
+        inchikey = mol_tools.inchikey_from_inchi(inchi)
         new_row = [
             component.id,
             fragment.name,
             f"F{j+1}",
             "fragment",
-            fragment.smiles,
+            smiles,
             inchi or None,
             inchikey or None,
         ]
