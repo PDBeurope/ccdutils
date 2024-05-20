@@ -423,8 +423,6 @@ class Component:
             DepictionResult: Object with the details about depiction process.
         """
         mol_copy = rdkit.Chem.RWMol(self.mol)
-        # alters Dative Bond type to Zero Bond type for depiction
-        mol_tools.change_bonds_type(mol_copy, BondType.DATIVE, BondType.ZERO)
         if remove_hs:
             mol_copy = rdkit.Chem.RemoveHs(
                 mol_copy, updateExplicitCount=True, sanitize=False
@@ -515,11 +513,16 @@ class Component:
                 atom_name = get_atom_name(a)
                 options.atomLabels[i] = atom_name
                 a.SetProp("molFileAlias", atom_name)
-
+        
+        mol_tools.change_bonds_type(self.mol2D, BondType.DATIVE, BondType.ZERO)
+        
         drawing.draw_molecule(
             self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight
         )
 
+        mol_tools.change_bonds_type(self.mol2D, BondType.ZERO, BondType.ZERO)
+    
+    
     def export_2d_annotation(self, file_name: str, wedge_bonds: bool = True) -> None:
         """Generates 2D depiction in JSON format with annotation of
         bonds and atoms to be redrawn in the interactions component.
