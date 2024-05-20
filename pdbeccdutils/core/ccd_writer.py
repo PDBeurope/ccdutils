@@ -167,7 +167,7 @@ def to_sdf_str(
 
                 block = [
                     f"{component.id} - {c.name} conformer",
-                    rdkit.Chem.MolToMolBlock(mol_to_save, confId=conf_id).strip(),
+                    rdkit.Chem.MolToMolBlock(mol_to_save, confId=conf_id).strip("\n"),
                     "$$$$\n",
                 ]
                 mol_block += block
@@ -926,7 +926,7 @@ def _to_sdf_str_fallback(mol, ccd_id, conformers):
 
         content += [
             f"{ccd_id} - {c.name} conformer",
-            "    RDKit   3D",
+            "     RDKit          3D",
             "\n" f"{atom_count:>3}{bond_count:3}  0  0  0  0  0  0  0  0999 V2000",
         ]
 
