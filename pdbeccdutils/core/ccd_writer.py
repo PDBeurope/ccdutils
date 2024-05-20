@@ -982,9 +982,9 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, alt_names):
             atom_symbol = atom.GetSymbol()
             # Atom name spans from column 13-16. For 4 letter atom names and 2 letter atom symbol it starts from column 13
             # and for others column starts from 14
-            col_align = "{:<6}{:>5}  {:<3} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}"
+            col_align = "{:<6}{:>5}  {:<3} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
             if len(atom_name) == 4 or len(atom_symbol) == 2:
-                col_align = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}"
+                col_align = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
 
             s = col_align.format(
                 "HETATM",
@@ -999,8 +999,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, alt_names):
                 rdkit_conformer.GetAtomPosition(i).z,
                 1,
                 20,
-                atom.GetSymbol(),
-                atom.GetFormalCharge(),
+                atom.GetSymbol().upper(),
             )
             content.append(s)
 

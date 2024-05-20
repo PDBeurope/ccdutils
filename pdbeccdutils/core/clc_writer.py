@@ -242,10 +242,10 @@ def _to_pdb_str_fallback(mol, conf_id):
             atom = mol.GetAtomWithIdx(i)
             res_info = atom.GetPDBResidueInfo()
             atom_name = atom.GetProp("name")
-            atom_symbol = atom.GetSymbol()
-            col_align = "{:<6}{:>5}  {:<3} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}"
+            atom_symbol = atom.GetSymbol().upper()
+            col_align = "{:<6}{:>5}  {:<3} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
             if len(atom_name) == 4 or len(atom_symbol) == 2:
-                col_align = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}"
+                col_align = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
 
             s = col_align.format(
                 "HETATM",
@@ -261,7 +261,6 @@ def _to_pdb_str_fallback(mol, conf_id):
                 1,
                 20,
                 atom_symbol,
-                atom.GetFormalCharge(),
             )
             content.append(s)
 
