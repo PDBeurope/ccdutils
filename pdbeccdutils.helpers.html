@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>helpers &mdash; pdbeccdutils 0.8.4 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>helpers &mdash; pdbeccdutils 0.8.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -36,7 +38,7 @@
               <img src="_static/logo.png" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                0.8.4
+                0.8.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -212,6 +214,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#module-pdbeccdutils.helpers.mol_tools">pdbeccdutils.helpers.mol_tools</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pdbeccdutils.helpers.mol_tools.change_bonds_type"><code class="docutils literal notranslate"><span class="pre">change_bonds_type()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pdbeccdutils.helpers.mol_tools.correct_atom_coords"><code class="docutils literal notranslate"><span class="pre">correct_atom_coords()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
@@ -362,7 +365,7 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 <p>Module helper providing drawing functionality based on RDKit</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.drawing.convert_svg">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.drawing.</span></span><span class="sig-name descname"><span class="pre">convert_svg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">svg_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ccd_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2023.09)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.convert_svg" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.drawing.</span></span><span class="sig-name descname"><span class="pre">convert_svg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">svg_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ccd_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.convert_svg" title="Permalink to this definition"></a></dt>
 <dd><p>Parse information from SVG depiction into object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -388,8 +391,8 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2023.09)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object to be depicted.</p></li>
-<li><p><strong>drawer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.Draw.MolDrawing.html#rdkit.Chem.Draw.MolDrawing.DrawingOptions" title="(in The RDKit v2023.09)"><em>rdkit.Chem.Draw.MolDrawing.DrawingOptions</em></a>) – RDKit object
+<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object to be depicted.</p></li>
+<li><p><strong>drawer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.Draw.MolDrawing.html#rdkit.Chem.Draw.MolDrawing.DrawingOptions" title="(in The RDKit v2024.03)"><em>rdkit.Chem.Draw.MolDrawing.DrawingOptions</em></a>) – RDKit object
 with parameters for drawing depiction.</p></li>
 <li><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Path where the depiction will be saved.</p></li>
 <li><p><strong>wedge_bonds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Whether or not to wedge bonds.</p></li>
@@ -408,7 +411,7 @@ ids and RGB colors.</p></li>
 <dd><p>Calculate molecule resolution given 50points per Angstroom</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2023.09)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object.</p>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dimension of the depictions (x, y).</p>
@@ -506,7 +509,7 @@ converted.</p>
 <dd class="field-even"><p>– bond type</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.BondType" title="(in The RDKit v2023.09)">rdkit.Chem.rdchem.BondType</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.BondType" title="(in The RDKit v2024.03)">rdkit.Chem.rdchem.BondType</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -571,6 +574,21 @@ in input structure and operator is the operator used by model-server</p>
 <span id="pdbeccdutils-helpers-mol-tools"></span><h2>pdbeccdutils.helpers.mol_tools<a class="headerlink" href="#module-pdbeccdutils.helpers.mol_tools" title="Permalink to this heading"></a></h2>
 <p>Set of methods for molecular sanitization and work with conformers</p>
 <dl class="py function">
+<dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.change_bonds_type">
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">change_bonds_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.change_bonds_type" title="Permalink to this definition"></a></dt>
+<dd><p>alters all bonds that are from_type to to_type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Mol object from RDKit</p></li>
+<li><p><strong>from_type</strong> – Bond type to be changed</p></li>
+<li><p><strong>to_type</strong> – Type of bond to be set</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.correct_atom_coords">
 <span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">correct_atom_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conformer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.correct_atom_coords" title="Permalink to this definition"></a></dt>
 <dd><p>Replace nan values of atom coordinates with zero</p>
@@ -594,19 +612,19 @@ results in errors in downstream processes so that it is easier
 to fix it when the problem occurs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2023.09)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – RDKit conformer</p>
+<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – RDKit conformer</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.fix_molecule">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">fix_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rwmol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2023.09)"><span class="pre">RWMol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.fix_molecule" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">fix_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rwmol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.03)"><span class="pre">RWMol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.fix_molecule" title="Permalink to this definition"></a></dt>
 <dd><p>Single molecule sanitization process. Presently, only valence
 errors are taken care are of.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2023.09)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be
+<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be
 sanitized</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -624,7 +642,7 @@ sanitized</p>
 <dd><p>Gets component atom id.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>atom</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Atom" title="(in The RDKit v2023.09)"><em>rdkit.Chem.rdchem.Atom</em></a>) – rdkit atom.</p>
+<dd class="field-odd"><p><strong>atom</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Atom" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Atom</em></a>) – rdkit atom.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Name of the atom.</p>
@@ -643,7 +661,7 @@ sanitized</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.inchi_from_mol">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">inchi_from_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2023.09)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit" title="pdbeccdutils.core.models.InChIFromRDKit"><span class="pre">InChIFromRDKit</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.inchi_from_mol" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">inchi_from_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit" title="pdbeccdutils.core.models.InChIFromRDKit"><span class="pre">InChIFromRDKit</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.inchi_from_mol" title="Permalink to this definition"></a></dt>
 <dd><p>Provides the InChI calculated by RDKit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -685,7 +703,7 @@ be used to determine, whether or not the coordinates should be
 regenerated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2023.09)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – conformer to check</p>
+<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – conformer to check</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>true if more then 1 atom has coordinates [0, 0, 0]</p>
@@ -722,7 +740,7 @@ processed in order to find out what went wrong with sanitization
 to fix the molecule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2023.09)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be sanitized</p>
+<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be sanitized</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Result of the sanitization process.</p>

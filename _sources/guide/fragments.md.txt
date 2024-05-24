@@ -26,7 +26,7 @@ fragment_library = FragmentLibrary()
 matches = component.library_search(fragment_library)
 print(f'Matches found in the fragment library {matches}.')
 
-fragment_mols = [Chem.MolFromSmiles(fragment.smiles) for fragment in component.fragments]
+fragment_mols = [fragment.mol for fragment in component.fragments]
 img = Draw.MolsToGridImage(fragment_mols, legends = [fragment.name for fragment in component.fragments])
 img
 ```
