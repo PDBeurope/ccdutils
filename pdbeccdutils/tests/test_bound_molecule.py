@@ -8,12 +8,93 @@ import gemmi
 from networkx import MultiDiGraph
 from pdbeccdutils.tests import tst_utilities
 from pdbeccdutils.core import boundmolecule
+from pdbeccdutils.core.models import AssemblyResidue, BoundMolecule
 
+
+test_residues = {
+    "first": [
+        AssemblyResidue(
+            "NAG",
+            "F",
+            "1",
+            None,
+            "1",
+            "F",
+            "",
+        ),
+        AssemblyResidue(
+            "NAG",
+            "F",
+            "2",
+            None,
+            "1",
+            "F",
+            "",
+        ),
+    ],
+    "second": [
+        AssemblyResidue(
+            "NAG",
+            "F_2",
+            "2",
+            None,
+            "1",
+            "F",
+            "2",
+        ),
+        AssemblyResidue(
+            "NAG",
+            "F_2",
+            "1",
+            None,
+            "1",
+            "F",
+            "2",
+        ),
+    ],
+    "third": [
+        AssemblyResidue(
+            "NAG",
+            "J_2",
+            "2",
+            None,
+            "1",
+            "J",
+            "2",
+        ),
+        AssemblyResidue(
+            "NAG",
+            "F_2",
+            "1",
+            None,
+            "1",
+            "F",
+            "2",
+        ),
+    ],
+}
 
 test_inputs = {
     "1c4q": {"au_fallback": False},
     "1tqh": {"au_fallback": False},
 }
+
+
+def create_boundmolecule(residues: list[AssemblyResidue]):
+    graph = MultiDiGraph()
+    for residue in residues:
+        graph.add_node(residue)
+
+    bm = BoundMolecule(graph)
+    return bm
+
+
+def test_boundmolecule_equivalence():
+    bm_1 = create_boundmolecule(test_residues["first"])
+    bm_2 = create_boundmolecule(test_residues["second"])
+    bm_3 = create_boundmolecule(test_residues["third"])
+    assert bm_1.is_equivalent(bm_2)
+    assert not bm_1.is_equivalent(bm_3)
 
 
 class TestBoundMolecule:

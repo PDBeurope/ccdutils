@@ -115,19 +115,6 @@ def to_pdb_str(
         component, remove_hs, conf_type
     )
 
-    for atom in mol_to_save.GetAtoms():
-        flag = (
-            ccd_writer._get_alt_atom_name(atom)
-            if alt_names
-            else ccd_writer._get_atom_name(atom)
-        )
-        atom_name = f"{flag:<4}"  # make sure it is 4 characters
-        res_info = atom.GetPDBResidueInfo()
-        res_info.SetName(atom_name)
-        res_info.SetTempFactor(20.0)
-        res_info.SetOccupancy(1.0)
-        res_info.SetChainId("A")
-
     pdb_title = [
         f"HEADER    {conf_type.name} coordinates",
         f" for PDB-PRD {component.id}",
@@ -136,12 +123,7 @@ def to_pdb_str(
         f"AUTHOR    RDKit {rdkit.__version__}",
     ]
 
-    try:
-        pdb_body = rdkit.Chem.MolToPDBBlock(mol_to_save, conf_id)
-    except Exception:
-        pdb_body = _to_pdb_str_fallback(
-            mol_to_save, component.id, conf_id, conf_type.name
-        )
+    pdb_body = _to_pdb_str_fallback(mol_to_save, conf_id, alt_names)
 
     return "\n".join(pdb_title + [pdb_body])
 
@@ -369,26 +351,19 @@ def _get_residue_id(atom):
 # region fallbacks
 
 
-def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
-    """Fallback method to generate PDB file in case the default one in
-    RDKit fails.
+def _to_pdb_str_fallback(mol, conf_id, alt_names):
+    """Method to generate PDB file
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule to be written.
-        component_id (str): Component id.
         conf_id (int): conformer id to be written.
-        conf_name (str): conformer name to be written.
+        alt_names (bool): atom names or alternate names.
 
     Returns:
         str: String representation the component in the PDB format.
     """
     conformer_ids = []
-    content = [
-        f"HEADER    {conf_name} coordinates for PDB-CCD {component_id}",
-        f"COMPND    {component_id}",
-        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
-        f"AUTHOR    RDKit {rdkit.__version__}",
-    ]
+    content = []
 
     if conf_id == -1:
         conformer_ids = [c.GetId() for c in mol.GetConformers()]
@@ -401,11 +376,20 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
             res_info = atom.GetPDBResidueInfo()
+            atom_name = (
+                ccd_writer._get_alt_atom_name(atom)
+                if alt_names
+                else ccd_writer._get_atom_name(atom)
+            )
+            atom_symbol = atom.GetSymbol().upper()
+            col_align = "{:<6}{:>5}  {:<3} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
+            if len(atom_name) == 4 or len(atom_symbol) == 2:
+                col_align = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
 
-            s = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}".format(
+            s = col_align.format(
                 "HETATM",
                 i + 1,
-                atom.GetProp("name"),
+                atom_name,
                 res_info.GetResidueName(),
                 "A",
                 res_info.GetResidueNumber(),
@@ -415,8 +399,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
                 rdkit_conformer.GetAtomPosition(i).z,
                 1,
                 20,
-                atom.GetSymbol(),
-                atom.GetFormalCharge(),
+                atom_symbol,
             )
             content.append(s)
 

@@ -20,7 +20,7 @@ jobs:
           python-version: "3.10"
 
       - run: |
-          pip install rdkit==2023.3.3
+          pip install rdkit==2023.09.6
           pip install -e ".[tests]"
           pip install pre-commit
           pre-commit install && pre-commit run --all

@@ -35,7 +35,7 @@ import pdbeccdutils
 import rdkit
 import gemmi
 from gemmi import cif
-from pdbeccdutils.helpers import cif_tools
+from pdbeccdutils.helpers import cif_tools, mol_tools
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
@@ -119,20 +119,6 @@ def to_pdb_str(
         component, remove_hs, conf_type
     )
 
-    info = rdkit.Chem.rdchem.AtomPDBResidueInfo()
-    info.SetResidueName(f"{component.id:>3}")
-    info.SetTempFactor(20.0)
-    info.SetOccupancy(1.0)
-    info.SetChainId("A")
-    info.SetResidueNumber(1)
-    info.SetIsHeteroAtom(True)
-
-    for atom in mol_to_save.GetAtoms():
-        flag = _get_alt_atom_name(atom) if alt_names else _get_atom_name(atom)
-        atom_name = f"{flag:<4}"  # make sure it is 4 characters
-        info.SetName(atom_name)
-        atom.SetMonomerInfo(info)
-
     pdb_title = [
         f"HEADER    {conf_type.name} coordinates",
         f" for PDB-CCD {component.id}",
@@ -141,12 +127,7 @@ def to_pdb_str(
         f"AUTHOR    RDKit {rdkit.__version__}",
     ]
 
-    try:
-        pdb_body = rdkit.Chem.MolToPDBBlock(mol_to_save, conf_id)
-    except Exception:
-        pdb_body = _to_pdb_str_fallback(
-            mol_to_save, component.id, conf_id, conf_type.name
-        )
+    pdb_body = _to_pdb_str_fallback(mol_to_save, component.id, conf_id, alt_names)
 
     return "\n".join(pdb_title + [pdb_body])
 
@@ -186,7 +167,7 @@ def to_sdf_str(
 
                 block = [
                     f"{component.id} - {c.name} conformer",
-                    rdkit.Chem.MolToMolBlock(mol_to_save, confId=conf_id).strip(),
+                    rdkit.Chem.MolToMolBlock(mol_to_save, confId=conf_id).strip("\n"),
                     "$$$$\n",
                 ]
                 mol_block += block
@@ -945,7 +926,7 @@ def _to_sdf_str_fallback(mol, ccd_id, conformers):
 
         content += [
             f"{ccd_id} - {c.name} conformer",
-            "    RDKit   3D",
+            "     RDKit          3D",
             "\n" f"{atom_count:>3}{bond_count:3}  0  0  0  0  0  0  0  0999 V2000",
         ]
 
@@ -972,42 +953,43 @@ def _to_sdf_str_fallback(mol, ccd_id, conformers):
     return content
 
 
-def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
-    """Fallback method to generate PDB file in case the default one in
-    RDKit fails.
+def _to_pdb_str_fallback(mol, component_id, conf_id, alt_names):
+    """Method to generate PDB file
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): Molecule to be written.
         component_id (str): Component id.
         conf_id (int): conformer id to be written.
-        conf_name (str): conformer name to be written.
+        alt_names (bool): atom names or alternate names.
 
     Returns:
         str: String representation the component in the PDB format.
     """
     conformer_ids = []
-    content = [
-        f"HEADER    {conf_name} coordinates for PDB-CCD {component_id}",
-        f"COMPND    {component_id}",
-        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
-        f"AUTHOR    RDKit {rdkit.__version__}",
-    ]
 
     if conf_id == -1:
         conformer_ids = [c.GetId() for c in mol.GetConformers()]
     else:
         conformer_ids = [conf_id]
 
+    content = []
     for m in conformer_ids:
         rdkit_conformer = mol.GetConformer(m)
 
         for i in range(0, mol.GetNumAtoms()):
             atom = mol.GetAtomWithIdx(i)
+            atom_name = _get_alt_atom_name(atom) if alt_names else _get_atom_name(atom)
+            atom_symbol = atom.GetSymbol()
+            # Atom name spans from column 13-16. For 4 letter atom names and 2 letter atom symbol it starts from column 13
+            # and for others column starts from 14
+            col_align = "{:<6}{:>5}  {:<3} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
+            if len(atom_name) == 4 or len(atom_symbol) == 2:
+                col_align = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}"
 
-            s = "{:<6}{:>5} {:<4} {:>3} {}{:>4}{}   {:>8.3f}{:>8.3f}{:>8.3f}{:>6.2f}{:>6.2f}          {:>2}{:>2}".format(
+            s = col_align.format(
                 "HETATM",
                 i + 1,
-                atom.GetProp("name"),
+                atom_name,
                 component_id,
                 "A",
                 1,
@@ -1017,8 +999,7 @@ def _to_pdb_str_fallback(mol, component_id, conf_id, conf_name="Model"):
                 rdkit_conformer.GetAtomPosition(i).z,
                 1,
                 20,
-                atom.GetSymbol(),
-                atom.GetFormalCharge(),
+                atom.GetSymbol().upper(),
             )
             content.append(s)
 
@@ -1189,30 +1170,30 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
     )
 
     for i, scaffold in enumerate(component.scaffolds):
-        mol = rdkit.Chem.MolFromSmiles(scaffold.smiles)
-        inchi = rdkit.Chem.MolToInchi(mol)
-        inchikey = rdkit.Chem.MolToInchiKey(mol)
+        smiles = rdkit.Chem.MolToSmiles(scaffold.mol)
+        inchi = mol_tools.inchi_from_mol(scaffold.mol).inchi
+        inchikey = mol_tools.inchikey_from_inchi(inchi)
         new_row = [
             component.id,
             scaffold.name,
             f"S{i+1}",
             "scaffold",
-            scaffold.smiles,
+            smiles,
             inchi or None,
             inchikey or None,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
     for j, fragment in enumerate(component.fragments):
-        mol = rdkit.Chem.MolFromSmiles(fragment.smiles)
-        inchi = rdkit.Chem.MolToInchi(mol)
-        inchikey = rdkit.Chem.MolToInchiKey(mol)
+        smiles = rdkit.Chem.MolToSmiles(fragment.mol)
+        inchi = mol_tools.inchi_from_mol(fragment.mol).inchi
+        inchikey = mol_tools.inchikey_from_inchi(inchi)
         new_row = [
             component.id,
             fragment.name,
             f"F{j+1}",
             "fragment",
-            fragment.smiles,
+            smiles,
             inchi or None,
             inchikey or None,
         ]

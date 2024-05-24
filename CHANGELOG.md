@@ -1,5 +1,18 @@
 # Changelog
 
+## RELEASE 0.8.5 - May 26, 2024
+
+### Features
+* Updated for RDKit 2023.09.6
+* Removed the formal charge adjustment for valence issues, instead uses Dative bonds
+* Uses Zero bond type (dotted lines) for depiction of coordinate bonds
+* Changes Dative bonds to single bonds for inchi calculation
+* Corrected the format of PDB files
+* Corrected the header of SDF file
+
+### Breaking changes
+* Removed smile from SubstructureMapping and added mol
+
 ## RELEASE 0.8.0 - July 26, 2023
 
 ### Features

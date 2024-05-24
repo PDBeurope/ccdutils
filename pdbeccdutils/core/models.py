@@ -270,13 +270,13 @@ class SubstructureMapping:
 
     Args:
         name (str): Name of the substructure.
-        smiles (str): SMILES representation of the substructure
+        mol (Chem.rdchem.Mol): RDKit Mol object
         source (str): Where does this fragment come from.
         mapping (List[List[Any]]): Mappings with atom names or indices.
     """
 
     name: str
-    smiles: str
+    mol: Chem.rdchem.Mol
     source: str
     mappings: List[List[Any]]
 
@@ -308,11 +308,30 @@ class Subcomponent:
 class BoundMolecule:
     def __init__(self, graph):
         self.graph = graph
-        self.id = "-".join(x.id for x in graph.nodes)
-        self.orig_id = "-".join(
-            x.orig_id if isinstance(x, AssemblyResidue) else x.id for x in graph.nodes
+        self.nodes = sorted(self.graph, key=lambda l: (int(l.res_id), l.chain))
+
+    @property
+    def id(self) -> str:
+        """Returns Id of boundmolecule as combination of
+        chain and residue ids
+        """
+        return "-".join(x.id for x in self.nodes)
+
+    @property
+    def orig_id(self) -> str:
+        """Returns id of boundmolecule without
+        symmetry operator
+        """
+        return "-".join(
+            x.orig_id if isinstance(x, AssemblyResidue) else x.id for x in self.nodes
         )
-        self.name = "_".join(x.name for x in graph.nodes)
+
+    @property
+    def name(self) -> str:
+        """Returns name of boundmolecule as a
+        combination of residue names
+        """
+        return "_".join(x.name for x in self.nodes)
 
     def __eq__(self, other) -> bool:
         """Checks the equality of two BoundMolecule objects

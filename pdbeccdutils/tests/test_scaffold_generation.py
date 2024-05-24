@@ -32,7 +32,7 @@ class TestScaffold:
 
         assert Chem.MolToSmiles(mol) == smiles
         assert component.scaffolds
-        assert component.scaffolds[0].smiles == smiles
+        assert Chem.MolToSmiles(component.scaffolds[0].mol) == smiles
 
     @staticmethod
     @pytest.mark.parametrize("ccd_id", ["EOH", "DMS"])

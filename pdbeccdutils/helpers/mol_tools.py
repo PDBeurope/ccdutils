@@ -22,6 +22,7 @@ Set of methods for molecular sanitization and work with conformers
 import re
 import sys
 from io import StringIO
+from rdkit.Chem import BondType
 from pdbeccdutils.core.models import (
     InChIFromRDKit,
     MolFromRDKit,
@@ -173,20 +174,18 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
             rdkit.Chem.SanitizeMol(
                 rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
             )
-
-            for metal_index, atom_index in metal_atom_bonds:
+            for metal_index, other_index in metal_atom_bonds:
                 metal_atom = rwmol.GetAtomWithIdx(metal_index)
-                erroneous_atom = rwmol.GetAtomWithIdx(atom_index)
-
-                # change the bond type to dative
-                bond = rwmol.GetBondBetweenAtoms(
-                    metal_atom.GetIdx(), erroneous_atom.GetIdx()
-                )
-                bond.SetBondType(rdkit.Chem.BondType.SINGLE)
-
-                if erroneous_atom.GetExplicitValence() == valency:
-                    erroneous_atom.SetFormalCharge(erroneous_atom.GetFormalCharge() + 1)
-                    metal_atom.SetFormalCharge(metal_atom.GetFormalCharge() - 1)
+                other_atom = rwmol.GetAtomWithIdx(other_index)
+                # alter the bond to be dative towards the metal -
+                if other_atom.GetExplicitValence() == valency:
+                    rwmol.RemoveBond(metal_atom.GetIdx(), other_atom.GetIdx())
+                    rwmol.AddBond(
+                        other_atom.GetIdx(),
+                        metal_atom.GetIdx(),
+                        rdkit.Chem.BondType.DATIVE,
+                    )
+            rwmol.UpdatePropertyCache()  # regenerates valence records
 
         attempts -= 1
 
@@ -223,10 +222,15 @@ def inchi_from_mol(mol: rdkit.Chem.rdchem.Mol) -> InChIFromRDKit:
         InChIFromRDKit: NamedTuple containing inchi, warnings and errors
         generated.
     """
+
+    # Alter Dative bond type to Single as InChI calculation doesn't work in mol
+    # with Dative bond
+    mol_copy = rdkit.Chem.RWMol(mol)
+    change_bonds_type(mol_copy, BondType.DATIVE, BondType.SINGLE)
     try:
         rdkit_stream = StringIO()  # redirecting rdkit logs
         with redirect_stderr(rdkit_stream):
-            inchi = rdkit.Chem.inchi.MolToInchi(mol)
+            inchi = rdkit.Chem.inchi.MolToInchi(mol_copy)
             warnings = None
             errors = None
             rdkit_log = rdkit_stream.getvalue()
@@ -321,3 +325,17 @@ def correct_atom_coords(conformer, atom_id):
         atom_coords_list[0], atom_coords_list[1], atom_coords_list[2]
     )
     conformer.SetAtomPosition(atom_id, atom_coords)
+
+
+def change_bonds_type(mol, from_type, to_type) -> None:
+    """
+    alters all bonds that are from_type to to_type
+
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): Mol object from RDKit
+        from_type: Bond type to be changed
+        to_type: Type of bond to be set
+    """
+    for bond in mol.GetBonds():
+        if bond.GetBondType() == from_type:
+            bond.SetBondType(to_type)

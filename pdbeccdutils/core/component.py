@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Tuple
 
 import rdkit
 import gemmi
-from rdkit.Chem import BRICS, Draw
+from rdkit.Chem import BRICS, Draw, BondType
 from rdkit.Chem.rdMolDescriptors import Properties
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
@@ -227,10 +227,12 @@ class Component:
             str: the InChI or empty '' if there was an error finding it.
         """
         if not self._inchi_from_rdkit:
-            try:
-                self._inchi_from_rdkit = rdkit.Chem.inchi.MolToInchi(self.mol)
-            except ValueError:
+            inchi_result = mol_tools.inchi_from_mol(self.mol)
+            if inchi_result.errors:
                 self._inchi_from_rdkit = ""
+            else:
+                self._inchi_from_rdkit = inchi_result.inchi
+
         return self._inchi_from_rdkit
 
     @property
@@ -512,9 +514,13 @@ class Component:
                 options.atomLabels[i] = atom_name
                 a.SetProp("molFileAlias", atom_name)
 
+        mol_tools.change_bonds_type(self.mol2D, BondType.DATIVE, BondType.ZERO)
+
         drawing.draw_molecule(
             self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight
         )
+
+        mol_tools.change_bonds_type(self.mol2D, BondType.ZERO, BondType.ZERO)
 
     def export_2d_annotation(self, file_name: str, wedge_bonds: bool = True) -> None:
         """Generates 2D depiction in JSON format with annotation of
@@ -675,9 +681,7 @@ class Component:
 
                 key = f"{fragment_library.name}_{v.name}"
                 if key not in self._fragments:
-                    temp[key] = SubstructureMapping(
-                        v.name, rdkit.Chem.MolToSmiles(v.mol), v.source, matches
-                    )
+                    temp[key] = SubstructureMapping(v.name, v.mol, v.source, matches)
 
             except Exception:
                 logging.warning(f"Error mapping fragment {v.name}.")
@@ -718,7 +722,8 @@ class Component:
                 brics_hits = [self.mol_no_h.GetSubstructMatches(i) for i in brics_mols]
 
                 for index, brics_hit in enumerate(brics_hits):
-                    smiles = rdkit.Chem.MolToSmiles(brics_mols[index])
+                    brics_mol = brics_mols[index]
+                    smiles = rdkit.Chem.MolToSmiles(brics_mol)
                     name = scaffolding_method.name
                     source = "RDKit scaffolds"
                     key = f"{name}_{smiles}"
@@ -729,7 +734,7 @@ class Component:
 
                     if key not in self._scaffolds:
                         self._scaffolds[key] = SubstructureMapping(
-                            name, smiles, source, brics_hit
+                            name, brics_mol, source, brics_hit
                         )
 
                 return brics_mols
@@ -756,7 +761,7 @@ class Component:
                     self._scaffolds[name].mappings.append(mapping)
                 else:
                     self._scaffolds[name] = SubstructureMapping(
-                        name, smiles, source, [mapping]
+                        name, s, source, [mapping]
                     )
 
             return scaffolds
@@ -802,6 +807,6 @@ class Component:
             for m in v.mappings:
                 atom_names = [self.mol.GetAtomWithIdx(idx).GetProp("name") for idx in m]
                 mappings.append(atom_names)
-            res.append(SubstructureMapping(v.name, v.smiles, v.source, mappings))
+            res.append(SubstructureMapping(v.name, v.mol, v.source, mappings))
 
         return res
