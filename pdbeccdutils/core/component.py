@@ -520,7 +520,7 @@ class Component:
             self.mol2D, drawer, file_name, wedge_bonds, atom_highlight, bond_highlight
         )
 
-        mol_tools.change_bonds_type(self.mol2D, BondType.ZERO, BondType.ZERO)
+        mol_tools.change_bonds_type(self.mol2D, BondType.ZERO, BondType.DATIVE)
 
     def export_2d_annotation(self, file_name: str, wedge_bonds: bool = True) -> None:
         """Generates 2D depiction in JSON format with annotation of
