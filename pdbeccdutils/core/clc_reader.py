@@ -527,7 +527,8 @@ def _parse_clc_mmcif(cif_block, sanitize=True):
     ccd_reader._handle_implicit_hydrogens(mol)
 
     if sanitize:
-        sanitized = mol_tools.sanitize(mol)
+        sanitized_result = mol_tools.sanitize(mol)
+        mol, sanitized = sanitized_result.mol, sanitized_result.status
 
     descriptors = ccd_reader._parse_pdb_descriptors(
         cif_block, "_pdbx_chem_comp_descriptor.", "descriptor"
