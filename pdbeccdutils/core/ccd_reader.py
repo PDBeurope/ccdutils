@@ -101,7 +101,7 @@ def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResul
 
 
 def read_pdb_components_file(
-    path_to_cif: str, sanitize: bool = True
+    path_to_cif: str, sanitize: bool = True, include: list[str]=[]
 ) -> Dict[str, CCDReaderResult]:
     """
     Process multiple compounds stored in the wwPDB CCD
@@ -112,6 +112,8 @@ def read_pdb_components_file(
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
+        include (list[str]): List of CCDs to be parsed. By deafult it is empy and parse 
+        all the CCDs. If a list of CCDs provided, will only parse them
 
     Raises:
         ValueError: if the file does not exist.
@@ -124,16 +126,16 @@ def read_pdb_components_file(
         raise ValueError("File '{}' does not exists".format(path_to_cif))
 
     result_bag = {}
-
     for block in cif.read(path_to_cif):
-        try:
-            result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
-        except CCDUtilsError as e:
-            logging.error(
-                f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
-            )
-
+        if (block.name in include) or (include.len()==0): 
+            try:
+                result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
+            except CCDUtilsError as e:
+                logging.error(
+                    f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
+                )              
     return result_bag
+
 
 
 # region parse mmcif
