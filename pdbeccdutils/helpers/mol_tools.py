@@ -258,9 +258,11 @@ def inchikey_from_inchi(inchi: str) -> str:
     Returns:
         str: the InChIKey or '' if there was an error finding it.
     """
-
-    inchikey = rdkit.Chem.inchi.InchiToInchiKey(inchi)
-    return inchikey if inchikey else None
+    try:
+        inchikey = rdkit.Chem.inchi.InchiToInchiKey(inchi)
+        return inchikey
+    except Exception:
+        return None
 
 
 def mol_from_inchi(inchi: str) -> MolFromRDKit:
