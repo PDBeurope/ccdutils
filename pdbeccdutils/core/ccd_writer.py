@@ -1179,8 +1179,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
             f"S{i+1}",
             "scaffold",
             smiles,
-            inchi or None,
-            inchikey or None,
+            inchi,
+            inchikey,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
