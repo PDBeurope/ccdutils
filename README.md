@@ -1,4 +1,5 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/pdbeurope/ccdutils/badge/master)](https://www.codefactor.io/repository/github/pdbeurope/ccdutils/overview/master)  ![PYPi](https://img.shields.io/pypi/v/pdbeccdutils?color=green&style=flat)  ![GitHub](https://img.shields.io/github/license/pdbeurope/ccdutils)   ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg)
+[![CodeFactor](https://www.codefactor.io/repository/github/PDBeurope/ccdutils/badge/master)](https://www.codefactor.io/repository/github/PDBeurope/ccdutils/overview/master)  ![PYPi](https://img.shields.io/pypi/v/pdbeccdutils?color=green&style=flat)  ![GitHub](https://img.shields.io/github/license/PDBeurope/ccdutils)   ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/PDBeurope/ccdutils/total)
+
 
 # pdbeccdutils
 
@@ -6,7 +7,7 @@
   for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd) and [wwPDB The Biologically Interesting Molecule Reference Dictionary](https://www.wwpdb.org/data/bird)
 
 * The tools use:
-  * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2022.09.4`
+  * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2023.9.6`
   * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing cif files.
   * [scipy](https://www.scipy.org/) for depiction quality check.
   * [numpy](https://www.numpy.org/) for molecular scaling.
@@ -41,11 +42,7 @@
 * Lightweight implementation of [parity method](https://doi.org/10.1016/j.str.2018.02.009) by Jon Tyzack.
 * RDKit molecular properties per component.
 * UniChem mapping.
-
-## TODO list
-
-* Add more unit/regression tests to get higher code coverage.
-* Further improvements of the documentation.
+* Generating complete representation of multiple [Covalently Linked Components (CLC)](https://www.ebi.ac.uk/pdbe/news/introducing-covalently-linked-components)
 
 
 ## Documentation
