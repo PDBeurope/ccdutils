@@ -1225,7 +1225,8 @@ def _add_rdkit_properties_cif(component, cif_block_copy):
         from gemmi.
     """
     category = "_pdbe_chem_comp_rdkit_properties."
-    cif_block_copy.set_pairs(category, {"comp_id": component.id})
+    if component.physchem_properties:
+        cif_block_copy.set_pairs(category, {"comp_id": component.id})
 
     for k, v in component.physchem_properties.items():
         cif_block_copy.set_pairs(
