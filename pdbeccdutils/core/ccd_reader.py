@@ -127,7 +127,7 @@ def read_pdb_components_file(
 
     result_bag = {}
     for block in cif.read(path_to_cif):
-        if (block.name in include) or (include.len() == 0):
+        if (block.name in include) or (len(include) == 0):
             try:
                 result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
             except CCDUtilsError as e:
