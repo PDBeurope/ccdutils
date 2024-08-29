@@ -18,7 +18,7 @@ class TestParity:
             ("000", "000", 1.00),
             ("SAC", "GOL", 0.50),
             ("MAN", "GLC", 1.00),
-            ("HEM", "HEM", 1.00)
+            ("HEM", "HEM", 1.00),
         ],
     )
     def test_parity_method(id_1, id_2, score):
