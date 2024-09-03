@@ -2,6 +2,7 @@
 the pdbeccdutils. Based on the inchikey provided in the CCD
 a corresponding 2D layout is downloaded from PubChem database.
 """
+
 import argparse
 import os
 import sys

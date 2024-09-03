@@ -1,6 +1,7 @@
 """
 load EOH.cif from file and test important cif item.
 """
+
 import pytest
 
 from pdbeccdutils.core import ccd_reader, ccd_writer

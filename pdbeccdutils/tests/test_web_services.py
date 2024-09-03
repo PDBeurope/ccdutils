@@ -1,5 +1,4 @@
-"""Test of routine for retrieving 2D layouts of the CCDs.
-"""
+"""Test of routine for retrieving 2D layouts of the CCDs."""
 
 import os
 

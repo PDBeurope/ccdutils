@@ -28,6 +28,7 @@ More detailed description can be found here:
 
 https://gitlab.ebi.ac.uk/pdbe/release/pdbechem
 """
+
 import argparse
 import logging
 import os

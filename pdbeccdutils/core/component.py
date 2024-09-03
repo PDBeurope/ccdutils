@@ -464,11 +464,12 @@ class Component:
         Raises:
             CCDUtilsError: If bond or atom does not exist.
         """
-        get_atom_name = (
-            lambda a: a.GetProp("name")
-            if a.HasProp("name")
-            else a.GetSymbol() + str(a.GetIdx())
-        )
+
+        def get_atom_name(atom):
+            if atom.HasProp("name"):
+                return atom.GetProp("name")
+            else:
+                return f"{atom.GetSymbol()}{atom.GetIdx()}"
 
         if self.mol2D is None:
             drawing.save_no_image(file_name, self.id, width)

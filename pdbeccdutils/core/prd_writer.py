@@ -22,6 +22,7 @@ Raises:
     CCDUtilsError: If deemed format is not supported or an unrecoverable
         error occurres.
 """
+
 import json
 import math
 from pathlib import Path

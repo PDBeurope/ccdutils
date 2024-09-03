@@ -15,8 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""module handling UniChem mapping
-"""
+"""module handling UniChem mapping"""
 
 from pdbeccdutils.helpers import helper
 

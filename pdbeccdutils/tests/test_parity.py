@@ -1,5 +1,4 @@
-"""Test of PARITY method
-"""
+"""Test of PARITY method"""
 
 import pytest
 

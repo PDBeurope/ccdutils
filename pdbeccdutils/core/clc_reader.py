@@ -93,7 +93,6 @@ def read_pdb_cif_file(
 
 
 def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
-
     """Args:
         path_to_cif: Path to input structure
         bm: bound-molecules identified from input structure

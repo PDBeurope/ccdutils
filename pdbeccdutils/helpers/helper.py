@@ -15,8 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Generic helper functions that may be re-used
-"""
+"""Generic helper functions that may be re-used"""
 
 import os
 import sys
@@ -145,7 +144,6 @@ def requests_retry_session(
     status_forcelist=(429, 500, 502, 503, 504),
     session=None,
 ):
-
     session = session or requests.Session()
     retry = Retry(
         total=retries,
