@@ -22,5 +22,5 @@ jobs:
       - run: |
           pip install poetry
           poetry install --with tests
-          pre-commit install && pre-commit run --all
-      - run: pytest --cov=pdbeccdutils
+          poetry run pre-commit install && pre-commit run --all
+      - run: poetry run pytest --cov=pdbeccdutils
