@@ -20,8 +20,7 @@ jobs:
           python-version: "3.10"
 
       - run: |
-          pip install rdkit==2023.09.6
-          pip install -e ".[tests]"
-          pip install pre-commit
+          pip install poetry
+          poetry install --with tests
           pre-commit install && pre-commit run --all
       - run: pytest --cov=pdbeccdutils
