@@ -21,11 +21,11 @@ jobs:
         with:
           python-version: "3.10"
       - run: |
-          pip install rdkit
-          pip install -e ".[docs]"
+          pip install poetry
+          poetry install --with docs
       - run: |
           cd doc
-          make html
+          poetry run make html
       - name: Deploy pages
         uses: peaceiris/actions-gh-pages@v3
         with:

@@ -20,6 +20,7 @@
 quality
 
 """
+
 import logging
 import math
 import os
@@ -118,7 +119,7 @@ class DepictionManager:
 
         results = results + template_res
 
-        results.sort(key=lambda l: (l.score, l.source))
+        results.sort(key=lambda item: (item.score, item.source))
 
         if results:
             to_return = results[0]

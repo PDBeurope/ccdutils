@@ -1,5 +1,4 @@
-"""Common fixtures shared among all the tests
-"""
+"""Common fixtures shared among all the tests"""
 
 import json
 import pytest

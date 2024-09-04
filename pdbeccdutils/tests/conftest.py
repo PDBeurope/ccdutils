@@ -1,5 +1,5 @@
-"""Common fixtures shared among all the tests
-"""
+"""Common fixtures shared among all the tests"""
+
 import pytest
 from pdbeccdutils.core import ccd_reader, clc_reader
 from pdbeccdutils.core.fragment_library import FragmentLibrary

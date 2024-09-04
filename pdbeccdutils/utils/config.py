@@ -1,5 +1,5 @@
-"""Package configuration with the paths to the templates
-"""
+"""Package configuration with the paths to the templates"""
+
 import os
 import pdbeccdutils
 

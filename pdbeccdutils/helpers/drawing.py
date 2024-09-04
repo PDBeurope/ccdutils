@@ -15,8 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""Module helper providing drawing functionality based on RDKit
-"""
+"""Module helper providing drawing functionality based on RDKit"""
 
 import os
 import re
