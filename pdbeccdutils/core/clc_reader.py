@@ -208,7 +208,6 @@ def _parse_pdb_mmcif(
     return (mol, warnings, errors)
 
 
-
 def _get_boundmolecule_atoms(cif_block, bm):
     if "_atom_site." not in cif_block.get_mmcif_category_names():
         return
@@ -368,11 +367,12 @@ def _add_connections(
         except RuntimeError:
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
+
 def _parse_pdb_entity(mol, bm, cif_block):
     if "_entity." not in cif_block.get_mmcif_category_names():
         return
-    
-    entities = cif_block.find("_entity.",["id", "pdbx_description"])
+
+    entities = cif_block.find("_entity.", ["id", "pdbx_description"])
     bm_entities = list({residue.ent_id for residue in bm.nodes()})
     if len(bm_entities) == 1:
         for row in entities:
@@ -380,7 +380,6 @@ def _parse_pdb_entity(mol, bm, cif_block):
                 mol.SetProp("name", cif.as_string(row["pdbx_description"]))
 
 
-        
 def get_chem_comp_bonds(cif_block: cif.Block, residue: str):
     """Returns _chem_comp_bond associated with a residue
 

@@ -455,7 +455,7 @@ def main():
     logging.basicConfig(level=lvl, format=frm, datefmt="%a, %d %b %Y %H:%M:%S")
     logging.info("PDBeChem pipeline using:")
     logging.info(
-        f"pdbeccdutils core v. {importlib.metadata.version("pdbeccdutils")}, RDKit v. {rdkit.__version__}"
+        f"pdbeccdutils core v. {importlib.metadata.version('pdbeccdutils')}, RDKit v. {rdkit.__version__}"
     )
 
     logging.info("Settings:")

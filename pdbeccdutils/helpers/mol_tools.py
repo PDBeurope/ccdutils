@@ -297,17 +297,14 @@ def mol_from_inchi(inchi: str) -> MolFromRDKit:
     return mol_result
 
 
-
 def rdkit_object_property(object, property: str):
     """Returns the value of property set to the rdkit object
-    
+
     Args:
-        object: rdkit.Chem.rdchem object with GetProp 
-    
+        object: rdkit.Chem.rdchem object with GetProp
+
     """
-    return (
-        object.GetProp(property) if object.HasProp(property) else None
-    )
+    return object.GetProp(property) if object.HasProp(property) else None
 
 
 def correct_atom_coords(conformer, atom_id):
