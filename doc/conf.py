@@ -13,7 +13,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
-import pdbeccdutils
+import importlib.metadata
 
 # region Project information
 project = "pdbeccdutils"
