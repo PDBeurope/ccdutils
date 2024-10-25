@@ -80,6 +80,7 @@ all_resource = {
     "47": ("rxnorm", "rxnorm"),
     "48": ("MedChemExpress", "MedChemExpress"),
     "49": ("Probes And Drugs", "Probes And Drugs"),
+    "50": ("CCDC", "CSD structures from the Cambridge Crystallographic Data Centre")
 }
 
 url_prefix = "https://www.ebi.ac.uk/unichem/rest/inchikey"
