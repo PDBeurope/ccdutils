@@ -112,7 +112,7 @@ def read_pdb_components_file(
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
-        include (list[str]): List of CCDs to be parsed. By deafult it is empy and parse
+        include (list[str]): List of CCDs to be parsed. By default it is empty and parse
         all the CCDs. If a list of CCDs provided, will only parse them
 
     Raises:
