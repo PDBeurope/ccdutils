@@ -151,7 +151,7 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
 
     properties = CCDProperties(
         id=bm_id,
-        name=bm.name,
+        name=mol_tools.rdkit_object_property(mol, "name"),
         formula=CalcMolFormula(mol),
         modified_date=date.today(),
         pdbx_release_status=pdbx_release_status,
@@ -203,8 +203,10 @@ def _parse_pdb_mmcif(
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
     _add_connections(mol, bm, errors)
+    _parse_pdb_entity(mol, bm, cif_block)
     mol = _handle_hydrogens(mol)
     return (mol, warnings, errors)
+
 
 
 def _get_boundmolecule_atoms(cif_block, bm):
@@ -366,7 +368,19 @@ def _add_connections(
         except RuntimeError:
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
+def _parse_pdb_entity(mol, bm, cif_block):
+    if "_entity." not in cif_block.get_mmcif_category_names():
+        return
+    
+    entities = cif_block.find("_entity.",["id", "pdbx_description"])
+    bm_entities = list({residue.ent_id for residue in bm.nodes()})
+    if len(bm_entities) == 1:
+        for row in entities:
+            if cif.as_string(row["_entity.id"]) == bm_entities[0]:
+                mol.SetProp("name", cif.as_string(row["pdbx_description"]))
 
+
+        
 def get_chem_comp_bonds(cif_block: cif.Block, residue: str):
     """Returns _chem_comp_bond associated with a residue
 
