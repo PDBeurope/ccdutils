@@ -421,7 +421,7 @@ def _write_pdb_clc_cif_atoms(cif_block, component):
             f"{model_atom.z:.3f}",
             res_info.GetResidueName(),
             residue_numbers[atom.GetProp("residue_id")],
-            mol_tools.get_component_atom_id(atom),
+            mol_tools.rdkit_object_property(atom, "component_atom_id"),
             str(atom.GetIdx() + 1),
         ]
 
