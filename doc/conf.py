@@ -21,9 +21,9 @@ copyright = "2020, Protein Data Bank in Europe"
 author = "Protein Data Bank in Europe"
 
 # The short X.Y version
-version = pdbeccdutils.__version__
+version = importlib.metadata.version("pdbeccdutils")
 # The full version, including alpha/beta/rc tags
-release = pdbeccdutils.__version__
+release = importlib.metadata.version("pdbeccdutils")
 
 # endregion
 

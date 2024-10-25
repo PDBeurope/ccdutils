@@ -10,7 +10,7 @@ from datetime import date as Date
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement
 
-import pdbeccdutils
+import importlib.metadata
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core.exceptions import CCDUtilsError
 from pdbeccdutils.core.models import ConformerType
@@ -96,7 +96,7 @@ def to_pdb_str(
         f"HEADER    {conf_type.name} coordinates",
         f" for PDB-CLC {component.id}",
         f"COMPND    {component.id}",
-        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
+        f"AUTHOR    pdbccdutils {importlib.metadata.version('pdbeccdutils')}",
         f"AUTHOR    RDKit {rdkit.__version__}",
     ]
 

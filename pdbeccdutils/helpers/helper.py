@@ -27,7 +27,7 @@ from urllib3 import Retry
 
 import rdkit
 
-import pdbeccdutils
+import importlib.metadata
 
 
 def bond_pdb_order(value_order):
@@ -96,7 +96,7 @@ def set_up_logger(args: argparse.Namespace) -> logging.Logger:
     if not args.no_header:
         logging.info("PDBeBm pipeline using:")
         logging.info(
-            f"pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}"
+            f"pdbeccdutils core v. {importlib.metadata.version('pdbeccdutils')}, RDKit v. {rdkit.__version__}"
         )
         logging.info("Settings:")
         for k, v in vars(args).items():
