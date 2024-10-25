@@ -297,17 +297,16 @@ def mol_from_inchi(inchi: str) -> MolFromRDKit:
     return mol_result
 
 
-def get_component_atom_id(atom):
-    """Gets component atom id.
 
+def rdkit_object_property(object, property: str):
+    """Returns the value of property set to the rdkit object
+    
     Args:
-        atom (rdkit.Chem.rdchem.Atom): rdkit atom.
-
-    Returns:
-        str: Name of the atom.
+        object: rdkit.Chem.rdchem object with GetProp 
+    
     """
     return (
-        atom.GetProp("component_atom_id") if atom.HasProp("component_atom_id") else None
+        object.GetProp(property) if object.HasProp(property) else None
     )
 
 
