@@ -230,7 +230,7 @@ class ParityResult:
 @dataclass
 class CCDProperties:
     """
-    Properties of the component comming from _chem_comp namespace.
+    Properties of the component coming from _chem_comp namespace.
 
     Args:
         id (str): _chem_comp.id
