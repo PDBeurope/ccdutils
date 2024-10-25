@@ -1,16 +1,13 @@
 """Package configuration with the paths to the templates"""
 
 import os
-import pdbeccdutils
+from pathlib import Path
 
-general_templates = os.path.join(
-    os.path.dirname(pdbeccdutils.__file__), "data", "general_templates"
-)
-coordgen_templates = os.path.join(
-    os.path.dirname(pdbeccdutils.__file__), "data", "coordgen_templates"
-)
-fragment_library = os.path.join(
-    os.path.dirname(pdbeccdutils.__file__), "data", "fragment_library.tsv"
-)
+def get_data_dir():
+    return Path(os.path.dirname(__file__)).parent / "data"
+
+general_templates = os.path.join(get_data_dir(), "general_templates")
+coordgen_templates = os.path.join(get_data_dir(), "data", "coordgen_templates")
+fragment_library = os.path.join(get_data_dir(), "data", "fragment_library.tsv")
 
 DISCARDED_RESIDUES = {"HOH", "UNX"}
