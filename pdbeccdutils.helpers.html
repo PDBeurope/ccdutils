@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
@@ -9,15 +11,11 @@
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script src="_static/doctools.js"></script>
+      <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +35,6 @@
             pdbeccdutils
               <img src="_static/logo.png" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                0.8.5
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -292,7 +287,7 @@
 <p>Set of methods to format data for gemmi parser</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.cif_tools.fix_updated_mmcif">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.cif_tools.</span></span><span class="sig-name descname"><span class="pre">fix_updated_mmcif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.cif_tools.fix_updated_mmcif" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.cif_tools.</span></span><span class="sig-name descname"><span class="pre">fix_updated_mmcif</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.cif_tools.fix_updated_mmcif" title="Permalink to this definition"></a></dt>
 <dd><p>Keeps only first model, remove alternate conformations of atoms and residues.
 Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</p>
 <dl class="field-list simple">
@@ -319,7 +314,7 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.cif_tools.get_prd_code">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.cif_tools.</span></span><span class="sig-name descname"><span class="pre">get_prd_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prdcc_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.cif_tools.get_prd_code" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.cif_tools.</span></span><span class="sig-name descname"><span class="pre">get_prd_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prdcc_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.cif_tools.get_prd_code" title="Permalink to this definition"></a></dt>
 <dd><p>Returns PRD code from PRDCC code</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -330,7 +325,7 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.cif_tools.get_prdcc_code">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.cif_tools.</span></span><span class="sig-name descname"><span class="pre">get_prdcc_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prd_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.cif_tools.get_prdcc_code" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.cif_tools.</span></span><span class="sig-name descname"><span class="pre">get_prdcc_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prd_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.cif_tools.get_prdcc_code" title="Permalink to this definition"></a></dt>
 <dd><p>Returns PRDCC code from PRD code</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -347,14 +342,14 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cif_block</strong> (<em>Block</em>) – mmcif Block from gemmi.</p></li>
-<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – name of the category</p></li>
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – name of the category</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Possible error encountered</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -365,13 +360,13 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 <p>Module helper providing drawing functionality based on RDKit</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.drawing.convert_svg">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.drawing.</span></span><span class="sig-name descname"><span class="pre">convert_svg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">svg_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ccd_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.convert_svg" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.drawing.</span></span><span class="sig-name descname"><span class="pre">convert_svg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">svg_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ccd_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.09)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.drawing.convert_svg" title="Permalink to this definition"></a></dt>
 <dd><p>Parse information from SVG depiction into object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>svg_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – SVG as string.</p></li>
-<li><p><strong>ccd_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – CCD ID.</p></li>
+<li><p><strong>svg_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – SVG as string.</p></li>
+<li><p><strong>ccd_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – CCD ID.</p></li>
 <li><p><strong>mol</strong> (<em>rdkit.Chem.Mol</em>) – RDKit mol object used for depiction.</p></li>
 </ul>
 </dd>
@@ -379,7 +374,7 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 <dd class="field-even"><p>JSON-style information for the 2D depiction.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -391,14 +386,14 @@ Updates _pdbx_branch_scheme, _struct_conn, _pdbx_nonpoly_scheme and _atom_site</
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object to be depicted.</p></li>
-<li><p><strong>drawer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.Draw.MolDrawing.html#rdkit.Chem.Draw.MolDrawing.DrawingOptions" title="(in The RDKit v2024.03)"><em>rdkit.Chem.Draw.MolDrawing.DrawingOptions</em></a>) – RDKit object
+<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object to be depicted.</p></li>
+<li><p><strong>drawer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.Draw.MolDrawing.html#rdkit.Chem.Draw.MolDrawing.DrawingOptions" title="(in The RDKit v2024.09)"><em>rdkit.Chem.Draw.MolDrawing.DrawingOptions</em></a>) – RDKit object
 with parameters for drawing depiction.</p></li>
-<li><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Path where the depiction will be saved.</p></li>
-<li><p><strong>wedge_bonds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Whether or not to wedge bonds.</p></li>
-<li><p><strong>atom_highlight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary with atom id and RGB
+<li><p><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path where the depiction will be saved.</p></li>
+<li><p><strong>wedge_bonds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether or not to wedge bonds.</p></li>
+<li><p><strong>atom_highlight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary with atom id and RGB
 mapping color mapping.</p></li>
-<li><p><strong>bond_highlight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary with mapping of atom
+<li><p><strong>bond_highlight</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary with mapping of atom
 ids and RGB colors.</p></li>
 </ul>
 </dd>
@@ -411,13 +406,13 @@ ids and RGB colors.</p></li>
 <dd><p>Calculate molecule resolution given 50points per Angstroom</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object.</p>
+<dd class="field-odd"><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Rdkit mol object.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dimension of the depictions (x, y).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a>,<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a>]]</p>
+<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>,<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -430,8 +425,8 @@ the 2D depiction cannot be created.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path_to_image</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – path to the image</p></li>
-<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – Defaults to 200. width of the image</p></li>
+<li><p><strong>path_to_image</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – path to the image</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Defaults to 200. width of the image</p></li>
 </ul>
 </dd>
 </dl>
@@ -446,13 +441,13 @@ the 2D depiction cannot be created.</p>
 <dd><p>Format deep tuples into deep list</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><em>tuple</em></a><em> of </em><em>tuples</em>) – deep tuples</p>
+<dd class="field-odd"><p><strong>t</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><em>tuple</em></a><em> of </em><em>tuples</em>) – deep tuples</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>deep list</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)">list</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -464,13 +459,13 @@ the 2D depiction cannot be created.</p>
 converted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – string representation of a float</p>
+<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – string representation of a float</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>conversion of the string</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -482,13 +477,13 @@ converted.</p>
 converted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – string representation of an integer</p>
+<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – string representation of an integer</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>conversion of the string</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -503,20 +498,20 @@ converted.</p>
 <dd><p>Transpils mmcif bond order into rdkit language</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – bond type as a str</p>
+<dd class="field-odd"><p><strong>value_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – bond type as a str</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>– bond type</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.BondType" title="(in The RDKit v2024.03)">rdkit.Chem.rdchem.BondType</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.BondType" title="(in The RDKit v2024.09)">rdkit.Chem.rdchem.BondType</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.helper.check_args">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">check_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.12)"><span class="pre">Namespace</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.check_args" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">check_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.13)"><span class="pre">Namespace</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.check_args" title="Permalink to this definition"></a></dt>
 <dd><p>Validates supplied arguments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -527,7 +522,7 @@ converted.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.helper.get_additional_fields">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">get_additional_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_asym_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.get_additional_fields" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">get_additional_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_asym_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.get_additional_fields" title="Permalink to this definition"></a></dt>
 <dd><p>Gets original auth_asym_id and assembly operator from auth_asym_id
 in assembly file</p>
 <dl class="field-list simple">
@@ -543,7 +538,7 @@ in input structure and operator is the operator used by model-server</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.helper.set_up_logger">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">set_up_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.12)"><span class="pre">Namespace</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.12)"><span class="pre">Logger</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.set_up_logger" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">set_up_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.Namespace" title="(in Python v3.13)"><span class="pre">Namespace</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.13)"><span class="pre">Logger</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.set_up_logger" title="Permalink to this definition"></a></dt>
 <dd><p>Sets up application level logging</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -557,7 +552,7 @@ in input structure and operator is the operator used by model-server</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.helper.validate_path_exists">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">validate_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.validate_path_exists" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.helper.</span></span><span class="sig-name descname"><span class="pre">validate_path_exists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.helper.validate_path_exists" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if the parameter exists.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -575,12 +570,12 @@ in input structure and operator is the operator used by model-server</p>
 <p>Set of methods for molecular sanitization and work with conformers</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.change_bonds_type">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">change_bonds_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.change_bonds_type" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">change_bonds_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.change_bonds_type" title="Permalink to this definition"></a></dt>
 <dd><p>alters all bonds that are from_type to to_type</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Mol object from RDKit</p></li>
+<li><p><strong>mol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.Mol</em></a>) – Mol object from RDKit</p></li>
 <li><p><strong>from_type</strong> – Bond type to be changed</p></li>
 <li><p><strong>to_type</strong> – Type of bond to be set</p></li>
 </ul>
@@ -612,26 +607,26 @@ results in errors in downstream processes so that it is easier
 to fix it when the problem occurs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – RDKit conformer</p>
+<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – RDKit conformer</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.fix_molecule">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">fix_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rwmol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.03)"><span class="pre">RWMol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.fix_molecule" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">fix_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rwmol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.09)"><span class="pre">RWMol</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.fix_molecule" title="Permalink to this definition"></a></dt>
 <dd><p>Single molecule sanitization process. Presently, only valence
 errors are taken care are of.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be
+<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be
 sanitized</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Whether or not sanitization succeeded</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -642,13 +637,13 @@ sanitized</p>
 <dd><p>Gets component atom id.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>atom</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Atom" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Atom</em></a>) – rdkit atom.</p>
+<dd class="field-odd"><p><strong>atom</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Atom" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.Atom</em></a>) – rdkit atom.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Name of the atom.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -661,7 +656,7 @@ sanitized</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.inchi_from_mol">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">inchi_from_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.03)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit" title="pdbeccdutils.core.models.InChIFromRDKit"><span class="pre">InChIFromRDKit</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.inchi_from_mol" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">inchi_from_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Mol" title="(in The RDKit v2024.09)"><span class="pre">Mol</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.InChIFromRDKit" title="pdbeccdutils.core.models.InChIFromRDKit"><span class="pre">InChIFromRDKit</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.inchi_from_mol" title="Permalink to this definition"></a></dt>
 <dd><p>Provides the InChI calculated by RDKit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -679,7 +674,7 @@ generated.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.inchikey_from_inchi">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">inchikey_from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">inchikey_from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi" title="Permalink to this definition"></a></dt>
 <dd><p>Provides the InChIKey calculated by RDKit from InChI.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -689,7 +684,7 @@ generated.</p>
 <dd class="field-even"><p>the InChIKey or ‘’ if there was an error finding it.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -703,20 +698,20 @@ be used to determine, whether or not the coordinates should be
 regenerated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – conformer to check</p>
+<dd class="field-odd"><p><strong>conformer</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.Conformer" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.Conformer</em></a>) – conformer to check</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>true if more then 1 atom has coordinates [0, 0, 0]</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.helpers.mol_tools.mol_from_inchi">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">mol_from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit" title="pdbeccdutils.core.models.MolFromRDKit"><span class="pre">MolFromRDKit</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.mol_from_inchi" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.helpers.mol_tools.</span></span><span class="sig-name descname"><span class="pre">mol_from_inchi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pdbeccdutils.core.html#pdbeccdutils.core.models.MolFromRDKit" title="pdbeccdutils.core.models.MolFromRDKit"><span class="pre">MolFromRDKit</span></a></span></span><a class="headerlink" href="#pdbeccdutils.helpers.mol_tools.mol_from_inchi" title="Permalink to this definition"></a></dt>
 <dd><p>Generates rdkit.Chem.rdchem.Mol object from InChI.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -740,13 +735,13 @@ processed in order to find out what went wrong with sanitization
 to fix the molecule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.03)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be sanitized</p>
+<dd class="field-odd"><p><strong>rwmol</strong> (<a class="reference external" href="https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.html#rdkit.Chem.rdchem.RWMol" title="(in The RDKit v2024.09)"><em>rdkit.Chem.rdchem.RWMol</em></a>) – rdkit molecule to be sanitized</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Result of the sanitization process.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
