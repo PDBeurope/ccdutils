@@ -3,12 +3,12 @@
 
 # pdbeccdutils
 
-* A set of python tools to deal with PDB chemical components definitions.
+* A set of python tools to deal with PDB chemical components definitions
   for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd) and [wwPDB The Biologically Interesting Molecule Reference Dictionary](https://www.wwpdb.org/data/bird)
 
 * The tools use:
   * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2023.9.6`
-  * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing cif files.
+  * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing mmCIF files.
   * [scipy](https://www.scipy.org/) for depiction quality check.
   * [numpy](https://www.numpy.org/) for molecular scaling.
   * [networkx](https://networkx.org/) for bound-molecules.
@@ -19,14 +19,14 @@
 
 * `pdbeccdutils` requires RDKit to be installed.
   The official RDKit documentation has [installation instructions for a variety of platforms](http://www.rdkit.org/docs/Install.html).
-  For linux/mac OS this is most easily done using the anaconda python with commands similar to:
+  For Linux/macOS this is most easily done using the Anaconda Python with commands similar to:
 
   ```console
   conda create -n rdkit-env rdkit python=3.9
   conda activate rdkit-env
   ```
 
-* Once you have installed RDKit, as described above then install pdbeccdutils using pip:
+* Once you have installed RDKit, as described above then install `pdbeccdutils` using `pip`:
 
   ```console
   pip install pdbeccdutils
@@ -34,10 +34,10 @@
 
 ## Features
 
-* gemmi CCD read/write.
+* `gemmi` CCD read/write.
 * Generation of 2D depictions (`No image available` generated if the flattening cannot be done) along with the quality check.
 * Generation of 3D conformations.
-* Fragment library search (PDBe hand currated library, ENAMINE, DSI).
+* Fragment library search (PDBe hand-curated library, ENAMINE, DSI).
 * Chemical scaffolds (Murcko scaffold, Murcko general, BRICS).
 * Lightweight implementation of [parity method](https://doi.org/10.1016/j.str.2018.02.009) by Jon Tyzack.
 * RDKit molecular properties per component.
