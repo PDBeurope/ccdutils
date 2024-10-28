@@ -9,7 +9,7 @@ def get_data_dir():
 
 
 general_templates = os.path.join(get_data_dir(), "general_templates")
-coordgen_templates = os.path.join(get_data_dir(), "data", "coordgen_templates")
-fragment_library = os.path.join(get_data_dir(), "data", "fragment_library.tsv")
+coordgen_templates = os.path.join(get_data_dir(), "coordgen_templates")
+fragment_library = os.path.join(get_data_dir(), "fragment_library.tsv")
 
 DISCARDED_RESIDUES = {"HOH", "UNX"}
