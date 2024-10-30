@@ -1,21 +1,23 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>computations &mdash; pdbeccdutils 0.8.5 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>computations &mdash; pdbeccdutils 0.8.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
-      <script src="_static/jquery.js"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-      <script src="_static/doctools.js"></script>
-      <script src="_static/sphinx_highlight.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=279f42e0"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -35,6 +37,9 @@
             pdbeccdutils
               <img src="_static/logo.png" class="logo" alt="Logo"/>
           </a>
+              <div class="version">
+                0.8.6
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -213,12 +218,12 @@
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.correct_atom_coords"><code class="docutils literal notranslate"><span class="pre">correct_atom_coords()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_component_atom_id"><code class="docutils literal notranslate"><span class="pre">get_component_atom_id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_conformer"><code class="docutils literal notranslate"><span class="pre">get_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchi_from_mol"><code class="docutils literal notranslate"><span class="pre">inchi_from_mol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi"><code class="docutils literal notranslate"><span class="pre">inchikey_from_inchi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.mol_from_inchi"><code class="docutils literal notranslate"><span class="pre">mol_from_inchi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.rdkit_object_property"><code class="docutils literal notranslate"><span class="pre">rdkit_object_property()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
@@ -281,14 +286,14 @@
            <div itemprop="articleBody">
              
   <section id="computations">
-<h1>computations<a class="headerlink" href="#computations" title="Permalink to this heading"></a></h1>
+<h1>computations<a class="headerlink" href="#computations" title="Link to this heading"></a></h1>
 <section id="module-pdbeccdutils.computations.parity_method">
-<span id="pdbeccdutils-computations-parity-method"></span><h2>pdbeccdutils.computations.parity_method<a class="headerlink" href="#module-pdbeccdutils.computations.parity_method" title="Permalink to this heading"></a></h2>
+<span id="pdbeccdutils-computations-parity-method"></span><h2>pdbeccdutils.computations.parity_method<a class="headerlink" href="#module-pdbeccdutils.computations.parity_method" title="Link to this heading"></a></h2>
 <p>Lightweight implementation of the <a class="reference external" href="https://doi.org/10.1016/j.str.2018.02.009">parity method</a> provided by
 Jon Tyzack.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.computations.parity_method.compare_molecules">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.computations.parity_method.</span></span><span class="sig-name descname"><span class="pre">compare_molecules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact_match</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.computations.parity_method.compare_molecules" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.computations.parity_method.</span></span><span class="sig-name descname"><span class="pre">compare_molecules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact_match</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.computations.parity_method.compare_molecules" title="Link to this definition"></a></dt>
 <dd><p>Given the two molecules calculates their similarity score.
 If expected similarity score is lower than the threshold nothing
 is calculated.</p>

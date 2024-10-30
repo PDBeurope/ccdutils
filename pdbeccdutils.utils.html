@@ -1,21 +1,23 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>utils &mdash; pdbeccdutils 0.8.5 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>utils &mdash; pdbeccdutils 0.8.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
-      <script src="_static/jquery.js"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-      <script src="_static/doctools.js"></script>
-      <script src="_static/sphinx_highlight.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=279f42e0"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -35,6 +37,9 @@
             pdbeccdutils
               <img src="_static/logo.png" class="logo" alt="Logo"/>
           </a>
+              <div class="version">
+                0.8.6
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -213,12 +218,12 @@
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.correct_atom_coords"><code class="docutils literal notranslate"><span class="pre">correct_atom_coords()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_component_atom_id"><code class="docutils literal notranslate"><span class="pre">get_component_atom_id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_conformer"><code class="docutils literal notranslate"><span class="pre">get_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchi_from_mol"><code class="docutils literal notranslate"><span class="pre">inchi_from_mol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi"><code class="docutils literal notranslate"><span class="pre">inchikey_from_inchi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.mol_from_inchi"><code class="docutils literal notranslate"><span class="pre">mol_from_inchi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.rdkit_object_property"><code class="docutils literal notranslate"><span class="pre">rdkit_object_property()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
@@ -281,16 +286,16 @@
            <div itemprop="articleBody">
              
   <section id="utils">
-<h1>utils<a class="headerlink" href="#utils" title="Permalink to this heading"></a></h1>
+<h1>utils<a class="headerlink" href="#utils" title="Link to this heading"></a></h1>
 <section id="module-pdbeccdutils.utils.pubchem_downloader">
-<span id="pubchem-downloader"></span><h2>pubchem_downloader<a class="headerlink" href="#module-pdbeccdutils.utils.pubchem_downloader" title="Permalink to this heading"></a></h2>
+<span id="pubchem-downloader"></span><h2>pubchem_downloader<a class="headerlink" href="#module-pdbeccdutils.utils.pubchem_downloader" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.pubchem_downloader.PubChemDownloader">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.pubchem_downloader.</span></span><span class="sig-name descname"><span class="pre">PubChemDownloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pubchem_templates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.pubchem_downloader.</span></span><span class="sig-name descname"><span class="pre">PubChemDownloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pubchem_templates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader" title="Link to this definition"></a></dt>
 <dd><p>Toolkit to retrieve 2D layouts from the PubChem database.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.process_template">
-<span class="sig-name descname"><span class="pre">process_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.process_template" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">process_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.process_template" title="Link to this definition"></a></dt>
 <dd><p>Process template for a given component. First the component
 is attempted to be downloaded and re-scaled. Since the RDKit
 default depiction has 1.5A single bond size whereas templates
@@ -313,7 +318,7 @@ from pubchem are 1.0A.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.update_ccd_dir">
-<span class="sig-name descname"><span class="pre">update_ccd_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.update_ccd_dir" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_ccd_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.update_ccd_dir" title="Link to this definition"></a></dt>
 <dd><p>Update 2D images of PDBeChem components which are available
 in the pubchem database</p>
 <dl class="field-list simple">
@@ -326,7 +331,7 @@ in the pubchem database</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.update_ccd_file">
-<span class="sig-name descname"><span class="pre">update_ccd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.update_ccd_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_ccd_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ccd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.PubChemDownloader.update_ccd_file" title="Link to this definition"></a></dt>
 <dd><p>Update 2d images of pdbechem components which are available
 in the pubchem database from CCD files.</p>
 <dl class="field-list simple">
@@ -340,7 +345,7 @@ in the pubchem database from CCD files.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.pubchem_downloader.download_template">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.pubchem_downloader.</span></span><span class="sig-name descname"><span class="pre">download_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">inchikey</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.download_template" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.pubchem_downloader.</span></span><span class="sig-name descname"><span class="pre">download_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">inchikey</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.download_template" title="Link to this definition"></a></dt>
 <dd><p>Download 2D layout from the PubChem FTP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -361,12 +366,12 @@ in the pubchem database from CCD files.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.pubchem_downloader.rescale_molecule">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.pubchem_downloader.</span></span><span class="sig-name descname"><span class="pre">rescale_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.rescale_molecule" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.pubchem_downloader.</span></span><span class="sig-name descname"><span class="pre">rescale_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.pubchem_downloader.rescale_molecule" title="Link to this definition"></a></dt>
 <dd><p>Rescale molecule coords to a given factor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – </p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
 <li><p><strong>factor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – rescaling factor</p></li>
 </ul>
 </dd>
@@ -375,11 +380,11 @@ in the pubchem database from CCD files.</p>
 
 </section>
 <section id="module-pdbeccdutils.utils.web_services">
-<span id="web-services"></span><h2>web_services<a class="headerlink" href="#module-pdbeccdutils.utils.web_services" title="Permalink to this heading"></a></h2>
+<span id="web-services"></span><h2>web_services<a class="headerlink" href="#module-pdbeccdutils.utils.web_services" title="Link to this heading"></a></h2>
 <p>module handling UniChem mapping</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.web_services.get_agreed_unichem_mapping">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.web_services.</span></span><span class="sig-name descname"><span class="pre">get_agreed_unichem_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchikey</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.web_services.get_agreed_unichem_mapping" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.web_services.</span></span><span class="sig-name descname"><span class="pre">get_agreed_unichem_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchikey</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.web_services.get_agreed_unichem_mapping" title="Link to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Get the agreed mappings for PDBeChem:</dt><dd><ul class="simple">
 <li><p>ChEMBL, DrugBank, KEGG LIGAND, ChEBI, ZINC, N¬MRShiftDB, BindingDB
@@ -406,7 +411,7 @@ MetaboLights, BRENDA, Rhea</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pdbeccdutils.utils.web_services.get_all_unichem_mapping">
-<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.web_services.</span></span><span class="sig-name descname"><span class="pre">get_all_unichem_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchikey</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.web_services.get_all_unichem_mapping" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">pdbeccdutils.utils.web_services.</span></span><span class="sig-name descname"><span class="pre">get_all_unichem_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inchikey</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pdbeccdutils.utils.web_services.get_all_unichem_mapping" title="Link to this definition"></a></dt>
 <dd><p>Get all mappings for PDBeChem</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

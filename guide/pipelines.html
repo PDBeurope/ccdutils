@@ -1,21 +1,23 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pipelines &mdash; pdbeccdutils 0.8.5 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+  <title>Pipelines &mdash; pdbeccdutils 0.8.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
-      <script src="../_static/jquery.js"></script>
-      <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-      <script src="../_static/doctools.js"></script>
-      <script src="../_static/sphinx_highlight.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=279f42e0"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -35,6 +37,9 @@
             pdbeccdutils
               <img src="../_static/logo.png" class="logo" alt="Logo"/>
           </a>
+              <div class="version">
+                0.8.6
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -213,12 +218,12 @@
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.correct_atom_coords"><code class="docutils literal notranslate"><span class="pre">correct_atom_coords()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_conformer"><code class="docutils literal notranslate"><span class="pre">fix_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.fix_molecule"><code class="docutils literal notranslate"><span class="pre">fix_molecule()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_component_atom_id"><code class="docutils literal notranslate"><span class="pre">get_component_atom_id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.get_conformer"><code class="docutils literal notranslate"><span class="pre">get_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchi_from_mol"><code class="docutils literal notranslate"><span class="pre">inchi_from_mol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.inchikey_from_inchi"><code class="docutils literal notranslate"><span class="pre">inchikey_from_inchi()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.is_degenerate_conformer"><code class="docutils literal notranslate"><span class="pre">is_degenerate_conformer()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.mol_from_inchi"><code class="docutils literal notranslate"><span class="pre">mol_from_inchi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.rdkit_object_property"><code class="docutils literal notranslate"><span class="pre">rdkit_object_property()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pdbeccdutils.helpers.html#pdbeccdutils.helpers.mol_tools.sanitize"><code class="docutils literal notranslate"><span class="pre">sanitize()</span></code></a></li>
 </ul>
 </li>
@@ -280,10 +285,10 @@
            <div itemprop="articleBody">
              
   <section id="pipelines">
-<span id="id1"></span><h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this heading"></a></h1>
+<span id="id1"></span><h1>Pipelines<a class="headerlink" href="#pipelines" title="Link to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> can be used to process standard ligand definitions defined by <a class="reference external" href="http://www.wwpdb.org/data/ccd">CCD</a> or <a class="reference external" href="https://www.wwpdb.org/data/bird">BIRD</a> dictionaries, identify boundmolecules from PDB model files and infer Covalently Linked Components (CLC). The packages comes with two pipelines, one to process CCD/PRDs and an another one to process boundmolecules from PDB model files</p>
 <section id="processing-of-ccd-prd">
-<h2>Processing of CCD/PRD<a class="headerlink" href="#processing-of-ccd-prd" title="Permalink to this heading"></a></h2>
+<h2>Processing of CCD/PRD<a class="headerlink" href="#processing-of-ccd-prd" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">process_components_cif</span></code> entry point can be used to run the pipeline to process a CCD or PRD. The pipeline enriches (data-enrichment-process) the information in standard wwPDB CCD/PRD files, generates 2D images and exports to multiple file formats.</p>
 <p>To find all the input options, use:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>process_components_cif<span class="w"> </span>-h
@@ -304,7 +309,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">ATP_annotation.json</span></code> - 2D depiction in JSON format with some additional annotation.</p></li>
 </ul>
 <section id="data-enrichment-process">
-<span id="id2"></span><h3>Data enrichment process<a class="headerlink" href="#data-enrichment-process" title="Permalink to this heading"></a></h3>
+<span id="id2"></span><h3>Data enrichment process<a class="headerlink" href="#data-enrichment-process" title="Link to this heading"></a></h3>
 <p>Aside from the standard content of the wwPDB CCD files, <code class="docutils literal notranslate"><span class="pre">process_components_cif</span></code> pipeline adds the following information in the <code class="docutils literal notranslate"><span class="pre">mmCIF</span></code> files.</p>
 <ul class="simple">
 <li><p>2D coordinations of the ligand.</p></li>
@@ -314,7 +319,7 @@
 </section>
 </section>
 <section id="processing-of-boundmolecules-from-pdb-model-files">
-<h2>Processing of boundmolecules from PDB model files<a class="headerlink" href="#processing-of-boundmolecules-from-pdb-model-files" title="Permalink to this heading"></a></h2>
+<h2>Processing of boundmolecules from PDB model files<a class="headerlink" href="#processing-of-boundmolecules-from-pdb-model-files" title="Link to this heading"></a></h2>
 <p>Most of the structures in PDB has atleast one small molecule bound to it. Many of these small molecules are ligands of biological significance, such as cofactors, metabolites, carbohydrates, or lipids. <code class="docutils literal notranslate"><span class="pre">read_boundmolecule</span></code> entry point can be used to run the pipeline to identify these boundmolecules from PDB entries and assign them as Covalently Linked Components (CLC) if they are composed of individual components represented by individual CCDs.</p>
 <p>To find all the input options, use:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>read_boundmolecule<span class="w"> </span>-h
