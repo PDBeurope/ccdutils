@@ -33,7 +33,7 @@ numpy = "~1.26.4"
 requests = "^2.32.3"
 gemmi = "^0.6.6"
 networkx = "^3.3"
-rdkit = "2023.09.6"
+rdkit = "2023.9.6"
 
 [tool.poetry.scripts]
 process_components_cif = "pdbeccdutils.scripts.process_components_cif_cli:main"
