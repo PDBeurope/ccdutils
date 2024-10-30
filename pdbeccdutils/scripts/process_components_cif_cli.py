@@ -28,12 +28,13 @@ More detailed description can be found here:
 
 https://gitlab.ebi.ac.uk/pdbe/release/pdbechem
 """
+
 import argparse
 import logging
 import os
 from pathlib import Path
 
-import pdbeccdutils
+import importlib.metadata
 import rdkit
 from pdbeccdutils.core import ccd_reader, ccd_writer, prd_reader, prd_writer
 from pdbeccdutils.core.component import Component
@@ -454,7 +455,7 @@ def main():
     logging.basicConfig(level=lvl, format=frm, datefmt="%a, %d %b %Y %H:%M:%S")
     logging.info("PDBeChem pipeline using:")
     logging.info(
-        f"pdbeccdutils core v. {pdbeccdutils.__version__}, RDKit v. {rdkit.__version__}"
+        f"pdbeccdutils core v. {importlib.metadata.version('pdbeccdutils')}, RDKit v. {rdkit.__version__}"
     )
 
     logging.info("Settings:")

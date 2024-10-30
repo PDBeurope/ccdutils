@@ -1,6 +1,4 @@
-"""Unit tests for checking whether or not depictions are written properly.
-"""
-
+"""Unit tests for checking whether or not depictions are written properly."""
 
 import json
 import os

@@ -1,5 +1,4 @@
-"""Test of PARITY method
-"""
+"""Test of PARITY method"""
 
 import pytest
 
@@ -15,7 +14,7 @@ class TestParity:
         [
             ("MAN", "NAG", 0.74),
             ("NAD", "NAG", 0.09),
-            ("000", "000", 1.00),
+            ("HEM", "HEM", 1.00),
             ("SAC", "GOL", 0.50),
             ("MAN", "GLC", 1.00),
         ],

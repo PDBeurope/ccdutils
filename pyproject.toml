@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "pdbeccdutils"
+version = "0.8.6"
+description = "Toolkit to parse and process small molecules in wwPDB"
+authors = ["Protein Data Bank in Europe <pdbehelp@ebi.ac.uk>"]
+license = "Apache License 2.0."
+readme = "README.md"
+repository = "https://github.com/PDBeurope/ccdutils"
+documentation = "https://pdbeurope.github.io/ccdutils/"
+keywords = ["PDB", "ligand", "small molecule", "complex", "CCD", "PRD", "CLC"]
+classifiers=[
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Development Status :: 5 - Production/Stable",
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pillow = "^10.4.0"
+scipy = "^1.14.1"
+numpy = "~1.26.4"
+requests = "^2.32.3"
+gemmi = "^0.6.6"
+networkx = "^3.3"
+rdkit = "2023.9.6"
+
+[tool.poetry.scripts]
+process_components_cif = "pdbeccdutils.scripts.process_components_cif_cli:main"
+setup_pubchem_library = "pdbeccdutils.scripts.setup_pubchem_library_cli:main"
+read_boundmolecule = "pdbeccdutils.scripts.boundmolecule_cli:run"
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^8.3.2"
+pytest-cov = "^5.0.0"
+pre-commit = "^3.8.0"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.0.0"
+sphinx-rtd-theme = "^2.0.0"
+sphinx-autodoc-typehints = "^2.3.0"
+sphinx-markdown-tables = "^0.0.17"
+myst-parser = "^4.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

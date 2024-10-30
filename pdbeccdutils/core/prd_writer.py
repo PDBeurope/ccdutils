@@ -22,10 +22,11 @@ Raises:
     CCDUtilsError: If deemed format is not supported or an unrecoverable
         error occurres.
 """
+
 import json
 import math
 from pathlib import Path
-import pdbeccdutils
+import importlib.metadata
 import rdkit
 import gemmi
 from gemmi import cif
@@ -119,7 +120,7 @@ def to_pdb_str(
         f"HEADER    {conf_type.name} coordinates",
         f" for PDB-PRD {component.id}",
         f"COMPND    {component.id}",
-        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
+        f"AUTHOR    pdbccdutils {importlib.metadata.version('pdbeccdutils')}",
         f"AUTHOR    RDKit {rdkit.__version__}",
     ]
 

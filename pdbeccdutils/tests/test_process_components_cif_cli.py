@@ -5,6 +5,7 @@ method based on
 http://dustinrcollins.com/testing-python-command-line-apps
 adapted to use nose then converted to pytest
 """
+
 import json
 import os
 import re

@@ -15,8 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""module handling UniChem mapping
-"""
+"""module handling UniChem mapping"""
 
 from pdbeccdutils.helpers import helper
 
@@ -41,7 +40,6 @@ agreed_resources = {
 all_resource = {
     "1": ("ChEMBL", "ChEMBL"),
     "2": ("DrugBank", "DrugBank"),
-    "3": ("PDBe", "Protein Data Bank in Europe"),
     "4": ("Guide to Pharmacology", "Guide to Pharmacology"),
     "5": ("PubChem DOTF", 'PubChem ("Drugs of the Future" subset'),
     "6": ("KEGG LIGAND", "KEGG (Kyoto Encyclopedia of Genes and Genomes) Ligand"),
@@ -82,6 +80,7 @@ all_resource = {
     "47": ("rxnorm", "rxnorm"),
     "48": ("MedChemExpress", "MedChemExpress"),
     "49": ("Probes And Drugs", "Probes And Drugs"),
+    "50": ("CCDC", "CSD structures from the Cambridge Crystallographic Data Centre"),
 }
 
 url_prefix = "https://www.ebi.ac.uk/unichem/rest/inchikey"

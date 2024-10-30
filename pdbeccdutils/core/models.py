@@ -230,7 +230,7 @@ class ParityResult:
 @dataclass
 class CCDProperties:
     """
-    Properties of the component comming from _chem_comp namespace.
+    Properties of the component coming from _chem_comp namespace.
 
     Args:
         id (str): _chem_comp.id
@@ -308,7 +308,7 @@ class Subcomponent:
 class BoundMolecule:
     def __init__(self, graph):
         self.graph = graph
-        self.nodes = sorted(self.graph, key=lambda l: (int(l.res_id), l.chain))
+        self.nodes = sorted(self.graph, key=lambda item: (int(item.res_id), item.chain))
 
     @property
     def id(self) -> str:
@@ -362,7 +362,7 @@ class BoundMolecule:
             dict of `str`: dict representation of the object
         """
 
-        nodes = sorted(self.graph, key=lambda l: (int(l.res_id), l.chain))
+        nodes = sorted(self.graph, key=lambda item: (int(item.res_id), item.chain))
 
         results_bag = {}
         results_bag["residues"] = [x.to_dict() for x in nodes]

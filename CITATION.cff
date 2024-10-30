@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Kunnakkattu"
+  given-names: "Ibrahim Roshan"
+  orcid: "https://orcid.org/0000-0002-8646-0969"
+- family-names: "Pravda"
+  given-names: "Lukas"
+- family-names: "Yuan"
+  given-names: "Qi"
+- family-names: "S.Smart"
+  given-names: "Oliver"
+- family-names: "Nadzirin"
+  given-names: "Nurul"
+- family-names: "Anyango"
+  given-names: "Stephen"
+- family-names: "Nair"
+  given-names: "Sreenath"
+
+title: "PDBe CCDUtils"
+version: 0.8.5
+date-released: 22/05/2024
+url: "https://github.com/PDBeurope/ccdutils"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Kunnakkattu"
+    given-names: "Ibrahim Roshan"
+    orcid: "https://orcid.org/0000-0002-8646-0969"
+  - family-names: "Choudhary"
+    given-names: "Preeti"
+    orcid: "https://orcid.org/0000-0003-2340-3278"
+  - family-names: "Pravda"
+    given-names: "Lukas"
+  - family-names: "Yuan"
+    given-names: "Qi"
+  - family-names: "S.Smart"
+    given-names: "Oliver"
+  - family-names: "Nadzirin"
+    given-names: "Nurul"
+  - family-names: "Anyango"
+    given-names: "Stephen"
+  - family-names: "Nair"
+    given-names: "Sreenath"
+  - family-names: "Velankar"
+    given-names: "Sameer"
+    orcid: "https://orcid.org/0000-0002-8439-5964"
+  doi: "10.1186/s13321-023-00786-w"
+  journal: "Journal of Cheminformatics"
+  month: 12
+  title: "PDBe CCDUtils: an RDKit-based toolkit for handling and analysing small molecules in the Protein Data Bank"
+  volume: 15
+  year: 2023

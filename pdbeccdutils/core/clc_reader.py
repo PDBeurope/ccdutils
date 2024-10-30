@@ -93,7 +93,6 @@ def read_pdb_cif_file(
 
 
 def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
-
     """Args:
         path_to_cif: Path to input structure
         bm: bound-molecules identified from input structure
@@ -152,7 +151,7 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
 
     properties = CCDProperties(
         id=bm_id,
-        name=bm.name,
+        name=mol_tools.rdkit_object_property(mol, "name"),
         formula=CalcMolFormula(mol),
         modified_date=date.today(),
         pdbx_release_status=pdbx_release_status,
@@ -204,6 +203,7 @@ def _parse_pdb_mmcif(
     _parse_pdb_conformers(mol, bm_atoms)
     _parse_pdb_bonds(mol, bm, cif_block, errors)
     _add_connections(mol, bm, errors)
+    _parse_pdb_entity(mol, bm, cif_block)
     mol = _handle_hydrogens(mol)
     return (mol, warnings, errors)
 
@@ -368,6 +368,18 @@ def _add_connections(
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
 
 
+def _parse_pdb_entity(mol, bm, cif_block):
+    if "_entity." not in cif_block.get_mmcif_category_names():
+        return
+
+    entities = cif_block.find("_entity.", ["id", "pdbx_description"])
+    bm_entities = list({residue.ent_id for residue in bm.nodes()})
+    if len(bm_entities) == 1:
+        for row in entities:
+            if cif.as_string(row["_entity.id"]) == bm_entities[0]:
+                mol.SetProp("name", cif.as_string(row["pdbx_description"]))
+
+
 def get_chem_comp_bonds(cif_block: cif.Block, residue: str):
     """Returns _chem_comp_bond associated with a residue
 
@@ -527,7 +539,8 @@ def _parse_clc_mmcif(cif_block, sanitize=True):
     ccd_reader._handle_implicit_hydrogens(mol)
 
     if sanitize:
-        sanitized = mol_tools.sanitize(mol)
+        sanitized_result = mol_tools.sanitize(mol)
+        mol, sanitized = sanitized_result.mol, sanitized_result.status
 
     descriptors = ccd_reader._parse_pdb_descriptors(
         cif_block, "_pdbx_chem_comp_descriptor.", "descriptor"

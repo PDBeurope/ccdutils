@@ -1,35 +1,9 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/pdbeurope/ccdutils/badge/master)](https://www.codefactor.io/repository/github/pdbeurope/ccdutils/overview/master)  ![PYPi](https://img.shields.io/pypi/v/pdbeccdutils?color=green&style=flat)  ![GitHub](https://img.shields.io/github/license/pdbeurope/ccdutils)   ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg)
+[![CodeFactor](https://www.codefactor.io/repository/github/PDBeurope/ccdutils/badge/master)](https://www.codefactor.io/repository/github/PDBeurope/ccdutils/overview/master)  ![PYPi](https://img.shields.io/pypi/v/pdbeccdutils?color=green&style=flat)  ![GitHub](https://img.shields.io/github/license/PDBeurope/ccdutils)   ![ccdutils documentation](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20documentation/badge.svg) ![ccdutils tests](https://github.com/PDBeurope/ccdutils/workflows/ccdutils%20tests/badge.svg) ![PyPI Downloads](https://img.shields.io/pypi/dm/pdbeccdutils)
+
 
 # pdbeccdutils
 
-* A set of python tools to deal with PDB chemical components definitions
-  for small molecules, taken from the [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd) and [wwPDB The Biologically Interesting Molecule Reference Dictionary](https://www.wwpdb.org/data/bird)
-
-* The tools use:
-  * [RDKit](http://www.rdkit.org/) for chemistry. Presently tested with `2022.09.4`
-  * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing mmCIF files.
-  * [scipy](https://www.scipy.org/) for depiction quality check.
-  * [numpy](https://www.numpy.org/) for molecular scaling.
-  * [networkx](https://networkx.org/) for bound-molecules.
-
-* Please note that the project is under active development.
-
-## Installation instructions
-
-* `pdbeccdutils` requires RDKit to be installed.
-  The official RDKit documentation has [installation instructions for a variety of platforms](http://www.rdkit.org/docs/Install.html).
-  For Linux/macOS this is most easily done using the Anaconda Python with commands similar to:
-
-  ```console
-  conda create -n rdkit-env rdkit python=3.9
-  conda activate rdkit-env
-  ```
-
-* Once you have installed RDKit, as described above then install `pdbeccdutils` using `pip`:
-
-  ```console
-  pip install pdbeccdutils
-  ```
+An RDKit-based python toolkit for parsing and processing small molecule definitions in [wwPDB Chemical Component Dictionary](https://www.wwpdb.org/data/ccd) and [wwPDB The Biologically Interesting Molecule Reference Dictionary](https://www.wwpdb.org/data/bird).`pdbeccdutils` provides streamlined access to all metadata of small molecules in the PDB and offers a set of convenient methods to compute various properties of small molecules using RDKIt such as 2D depictions, 3D conformers, physicochemical properties, matching common fragments and scaffolds, mapping to small-molecule databases using UniChem.
 
 ## Features
 
@@ -41,36 +15,69 @@
 * Lightweight implementation of [parity method](https://doi.org/10.1016/j.str.2018.02.009) by Jon Tyzack.
 * RDKit molecular properties per component.
 * UniChem mapping.
+* Generating complete representation of multiple [Covalently Linked Components (CLC)](https://www.ebi.ac.uk/pdbe/news/introducing-covalently-linked-components)
 
-## TODO list
+## Dependencies
 
-* Add more unit/regression tests to get higher code coverage.
-* Further improvements of the documentation.
+  * [RDKit](http://www.rdkit.org/) for small molecule representation. Presently tested with `2023.9.6`
+  * [GEMMI](https://gemmi.readthedocs.io/en/latest/index.html) for parsing mmCIF files.
+  * [scipy](https://www.scipy.org/) for depiction quality check.
+  * [numpy](https://www.numpy.org/) for molecular scaling.
+  * [networkx](https://networkx.org/) for bound-molecules.
+
+
+## Installation
+
+create a [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#create-and-use-virtual-environments) and install using pip
+
+  ```bash
+  pip install pdbeccdutils
+  ```
+
+## Contribution
+We encourage you to contribute to this project. The package uses [poetry](https://python-poetry.org/) for packaging and dependency management. You can develop locally using:
+
+```bash
+git clone https://github.com/PDBeurope/ccdutils.git
+cd ccdutils
+pip install poetry
+poetry install --with tests,docs
+pre-commit install
+```
+
+The pre-commit hook will run linting, formatting and update `poetry.lock`. The `poetry.lock` file will lock all dependencies and ensure that they match pyproject.toml versions.
+
+To add a new dependency
+
+```bash
+# Latest resolvable version
+poetry add <package>
+
+# Optionally fix a version
+poetry add <package>@<version>
+```
+
+To change a version of a dependency, either edit pyproject.toml and run:
+
+```bash
+poetry sync --with dev
+```
+
+or
+
+```bash
+poetry add <package>@<version>
+```
 
 
 ## Documentation
 
-The documentation depends on the following packages:
+The documentation is generated using `sphinx` in `sphinx_rtd_theme` and hosted on GitHub Pages. To generate the documentation locally,
 
-* `sphinx`
-* `sphinx_rtd_theme`
-* `myst-parser`
-* `sphinx-autodoc-typehints`
+```bash
+cd doc
+poetry run sphinx-build -b html . _build/html
 
-Note that `sphinx` needs to be a part of the virtual environment, if you want to generate documentation by yourself.
-Otherwise it cannot pick `rdkit` module. `sphinx_rtd_theme` is a theme providing nice `ReadtheDocs` mobile friendly style.
-
-* Generate *.rst* files to be included as a part of the documentation. Inside the directory `pdbeccdutils/doc` run the following commands to generate documentation.
-* Alternatively, use the `myst-parser` package to get the Markdown working.
-
- Use the following to generate initial markup files to be used by sphinx.  This needs to be used when adding another sub-packages.
-
-```console
-sphinx-apidoc -f -o /path/to/output/dir ../pdbeccdutils/
-```
-
-Use this to re-generate the documentation from the doc/ directory:
-
-```console
-make html
+# See the documentation at http://localhost:8080.
+python -m http.server 8080 -d _build/html
 ```

@@ -1,6 +1,7 @@
 """
 load 6lq4_updated.cif from file and test important cif item.
 """
+
 import pytest
 from pdbeccdutils.core import clc_reader
 from pdbeccdutils.core.models import ReleaseStatus

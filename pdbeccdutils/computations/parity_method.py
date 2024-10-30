@@ -5,6 +5,8 @@ Jon Tyzack.
 from rdkit import Chem
 from rdkit.Chem import rdFMCS
 
+from pdbeccdutils.helpers import mol_tools
+from rdkit.Chem import BondType
 from pdbeccdutils.core.models import ParityResult
 
 
@@ -88,8 +90,17 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
         ParityResult: Result of the PARITY comparison.
     """
 
-    template_atoms = template.GetNumAtoms()
-    query_atoms = query.GetNumAtoms()
+    template_copy = Chem.RWMol(template)
+    query_copy = Chem.RWMol(query)
+
+    # changing bondtype from DATIVE to ZERO as the SMARTS with DATIVE bondtype were missing
+    # substructures using GetSubstructMatches (e.g. HEM)
+    # refer rdkit github issue https://github.com/rdkit/rdkit/issues/7280
+    mol_tools.change_bonds_type(template_copy, BondType.DATIVE, BondType.ZERO)
+    mol_tools.change_bonds_type(query_copy, BondType.DATIVE, BondType.ZERO)
+
+    template_atoms = template_copy.GetNumAtoms()
+    query_atoms = query_copy.GetNumAtoms()
 
     min_num_atoms = min(template_atoms, query_atoms)
     max_sim_score = float(min_num_atoms) / float(
@@ -101,7 +112,7 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
 
     if not exact_match:
         mcs_graph = rdFMCS.FindMCS(
-            [template, query],
+            [template_copy, query_copy],
             bondCompare=rdFMCS.BondCompare.CompareAny,
             atomCompare=rdFMCS.AtomCompare.CompareAny,
             timeout=40,
@@ -109,7 +120,7 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
         )
     else:
         mcs_graph = rdFMCS.FindMCS(
-            [template, query],
+            [template_copy, query_copy],
             bondCompare=rdFMCS.BondCompare.CompareOrderExact,
             atomCompare=rdFMCS.AtomCompare.CompareElements,
             timeout=40,

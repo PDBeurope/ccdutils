@@ -1,5 +1,4 @@
-"""Test fragment library functionality
-"""
+"""Test fragment library functionality"""
 
 import os
 

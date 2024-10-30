@@ -258,9 +258,11 @@ def inchikey_from_inchi(inchi: str) -> str:
     Returns:
         str: the InChIKey or '' if there was an error finding it.
     """
-
-    inchikey = rdkit.Chem.inchi.InchiToInchiKey(inchi)
-    return inchikey if inchikey else None
+    try:
+        inchikey = rdkit.Chem.inchi.InchiToInchiKey(inchi)
+        return inchikey
+    except Exception:
+        return None
 
 
 def mol_from_inchi(inchi: str) -> MolFromRDKit:
@@ -295,18 +297,14 @@ def mol_from_inchi(inchi: str) -> MolFromRDKit:
     return mol_result
 
 
-def get_component_atom_id(atom):
-    """Gets component atom id.
+def rdkit_object_property(object, property: str):
+    """Returns the value of property set to the rdkit object
 
     Args:
-        atom (rdkit.Chem.rdchem.Atom): rdkit atom.
+        object: rdkit.Chem.rdchem object with GetProp
 
-    Returns:
-        str: Name of the atom.
     """
-    return (
-        atom.GetProp("component_atom_id") if atom.HasProp("component_atom_id") else None
-    )
+    return object.GetProp(property) if object.HasProp(property) else None
 
 
 def correct_atom_coords(conformer, atom_id):

@@ -22,6 +22,7 @@ Raises:
     CCDUtilsError: If deemed format is not supported or an unrecoverable
         error occurres.
 """
+
 import json
 import logging
 import math
@@ -31,7 +32,7 @@ from xml.dom import minidom
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement
 
-import pdbeccdutils
+import importlib.metadata
 import rdkit
 import gemmi
 from gemmi import cif
@@ -123,7 +124,7 @@ def to_pdb_str(
         f"HEADER    {conf_type.name} coordinates",
         f" for PDB-CCD {component.id}",
         f"COMPND    {component.id}",
-        f"AUTHOR    pdbccdutils {pdbeccdutils.__version__}",
+        f"AUTHOR    pdbccdutils {importlib.metadata.version('pdbeccdutils')}",
         f"AUTHOR    RDKit {rdkit.__version__}",
     ]
 
@@ -496,7 +497,7 @@ def to_json_str(component: Component, remove_hs=True, conf_type=ConformerType.Id
 
     temp = to_json_dict(component, remove_hs, conf_type)
     temp["rdkit_version"] = rdkit.__version__
-    temp["pdbeccdutils_version"] = pdbeccdutils.__version__
+    temp["pdbeccdutils_version"] = importlib.metadata.version("pdbeccdutils")
 
     return json.dumps(temp)
 
@@ -1125,7 +1126,7 @@ def _add_sw_info_cif(cif_block_copy):
         cif.quote_list(
             [
                 "pdbeccdutils",
-                pdbeccdutils.__version__,
+                importlib.metadata.version("pdbeccdutils"),
                 "Wrapper to provide 2D templates and molecular fragments.",
             ]
         )
@@ -1179,8 +1180,8 @@ def _add_fragments_and_scaffolds_cif(component, cif_block_copy):
             f"S{i+1}",
             "scaffold",
             smiles,
-            inchi or None,
-            inchikey or None,
+            inchi,
+            inchikey,
         ]
         substructure_loop.add_row(cif.quote_list(new_row))
 
@@ -1225,7 +1226,8 @@ def _add_rdkit_properties_cif(component, cif_block_copy):
         from gemmi.
     """
     category = "_pdbe_chem_comp_rdkit_properties."
-    cif_block_copy.set_pairs(category, {"comp_id": component.id})
+    if component.physchem_properties:
+        cif_block_copy.set_pairs(category, {"comp_id": component.id})
 
     for k, v in component.physchem_properties.items():
         cif_block_copy.set_pairs(

@@ -46,7 +46,7 @@ def infer_bound_molecules(structure, to_discard, assembly=False):
         bm = BoundMolecule(subgraph)
         bound_molecules.append(bm)
 
-    bound_molecules = sorted(bound_molecules, key=lambda l: -len(l.graph.nodes))
+    bound_molecules = sorted(bound_molecules, key=lambda item: -len(item.graph.nodes))
     return bound_molecules
 
 

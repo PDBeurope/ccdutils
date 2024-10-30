@@ -1,5 +1,12 @@
 # Changelog
 
+## RELEASE 0.8.6 - Oct 28, 2024
+
+### Features
+* Enable parsing of a subset of CCDs from the Chemical Component Dictionary
+* Added CCDC to UniChem resources
+
+
 ## RELEASE 0.8.5 - May 26, 2024
 
 ### Features
