@@ -33,7 +33,7 @@ from pdbeccdutils.core.models import DepictionResult, DepictionSource
 from pdbeccdutils.helpers.mol_tools import fix_conformer
 from pdbeccdutils.utils import config
 from rdkit import Chem, Geometry
-from rdkit.Chem import AllChem, rdCoordGen 
+from rdkit.Chem import AllChem, rdCoordGen, rdDepictor
 from scipy.spatial import KDTree
 
 
@@ -102,6 +102,7 @@ class DepictionManager:
         templateMol = Chem.RWMol(temp_mol).GetMol()
         pubchemMol = Chem.RWMol(temp_mol).GetMol()
         rdkitMolCd = Chem.RWMol(temp_mol).GetMol()
+        rdkitMol = Chem.RWMol(temp_mol).GetMol()
         results = []
 
         pubchem_res = (
@@ -111,10 +112,13 @@ class DepictionManager:
         )
         template_res = self._get_2D_by_template(templateMol) if self.templates else []
         rdkit_res_cd = self._get_2D_by_rdkit_coordgen(rdkitMolCd)
+        rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
-        if (pubchem_res is not None) and (pubchem_res.source == DepictionSource.PubChem):
+        if (pubchem_res is not None) and (pubchem_res.source.name == 'PubChem'):
             results.append(pubchem_res)
-        if rdkit_res.source == DepictionSource.RDKit:
+        if rdkit_res_cd.source.name == 'RDKit':
+            results.append(rdkit_res_cd)
+        if rdkit_res.source.name == 'RDKit':
             results.append(rdkit_res)
 
         results = results + template_res
@@ -192,6 +196,31 @@ class DepictionManager:
         """
         try:
             rdCoordGen.AddCoords(mol, self.coordgen_params)
+            flaws = DepictionValidator(mol).depiction_score()
+            return DepictionResult(
+                source=DepictionSource.RDKit, template_name=None, mol=mol, score=flaws
+            )
+        except Exception:
+            return DepictionResult(
+                source=DepictionSource.Failed,
+                template_name=None,
+                mol=None,
+                score=float("inf"),
+            )
+
+    def _get_2D_by_rdkit(self, mol):
+        """
+        Get depiction done using solely the default RDKit functionality.
+
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
+
+        Returns:
+            DepictionResult: Depiction with some usefull metadata
+        """
+        try:
+            rdDepictor.SetPreferCoordGen(False)
+            rdDepictor.Compute2DCoords(mol, useRingTemplates=True)
             flaws = DepictionValidator(mol).depiction_score()
             return DepictionResult(
                 source=DepictionSource.RDKit, template_name=None, mol=mol, score=flaws
