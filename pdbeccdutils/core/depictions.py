@@ -112,9 +112,9 @@ class DepictionManager:
         template_res = self._get_2D_by_template(templateMol) if self.templates else []
         rdkit_res = self._get_2D_by_rdkit(rdkitMol)
 
-        if pubchem_res is not None:
+        if (pubchem_res is not None) and (pubchem_res.source == DepictionSource.PubChem):
             results.append(pubchem_res)
-        if rdkit_res is not None:
+        if rdkit_res.source == DepictionSource.RDKit:
             results.append(rdkit_res)
 
         results = results + template_res
