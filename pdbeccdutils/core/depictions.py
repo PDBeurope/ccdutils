@@ -33,7 +33,7 @@ from pdbeccdutils.core.models import DepictionResult, DepictionSource
 from pdbeccdutils.helpers.mol_tools import fix_conformer
 from pdbeccdutils.utils import config
 from rdkit import Chem, Geometry
-from rdkit.Chem import AllChem, rdCoordGen
+from rdkit.Chem import AllChem, rdCoordGen 
 from scipy.spatial import KDTree
 
 
@@ -101,7 +101,7 @@ class DepictionManager:
 
         templateMol = Chem.RWMol(temp_mol).GetMol()
         pubchemMol = Chem.RWMol(temp_mol).GetMol()
-        rdkitMol = Chem.RWMol(temp_mol).GetMol()
+        rdkitMolCd = Chem.RWMol(temp_mol).GetMol()
         results = []
 
         pubchem_res = (
@@ -110,7 +110,7 @@ class DepictionManager:
             else None
         )
         template_res = self._get_2D_by_template(templateMol) if self.templates else []
-        rdkit_res = self._get_2D_by_rdkit(rdkitMol)
+        rdkit_res_cd = self._get_2D_by_rdkit_coordgen(rdkitMolCd)
 
         if (pubchem_res is not None) and (pubchem_res.source == DepictionSource.PubChem):
             results.append(pubchem_res)
@@ -180,9 +180,9 @@ class DepictionManager:
 
         return mol
 
-    def _get_2D_by_rdkit(self, mol):
+    def _get_2D_by_rdkit_coordgen(self, mol):
         """
-        Get depiction done using solely the default RDKit functionality.
+        Get depiction done using solely the default RDKit coordgen functionality.
 
         Args:
             mol (rdkit.Chem.rdchem.Mol): Mol to be depicted
