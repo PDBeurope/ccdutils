@@ -129,7 +129,7 @@ class DepictionManager:
 
         return DepictionResult(
             source=DepictionSource.Failed,
-            template_name="",
+            template_name=None,
             mol=None,
             score=float("inf"),
         )
