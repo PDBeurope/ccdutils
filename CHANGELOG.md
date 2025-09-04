@@ -1,5 +1,11 @@
 # Changelog
 
+## RELEASE 1.0.0 - Sep 4, 2025
+
+### Features
+* Support for RDKit 2025 and NumPy 2.0
+* Uses both coordgen library and the default RDKit functionality to generate 2D depictions
+
 ## RELEASE 0.8.6 - Oct 28, 2024
 
 ### Features
