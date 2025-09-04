@@ -174,6 +174,7 @@ class DepictionManager:
         p = Chem.AdjustQueryParameters()
         p.makeAtomsGeneric = True
         p.makeBondsGeneric = True
+        p.adjustDegree = False
 
         mol = Chem.AdjustQueryProperties(mol, p)
 

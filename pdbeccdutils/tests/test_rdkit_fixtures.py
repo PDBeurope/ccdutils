@@ -12,7 +12,7 @@ class TestRDKitFixtures:
         mol.AddAtom(atom)
 
         conformer = rdkit.Chem.Conformer(1)
-        atom_position = rdkit.Chem.rdGeometry.Point3D(np.NaN, np.NaN, np.NaN)
+        atom_position = rdkit.Chem.rdGeometry.Point3D(np.nan, np.nan, np.nan)
         conformer.SetAtomPosition(0, atom_position)
         mol.AddConformer(conformer, assignId=True)
 
@@ -37,7 +37,7 @@ class TestRDKitFixtures:
 
         conformer = rdkit.Chem.Conformer(1)
         o_position = rdkit.Chem.rdGeometry.Point3D(1, 2, 3)
-        h_position = rdkit.Chem.rdGeometry.Point3D(np.NaN, np.NaN, np.NaN)
+        h_position = rdkit.Chem.rdGeometry.Point3D(np.nan, np.nan, np.nan)
 
         conformer.SetAtomPosition(0, o_position)
         conformer.SetAtomPosition(1, h_position)
