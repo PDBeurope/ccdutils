@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Depictions &mdash; pdbeccdutils 0.8.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
@@ -287,7 +287,7 @@
   <section id="depictions">
 <span id="id1"></span><h1>Depictions<a class="headerlink" href="#depictions" title="Link to this heading"></a></h1>
 <p>The depictions rely on two optional external resources. <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pccompound">PubChem layouts</a> and general templates for substructures. e.g. <a class="reference external" href="https://en.wikipedia.org/wiki/Porphyrin">porphyrin rings</a>. These can be supplied as a paths to folders with 2D layouts for molecules in an SDF format. If neither of the paths is supplied, <code class="docutils literal notranslate"><span class="pre">pdbeccdutils</span></code> uses a few templates provided with the source code.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core.depictions</span> <span class="kn">import</span> <span class="n">DepictionManager</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pdbeccdutils.core.depictions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DepictionManager</span>
 
 <span class="n">depictions</span> <span class="o">=</span> <span class="n">DepictionManager</span><span class="p">(</span><span class="s1">&#39;pubchem_templates_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;general_templates_dir&#39;</span><span class="p">)</span>
 <span class="n">depiction_result</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">compute_2d</span><span class="p">(</span><span class="n">depictions</span><span class="p">)</span>

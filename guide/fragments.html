@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fragments &mdash; pdbeccdutils 0.8.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
 
   
@@ -323,8 +323,8 @@
 </table>
 <section id="identifying-fragments-of-a-chemical-component">
 <h2>Identifying fragments of a chemical component<a class="headerlink" href="#identifying-fragments-of-a-chemical-component" title="Link to this heading"></a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pdbeccdutils.core</span> <span class="kn">import</span> <span class="n">ccd_reader</span>
-<span class="kn">from</span> <span class="nn">pdbeccdutils.core.fragment_library</span> <span class="kn">import</span> <span class="n">FragmentLibrary</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pdbeccdutils.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">ccd_reader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pdbeccdutils.core.fragment_library</span><span class="w"> </span><span class="kn">import</span> <span class="n">FragmentLibrary</span>
 
 <span class="n">component</span> <span class="o">=</span> <span class="n">ccd_reader</span><span class="o">.</span><span class="n">read_pdb_cif_file</span><span class="p">(</span><span class="s1">&#39;HEL.cif&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">component</span>
 <span class="n">fragment_library</span> <span class="o">=</span> <span class="n">FragmentLibrary</span><span class="p">()</span>
