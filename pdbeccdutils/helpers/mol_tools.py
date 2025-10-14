@@ -110,7 +110,7 @@ def sanitize(rwmol):
                 conformer_id = conformer.GetId()
                 break
         
-        assign_atom_stereo_config(mol_copy, conformer_id)
+        assign_stereo_config(mol_copy, conformer_id)
 
     except Exception as e:
         print(e, file=sys.stderr)
@@ -128,9 +128,10 @@ def get_conformer(rwmol, c_type):
         if conformer.GetProp("name") == c_type.name:
             return conformer
 
-def assign_atom_stereo_config(mol, conf_id):
-    """Assigns atom-based stereo configuration from
-    _chem_comp_atom.pdbx_stereo_config
+def assign_stereo_config(mol, conf_id):
+    """Perceives stereo configuration from 3D co-ordinates
+    of the conformer and assigns the atom-based stereo config
+    value from _chem_comp_atom.pdbx_stereo_config
 
     Args:
         mol (rdkit.Chem.rdchem.RWMol): rdkit mol object
@@ -139,15 +140,15 @@ def assign_atom_stereo_config(mol, conf_id):
     AssignStereochemistryFrom3D(mol, conf_id, replaceExistingTags=True)
     
     chiral_centers = rdkit.Chem.FindMolChiralCenters(mol)
-    for atom_id, rdkit_stereo_config in chiral_centers:
+    for atom_id, rdkit_atom_stereo_config in chiral_centers:
         atom = mol.GetAtomWithIdx(atom_id)
         if not atom.HasProp("stereo_config"):
             continue
-        cif_stereo_config = atom.GetProp("stereo_config")
+        cif_atom_stereo_config = atom.GetProp("stereo_config")
         
-        if cif_stereo_config == 'N':
+        if cif_atom_stereo_config == 'N':
             atom.SetChiralTag(ChiralType.CHI_UNSPECIFIED)
-        elif rdkit_stereo_config != cif_stereo_config:
+        elif rdkit_atom_stereo_config != cif_atom_stereo_config:
             atom.InvertChirality()
                 
     AssignStereochemistryFrom3D(mol, conf_id, replaceExistingTags=False)
