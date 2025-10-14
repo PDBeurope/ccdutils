@@ -22,7 +22,7 @@ Set of methods for molecular sanitization and work with conformers
 import re
 import sys
 from io import StringIO
-from rdkit.Chem import BondType
+from rdkit.Chem import BondType, ChiralType
 from pdbeccdutils.core.models import (
     InChIFromRDKit,
     MolFromRDKit,
@@ -106,8 +106,8 @@ def sanitize(rwmol):
             if not is_degenerate_conformer(conformer):
                 conformer_id = conformer.GetId()
                 break
-
-        rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
+        
+        assign_atom_stereo_config(mol_copy, conformer_id)
 
     except Exception as e:
         print(e, file=sys.stderr)
@@ -119,16 +119,47 @@ def sanitize(rwmol):
     return SanitisationResult(mol=mol_copy, status=success)
 
 
-
-
-
-
 def get_conformer(rwmol, c_type):
     """Returns requested Conformer from mol"""
     for conformer in rwmol.GetConformers():
         if conformer.GetProp("name") == c_type.name:
             return conformer
 
+def assign_atom_stereo_config(mol, conf_id):
+    """Assigns atom-based stereo configuration from
+    _chem_comp_atom.pdbx_stereo_config
+
+    Args:
+        mol (rdkit.Chem.rdchem.RWMol): rdkit mol object
+        conf_id: conformer id 
+    """
+    rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol, conf_id)
+    
+    chiral_centers = rdkit.Chem.FindMolChiralCenters(mol)
+    for atom_id, rdkit_stereo_config in chiral_centers:
+        atom = mol.GetAtomWithIdx(atom_id)
+        if not atom.HasProp("stereo_config"):
+            continue
+        cif_stereo_config = atom.GetProp("stereo_config")
+        
+        if cif_stereo_config == 'N':
+            atom.SetChiralTag(ChiralType.CHI_UNSPECIFIED)
+        elif rdkit_stereo_config != cif_stereo_config:
+            atom.InvertChirality()
+                
+    rdkit.Chem.rdmolops.AssignStereochemistry(mol)
+    remove_atom_property(mol, "stereo_config")
+
+def remove_atom_property(mol, atom_prop):
+    """
+    Removes a property from all atoms in a mol object
+
+    Args:
+       mol (rdkit.Chem.rdchem.RWMol): rdkit mol object
+       atom_prop: name of the property to be 
+    """
+    for atom in mol.GetAtoms():
+        atom.ClearProp(atom_prop)
 
 def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
     """

@@ -203,7 +203,7 @@ def _parse_pdb_atoms(mol, cif_block):
 
     atoms = cif_block.find(
         "_chem_comp_atom.",
-        ["atom_id", "type_symbol", "alt_atom_id", "pdbx_leaving_atom_flag", "charge"],
+        ["atom_id", "type_symbol", "alt_atom_id", "pdbx_leaving_atom_flag", "charge", "pdbx_stereo_config"],
     )
     for row in atoms:
         atom_id = cif.as_string(row["_chem_comp_atom.atom_id"])
