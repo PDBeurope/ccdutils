@@ -211,6 +211,7 @@ def _parse_pdb_atoms(mol, cif_block):
         alt_atom_id = cif.as_string(row["_chem_comp_atom.alt_atom_id"])
         leaving_atom = cif.as_string(row["_chem_comp_atom.pdbx_leaving_atom_flag"])
         charge = cif.as_string(row["_chem_comp_atom.charge"])
+        stereo_config = cif.as_string(row["_chem_comp_atom.pdbx_stereo_config"])
 
         element = element if len(element) == 1 else element[0] + element[1].lower()
         isotope = None
@@ -226,6 +227,7 @@ def _parse_pdb_atoms(mol, cif_block):
         atom.SetProp("alt_name", alt_atom_id)
         atom.SetBoolProp("leaving_atom", leaving_atom == "Y")
         atom.SetFormalCharge(conversions.str_to_int(charge))
+        atom.SetProp("stereo_config", stereo_config)
 
         if isotope is not None:
             atom.SetIsotope(isotope)
