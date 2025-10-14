@@ -22,7 +22,10 @@ Set of methods for molecular sanitization and work with conformers
 import re
 import sys
 from io import StringIO
-from rdkit.Chem import BondType, ChiralType
+from rdkit.Chem import (
+    BondType,
+    ChiralType,
+    AssignStereochemistryFrom3D)
 from pdbeccdutils.core.models import (
     InChIFromRDKit,
     MolFromRDKit,
@@ -133,7 +136,7 @@ def assign_atom_stereo_config(mol, conf_id):
         mol (rdkit.Chem.rdchem.RWMol): rdkit mol object
         conf_id: conformer id 
     """
-    rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol, conf_id)
+    AssignStereochemistryFrom3D(mol, conf_id, replaceExistingTags=True)
     
     chiral_centers = rdkit.Chem.FindMolChiralCenters(mol)
     for atom_id, rdkit_stereo_config in chiral_centers:
@@ -147,7 +150,7 @@ def assign_atom_stereo_config(mol, conf_id):
         elif rdkit_stereo_config != cif_stereo_config:
             atom.InvertChirality()
                 
-    rdkit.Chem.rdmolops.AssignStereochemistry(mol)
+    AssignStereochemistryFrom3D(mol, conf_id, replaceExistingTags=False)
     remove_atom_property(mol, "stereo_config")
 
 def remove_atom_property(mol, atom_prop):
