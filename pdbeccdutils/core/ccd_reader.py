@@ -101,7 +101,7 @@ def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResul
 
 
 def read_pdb_components_file(
-    path_to_cif: str, sanitize: bool = True, include: list[str] = []
+    path_to_cif: str, sanitize: bool = True, include: List[str] | None = None
 ) -> Dict[str, CCDReaderResult]:
     """
     Process multiple compounds stored in the wwPDB CCD
@@ -112,8 +112,9 @@ def read_pdb_components_file(
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
-        include (list[str]): List of CCDs to be parsed. By default it is empty and parse
-        all the CCDs. If a list of CCDs provided, will only parse them
+        include (list[str] | None): List of CCDs to be parsed.
+        If None (default), parse all CCDs.
+        If a list of CCD IDs is provided, only those are parsed.
 
     Raises:
         ValueError: if the file does not exist.
@@ -125,9 +126,11 @@ def read_pdb_components_file(
     if not os.path.isfile(path_to_cif):
         raise ValueError("File '{}' does not exists".format(path_to_cif))
 
+    include = include or []
+    
     result_bag = {}
     for block in cif.read(path_to_cif):
-        if (block.name in include) or (len(include) == 0):
+        if not include or block.name in include:
             try:
                 result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
             except CCDUtilsError as e:
