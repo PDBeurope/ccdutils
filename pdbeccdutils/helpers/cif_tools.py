@@ -32,9 +32,9 @@ def validate_ligand_cif_categories(cif_block):
     mandatory_fields = [
         "_chem_comp.",
         "_chem_comp_atom.",
-        "_chem_comp_bond.",
     ]
     optional_fields = [
+        "_chem_comp_bond.",
         "_pdbx_chem_comp_identifier.",
         "_pdbx_chem_comp_descriptor.",
     ]
