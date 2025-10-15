@@ -65,7 +65,7 @@ def validate_mm_cif_categories(cif_block):
     categories = set(cif_block.get_mmcif_category_names())
 
     mandatory_fields = [
-        "_entry."
+        "_entry.",
         "_atom_site.",
         "_chem_comp_bond."
     ]
