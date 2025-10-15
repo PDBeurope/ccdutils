@@ -152,7 +152,6 @@ def assign_stereo_config(mol, conf_id):
             atom.InvertChirality()
                 
     AssignStereochemistryFrom3D(mol, conf_id, replaceExistingTags=False)
-    remove_atom_property(mol, "stereo_config")
 
 def remove_atom_property(mol, atom_prop):
     """

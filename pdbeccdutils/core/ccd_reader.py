@@ -165,6 +165,7 @@ def _parse_pdb_mmcif(cif_block, sanitize=True):
         sanitized_result = mol_tools.sanitize(mol)
         mol, sanitized = sanitized_result.mol, sanitized_result.status
 
+    mol_tools.remove_atom_property(mol, "stereo_config")
     descriptors = _parse_pdb_descriptors(
         cif_block, "_pdbx_chem_comp_descriptor.", "descriptor"
     )
