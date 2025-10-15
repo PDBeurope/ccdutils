@@ -42,15 +42,6 @@ from pdbeccdutils.core.models import (
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 from gemmi import cif
 
-# categories that need to be 'fixed'
-# str => list[str]
-preprocessable_categories = [
-    "_chem_comp_atom.",
-    "_chem_comp_bond.",
-    "_pdbx_chem_comp_identifier.",
-    "_pdbx_chem_comp_descriptor.",
-    "_chem_comp.",
-]
 
 
 class CCDReaderResult(NamedTuple):
@@ -161,11 +152,9 @@ def _parse_pdb_mmcif(cif_block, sanitize=True):
     sanitized = False
     mol = rdkit.Chem.RWMol()
 
-    for c in preprocessable_categories:
-        w = cif_tools.preprocess_cif_category(cif_block, c)
-
-        if w:
-            warnings.append(w)
+    w = cif_tools.validate_ligand_cif_categories(cif_block)
+    if w:
+        warnings.append(w)
 
     _parse_pdb_atoms(mol, cif_block)
     _parse_pdb_conformers(mol, cif_block)

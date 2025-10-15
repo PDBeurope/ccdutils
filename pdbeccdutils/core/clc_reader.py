@@ -42,15 +42,7 @@ from pdbeccdutils.core.models import (
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 
-# categories that need to be 'fixed'
-# str => list[str]
 
-preprocessable_categories = [
-    "_chem_comp_atom.",
-    "_chem_comp_bond.",
-    "_pdbx_chem_comp_descriptor.",
-    "_chem_comp.",
-]
 
 
 CLCReaderResult = namedtuple(
@@ -189,13 +181,10 @@ def _parse_pdb_mmcif(
     warnings = []
     errors = []
     mol = rdkit.Chem.RWMol()
-    preprocessable_categories = ["_atom_site.", "_chem_comp_bond."]
 
-    for c in preprocessable_categories:
-        w = cif_tools.preprocess_cif_category(cif_block, c)
-
-        if w:
-            warnings.append(w)
+    w = cif_tools.validate_mm_cif_categories(cif_block)
+    if w:
+        warnings.append(w)
 
     bm_atoms = _get_boundmolecule_atoms(cif_block, bm)
 
@@ -527,11 +516,9 @@ def _parse_clc_mmcif(cif_block, sanitize=True):
     sanitized = False
     mol = rdkit.Chem.RWMol()
 
-    for c in preprocessable_categories:
-        w = cif_tools.preprocess_cif_category(cif_block, c)
-
-        if w:
-            warnings.append(w)
+    w = cif_tools.validate_ligand_cif_categories(cif_block)
+    if w:
+        warnings.append(w)
 
     _parse_clc_atoms(mol, cif_block)
     _parse_clc_conformers(mol, cif_block)

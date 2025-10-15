@@ -22,7 +22,62 @@ Set of methods to format data for gemmi parser
 import gemmi
 from gemmi import cif
 from pathlib import Path
+from pdbeccdutils.core.exceptions import CCDUtilsError
 
+
+def validate_ligand_cif_categories(cif_block):
+    """Validate CIF block of ligand file based on their categories"""
+    categories = set(cif_block.get_mmcif_category_names())
+
+    mandatory_fields = [
+        "_chem_comp.",
+        "_chem_comp_atom.",
+        "_chem_comp_bond.",
+    ]
+    optional_fields = [
+        "_pdbx_chem_comp_identifier.",
+        "_pdbx_chem_comp_descriptor.",
+    ]
+
+    # Check if the input file is a mmCIF file
+    if "_entry." in categories:
+        raise CCDUtilsError(
+            f"Cannot process macromolecule file. Supports only ligands in CIF format"
+        )
+
+    # Check mandatory fields
+    missing_mandatory = [f for f in mandatory_fields if f not in categories]
+    if missing_mandatory:
+        raise CCDUtilsError(
+            f"Missing mandatory categories: {', '.join(missing_mandatory)}; cannot process input file."
+        )
+
+    # Check optional fields
+    missing_optional = [f for f in optional_fields if f not in categories]
+    if missing_optional:
+        return f"missing: {', '.join(missing_optional)}"
+
+    return None  # Explicitly return None if everything is fine
+
+
+def validate_mm_cif_categories(cif_block):
+    """Validate the CIF block of macromolecule based on the categories"""
+    categories = set(cif_block.get_mmcif_category_names())
+
+    mandatory_fields = [
+        "_entry."
+        "_atom_site.",
+        "_chem_comp_bond."
+    ]
+
+    # Check mandatory fields
+    missing_mandatory = [f for f in mandatory_fields if f not in categories]
+    if missing_mandatory:
+        raise CCDUtilsError(
+            f"Missing mandatory categories: {', '.join(missing_mandatory)}; cannot process input file."
+        )
+
+    return None  # Explicitly return None if everything is fine
 
 def preprocess_cif_category(cif_block, label):
     """
