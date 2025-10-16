@@ -42,16 +42,6 @@ from pdbeccdutils.core.models import (
 )
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools, helper
 
-# categories that need to be 'fixed'
-# str => list[str]
-
-preprocessable_categories = [
-    "_chem_comp_atom.",
-    "_chem_comp_bond.",
-    "_pdbx_chem_comp_descriptor.",
-    "_chem_comp.",
-]
-
 
 CLCReaderResult = namedtuple(
     "CLCReaderResult", ccd_reader.CCDReaderResult._fields + ("bound_molecule",)

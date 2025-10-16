@@ -30,17 +30,6 @@ from pdbeccdutils.core.models import (
 from pdbeccdutils.helpers import cif_tools, conversions, mol_tools
 from gemmi import cif
 
-# categories that need to be 'fixed'
-# str => list[str]
-preprocessable_categories = [
-    "_chem_comp_atom.",
-    "_chem_comp_bond.",
-    "_pdbx_chem_comp_identifier.",
-    "_pdbx_chem_comp_descriptor.",
-    "_chem_comp.",
-]
-
-
 def read_pdb_cif_file(
     path_to_cif: str, sanitize: bool = True
 ) -> ccd_reader.CCDReaderResult:
