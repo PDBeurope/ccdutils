@@ -51,6 +51,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Extract Docker tag from GitHub ref
+        run: echo "DOCKER_TAG=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -62,8 +64,8 @@ jobs:
       - name: Login to GitLab Container Registry
         run: echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin ${{ vars.REGISTRY_URL }}
       - name: Build and tag Docker image
-        run: docker build -t ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pdbeccdutils:latest -t ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pdbeccdutils:${{ github.ref_name }} .
+        run: docker build -t ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pdbeccdutils:latest -t ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pdbeccdutils:${{ env.DOCKER_TAG }} .
       - name: Push Docker image to GitLab Container Registry
         run: |
           docker push ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pdbeccdutils:latest
-          docker push ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pdbeccdutils:${{ github.ref_name }}
+          docker push ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pdbeccdutils:${{ env.DOCKER_TAG }}
