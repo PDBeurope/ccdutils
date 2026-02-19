@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pdbeccdutils"
-version = "1.0.2"
+version = "1.0.3"
 description = "Toolkit to parse and process small molecules in wwPDB"
 authors = ["Protein Data Bank in Europe <pdbehelp@ebi.ac.uk>"]
 license = "Apache License 2.0."
