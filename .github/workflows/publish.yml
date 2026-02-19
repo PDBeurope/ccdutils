@@ -59,7 +59,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64/v8
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/pdbeccdutils:${{ github.ref_name }}
+            ${{ secrets.DOCKER_USERNAME }}/pdbeccdutils:${{ env.DOCKER_TAG }}
             ${{ secrets.DOCKER_USERNAME }}/pdbeccdutils:latest
       - name: Login to GitLab Container Registry
         run: echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin ${{ vars.REGISTRY_URL }}
