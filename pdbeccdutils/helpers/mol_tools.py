@@ -82,41 +82,45 @@ def sanitize(rwmol):
     Returns:
         bool: Result of the sanitization process.
     """
-    success = False
 
-    try:
-        mol_copy = rdkit.Chem.RWMol(rwmol)
-        success = fix_molecule(mol_copy)
+    mol_copy = rdkit.Chem.RWMol(rwmol)
 
-        if not success:
-            rdkit.Chem.SanitizeMol(
-                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-            )
-            return SanitisationResult(mol=rwmol, status=False)
-
-        rdkit.Chem.Kekulize(mol_copy)
-
-        # find correct conformer to assign stereochemistry
-        # prioritise ideal conformer over model conformer
-
-        conformer_id = -1
-        conformer_types = [ConformerType.Ideal, ConformerType.Model]
-        for conf_type in conformer_types:
-            conformer = get_conformer(mol_copy, conf_type)
-            if not is_degenerate_conformer(conformer):
-                conformer_id = conformer.GetId()
-                break
-
-        rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
-
-    except Exception as e:
-        print(e, file=sys.stderr)
-        rdkit.Chem.SanitizeMol(
-            rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-        )
-        return SanitisationResult(mol=rwmol, status=False)
-
-    return SanitisationResult(mol=mol_copy, status=success)
+    with rdkit.Chem.rdBase.BlockLogs():
+        sanity_issues = rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
+        if sanity_issues:
+            chem_problems = rdkit.Chem.DetectChemistryProblems(mol_copy)
+            errors = [(error.GetType(), error.Message()) for error in chem_problems]
+            try:
+                mol_copy.UpdatePropertyCache(strict=False)
+                rdkit.Chem.SanitizeMol(
+                    mol_copy,
+                    sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_ALL ^ rdkit.Chem.SanitizeFlags.SANITIZE_PROPERTIES
+                )
+            except Exception:
+                rdkit.Chem.SanitizeMol(mol_copy,
+                sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+                )
+            finally:
+                return SanitisationResult(mol=mol_copy, status=False, errors = errors)
+        
+        else:
+            conformer_id = -1
+            conformer_types = [ConformerType.Ideal, ConformerType.Model]
+            for conf_type in conformer_types:
+                conformer = get_conformer(mol_copy, conf_type)
+                if not is_degenerate_conformer(conformer):
+                    conformer_id = conformer.GetId()
+                    break
+            
+            if conformer_id != -1:
+                rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
+                return SanitisationResult(mol=mol_copy, status=True, errors=[])
+            else:
+                error_msg = 'Missing coordinates in both Ideal and Model conformers'
+                rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
+                return SanitisationResult(mol=mol_copy,
+                                          status=True,
+                                          errors=[('AtomCoordinateException', error_msg)])
 
 
 
