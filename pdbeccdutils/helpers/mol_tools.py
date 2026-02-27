@@ -124,9 +124,6 @@ def sanitize(rwmol):
 
 
 
-
-
-
 def get_conformer(rwmol, c_type):
     """Returns requested Conformer from mol"""
     for conformer in rwmol.GetConformers():
@@ -157,12 +154,13 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
 
         if sanitization_result == 0:
             sys.stderr = saved_std_err
-            return True
+            return True, None
 
+        error_log = log.getvalue().strip()
         sanitization_failures = re.findall("[a-zA-Z]{1,2}, \\d+", log.getvalue())
         if not sanitization_failures:
             sys.stderr = saved_std_err
-            return False
+            return False, error_log
 
         for sanitization_failure in sanitization_failures:
             split_object = sanitization_failure.split(",")  # [0] element [1] valency
@@ -187,13 +185,17 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
                         metal_atom.GetIdx(),
                         rdkit.Chem.BondType.DATIVE,
                     )
-            rwmol.UpdatePropertyCache()  # regenerates valence records
-
+            try:
+                rwmol.UpdatePropertyCache()  # regenerates valence records
+            except Exception:
+                continue
+        
         attempts -= 1
 
+    error_log = log.getvalue().strip()
     sys.stderr = saved_std_err
 
-    return False
+    return False, error_log
 
 
 def fix_conformer(conformer):
