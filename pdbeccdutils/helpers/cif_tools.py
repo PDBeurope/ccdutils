@@ -22,6 +22,7 @@ Set of methods to format data for gemmi parser
 import gemmi
 from gemmi import cif
 from pathlib import Path
+from pdbeccdutils.core.exceptions import CCDUtilsError
 
 
 def validate_ligand_cif_categories(cif_block):
