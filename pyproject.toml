@@ -41,7 +41,7 @@ setup_pubchem_library = "pdbeccdutils.scripts.setup_pubchem_library_cli:main"
 read_boundmolecule = "pdbeccdutils.scripts.boundmolecule_cli:run"
 
 [tool.poetry.group.tests.dependencies]
-pytest = "^8.3.2"
+pytest = ">=8.3.2,<10.0.0"
 pytest-cov = "^5.0.0"
 pre-commit = "^3.8.0"
 
