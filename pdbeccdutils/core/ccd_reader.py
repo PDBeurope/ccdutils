@@ -331,23 +331,29 @@ def _parse_pdb_bonds(mol, cif_block, errors):
     )
     atom_indices = {
         atom_id: atom_index
-        for atom_index, atom_id in enumerate(
+        for atom_index, _atom_id in enumerate(
             atoms.find_column("_chem_comp_atom.atom_id")
-        )
+        ) if (atom_id := cif.as_string(_atom_id))
     }
-    for row in bonds:
-        atom_1 = row["_chem_comp_bond.atom_id_1"]
-        atom_2 = row["_chem_comp_bond.atom_id_2"]
+    for index, row in enumerate(bonds):
+        atom_1 = cif.as_string(row["_chem_comp_bond.atom_id_1"])
+        atom_2 = cif.as_string(row["_chem_comp_bond.atom_id_2"])
 
         try:
             atom_1_id = atom_indices[atom_1]
             atom_2_id = atom_indices[atom_2]
-            bond_order = helper.bond_pdb_order(row["_chem_comp_bond.value_order"])
+            bond_order = helper.bond_pdb_order(cif.as_string(row["_chem_comp_bond.value_order"]))
+            if bond_order is None:
+                errors.append(
+                    f"""Unknown bond order {cif.as_string(row['_chem_comp_bond.value_order'])} in 
+                    {index} entry in _chem_comp_bond"""
+                )
+                continue
 
             mol.AddBond(atom_1_id, atom_2_id, bond_order)
-        except (KeyError, ValueError):
+        except KeyError:
             errors.append(
-                f"Error perceiving {atom_1} - {atom_2} bond in _chem_comp_bond"
+                f"Missing atom in {index} entry in _chem_comp_bond"
             )
         except RuntimeError:
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
