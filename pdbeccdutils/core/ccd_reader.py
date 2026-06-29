@@ -329,17 +329,23 @@ def _parse_pdb_bonds(mol, cif_block, errors):
     bonds = cif_block.find(
         "_chem_comp_bond.", ["atom_id_1", "atom_id_2", "value_order"]
     )
-    atoms_ids = list(atoms.find_column("_chem_comp_atom.atom_id"))
+    atom_indices = {
+        atom_id: atom_index
+        for atom_index, atom_id in enumerate(
+            atoms.find_column("_chem_comp_atom.atom_id")
+        )
+    }
     for row in bonds:
+        atom_1 = row["_chem_comp_bond.atom_id_1"]
+        atom_2 = row["_chem_comp_bond.atom_id_2"]
+
         try:
-            atom_1 = row["_chem_comp_bond.atom_id_1"]
-            atom_1_id = atoms_ids.index(atom_1)
-            atom_2 = row["_chem_comp_bond.atom_id_2"]
-            atom_2_id = atoms_ids.index(atom_2)
+            atom_1_id = atom_indices[atom_1]
+            atom_2_id = atom_indices[atom_2]
             bond_order = helper.bond_pdb_order(row["_chem_comp_bond.value_order"])
 
             mol.AddBond(atom_1_id, atom_2_id, bond_order)
-        except ValueError:
+        except (KeyError, ValueError):
             errors.append(
                 f"Error perceiving {atom_1} - {atom_2} bond in _chem_comp_bond"
             )
