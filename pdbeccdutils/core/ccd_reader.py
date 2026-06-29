@@ -28,7 +28,7 @@ of molecules. The basic use can be as easy as this:
 import logging
 import os
 from datetime import date
-from typing import Dict, List, NamedTuple
+from typing import Collection, Dict, List, NamedTuple, Optional
 
 import rdkit
 from pdbeccdutils.core.component import Component
@@ -101,7 +101,7 @@ def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResul
 
 
 def read_pdb_components_file(
-    path_to_cif: str, sanitize: bool = True, include: list[str] = []
+    path_to_cif: str, sanitize: bool = True, include: Optional[Collection[str]] = None
 ) -> Dict[str, CCDReaderResult]:
     """
     Process multiple compounds stored in the wwPDB CCD
@@ -112,8 +112,10 @@ def read_pdb_components_file(
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
-        include (list[str]): List of CCDs to be parsed. By default it is empty and parse
-        all the CCDs. If a list of CCDs provided, will only parse them
+        include (Optional[Collection[str]]): List of CCDs to be parsed. By default it
+            is None and parses all the CCDs. If a collection of CCDs is provided, only
+            those CCDs are parsed. Empty collections parse all CCDs, matching the
+            previous behavior.
 
     Raises:
         ValueError: if the file does not exist.
@@ -126,16 +128,27 @@ def read_pdb_components_file(
         raise ValueError("File '{}' does not exists".format(path_to_cif))
 
     result_bag = {}
-    for block in cif.read(path_to_cif):
-        if (block.name in include) or (len(include) == 0):
-            try:
-                result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
-            except CCDUtilsError as e:
-                logging.error(
-                    f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
-                )
-    return result_bag
+    doc = cif.read(path_to_cif)
 
+    if not include:
+        blocks = doc
+    else:
+        blocks = []
+        for block_name in dict.fromkeys(include):
+            block = doc.find_block(block_name)
+            if block is None:
+                logging.warning(f"Data block {block_name} not found in {path_to_cif}.")
+                continue
+            blocks.append(block)
+
+    for block in blocks:
+        try:
+            result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
+        except CCDUtilsError as e:
+            logging.error(
+                f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
+            )
+    return result_bag
 
 # region parse mmcif
 
