@@ -18,7 +18,7 @@
 
 import logging
 import os
-from typing import Dict
+from typing import Collection, Dict, Optional
 import rdkit
 from pdbeccdutils.core.component import Component
 from pdbeccdutils.core import ccd_reader
@@ -69,31 +69,47 @@ def read_pdb_cif_file(
 
 
 def read_pdb_components_file(
-    path_to_cif: str, sanitize: bool = True
+    path_to_cif: str, sanitize: bool = True, include: Optional[Collection[str]] = None
 ) -> Dict[str, ccd_reader.CCDReaderResult]:
     """
-    Process multiple compounds stored in the wwPDB CCD
-    `components.cif` file.
+    Process multiple compounds stored in the wwPDB PRD
+    `prdcc-all.cif` file.
 
     Args:
         path_to_cif (str): Path to the `prdcc-all.cif` file with
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
+        include (Optional[Collection[str]]): List of PRDs to be parsed. By default it
+            is None and parses all the PRDs. If a collection of PRDs is provided, only
+            those PRDs are parsed. Empty collections parse all PRDs, matching the
+            previous behavior.
 
     Raises:
         ValueError: if the file does not exist.
 
     Returns:
         dict[str, CCDReaderResult]: Internal representation of all
-        the components in the `components.cif` file.
+        the components in the `prdcc-all.cif` file.
     """
     if not os.path.isfile(path_to_cif):
         raise ValueError("File '{}' does not exists".format(path_to_cif))
 
     result_bag = {}
+    doc = cif.read(path_to_cif)
 
-    for block in cif.read(path_to_cif):
+    if not include:
+        blocks = doc
+    else:
+        blocks = []
+        for block_name in dict.fromkeys(include):
+            block = doc.find_block(block_name)
+            if block is None:
+                logging.warning(f"Data block {block_name} not found in {path_to_cif}.")
+                continue
+            blocks.append(block)
+
+    for block in blocks:
         try:
             result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
         except CCDUtilsError as e:

@@ -28,7 +28,7 @@ of molecules. The basic use can be as easy as this:
 import logging
 import os
 from datetime import date
-from typing import Dict, List, NamedTuple
+from typing import Collection, Dict, List, NamedTuple, Optional
 
 import rdkit
 from pdbeccdutils.core.component import Component
@@ -101,7 +101,7 @@ def read_pdb_cif_file(path_to_cif: str, sanitize: bool = True) -> CCDReaderResul
 
 
 def read_pdb_components_file(
-    path_to_cif: str, sanitize: bool = True, include: list[str] = []
+    path_to_cif: str, sanitize: bool = True, include: Optional[Collection[str]] = None
 ) -> Dict[str, CCDReaderResult]:
     """
     Process multiple compounds stored in the wwPDB CCD
@@ -112,8 +112,10 @@ def read_pdb_components_file(
             multiple ligands in it.
         sanitize (bool): Whether or not the components should be sanitized
             Defaults to True.
-        include (list[str]): List of CCDs to be parsed. By default it is empty and parse
-        all the CCDs. If a list of CCDs provided, will only parse them
+        include (Optional[Collection[str]]): List of CCDs to be parsed. By default it
+            is None and parses all the CCDs. If a collection of CCDs is provided, only
+            those CCDs are parsed. Empty collections parse all CCDs, matching the
+            previous behavior.
 
     Raises:
         ValueError: if the file does not exist.
@@ -126,16 +128,27 @@ def read_pdb_components_file(
         raise ValueError("File '{}' does not exists".format(path_to_cif))
 
     result_bag = {}
-    for block in cif.read(path_to_cif):
-        if (block.name in include) or (len(include) == 0):
-            try:
-                result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
-            except CCDUtilsError as e:
-                logging.error(
-                    f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
-                )
-    return result_bag
+    doc = cif.read(path_to_cif)
 
+    if not include:
+        blocks = doc
+    else:
+        blocks = []
+        for block_name in dict.fromkeys(include):
+            block = doc.find_block(block_name)
+            if block is None:
+                logging.warning(f"Data block {block_name} not found in {path_to_cif}.")
+                continue
+            blocks.append(block)
+
+    for block in blocks:
+        try:
+            result_bag[block.name] = _parse_pdb_mmcif(block, sanitize)
+        except CCDUtilsError as e:
+            logging.error(
+                f"ERROR: Data block {block.name} not processed. Reason: ({str(e)})."
+            )
+    return result_bag
 
 # region parse mmcif
 
@@ -316,19 +329,31 @@ def _parse_pdb_bonds(mol, cif_block, errors):
     bonds = cif_block.find(
         "_chem_comp_bond.", ["atom_id_1", "atom_id_2", "value_order"]
     )
-    atoms_ids = list(atoms.find_column("_chem_comp_atom.atom_id"))
-    for row in bonds:
+    atom_indices = {
+        atom_id: atom_index
+        for atom_index, _atom_id in enumerate(
+            atoms.find_column("_chem_comp_atom.atom_id")
+        ) if (atom_id := cif.as_string(_atom_id))
+    }
+    for index, row in enumerate(bonds):
+        atom_1 = cif.as_string(row["_chem_comp_bond.atom_id_1"])
+        atom_2 = cif.as_string(row["_chem_comp_bond.atom_id_2"])
+
         try:
-            atom_1 = row["_chem_comp_bond.atom_id_1"]
-            atom_1_id = atoms_ids.index(atom_1)
-            atom_2 = row["_chem_comp_bond.atom_id_2"]
-            atom_2_id = atoms_ids.index(atom_2)
-            bond_order = helper.bond_pdb_order(row["_chem_comp_bond.value_order"])
+            atom_1_id = atom_indices[atom_1]
+            atom_2_id = atom_indices[atom_2]
+            bond_order = helper.bond_pdb_order(cif.as_string(row["_chem_comp_bond.value_order"]))
+            if bond_order is None:
+                errors.append(
+                    f"""Unknown bond order {cif.as_string(row['_chem_comp_bond.value_order'])} in 
+                    {index} entry in _chem_comp_bond"""
+                )
+                continue
 
             mol.AddBond(atom_1_id, atom_2_id, bond_order)
-        except ValueError:
+        except KeyError:
             errors.append(
-                f"Error perceiving {atom_1} - {atom_2} bond in _chem_comp_bond"
+                f"Missing atom in {index} entry in _chem_comp_bond"
             )
         except RuntimeError:
             errors.append(f"Duplicit bond {atom_1} - {atom_2}")
