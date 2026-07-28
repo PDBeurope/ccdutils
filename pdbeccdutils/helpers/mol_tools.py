@@ -86,14 +86,6 @@ def sanitize(rwmol):
 
     try:
         mol_copy = rdkit.Chem.RWMol(rwmol)
-        success = fix_molecule(mol_copy)
-
-        if not success:
-            rdkit.Chem.SanitizeMol(
-                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-            )
-            return SanitisationResult(mol=rwmol, status=False)
-
         rdkit.Chem.Kekulize(mol_copy)
 
         # find correct conformer to assign stereochemistry
