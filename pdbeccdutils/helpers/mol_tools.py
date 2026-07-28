@@ -82,12 +82,29 @@ def sanitize(rwmol):
     Returns:
         bool: Result of the sanitization process.
     """
-    success = False
 
-    try:
-        mol_copy = rdkit.Chem.RWMol(rwmol)
+    mol_copy = rdkit.Chem.RWMol(rwmol)
+    sanitised = True
+    errors = []
+    with rdkit.Chem.rdBase.BlockLogs():
+        sanity_issues = rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
+        if sanity_issues:
+            chem_problems = rdkit.Chem.DetectChemistryProblems(mol_copy)
+            errors.extend([(error.GetType(), error.Message()) for error in chem_problems])
+            try:
+                mol_copy.UpdatePropertyCache(strict=False)
+                rdkit.Chem.SanitizeMol(
+                    mol_copy,
+                    sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_ALL ^ rdkit.Chem.SanitizeFlags.SANITIZE_PROPERTIES
+                    )
+            except Exception:
+                rdkit.Chem.SanitizeMol(mol_copy,
+                sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+                )
+            finally:
+                sanitised = False
+
         rdkit.Chem.Kekulize(mol_copy)
-
         # find correct conformer to assign stereochemistry
         # ideal conformer comes first
         conformer_id = -1
@@ -97,18 +114,16 @@ def sanitize(rwmol):
             if not is_degenerate_conformer(conformer):
                 conformer_id = conformer.GetId()
                 break
+        
+        if conformer_id != -1:
+            rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
+            rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
+        else:
+            errors.append('Missing coordinates in both Ideal and Model conformers')
+        
+        return SanitisationResult(mol=mol_copy, status=sanitised, errors = errors)
 
-        rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
-        rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
 
-    except Exception as e:
-        print(e, file=sys.stderr)
-        rdkit.Chem.SanitizeMol(
-            rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-        )
-        return SanitisationResult(mol=rwmol, status=False)
-
-    return SanitisationResult(mol=mol_copy, status=success)
 
 
 def get_conformer(rwmol, c_type):
