@@ -156,10 +156,12 @@ class SanitisationResult(NamedTuple):
     Args:
         mol: rdkit.Chem.rdchem.RWMol
         status: Status of sanitisation process.
+        errors: Errors generated using sanitisation process
     """
 
     mol: Chem.rdchem.Mol
     status: str
+    errors: list[tuple[str, str]]
 
 
 class Descriptor(NamedTuple):
