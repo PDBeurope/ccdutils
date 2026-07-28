@@ -112,7 +112,8 @@ def infer_multiple_chem_comp(path_to_cif, bm, bm_id, sanitize=True):
     sanitized = False
     if sanitize:
         sanitized_result = mol_tools.sanitize(mol)
-        mol, sanitized = sanitized_result.mol, sanitized_result.status
+        mol, sanitized, sanitization_error = sanitized_result.mol, sanitized_result.status, sanitized_result.errors
+        errors.extend(sanitization_error)
 
     inchi_result = mol_tools.inchi_from_mol(mol)
     if inchi_result.warnings:

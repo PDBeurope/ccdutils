@@ -154,7 +154,8 @@ def _parse_pdb_mmcif(cif_block, sanitize=True):
 
     if sanitize:
         sanitized_result = mol_tools.sanitize(mol)
-        mol, sanitized = sanitized_result.mol, sanitized_result.status
+        mol, sanitized, sanitization_error = sanitized_result.mol, sanitized_result.status, sanitized_result.errors
+        errors.extend(sanitization_error)
 
     descriptors = ccd_reader._parse_pdb_descriptors(
         cif_block, "_pdbx_chem_comp_descriptor.", "descriptor"
