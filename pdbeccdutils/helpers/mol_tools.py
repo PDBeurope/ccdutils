@@ -105,8 +105,9 @@ def sanitize(rwmol):
             if not is_degenerate_conformer(conformer):
                 conformer_id = conformer.GetId()
                 break
-                
+
         rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
+        rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
 
     except Exception as e:
         print(e, file=sys.stderr)
