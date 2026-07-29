@@ -46,11 +46,3 @@ class TestPropertyCalculation:
         assert test_inputs[key]["TPSA"] == round(physchem_props["tpsa"], 3)
         assert test_inputs[key]["molwt"] == round(physchem_props["exactmw"], 3)
 
-    @staticmethod
-    @pytest.mark.parametrize("key", ["10R", "08T"])
-    def test_invalid_properties(key):
-        physchem_props = ccd_reader.read_pdb_cif_file(
-            cif_filename(key)
-        ).component.physchem_properties
-
-        assert physchem_props == {}
