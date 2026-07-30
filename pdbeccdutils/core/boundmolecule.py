@@ -31,7 +31,7 @@ from pdbeccdutils.core.models import (
 )
 
 
-def infer_bound_molecules(structure, to_discard, assembly=False):
+def infer_bound_molecules(structure, to_discard):
     """Identify bound molecules in the input protein structure.
 
     Args:
@@ -39,7 +39,7 @@ def infer_bound_molecules(structure, to_discard, assembly=False):
         to_discard (list of str): List of residue names to be discarded
     """
 
-    bms = parse_bound_molecules(structure, to_discard, assembly)
+    bms = parse_bound_molecules(structure, to_discard)
     bound_molecules = []
 
     for bm_nodes in connected_components(bms.to_undirected()):
