@@ -406,11 +406,10 @@ class Residue:
     chain: Corresponds to `_atom_site.auth_asym_id`
     res_id: Corresponds to `_atom_site.auth_seq_id`
     ins_code: Corresponds to `_atom_site.pdbx_PDB_ins_code`
-    ent_id: Entity id
     id: ID of the Residue
     """
 
-    def __init__(self, name: str, chain: str, res_id: str, ins_code: str, ent_id: str):
+    def __init__(self, name: str, chain: str, res_id: str, ins_code: str):
         """Initializes Residue
 
         Args:
@@ -418,14 +417,12 @@ class Residue:
             chain: Corresponds to `_atom_site.auth_asym_id`
             res_id: Corresponds to `_atom_site.auth_seq_id`
             ins_code: Corresponds to `_atom_site.pdbx_PDB_ins_code`
-            ent_id: Entity id
             id: ID of the Residue
         """
         self.name = name
         self.chain = chain
         self.res_id = res_id
         self.ins_code = "" if not ins_code else ins_code
-        self.ent_id = ent_id
         self.id = f"{chain}{res_id}{self.ins_code}"
 
     def __eq__(self, other) -> bool:
@@ -452,7 +449,6 @@ class Residue:
             "auth_asym_id": self.chain,
             "auth_seq_id": self.res_id,
             "pdbx_PDB_ins_code": " " if not self.ins_code else self.ins_code,
-            "entity_id": self.ent_id,
         }
 
     def __hash__(self):
