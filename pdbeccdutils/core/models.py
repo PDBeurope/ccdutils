@@ -403,7 +403,7 @@ class Residue:
         self.name = name
         self.chain = chain
         self.res_id = res_id
-        self.ins_code = "" if not ins_code else ins_code
+        self.ins_code = ins_code.strip()
         self.id = f"{chain}{res_id}{self.ins_code}"
 
     def __eq__(self, other) -> bool:
@@ -429,7 +429,7 @@ class Residue:
             "label_comp_id": self.name,
             "auth_asym_id": self.chain,
             "auth_seq_id": self.res_id,
-            "pdbx_PDB_ins_code": " " if not self.ins_code else self.ins_code,
+            "pdbx_PDB_ins_code": self.ins_code or None,
         }
 
     def __hash__(self):
