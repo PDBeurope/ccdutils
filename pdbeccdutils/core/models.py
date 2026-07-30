@@ -320,15 +320,6 @@ class BoundMolecule:
         return "-".join(x.id for x in self.nodes)
 
     @property
-    def orig_id(self) -> str:
-        """Returns id of boundmolecule without
-        symmetry operator
-        """
-        return "-".join(
-            x.orig_id if isinstance(x, AssemblyResidue) else x.id for x in self.nodes
-        )
-
-    @property
     def name(self) -> str:
         """Returns name of boundmolecule as a
         combination of residue names
@@ -346,16 +337,6 @@ class BoundMolecule:
 
         return True
 
-    def is_equivalent(self, other) -> bool:
-        """Checks the equivalence of two BoundMolecule objects
-
-        Return:
-            True if orig_id or id of two BoundMolecules are same else False
-        """
-        if self.orig_id != other.orig_id:
-            return False
-
-        return True
 
     def to_dict(self):
         """Return dictionary style representation of the bound molecule.
