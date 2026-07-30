@@ -20,6 +20,7 @@ A set of methods for identifying bound-molecules (covalently bonded CCDs ) from 
 of proteins and creating MultiDiGraph representation of the molecules.
 """
 
+import gemmi
 from gemmi import cif
 from pdbeccdutils.helpers import helper
 from networkx import MultiDiGraph, connected_components
@@ -135,60 +136,44 @@ def __add_con_branch_link(
 
 
 def parse_bound_molecules(
-    path: str, to_discard: list[str], assembly=False
+    structure: gemmi.Structure, to_discard: list[str], model_index = 0
 ) -> MultiDiGraph:
-    """Parse information from the information about HETATMS from the
-    `_pdbx_nonpoly_scheme` and connectivity among them from `_struct_conn`.
 
-    Args:
-        path (str): Path to the mmCIF structure
-        to_discard (list of str): List of residue names to be discarded.
+    try:
+        model = structure[model_index]
+    except IndexError:
+        raise IndexError(f"""Structure has only {len(structure)} models.
+                         model_index should be less than {len(structure)}""")
 
-    Returns:
-        MultiDiGraph: All the bound molecules in a given entry.
-    """
-    doc = cif.read(path)
-    cif_block = doc.sole_block()
-
-    if (
-        "_pdbx_nonpoly_scheme." not in cif_block.get_mmcif_category_names()
-        and "_pdbx_branch_scheme." not in cif_block.get_mmcif_category_names()
-    ):
-        return MultiDiGraph()
-
-    if "_pdbx_nonpoly_scheme." in cif_block.get_mmcif_category_names():
-        bms = parse_ligands_from_nonpoly_scheme(
-            cif_block.get_mmcif_category("_pdbx_nonpoly_scheme."), to_discard, assembly
-        )
-
-    else:
-        bms = MultiDiGraph()
-
-    if "_pdbx_branch_scheme." in cif_block.get_mmcif_category_names():
-        if bms:
-            bms = parse_ligands_from_branch_scheme(
-                cif_block.get_mmcif_category("_pdbx_branch_scheme."),
-                to_discard,
-                bms,
-                assembly,
-            )
-        else:
-            bms = parse_ligands_from_branch_scheme(
-                cif_block.get_mmcif_category("_pdbx_branch_scheme."),
-                to_discard,
-                MultiDiGraph(),
-                assembly,
-            )
-
-    if "_struct_conn." in cif_block.get_mmcif_category_names():
-        __add_connections(cif_block.get_mmcif_category("_struct_conn."), bms)
-
-    if "_pdbx_branch_scheme." in cif_block.get_mmcif_category_names():
-        __add_con_branch_link(
-            cif_block.get_mmcif_category("_pdbx_entity_branch_link."),
-            cif_block.get_mmcif_category("_pdbx_branch_scheme."),
-            bms,
-        )
+    bms = MultiDiGraph()
+    for chain in model:
+        for lig in chain.get_ligands():
+            if lig.name not in to_discard:
+                n = Residue(
+                    lig.name,  
+                    chain.name,  
+                    lig.seqid.num,  
+                    lig.seqid.icode,
+                )
+                bms.add_node(n)
+    
+    for link in structure.connections:
+        if link.type.name == 'Covale':
+            partner1 = Residue(
+                    link.partner1.res_id.name,  
+                    link.partner1.chain_name,  
+                    link.partner1.res_id.seqid.num,  
+                    link.partner1.res_id.seqid.icode, 
+                )
+            
+            partner2 = Residue(
+                    link.partner2.res_id.name,  
+                    link.partner2.chain_name,  
+                    link.partner2.res_id.seqid.num,  
+                    link.partner2.res_id.seqid.icode, 
+                )
+            
+            bms.add_edge(partner1, partner2, atom_id_1=link.partner1.atom_name, atom_id_2=link.partner2.atom_name)
 
     return bms
 
