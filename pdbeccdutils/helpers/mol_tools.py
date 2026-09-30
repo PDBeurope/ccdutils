@@ -146,50 +146,48 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
     """
     attempts = 10
     success = False
-    saved_std_err = sys.stderr
-    log = sys.stderr = StringIO()
-    rdkit.rdBase.LogToPythonStderr()
+    log = StringIO()
 
-    while (not success) and attempts >= 0:
-        sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
+    with redirect_stderr(log):
+        rdkit.rdBase.LogToPythonStderr()
 
-        if sanitization_result == 0:
-            sys.stderr = saved_std_err
-            return True
+        while (not success) and attempts >= 0:
+            sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
 
-        sanitization_failures = re.findall("[a-zA-Z]{1,2}, \\d+", log.getvalue())
-        if not sanitization_failures:
-            sys.stderr = saved_std_err
-            return False
+            if sanitization_result == 0:
+                return True
 
-        for sanitization_failure in sanitization_failures:
-            split_object = sanitization_failure.split(",")  # [0] element [1] valency
-            element = split_object[0]
-            valency = int(split_object[1].strip())
+            sanitization_failures = re.findall("[a-zA-Z]{1,2}, \\d+", log.getvalue())
+            if not sanitization_failures:
+                return False
 
-            smarts_metal_check = rdkit.Chem.MolFromSmarts(
-                METALS_SMART + "~[{}]".format(element)
-            )
-            metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-            rdkit.Chem.SanitizeMol(
-                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-            )
-            for metal_index, other_index in metal_atom_bonds:
-                metal_atom = rwmol.GetAtomWithIdx(metal_index)
-                other_atom = rwmol.GetAtomWithIdx(other_index)
-                # alter the bond to be dative towards the metal -
-                if other_atom.GetExplicitValence() == valency:
-                    rwmol.RemoveBond(metal_atom.GetIdx(), other_atom.GetIdx())
-                    rwmol.AddBond(
-                        other_atom.GetIdx(),
-                        metal_atom.GetIdx(),
-                        rdkit.Chem.BondType.DATIVE,
-                    )
-            rwmol.UpdatePropertyCache()  # regenerates valence records
+            for sanitization_failure in sanitization_failures:
+                split_object = sanitization_failure.split(",")  # [0] element [1] valency
+                element = split_object[0]
+                valency = int(split_object[1].strip())
 
-        attempts -= 1
+                smarts_metal_check = rdkit.Chem.MolFromSmarts(
+                    METALS_SMART + "~[{}]".format(element)
+                )
+                metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
+                rdkit.Chem.SanitizeMol(
+                    rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+                )
+                for metal_index, other_index in metal_atom_bonds:
+                    metal_atom = rwmol.GetAtomWithIdx(metal_index)
+                    other_atom = rwmol.GetAtomWithIdx(other_index)
+                    # alter the bond to be dative towards the metal -
+                    if other_atom.GetExplicitValence() == valency:
+                        rwmol.RemoveBond(metal_atom.GetIdx(), other_atom.GetIdx())
+                        rwmol.AddBond(
+                            other_atom.GetIdx(),
+                            metal_atom.GetIdx(),
+                            rdkit.Chem.BondType.DATIVE,
+                        )
+                rwmol.UpdatePropertyCache()  # regenerates valence records
 
-    sys.stderr = saved_std_err
+            attempts -= 1
+
 
     return False
 
