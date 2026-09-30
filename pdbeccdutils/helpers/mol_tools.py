@@ -95,10 +95,6 @@ def sanitize(rwmol):
             return SanitisationResult(mol=rwmol, status=False)
 
         rdkit.Chem.Kekulize(mol_copy)
-        # rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
-
-        # find correct conformer to assign stereochemistry
-        # ideal conformer comes first
 
         conformer_id = -1
         conformer_types = [ConformerType.Ideal, ConformerType.Model]
@@ -106,14 +102,11 @@ def sanitize(rwmol):
             conformer = get_conformer(mol_copy, conf_type)
             if not is_degenerate_conformer(conformer):
                 conformer_id = conformer.GetId()
+                break
 
-        # conformers = rwmol.GetConformers()
-        # if is_degenerate_conformer(conformers[0]):
-        #     conformer_id = conformers[1].GetId()
-        # else:
-        #     conformer_id = conformers[0].GetId()
-
-        rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
+        if conformer_id != -1:
+            rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
+            rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
 
     except Exception as e:
         print(e, file=sys.stderr)
