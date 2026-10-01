@@ -20,7 +20,6 @@ Set of methods for molecular sanitization and work with conformers
 """
 
 import re
-import sys
 from io import StringIO
 from rdkit.Chem import BondType
 from pdbeccdutils.core.models import (
@@ -82,47 +81,48 @@ def sanitize(rwmol):
     Returns:
         bool: Result of the sanitization process.
     """
-    success = False
 
-    try:
-        mol_copy = rdkit.Chem.RWMol(rwmol)
-        success = fix_molecule(mol_copy)
-
-        if not success:
-            rdkit.Chem.SanitizeMol(
-                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-            )
-            return SanitisationResult(mol=rwmol, status=False)
+    mol_copy = rdkit.Chem.RWMol(rwmol)
+    sanitised = True
+    errors = []
+    with rdkit.Chem.rdBase.BlockLogs():
+        sanity_issues = rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
+        if sanity_issues:
+            chem_problems = rdkit.Chem.DetectChemistryProblems(mol_copy)
+            errors.extend([(error.GetType(), error.Message()) for error in chem_problems])
+            try:
+                mol_copy.UpdatePropertyCache(strict=False)
+                rdkit.Chem.SanitizeMol(
+                    mol_copy,
+                    sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_ALL ^ rdkit.Chem.SanitizeFlags.SANITIZE_PROPERTIES
+                    )
+            except Exception:
+                rdkit.Chem.SanitizeMol(mol_copy,
+                sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+                )
+            finally:
+                sanitised = False
 
         rdkit.Chem.Kekulize(mol_copy)
-        # rdkit.Chem.rdmolops.AssignAtomChiralTagsFromStructure(rwmol, confId=0)
-
         # find correct conformer to assign stereochemistry
         # ideal conformer comes first
-
         conformer_id = -1
         conformer_types = [ConformerType.Ideal, ConformerType.Model]
         for conf_type in conformer_types:
             conformer = get_conformer(mol_copy, conf_type)
             if not is_degenerate_conformer(conformer):
                 conformer_id = conformer.GetId()
+                break
+        
+        if conformer_id != -1:
+            rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
+            rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
+        else:
+            errors.append(("DegenerateConformerException", "Missing coordinates in both Ideal and Model conformers"))
+        
+        return SanitisationResult(mol=mol_copy, status=sanitised, errors = errors)
 
-        # conformers = rwmol.GetConformers()
-        # if is_degenerate_conformer(conformers[0]):
-        #     conformer_id = conformers[1].GetId()
-        # else:
-        #     conformer_id = conformers[0].GetId()
 
-        rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
-
-    except Exception as e:
-        print(e, file=sys.stderr)
-        rdkit.Chem.SanitizeMol(
-            rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-        )
-        return SanitisationResult(mol=rwmol, status=False)
-
-    return SanitisationResult(mol=mol_copy, status=success)
 
 
 def get_conformer(rwmol, c_type):
@@ -146,50 +146,48 @@ def fix_molecule(rwmol: rdkit.Chem.rdchem.RWMol):
     """
     attempts = 10
     success = False
-    saved_std_err = sys.stderr
-    log = sys.stderr = StringIO()
-    rdkit.rdBase.LogToPythonStderr()
+    log = StringIO()
 
-    while (not success) and attempts >= 0:
-        sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
+    with redirect_stderr(log):
+        rdkit.rdBase.LogToPythonStderr()
 
-        if sanitization_result == 0:
-            sys.stderr = saved_std_err
-            return True
+        while (not success) and attempts >= 0:
+            sanitization_result = rdkit.Chem.SanitizeMol(rwmol, catchErrors=True)
 
-        sanitization_failures = re.findall("[a-zA-Z]{1,2}, \\d+", log.getvalue())
-        if not sanitization_failures:
-            sys.stderr = saved_std_err
-            return False
+            if sanitization_result == 0:
+                return True
 
-        for sanitization_failure in sanitization_failures:
-            split_object = sanitization_failure.split(",")  # [0] element [1] valency
-            element = split_object[0]
-            valency = int(split_object[1].strip())
+            sanitization_failures = re.findall("[a-zA-Z]{1,2}, \\d+", log.getvalue())
+            if not sanitization_failures:
+                return False
 
-            smarts_metal_check = rdkit.Chem.MolFromSmarts(
-                METALS_SMART + "~[{}]".format(element)
-            )
-            metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
-            rdkit.Chem.SanitizeMol(
-                rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
-            )
-            for metal_index, other_index in metal_atom_bonds:
-                metal_atom = rwmol.GetAtomWithIdx(metal_index)
-                other_atom = rwmol.GetAtomWithIdx(other_index)
-                # alter the bond to be dative towards the metal -
-                if other_atom.GetExplicitValence() == valency:
-                    rwmol.RemoveBond(metal_atom.GetIdx(), other_atom.GetIdx())
-                    rwmol.AddBond(
-                        other_atom.GetIdx(),
-                        metal_atom.GetIdx(),
-                        rdkit.Chem.BondType.DATIVE,
-                    )
-            rwmol.UpdatePropertyCache()  # regenerates valence records
+            for sanitization_failure in sanitization_failures:
+                split_object = sanitization_failure.split(",")  # [0] element [1] valency
+                element = split_object[0]
+                valency = int(split_object[1].strip())
 
-        attempts -= 1
+                smarts_metal_check = rdkit.Chem.MolFromSmarts(
+                    METALS_SMART + "~[{}]".format(element)
+                )
+                metal_atom_bonds = rwmol.GetSubstructMatches(smarts_metal_check)
+                rdkit.Chem.SanitizeMol(
+                    rwmol, sanitizeOps=rdkit.Chem.SanitizeFlags.SANITIZE_CLEANUP
+                )
+                for metal_index, other_index in metal_atom_bonds:
+                    metal_atom = rwmol.GetAtomWithIdx(metal_index)
+                    other_atom = rwmol.GetAtomWithIdx(other_index)
+                    # alter the bond to be dative towards the metal -
+                    if other_atom.GetExplicitValence() == valency:
+                        rwmol.RemoveBond(metal_atom.GetIdx(), other_atom.GetIdx())
+                        rwmol.AddBond(
+                            other_atom.GetIdx(),
+                            metal_atom.GetIdx(),
+                            rdkit.Chem.BondType.DATIVE,
+                        )
+                rwmol.UpdatePropertyCache()  # regenerates valence records
 
-    sys.stderr = saved_std_err
+            attempts -= 1
+
 
     return False
 

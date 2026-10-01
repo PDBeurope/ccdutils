@@ -73,7 +73,7 @@ def _generate_sim_score(template, query, smarts):
     return (substructure, best_sim_score)
 
 
-def compare_molecules(template, query, thresh=0.01, exact_match=False):
+def compare_molecules(template, query, thresh=0.01, exact_match=False, timeout=40):
     """Given the two molecules calculates their similarity score.
     If expected similarity score is lower than the threshold nothing
     is calculated.
@@ -85,6 +85,8 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
             the match to be considered. Defaults to 0.01.
         exact_match (bool, optional): Controls whether atom type and
             bond order should be checked too. Defaults to False.
+        timeout (int, optional): Value of timeout in seconds to stop the
+        maximum common substructure calcualtion 
 
     Returns:
         ParityResult: Result of the PARITY comparison.
@@ -115,7 +117,7 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
             [template_copy, query_copy],
             bondCompare=rdFMCS.BondCompare.CompareAny,
             atomCompare=rdFMCS.AtomCompare.CompareAny,
-            timeout=40,
+            timeout=timeout,
             completeRingsOnly=True,
         )
     else:
@@ -123,9 +125,13 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False):
             [template_copy, query_copy],
             bondCompare=rdFMCS.BondCompare.CompareOrderExact,
             atomCompare=rdFMCS.AtomCompare.CompareElements,
-            timeout=40,
+            timeout=timeout,
             completeRingsOnly=True,
         )
+
+    if mcs_graph.canceled:
+        raise TimeoutError(f"MCS calculation timed out after {timeout} seconds. "
+                           "Try increasing the value of timeout.")
 
     substructure, sim_score = _generate_sim_score(
         template, query, mcs_graph.smartsString
