@@ -1,5 +1,28 @@
 # Changelog
 
+## RELEASE 2.0.0 - Oct 1, 2026
+
+### Features
+* Added `timeout` argument to `compare_molecules` in the PARITY method to control the MCS calculation time (default 40 seconds)
+* Added `validate_ligand_cif_categories` and `validate_mm_cif_categories` to validate ligand and macromolecule CIF files before reading
+* Errors raised during sanitisation are now reported in the `errors` of the reader results
+* CIP labels are assigned to molecules after sanitisation (#36)
+
+### Bug fixes
+* Stereochemistry is assigned from the Ideal conformer when it is valid, falling back to the Model conformer only when the Ideal one is degenerate 
+* Physicochemical properties are calculated on the molecule without hydrogens, so bonds to terminal hydrogens are no longer counted as rotatable bonds
+* RDKit logging no longer redirects the global standard error output
+
+### Breaking changes
+* Added `errors` field to `SanitisationResult`, a list of `(error_type, message)` tuples
+* `sanitize` no longer converts bonds between metals and other atoms to dative bonds to fix valence issues
+* Ligand CIF readers raise `CCDUtilsError` when `_chem_comp.` or `_chem_comp_atom.` categories are missing, or when a macromolecule mmCIF file is provided
+* Bound molecule reader raises `CCDUtilsError` when `_entry.`, `_atom_site.` or `_chem_comp_bond.` categories are missing
+* Missing optional categories are reported as a single warning (`missing: ...`) instead of one warning per category
+* `compare_molecules` raises `TimeoutError` when the MCS calculation times out
+* Physicochemical property values (e.g. `NumRotatableBonds`) differ from previous versions
+* Removed `preprocessable_categories` from `ccd_reader`, `clc_reader` and `prd_reader`
+
 ## RELEASE 1.0.0 - Sep 4, 2025
 
 ### Features
