@@ -20,7 +20,6 @@ Set of methods for molecular sanitization and work with conformers
 """
 
 import re
-import sys
 from io import StringIO
 from rdkit.Chem import BondType
 from pdbeccdutils.core.models import (
@@ -119,7 +118,7 @@ def sanitize(rwmol):
             rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
             rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
         else:
-            errors.append('Missing coordinates in both Ideal and Model conformers')
+            errors.append(("DegenerateConformerException", "Missing coordinates in both Ideal and Model conformers"))
         
         return SanitisationResult(mol=mol_copy, status=sanitised, errors = errors)
 
