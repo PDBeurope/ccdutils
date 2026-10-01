@@ -130,8 +130,8 @@ def compare_molecules(template, query, thresh=0.01, exact_match=False, timeout=4
         )
 
     if mcs_graph.canceled:
-        raise TimeoutError(f"MCS calculation timed out after {timeout} seconnds."
-                           f"Try increasing the value of {timeout}.")
+        raise TimeoutError(f"MCS calculation timed out after {timeout} seconds. "
+                           "Try increasing the value of timeout.")
 
     substructure, sim_score = _generate_sim_score(
         template, query, mcs_graph.smartsString
