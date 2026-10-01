@@ -5,11 +5,11 @@ from pdbeccdutils.tests.tst_utilities import cif_filename
 
 test_inputs = {
     "ATP": {
-        "logp": -2.438,
+        "logp": -1.629,
         "heavy_atom_count": 31,
-        "numH_acceptors": 18,
+        "numH_acceptors": 13,
         "numH_donors": 7,
-        "num_rotable_bonds": 15,
+        "num_rotable_bonds": 8,
         "rings_count": 3,
         "TPSA": 279.130,
         "molwt": 506.996,
@@ -19,7 +19,7 @@ test_inputs = {
         "heavy_atom_count": 15,
         "numH_acceptors": 6,
         "numH_donors": 5,
-        "num_rotable_bonds": 7,
+        "num_rotable_bonds": 2,
         "rings_count": 1,
         "TPSA": 119.250,
         "molwt": 221.09,
