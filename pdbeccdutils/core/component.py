@@ -330,7 +330,7 @@ class Component:
         if not self._physchem_properties:
             try:
                 properties = Properties()
-                # calcualtion of properties on the molecule with hydrogen will include 
+                # calculation of properties on the molecule with hydrogen will include 
                 # bonds to terminal atoms in the number of rotatable bonds 
                 self._physchem_properties = dict(
                     zip(
