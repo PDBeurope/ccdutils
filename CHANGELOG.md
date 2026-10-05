@@ -14,7 +14,7 @@
 * RDKit logging no longer redirects the global standard error output
 
 ### Breaking changes
-* Added `errors` field to `SanitisationResult`, a list of `(error_type, message)` tuples
+* Added `errors` field to `SanitisationResult`, a list of `"<error type>: <message>"` strings
 * `sanitize` no longer converts bonds between metals and other atoms to dative bonds to fix valence issues
 * Ligand CIF readers raise `CCDUtilsError` when `_chem_comp.` or `_chem_comp_atom.` categories are missing, or when a macromolecule mmCIF file is provided
 * Bound molecule reader raises `CCDUtilsError` when `_entry.`, `_atom_site.` or `_chem_comp_bond.` categories are missing

@@ -161,7 +161,7 @@ class SanitisationResult(NamedTuple):
 
     mol: Chem.rdchem.Mol
     status: str
-    errors: list[tuple[str, str]]
+    errors: List[str]
 
 
 class Descriptor(NamedTuple):

@@ -89,7 +89,7 @@ def sanitize(rwmol):
         sanity_issues = rdkit.Chem.SanitizeMol(mol_copy, catchErrors=True)
         if sanity_issues:
             chem_problems = rdkit.Chem.DetectChemistryProblems(mol_copy)
-            errors.extend([(error.GetType(), error.Message()) for error in chem_problems])
+            errors.extend([f"{error.GetType()}: {error.Message()}" for error in chem_problems])
             try:
                 mol_copy.UpdatePropertyCache(strict=False)
                 rdkit.Chem.SanitizeMol(
@@ -118,7 +118,7 @@ def sanitize(rwmol):
             rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
             rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
         else:
-            errors.append(("DegenerateConformerException", "Missing coordinates in both Ideal and Model conformers"))
+            errors.append("DegenerateConformerException: Missing coordinates in both Ideal and Model conformers")
         
         return SanitisationResult(mol=mol_copy, status=sanitised, errors = errors)
 
