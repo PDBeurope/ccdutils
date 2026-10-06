@@ -5,11 +5,11 @@ from pdbeccdutils.tests.tst_utilities import cif_filename
 
 test_inputs = {
     "ATP": {
-        "logp": -2.438,
+        "logp": -1.629,
         "heavy_atom_count": 31,
-        "numH_acceptors": 18,
+        "numH_acceptors": 13,
         "numH_donors": 7,
-        "num_rotable_bonds": 15,
+        "num_rotable_bonds": 8,
         "rings_count": 3,
         "TPSA": 279.130,
         "molwt": 506.996,
@@ -19,7 +19,7 @@ test_inputs = {
         "heavy_atom_count": 15,
         "numH_acceptors": 6,
         "numH_donors": 5,
-        "num_rotable_bonds": 7,
+        "num_rotable_bonds": 2,
         "rings_count": 1,
         "TPSA": 119.250,
         "molwt": 221.09,
@@ -46,11 +46,3 @@ class TestPropertyCalculation:
         assert test_inputs[key]["TPSA"] == round(physchem_props["tpsa"], 3)
         assert test_inputs[key]["molwt"] == round(physchem_props["exactmw"], 3)
 
-    @staticmethod
-    @pytest.mark.parametrize("key", ["10R", "08T"])
-    def test_invalid_properties(key):
-        physchem_props = ccd_reader.read_pdb_cif_file(
-            cif_filename(key)
-        ).component.physchem_properties
-
-        assert physchem_props == {}

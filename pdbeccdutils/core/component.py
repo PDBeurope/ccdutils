@@ -330,14 +330,16 @@ class Component:
         if not self._physchem_properties:
             try:
                 properties = Properties()
+                # calculation of properties on the molecule with hydrogen will include 
+                # bonds to terminal atoms in the number of rotatable bonds 
                 self._physchem_properties = dict(
                     zip(
                         properties.GetPropertyNames(),
-                        properties.ComputeProperties(self.mol),
+                        properties.ComputeProperties(self.mol_no_h),
                     )
                 )
                 self._physchem_properties["NumHeavyAtoms"] = float(
-                    self.mol.GetNumHeavyAtoms()
+                    self.mol_no_h.GetNumHeavyAtoms()
                 )
             except (RuntimeError, ValueError):
                 return {}
