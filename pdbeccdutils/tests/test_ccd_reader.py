@@ -5,7 +5,7 @@ from gemmi import cif
 from rdkit import Chem
 
 from pdbeccdutils.core import ccd_reader
-from pdbeccdutils.tests.tst_utilities import cif_filename
+from pdbeccdutils.tests.tst_utilities import cif_filename, xcu_model
 
 
 def _components_cif(tmp_path):
@@ -91,3 +91,25 @@ def test_parse_pdb_bonds_missing_atom_1_does_not_mask_error():
         f"Missing atom in 0 entry in _chem_comp_bond"
     ]
     assert mol.GetNumBonds() == 0
+
+
+def test_read_pdb_cif_file_survives_cip_labeler_digraph_limit():
+    # Keggin polyoxometalate cage blows up the new CIP labeler digraph
+    result = ccd_reader.read_pdb_cif_file(xcu_model())
+
+    assert result.component.id == "XCU"
+    assert any(e.startswith("CIPLabelerException") for e in result.errors)
+
+
+def test_read_pdb_cif_file_cip_labeler_failure_is_reported(monkeypatch):
+    def _raise(*args, **kwargs):
+        raise RuntimeError("Digraph generation failed: more than 100000 nodes found.")
+
+    monkeypatch.setattr(Chem.rdCIPLabeler, "AssignCIPLabels", _raise)
+    result = ccd_reader.read_pdb_cif_file(cif_filename("ATP"))
+
+    assert result.sanitized
+    assert result.errors == [
+        "CIPLabelerException: Digraph generation failed: more than 100000 nodes found."
+    ]
+    assert result.component.mol.GetNumAtoms() > 0

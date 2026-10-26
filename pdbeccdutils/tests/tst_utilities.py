@@ -90,6 +90,10 @@ def unl_model():
     return os.path.join(tests_dir(), "ccd_mmcif_test_files", "UNL.cif")
 
 
+def xcu_model():
+    return os.path.join(tests_dir(), "ccd_mmcif_test_files", "XCU.cif")
+
+
 def supply_list_of_sample_cifs():
     """
     returns the list of sample pdb ccd cifs for test.

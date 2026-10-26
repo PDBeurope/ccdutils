@@ -113,13 +113,18 @@ def sanitize(rwmol):
             if not is_degenerate_conformer(conformer):
                 conformer_id = conformer.GetId()
                 break
-        
+
         if conformer_id != -1:
             rdkit.Chem.rdmolops.AssignStereochemistryFrom3D(mol_copy, conformer_id)
-            rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
+            # new CIP labeler can exceed its digraph size limit on highly
+            # symmetric cages (e.g. polyoxometalates); keep the legacy labels
+            try:
+                rdkit.Chem.rdCIPLabeler.AssignCIPLabels(mol_copy)
+            except RuntimeError as e:
+                errors.append(f"CIPLabelerException: {e}")
         else:
             errors.append("DegenerateConformerException: Missing coordinates in both Ideal and Model conformers")
-        
+
         return SanitisationResult(mol=mol_copy, status=sanitised, errors = errors)
 
 

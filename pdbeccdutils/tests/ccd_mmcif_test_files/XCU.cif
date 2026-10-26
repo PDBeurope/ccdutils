@@ -1,0 +1,272 @@
+data_XCU
+# 
+_chem_comp.id                                    XCU 
+_chem_comp.name                                  'Cu-substituted alpha-Keggin' 
+_chem_comp.type                                  NON-POLYMER 
+_chem_comp.pdbx_type                             HETAIN 
+_chem_comp.formula                               'Cu O39 P W11' 
+_chem_comp.mon_nstd_parent_comp_id               ? 
+_chem_comp.pdbx_synonyms                         ? 
+_chem_comp.pdbx_formal_charge                    ? 
+_chem_comp.pdbx_initial_date                     2019-05-28 
+_chem_comp.pdbx_modified_date                    2026-09-16 
+_chem_comp.pdbx_ambiguous_flag                   N 
+_chem_comp.pdbx_release_status                   REL 
+_chem_comp.pdbx_replaced_by                      ? 
+_chem_comp.pdbx_replaces                         ? 
+_chem_comp.formula_weight                        2740.736 
+_chem_comp.one_letter_code                       ? 
+_chem_comp.three_letter_code                     XCU 
+_chem_comp.pdbx_model_coordinates_details        ? 
+_chem_comp.pdbx_model_coordinates_missing_flag   N 
+_chem_comp.pdbx_ideal_coordinates_details        MetalCoord 
+_chem_comp.pdbx_ideal_coordinates_missing_flag   N 
+_chem_comp.pdbx_model_coordinates_db_code        6RUK 
+_chem_comp.pdbx_subcomponent_list                ? 
+_chem_comp.pdbx_processing_site                  RCSB 
+_chem_comp.pdbx_comp_type                        'metal-containing ligand' 
+_chem_comp.pdbx_pcm                              Y 
+# 
+loop_
+_chem_comp_atom.comp_id 
+_chem_comp_atom.atom_id 
+_chem_comp_atom.alt_atom_id 
+_chem_comp_atom.type_symbol 
+_chem_comp_atom.charge 
+_chem_comp_atom.pdbx_align 
+_chem_comp_atom.pdbx_aromatic_flag 
+_chem_comp_atom.pdbx_leaving_atom_flag 
+_chem_comp_atom.pdbx_stereo_config 
+_chem_comp_atom.pdbx_backbone_atom_flag 
+_chem_comp_atom.pdbx_n_terminal_atom_flag 
+_chem_comp_atom.pdbx_c_terminal_atom_flag 
+_chem_comp_atom.model_Cartn_x 
+_chem_comp_atom.model_Cartn_y 
+_chem_comp_atom.model_Cartn_z 
+_chem_comp_atom.pdbx_model_Cartn_x_ideal 
+_chem_comp_atom.pdbx_model_Cartn_y_ideal 
+_chem_comp_atom.pdbx_model_Cartn_z_ideal 
+_chem_comp_atom.pdbx_component_atom_id 
+_chem_comp_atom.pdbx_component_comp_id 
+_chem_comp_atom.pdbx_ordinal 
+XCU O40 O1  O  -2 1 N N N N N N 32.414 55.433 25.410 32.255 55.897 25.840 O40 XCU 1  
+XCU O41 O2  O  -2 1 N N N N N N 30.524 56.175 27.361 30.606 56.530 27.489 O41 XCU 2  
+XCU O42 O3  O  -2 1 N N N N N N 29.612 54.544 29.587 29.833 55.207 29.361 O42 XCU 3  
+XCU O43 O4  O  -2 1 N N N N N N 30.390 57.433 25.032 30.522 57.508 25.301 O43 XCU 4  
+XCU O44 O5  O  -2 1 N N N N N N 28.132 56.720 28.309 28.410 56.894 28.363 O44 XCU 5  
+XCU O45 O6  O  -2 1 N N N N N N 29.057 56.978 30.700 29.256 57.264 30.605 O45 XCU 6  
+XCU O46 O7  O  -2 1 N N N N N N 32.928 58.117 25.248 32.814 58.271 25.447 O46 XCU 7  
+XCU O47 O8  O  -2 1 N N N N N N 31.238 59.838 24.299 31.168 59.788 24.569 O47 XCU 8  
+XCU O48 O9  O  -2 1 N N N N N N 28.624 58.993 23.487 28.912 58.960 24.045 O48 XCU 9  
+XCU O49 O10 O  -2 1 N N N N N N 28.421 58.403 26.266 28.565 58.331 26.357 O49 XCU 10 
+XCU O50 O11 O  -2 1 N N N N N N 25.898 58.054 27.464 26.452 58.213 27.510 O50 XCU 11 
+XCU O51 O12 O  -2 1 N N N N N N 27.316 58.742 29.784 27.514 58.749 29.646 O51 XCU 12 
+XCU O52 O13 O  -2 1 N N N N N N 27.961 58.766 32.534 28.200 58.982 32.025 O52 XCU 13 
+XCU O53 O14 O  -2 1 N N N N N N 30.551 59.118 31.596 30.551 59.052 31.304 O53 XCU 14 
+XCU O54 O15 O  -2 1 N N N N N N 32.601 60.279 33.150 32.378 60.148 32.538 O54 XCU 15 
+XCU O55 O16 O  -2 1 N N N N N N 33.805 60.646 30.619 33.515 60.611 30.378 O55 XCU 16 
+XCU O56 O17 O  -2 1 N N N N N N 35.756 61.092 28.681 35.201 60.980 28.590 O56 XCU 17 
+XCU O57 O18 O  -2 1 N N N N N N 33.907 60.026 26.894 33.667 59.923 26.975 O57 XCU 18 
+XCU O58 O19 O  -2 1 N N N N N N 33.912 60.514 24.185 33.549 60.483 24.590 O58 XCU 19 
+XCU O59 O20 O  -1 1 N N N N N N 31.196 59.059 26.785 31.142 59.098 26.767 O59 XCU 20 
+XCU O60 O21 O  0  1 N N N N N N 29.747 58.616 28.816 29.679 58.679 28.837 O60 XCU 21 
+XCU O61 O22 O  -1 1 N N N N N N 32.159 59.453 29.199 32.063 59.521 29.111 O61 XCU 22 
+XCU O62 O23 O  -1 1 N N N N N N 30.407 61.060 28.221 30.322 61.096 28.196 O62 XCU 23 
+XCU O63 O24 O  -2 1 N N N N N N 29.101 60.743 25.586 29.130 60.654 25.821 O63 XCU 24 
+XCU O64 O25 O  -2 1 N N N N N N 27.647 60.325 27.641 27.801 60.269 27.765 O64 XCU 25 
+XCU O65 O26 O  -2 1 N N N N N N 28.820 60.730 30.650 28.915 60.722 30.470 O65 XCU 26 
+XCU O66 O27 O  -2 1 N N N N N N 31.285 61.463 30.936 31.279 61.316 30.755 O66 XCU 27 
+XCU O67 O28 O  -2 1 N N N N N N 33.143 62.013 28.408 32.966 61.795 28.326 O67 XCU 28 
+XCU O68 O29 O  -2 1 N N N N N N 32.209 61.666 25.993 31.932 61.579 26.082 O68 XCU 29 
+XCU O69 O30 O  -2 1 N N N N N N 29.926 62.958 26.648 30.010 62.762 26.753 O69 XCU 30 
+XCU O70 O31 O  -2 1 N N N N N N 27.200 62.714 26.257 27.519 62.401 26.522 O70 XCU 31 
+XCU O71 O32 O  -2 1 N N N N N N 28.456 62.618 28.775 28.589 62.361 28.806 O71 XCU 32 
+XCU O72 O33 O  -2 1 N N N N N N 29.217 63.445 31.308 29.517 63.006 31.040 O72 XCU 33 
+XCU O73 O34 O  -2 1 N N N N N N 30.921 63.337 29.108 30.934 63.153 29.019 O73 XCU 34 
+XCU O74 O35 O  -2 1 N N N N N N 32.444 64.291 26.996 32.281 63.784 27.044 O74 XCU 35 
+XCU O75 O36 O  -2 1 N N N N N N 33.054 57.043 27.489 33.010 57.110 27.706 O75 XCU 36 
+XCU O76 O37 O  -2 1 N N N N N N 31.328 56.680 29.808 31.587 56.702 29.773 O76 XCU 37 
+XCU O77 O38 O  -2 1 N N N N N N 33.088 58.268 31.374 32.973 58.308 31.112 O77 XCU 38 
+XCU O78 O39 O  -2 1 N N N N N N 34.655 58.734 29.086 34.462 58.745 29.043 O78 XCU 39 
+XCU P2  P1  P  0  1 N N S N N N 30.876 59.545 28.269 30.793 59.602 28.215 P2  XCU 40 
+XCU W12 W1  W  ?  1 N N N N N N 31.928 56.798 26.259 31.755 57.411 26.538 W12 XCU 41 
+XCU W13 W2  W  ?  1 N N N N N N 29.923 56.194 29.153 30.010 56.913 29.068 W13 XCU 42 
+XCU W14 W3  W  ?  1 N N N N N N 29.567 59.046 24.937 29.854 59.112 25.500 W14 XCU 43 
+XCU W15 W4  W  ?  1 N N N N N N 27.498 58.406 27.930 28.081 58.574 28.003 W15 XCU 44 
+XCU W16 W5  W  ?  1 N N N N N N 28.775 58.887 31.050 29.025 58.993 30.493 W16 XCU 45 
+XCU W17 W6  W  ?  1 N N N N N N 32.342 59.843 31.508 32.062 59.771 30.869 W17 XCU 46 
+XCU W18 W7  W  ?  1 N N N N N N 34.255 60.332 28.775 33.633 60.230 28.676 W18 XCU 47 
+XCU W19 W8  W  ?  1 N N N N N N 32.813 60.055 25.370 32.411 59.938 25.788 W19 XCU 48 
+XCU W20 W9  W  ?  1 N N N N N N 28.471 61.885 27.052 28.847 61.562 27.271 W20 XCU 49 
+XCU W21 W10 W  ?  1 N N N N N N 29.762 62.318 30.189 29.972 61.903 29.773 W21 XCU 50 
+XCU W22 W11 W  ?  1 N N N N N N 31.749 62.871 27.445 31.489 62.330 27.580 W22 XCU 51 
+XCU CU1 CU1 CU ?  0 N N R N N N 33.347 57.068 29.611 33.577 56.995 29.661 CU1 XCU 52 
+# 
+loop_
+_chem_comp_bond.comp_id 
+_chem_comp_bond.atom_id_1 
+_chem_comp_bond.atom_id_2 
+_chem_comp_bond.value_order 
+_chem_comp_bond.pdbx_aromatic_flag 
+_chem_comp_bond.pdbx_stereo_config 
+_chem_comp_bond.pdbx_ordinal 
+_chem_comp_bond.pdbx_metal_coordination_flag 
+_chem_comp_bond.pdbx_metal_pi_flag 
+XCU O40 W12 DOUB N N 1  Y N 
+XCU O41 W12 SING N N 2  Y N 
+XCU O41 W13 SING N N 3  Y N 
+XCU O42 W13 DOUB N N 4  Y N 
+XCU O43 W12 SING N N 5  Y N 
+XCU O43 W14 SING N N 6  Y N 
+XCU O44 W13 SING N N 7  Y N 
+XCU O44 W15 SING N N 8  Y N 
+XCU O45 W13 SING N N 9  Y N 
+XCU O45 W16 SING N N 10 Y N 
+XCU O46 W12 SING N N 11 Y N 
+XCU O46 W19 SING N N 12 Y N 
+XCU O47 W14 SING N N 13 Y N 
+XCU O47 W19 SING N N 14 Y N 
+XCU O48 W14 DOUB N N 15 Y N 
+XCU O49 W14 SING N N 16 Y N 
+XCU O49 W15 SING N N 17 Y N 
+XCU O50 W15 DOUB N N 18 Y N 
+XCU O51 W15 SING N N 19 Y N 
+XCU O51 W16 SING N N 20 Y N 
+XCU O52 W16 DOUB N N 21 Y N 
+XCU O53 W16 SING N N 22 Y N 
+XCU O53 W17 SING N N 23 Y N 
+XCU O54 W17 DOUB N N 24 Y N 
+XCU O55 W17 SING N N 25 Y N 
+XCU O55 W18 SING N N 26 Y N 
+XCU O56 W18 DOUB N N 27 Y N 
+XCU O57 W18 SING N N 28 Y N 
+XCU O57 W19 SING N N 29 Y N 
+XCU O58 W19 DOUB N N 30 Y N 
+XCU O59 P2  SING N N 31 N N 
+XCU O59 W12 SING N N 32 Y N 
+XCU O59 W14 SING N N 33 Y N 
+XCU O59 W19 SING N N 34 Y N 
+XCU O60 P2  DOUB N N 35 N N 
+XCU O60 W13 SING N N 36 Y N 
+XCU O60 W15 SING N N 37 Y N 
+XCU O60 W16 SING N N 38 Y N 
+XCU O61 P2  SING N N 39 N N 
+XCU O61 W17 SING N N 40 Y N 
+XCU O61 W18 SING N N 41 Y N 
+XCU O62 P2  SING N N 42 N N 
+XCU O62 W20 SING N N 43 Y N 
+XCU O62 W21 SING N N 44 Y N 
+XCU O62 W22 SING N N 45 Y N 
+XCU O63 W14 SING N N 46 Y N 
+XCU O63 W20 SING N N 47 Y N 
+XCU O64 W15 SING N N 48 Y N 
+XCU O64 W20 SING N N 49 Y N 
+XCU O65 W16 SING N N 50 Y N 
+XCU O65 W21 SING N N 51 Y N 
+XCU O66 W17 SING N N 52 Y N 
+XCU O66 W21 SING N N 53 Y N 
+XCU O67 W18 SING N N 54 Y N 
+XCU O67 W22 SING N N 55 Y N 
+XCU O68 W19 SING N N 56 Y N 
+XCU O68 W22 SING N N 57 Y N 
+XCU O69 W20 SING N N 58 Y N 
+XCU O69 W22 SING N N 59 Y N 
+XCU O70 W20 DOUB N N 60 Y N 
+XCU O71 W20 SING N N 61 Y N 
+XCU O71 W21 SING N N 62 Y N 
+XCU O72 W21 DOUB N N 63 Y N 
+XCU O73 W21 SING N N 64 Y N 
+XCU O73 W22 SING N N 65 Y N 
+XCU O74 W22 DOUB N N 66 Y N 
+XCU O75 W12 SING N N 67 Y N 
+XCU O75 CU1 SING N N 68 Y N 
+XCU O76 W13 SING N N 69 Y N 
+XCU O76 CU1 SING N N 70 Y N 
+XCU O77 W17 SING N N 71 Y N 
+XCU O77 CU1 SING N N 72 Y N 
+XCU O78 W18 SING N N 73 Y N 
+XCU O78 CU1 SING N N 74 Y N 
+# 
+loop_
+_pdbx_chem_comp_descriptor.comp_id 
+_pdbx_chem_comp_descriptor.type 
+_pdbx_chem_comp_descriptor.program 
+_pdbx_chem_comp_descriptor.program_version 
+_pdbx_chem_comp_descriptor.descriptor 
+XCU InChI            InChI                1.03  'InChI=1S/Cu.O4P.35O.11W/c;1-5(2,3)4;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;'                                                                                                                                                               
+XCU InChIKey         InChI                1.03  VTFKPIUMCMADIJ-UHFFFAOYSA-N                                                                                                                                                                                                                       
+XCU SMILES_CANONICAL CACTVS               3.385 'O=[W]123O[Cu@]45O[W]67(=O)O[W]89(=O)(O1)O[W]%10%11(=O)(O6)O[W]%12%13%14(=O)O[W]%15(=O)(O4)(O7)O[W]%16%17(=O)(O[W]%18(=O)(O5)(O[P@](=[O]8%10)([O]%12%15%16)[O]%19%20[W]%21(=O)(O2)(O9)O[W]%19(=O)(O%18)(O%17)O[W]%20(=O)(O%11)(O%21)O%13)O3)O%14' 
+XCU SMILES           CACTVS               3.385 'O=[W]123O[Cu]45O[W]67(=O)O[W]89(=O)(O1)O[W]%10%11(=O)(O6)O[W]%12%13%14(=O)O[W]%15(=O)(O4)(O7)O[W]%16%17(=O)(O[W]%18(=O)(O5)(O[P](=[O]8%10)([O]%12%15%16)[O]%19%20[W]%21(=O)(O2)(O9)O[W]%19(=O)(O%18)(O%17)O[W]%20(=O)(O%11)(O%21)O%13)O3)O%14'   
+XCU SMILES_CANONICAL 'OpenEye OEToolkits' 2.0.7 'O=[W]1234O[Cu]56O[W]78(=O)(O1)O2[P@]91=O2%10[W]%11%12(=O)(O5)O[W]5%13(=O)(O6)O96[W]9(=O)(O7)(O5)O[W]57(=O)(O8)O11[W]8(=O)(O3)(O5)O[W]2(=O)(O4)(O%11)O[W]%102(=O)(O%12)O[W]6(=O)(O%13)(O9)O[W]1(=O)(O2)(O8)O7'                                    
+XCU SMILES           'OpenEye OEToolkits' 2.0.7 'O=[W]1234O[Cu]56O[W]78(=O)(O1)O2P91=O2%10[W]%11%12(=O)(O5)O[W]5%13(=O)(O6)O96[W]9(=O)(O7)(O5)O[W]57(=O)(O8)O11[W]8(=O)(O3)(O5)O[W]2(=O)(O4)(O%11)O[W]%102(=O)(O%12)O[W]6(=O)(O%13)(O9)O[W]1(=O)(O2)(O8)O7'                                       
+# 
+loop_
+_pdbx_chem_comp_atom_coordination.geometry_id 
+_pdbx_chem_comp_atom_coordination.comp_id 
+_pdbx_chem_comp_atom_coordination.atom_id 
+_pdbx_chem_comp_atom_coordination.number 
+_pdbx_chem_comp_atom_coordination.geometry_calculated 
+_pdbx_chem_comp_atom_coordination.geometry_generic 
+_pdbx_chem_comp_atom_coordination.geometry_abbr 
+_pdbx_chem_comp_atom_coordination.provenance 
+_pdbx_chem_comp_atom_coordination.representative_entry_id 
+1  XCU CU1 5 square-pyramid 'square pyramidal' SQP MetalCoord 6RUK 
+2  XCU W12 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+3  XCU W13 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+4  XCU W14 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+5  XCU W15 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+6  XCU W16 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+7  XCU W17 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+8  XCU W18 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+9  XCU W19 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+10 XCU W20 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+11 XCU W21 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+12 XCU W22 6 octahedral     octahedral         OCT MetalCoord 6RUK 
+# 
+loop_
+_pdbx_chem_comp_atom_coordination_sphere.id 
+_pdbx_chem_comp_atom_coordination_sphere.geometry_id 
+_pdbx_chem_comp_atom_coordination_sphere.comp_id 
+_pdbx_chem_comp_atom_coordination_sphere.atom_id 
+_pdbx_chem_comp_atom_coordination_sphere.descriptor 
+_pdbx_chem_comp_atom_coordination_sphere.provenance 
+_pdbx_chem_comp_atom_coordination_sphere.representative_entry_id 
+1  1  XCU CU1 '@SQP{Cu,O,O,O,O,O}'  MetalCoord 6RUK 
+2  10 XCU W20 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+3  11 XCU W21 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+4  12 XCU W22 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+5  2  XCU W12 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+6  3  XCU W13 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+7  4  XCU W14 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+8  5  XCU W15 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+9  6  XCU W16 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+10 7  XCU W17 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+11 8  XCU W18 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+12 9  XCU W19 '@OCT{W,O,O,O,O,O,O}' MetalCoord 6RUK 
+# 
+_pdbx_chem_comp_pcm.pcm_id                             1 
+_pdbx_chem_comp_pcm.comp_id                            XCU 
+_pdbx_chem_comp_pcm.modified_residue_id                LYS 
+_pdbx_chem_comp_pcm.type                               None 
+_pdbx_chem_comp_pcm.category                           'Metal coordination' 
+_pdbx_chem_comp_pcm.polypeptide_position               'Any position' 
+_pdbx_chem_comp_pcm.comp_id_linking_atom               W16 
+_pdbx_chem_comp_pcm.modified_residue_id_linking_atom   NZ 
+_pdbx_chem_comp_pcm.uniprot_specific_ptm_accession     ? 
+_pdbx_chem_comp_pcm.uniprot_generic_ptm_accession      ? 
+_pdbx_chem_comp_pcm.first_instance_model_db_code       6RUK 
+_pdbx_chem_comp_pcm.position                           'Amino-acid side chain' 
+# 
+loop_
+_pdbx_chem_comp_audit.comp_id 
+_pdbx_chem_comp_audit.action_type 
+_pdbx_chem_comp_audit.date 
+_pdbx_chem_comp_audit.processing_site 
+_pdbx_chem_comp_audit.annotator 
+_pdbx_chem_comp_audit.details 
+XCU 'Create component'   2019-05-28 RCSB DG ?                                                                                                                                                                                                                                                                                 
+XCU 'Initial release'    2019-09-18 RCSB ?  ?                                                                                                                                                                                                                                                                                 
+XCU 'Other modification' 2026-07-17 RCSB CS 'metallic remediation: add coordination and coordination sphere annotation, add pcm and update ideal coordinates if applicable'                                                                                                                                                   
+XCU 'Other modification' 2026-07-31 RCSB CS 'metallic remediation: commit remediated files to production CVS for public re-release'                                                                                                                                                                                           
+XCU 'Other modification' 2026-09-16 RCSB CS 'Strip _pdbx_chem_comp_atom_coordination.representative_entry_id and _pdbx_chem_comp_atom_coordination_sphere.representative_entry_id from public file if applicable. The two items were meant to be internal but were accidentally included in the initial remediation release.' 
+# 
